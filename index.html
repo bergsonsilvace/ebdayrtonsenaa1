@@ -1,0 +1,927 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Lições Bíblicas — 2º Trimestre 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Source+Sans+3:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --sand: #F5F0E8;
+    --sand-dark: #EBE4D2;
+    --parchment: #FAF7F0;
+    --gold: #C9973A;
+    --gold-light: #E8C878;
+    --gold-dark: #8B6520;
+    --brown: #5C3D1E;
+    --crimson: #8B1A2A;
+    --navy: #1A2744;
+    --text: #2C1F0E;
+    --text-mid: #5C4A32;
+    --text-light: #8B7355;
+    --sidebar-w: 280px;
+    --header-h: 64px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Source Sans 3', sans-serif;
+    background: var(--parchment);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- HEADER ---- */
+  header {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    height: var(--header-h);
+    background: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 0 2rem;
+  }
+  .header-logo { display: flex; align-items: center; gap: 12px; }
+  .header-logo .cross { width: 28px; height: 28px; position: relative; }
+  .header-logo .cross::before,
+  .header-logo .cross::after { content: ''; position: absolute; background: var(--gold); }
+  .header-logo .cross::before { width: 4px; height: 100%; left: 50%; transform: translateX(-50%); }
+  .header-logo .cross::after  { width: 100%; height: 4px; top: 35%; }
+  .header-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 18px; color: #fff; letter-spacing: 0.02em; line-height: 1.2;
+  }
+  .header-title span {
+    display: block; font-size: 11px;
+    font-family: 'Source Sans 3', sans-serif;
+    font-weight: 300; color: var(--gold-light);
+    letter-spacing: 0.12em; text-transform: uppercase;
+  }
+  nav.top-nav { display: flex; gap: 6px; }
+  nav.top-nav a {
+    color: rgba(255,255,255,0.7); text-decoration: none;
+    font-size: 13px; padding: 6px 14px; border-radius: 4px;
+    border: 0.5px solid transparent; transition: all 0.2s;
+  }
+  nav.top-nav a:hover, nav.top-nav a.active {
+    color: #fff; background: rgba(201,151,58,0.15);
+    border-color: rgba(201,151,58,0.4);
+  }
+
+  /* ---- LAYOUT ---- */
+  .layout {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    min-height: 100vh;
+    padding-top: var(--header-h);
+  }
+
+  /* ---- SIDEBAR ---- */
+  aside {
+    position: sticky; top: var(--header-h);
+    height: calc(100vh - var(--header-h));
+    overflow-y: auto;
+    background: var(--navy);
+    border-right: 1px solid rgba(201,151,58,0.25);
+    padding: 1.5rem 0 2rem;
+    scrollbar-width: thin;
+    scrollbar-color: var(--gold-dark) transparent;
+  }
+  aside::-webkit-scrollbar { width: 4px; }
+  aside::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+
+  .sidebar-section { padding: 0.5rem 1.25rem 1rem; }
+  .sidebar-section-title {
+    font-size: 10px; letter-spacing: 0.16em;
+    text-transform: uppercase; color: rgba(201,151,58,0.6);
+    font-weight: 600; margin-bottom: 0.5rem;
+    padding-bottom: 0.4rem;
+    border-bottom: 0.5px solid rgba(201,151,58,0.15);
+  }
+  .lesson-link {
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 8px 10px; border-radius: 6px;
+    text-decoration: none; color: rgba(255,255,255,0.65);
+    font-size: 12.5px; line-height: 1.4;
+    margin-bottom: 2px; cursor: pointer;
+    transition: all 0.18s; border: 0.5px solid transparent;
+  }
+  .lesson-link:hover {
+    background: rgba(201,151,58,0.1);
+    color: rgba(255,255,255,0.9);
+    border-color: rgba(201,151,58,0.2);
+  }
+  .lesson-link.active {
+    background: rgba(201,151,58,0.18);
+    color: #fff; border-color: rgba(201,151,58,0.35);
+  }
+  .lesson-num {
+    flex-shrink: 0; width: 22px; height: 22px;
+    background: rgba(201,151,58,0.15);
+    border: 0.5px solid rgba(201,151,58,0.3);
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 10px; font-weight: 600; color: var(--gold-light);
+  }
+  .lesson-link.active .lesson-num {
+    background: var(--gold); color: var(--navy); border-color: var(--gold);
+  }
+
+  /* ---- MAIN ---- */
+  main { padding: 0; min-width: 0; }
+
+  /* ---- HERO ---- */
+  .hero {
+    background: linear-gradient(160deg, var(--navy) 0%, #0E1B35 100%);
+    padding: 5rem 4rem 4rem;
+    position: relative; overflow: hidden;
+    border-bottom: 2px solid var(--gold);
+  }
+  .hero::before {
+    content: ''; position: absolute; top: -40px; right: -40px;
+    width: 320px; height: 320px;
+    border: 1px solid rgba(201,151,58,0.1); border-radius: 50%;
+  }
+  .hero::after {
+    content: ''; position: absolute; bottom: -60px; right: 60px;
+    width: 200px; height: 200px;
+    border: 1px solid rgba(201,151,58,0.07); border-radius: 50%;
+  }
+  .hero-eyebrow {
+    font-size: 11px; letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--gold); font-weight: 500; margin-bottom: 1rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .hero-eyebrow::before, .hero-eyebrow::after {
+    content: ''; display: block; height: 1px; width: 32px;
+    background: var(--gold); opacity: 0.5;
+  }
+  .hero-tag {
+    display: inline-block;
+    background: rgba(201,151,58,0.15);
+    border: 0.5px solid rgba(201,151,58,0.4);
+    color: var(--gold-light); font-size: 11px; padding: 3px 12px;
+    border-radius: 20px; letter-spacing: 0.1em;
+    text-transform: uppercase; margin-bottom: 1.25rem;
+  }
+  .hero h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(32px, 4vw, 52px);
+    font-weight: 700; color: #fff; line-height: 1.15;
+    margin-bottom: 0.75rem; max-width: 640px;
+  }
+  .hero h1 em { color: var(--gold-light); font-style: italic; }
+  .hero-sub {
+    font-family: 'Crimson Pro', serif;
+    font-size: 20px; color: rgba(255,255,255,0.6);
+    margin-bottom: 2rem; font-style: italic;
+  }
+  .hero-meta { display: flex; gap: 2rem; flex-wrap: wrap; margin-bottom: 2.5rem; }
+  .hero-meta-item { display: flex; flex-direction: column; gap: 2px; }
+  .hero-meta-label {
+    font-size: 10px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: rgba(255,255,255,0.4); font-weight: 500;
+  }
+  .hero-meta-value { font-size: 14px; color: rgba(255,255,255,0.85); }
+  .hero-actions { display: flex; gap: 12px; flex-wrap: wrap; }
+  .btn-primary {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: var(--gold); color: var(--navy);
+    text-decoration: none; font-weight: 600;
+    font-size: 14px; padding: 12px 28px; border-radius: 6px;
+    letter-spacing: 0.03em; transition: all 0.2s;
+    border: none; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+  }
+  .btn-primary:hover { background: var(--gold-light); }
+  .btn-ghost {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: transparent; color: rgba(255,255,255,0.75);
+    text-decoration: none; font-weight: 400;
+    font-size: 14px; padding: 12px 28px; border-radius: 6px;
+    border: 0.5px solid rgba(255,255,255,0.25);
+    transition: all 0.2s; cursor: pointer; font-family: 'Source Sans 3', sans-serif;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.08); color: #fff; }
+
+  /* ---- SECTIONS ---- */
+  .section { padding: 3rem 4rem; border-bottom: 0.5px solid rgba(92,61,30,0.1); }
+  .section:last-child { border-bottom: none; }
+
+  .section-eyebrow {
+    font-size: 10px; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold-dark); font-weight: 600; margin-bottom: 0.5rem;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .section-eyebrow::after {
+    content: ''; display: block; height: 1px; flex: 1;
+    background: var(--gold); opacity: 0.25;
+  }
+  .section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 28px; font-weight: 600;
+    color: var(--navy); margin-bottom: 0.4rem; line-height: 1.2;
+  }
+  .section-lead {
+    font-family: 'Crimson Pro', serif;
+    font-size: 17px; color: var(--text-mid);
+    margin-bottom: 2rem; font-style: italic;
+  }
+
+  /* ---- LESSON CARDS ---- */
+  .lessons-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1rem; margin-top: 1.5rem;
+  }
+  .lesson-card {
+    background: #fff;
+    border: 0.5px solid rgba(92,61,30,0.12);
+    border-radius: 10px; padding: 1.25rem 1.5rem;
+    text-decoration: none; color: inherit;
+    transition: all 0.2s; display: block;
+    position: relative; overflow: hidden; cursor: pointer;
+  }
+  .lesson-card::before {
+    content: ''; position: absolute;
+    left: 0; top: 0; bottom: 0; width: 3px;
+    background: var(--gold); opacity: 0; transition: opacity 0.2s;
+  }
+  .lesson-card:hover { border-color: var(--gold); box-shadow: 0 4px 20px rgba(201,151,58,0.12); }
+  .lesson-card:hover::before { opacity: 1; }
+  .lesson-card-header {
+    display: flex; align-items: center; justify-content: space-between;
+    margin-bottom: 0.75rem;
+  }
+  .lesson-badge {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--gold-dark);
+    background: rgba(201,151,58,0.1);
+    border: 0.5px solid rgba(201,151,58,0.25);
+    padding: 2px 10px; border-radius: 20px;
+  }
+  .lesson-date { font-size: 12px; color: var(--text-light); font-weight: 300; }
+  .lesson-card-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 16px; font-weight: 600;
+    color: var(--navy); line-height: 1.35; margin-bottom: 0.5rem;
+  }
+  .lesson-card-text { font-size: 13px; color: var(--text-mid); line-height: 1.55; }
+  .lesson-card-verse {
+    font-family: 'Crimson Pro', serif;
+    font-size: 13px; font-style: italic; color: var(--crimson);
+    border-left: 2px solid rgba(139,26,42,0.25);
+    padding-left: 10px; line-height: 1.5; margin-top: 0.75rem;
+  }
+
+  /* ---- PATRIARCAS ---- */
+  .patriarchs {
+    display: grid; grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem; margin-top: 1.5rem;
+  }
+  .patriarch-card {
+    background: var(--navy); border-radius: 12px;
+    padding: 2rem 1.5rem; text-align: center;
+    border: 0.5px solid rgba(201,151,58,0.2);
+    position: relative; overflow: hidden;
+  }
+  .patriarch-card::after {
+    content: ''; position: absolute;
+    bottom: 0; left: 0; right: 0; height: 3px; background: var(--gold);
+  }
+  .patriarch-icon {
+    width: 56px; height: 56px;
+    border: 1.5px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 1rem;
+    font-family: 'Playfair Display', serif;
+    font-size: 22px; color: var(--gold-light); font-weight: 700;
+    background: rgba(201,151,58,0.08);
+  }
+  .patriarch-name {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; font-weight: 700; color: #fff; margin-bottom: 0.35rem;
+  }
+  .patriarch-subtitle {
+    font-size: 11px; letter-spacing: 0.12em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.75; margin-bottom: 1rem; font-weight: 500;
+  }
+  .patriarch-desc {
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px; color: rgba(255,255,255,0.6); line-height: 1.6; font-style: italic;
+  }
+  .patriarch-lessons { margin-top: 1rem; font-size: 11px; color: rgba(255,255,255,0.35); }
+
+  /* ---- CALLOUT ---- */
+  .callout {
+    background: rgba(201,151,58,0.06);
+    border: 0.5px solid rgba(201,151,58,0.3);
+    border-radius: 8px; padding: 1.25rem 1.5rem;
+    margin: 1.5rem 0; display: flex; gap: 12px; align-items: flex-start;
+  }
+  .callout-icon {
+    flex-shrink: 0; width: 20px; height: 20px;
+    background: var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 11px; color: var(--navy); font-weight: 700; margin-top: 1px;
+  }
+  .callout-text { font-size: 14px; line-height: 1.55; color: var(--text-mid); }
+  .callout-text strong { color: var(--brown); font-weight: 600; }
+
+  /* ---- PREREQS ---- */
+  .prereqs-grid {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 1rem; margin-top: 1.5rem;
+  }
+  .prereq-item {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 1rem 1.25rem; background: #fff;
+    border: 0.5px solid rgba(92,61,30,0.1); border-radius: 8px;
+  }
+  .prereq-check {
+    flex-shrink: 0; width: 20px; height: 20px;
+    background: rgba(201,151,58,0.1);
+    border: 1.5px solid var(--gold); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center; margin-top: 1px;
+  }
+  .prereq-check::after {
+    content: ''; width: 7px; height: 5px;
+    border-left: 1.5px solid var(--gold); border-bottom: 1.5px solid var(--gold);
+    transform: rotate(-45deg) translateY(-1px);
+  }
+  .prereq-text { font-size: 14px; line-height: 1.5; color: var(--text); }
+  .prereq-text strong { font-weight: 600; color: var(--navy); display: block; font-size: 13.5px; }
+  .prereq-text span { color: var(--text-light); font-size: 12.5px; }
+
+  /* ---- FOOTER ---- */
+  footer {
+    background: var(--navy); border-top: 2px solid var(--gold);
+    padding: 3rem 4rem; color: rgba(255,255,255,0.45);
+  }
+  .footer-grid {
+    display: grid; grid-template-columns: 1fr 1fr 1fr;
+    gap: 3rem; margin-bottom: 2rem;
+  }
+  .footer-brand { font-family: 'Playfair Display', serif; font-size: 20px; color: #fff; margin-bottom: 0.5rem; }
+  .footer-brand-sub {
+    font-size: 12px; color: var(--gold); opacity: 0.7;
+    letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 1rem;
+  }
+  .footer-desc { font-size: 13px; line-height: 1.6; }
+  .footer-col-title {
+    font-size: 11px; letter-spacing: 0.15em; text-transform: uppercase;
+    color: var(--gold); opacity: 0.6; font-weight: 600; margin-bottom: 1rem;
+  }
+  .footer-links { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+  .footer-links a { color: rgba(255,255,255,0.5); text-decoration: none; font-size: 13px; transition: color 0.15s; cursor: pointer; }
+  .footer-links a:hover { color: rgba(255,255,255,0.9); }
+  .footer-bottom {
+    border-top: 0.5px solid rgba(201,151,58,0.15); padding-top: 1.5rem;
+    display: flex; justify-content: space-between; align-items: center; font-size: 12px;
+  }
+
+  /* ════════════════════════════════
+     MODAL LATERAL
+     ════════════════════════════════ */
+  .modal-overlay {
+    position: fixed; inset: 0; z-index: 500;
+    background: rgba(15, 20, 40, 0.6);
+    display: flex; align-items: flex-start; justify-content: flex-end;
+    opacity: 0; pointer-events: none;
+    transition: opacity 0.25s;
+  }
+  .modal-overlay.open { opacity: 1; pointer-events: all; }
+
+  .modal-panel {
+    width: min(700px, 100vw);
+    height: 100vh;
+    background: var(--parchment);
+    display: flex; flex-direction: column;
+    transform: translateX(100%);
+    transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+    overflow: hidden;
+    border-left: 2px solid var(--gold);
+  }
+  .modal-overlay.open .modal-panel { transform: translateX(0); }
+
+  .modal-header {
+    flex-shrink: 0;
+    background: var(--navy);
+    border-bottom: 2px solid var(--gold);
+    padding: 1.5rem 2rem;
+    display: flex; align-items: flex-start; justify-content: space-between; gap: 16px;
+  }
+  .modal-kick {
+    font-size: 10px; font-weight: 600;
+    letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--gold); margin-bottom: 0.4rem;
+  }
+  .modal-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 20px; font-weight: 700; color: #fff;
+    line-height: 1.2; margin-bottom: 0.3rem;
+  }
+  .modal-date { font-size: 12px; color: rgba(255,255,255,0.4); font-weight: 300; }
+
+  .modal-close {
+    flex-shrink: 0; width: 32px; height: 32px;
+    background: rgba(201,151,58,0.15);
+    border: 0.5px solid rgba(201,151,58,0.4);
+    border-radius: 6px; cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; color: var(--gold-light);
+    transition: all 0.15s; margin-top: 2px;
+  }
+  .modal-close:hover { background: rgba(201,151,58,0.3); color: #fff; }
+
+  .modal-body {
+    flex: 1; overflow-y: auto; padding: 2rem;
+    scrollbar-width: thin; scrollbar-color: var(--gold-dark) transparent;
+  }
+  .modal-body::-webkit-scrollbar { width: 4px; }
+  .modal-body::-webkit-scrollbar-thumb { background: var(--gold-dark); border-radius: 2px; }
+
+  /* conteúdo do modal */
+  .m-2col { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1rem; }
+
+  .m-block {
+    background: #fff;
+    border: 0.5px solid rgba(92,61,30,0.12);
+    border-radius: 8px; padding: 1.25rem 1.5rem;
+    margin-bottom: 1rem;
+  }
+  .m-block-lbl {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--text-light);
+    margin-bottom: 0.75rem; padding-bottom: 0.5rem;
+    border-bottom: 0.5px solid rgba(92,61,30,0.1);
+  }
+  .m-verse {
+    font-family: 'Crimson Pro', serif;
+    font-size: 16px; font-style: italic;
+    color: var(--crimson); line-height: 1.65; margin-bottom: 0.5rem;
+  }
+  .m-verse-ref { font-size: 12px; color: var(--text-light); font-weight: 500; font-style: normal; }
+  .m-truth {
+    font-family: 'Crimson Pro', serif;
+    font-size: 15px; font-style: italic;
+    color: var(--navy); line-height: 1.65;
+  }
+
+  .m-read-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px 20px; }
+  .m-read-item { display: flex; align-items: flex-start; gap: 8px; }
+  .m-read-day {
+    flex-shrink: 0; font-size: 10px; font-weight: 600;
+    color: var(--gold-dark); background: rgba(201,151,58,0.1);
+    padding: 1px 7px; border-radius: 3px; white-space: nowrap; margin-top: 1px;
+  }
+  .m-read-ref { font-size: 12px; font-weight: 600; color: var(--navy); }
+  .m-read-topic { font-size: 11px; color: var(--text-mid); line-height: 1.5; }
+
+  .m-section-title {
+    font-family: 'Playfair Display', serif;
+    font-size: 15px; font-weight: 600; color: var(--navy);
+    margin: 1.25rem 0 0.5rem; letter-spacing: 0.01em;
+  }
+  .m-section-title:first-child { margin-top: 0; }
+  .m-text { font-size: 14px; font-weight: 300; color: var(--text-mid); line-height: 1.8; margin-bottom: 0.75rem; }
+
+  .m-review {
+    background: rgba(201,151,58,0.06);
+    border: 0.5px solid rgba(201,151,58,0.3);
+    border-radius: 8px; padding: 1.25rem 1.5rem; margin-top: 1rem;
+  }
+  .m-review-title {
+    font-size: 10px; font-weight: 600; letter-spacing: 0.15em;
+    text-transform: uppercase; color: var(--gold-dark);
+    margin-bottom: 0.75rem; padding-bottom: 0.5rem;
+    border-bottom: 0.5px solid rgba(201,151,58,0.2);
+  }
+  .m-review ol { padding-left: 18px; display: flex; flex-direction: column; gap: 8px; }
+  .m-review li { font-size: 13px; color: var(--text-mid); line-height: 1.6; }
+
+  .m-nav { display: flex; gap: 10px; margin-top: 1.5rem; flex-wrap: wrap; }
+
+  /* ---- RESPONSIVE ---- */
+  @media (max-width: 900px) {
+    :root { --sidebar-w: 0px; }
+    aside { display: none; }
+    .layout { grid-template-columns: 1fr; }
+    .section { padding: 2rem 1.5rem; }
+    .hero { padding: 3rem 1.5rem 2.5rem; }
+    .patriarchs { grid-template-columns: 1fr; }
+    footer { padding: 2rem 1.5rem; }
+    .footer-grid { grid-template-columns: 1fr; gap: 2rem; }
+    nav.top-nav { display: none; }
+    .m-2col { grid-template-columns: 1fr; }
+    .m-read-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-logo">
+    <div class="cross"></div>
+    <div class="header-title">
+      Lições Bíblicas
+      <span>Adultos · 2º Trimestre 2026</span>
+    </div>
+  </div>
+  <nav class="top-nav">
+    <a href="#home" class="active">Início</a>
+    <a href="#patriarcas">Patriarcas</a>
+    <a href="#licoes">Lições</a>
+    <a href="#leituras">Leituras</a>
+  </nav>
+</header>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Abraão</div>
+      <div class="lesson-link" onclick="openLesson(1)"><span class="lesson-num">1</span><span>Chamado e Jornada de Fé</span></div>
+      <div class="lesson-link" onclick="openLesson(2)"><span class="lesson-num">2</span><span>A Fé nas Promessas de Deus</span></div>
+      <div class="lesson-link" onclick="openLesson(3)"><span class="lesson-num">3</span><span>A Impaciência na Espera</span></div>
+      <div class="lesson-link" onclick="openLesson(4)"><span class="lesson-num">4</span><span>A Confirmação de Uma Promessa</span></div>
+      <div class="lesson-link" onclick="openLesson(5)"><span class="lesson-num">5</span><span>O Juízo contra Sodoma</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Isaque</div>
+      <div class="lesson-link" onclick="openLesson(6)"><span class="lesson-num">6</span><span>O Nascimento de Isaque</span></div>
+      <div class="lesson-link" onclick="openLesson(7)"><span class="lesson-num">7</span><span>Uma Prova de Fé</span></div>
+      <div class="lesson-link" onclick="openLesson(8)"><span class="lesson-num">8</span><span>Herdeiro da Promessa</span></div>
+    </div>
+    <div class="sidebar-section">
+      <div class="sidebar-section-title">Jacó</div>
+      <div class="lesson-link" onclick="openLesson(9)"><span class="lesson-num">9</span><span>Jacó e Esaú: Irmãos em Conflito</span></div>
+      <div class="lesson-link" onclick="openLesson(10)"><span class="lesson-num">10</span><span>A Experiência Transformadora</span></div>
+      <div class="lesson-link" onclick="openLesson(11)"><span class="lesson-num">11</span><span>De Enganador a Homem de Honra</span></div>
+      <div class="lesson-link" onclick="openLesson(12)"><span class="lesson-num">12</span><span>A Reconciliação com Esaú</span></div>
+      <div class="lesson-link" onclick="openLesson(13)"><span class="lesson-num">13</span><span>O Legado de Fé</span></div>
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main>
+
+    <!-- HERO -->
+    <section class="hero" id="home">
+      <div class="hero-eyebrow">Escola Bíblica Dominical</div>
+      <div class="hero-tag">2º Trimestre · Abril — Junho 2026</div>
+      <h1>Homens dos quais o Mundo não era <em>Digno</em></h1>
+      <p class="hero-sub">O Legado de Abraão, Isaque e Jacó</p>
+      <div class="hero-meta">
+        <div class="hero-meta-item"><span class="hero-meta-label">Lições</span><span class="hero-meta-value">13 lições</span></div>
+        <div class="hero-meta-item"><span class="hero-meta-label">Período</span><span class="hero-meta-value">Abr · Mai · Jun 2026</span></div>
+        <div class="hero-meta-item"><span class="hero-meta-label">Comentarista</span><span class="hero-meta-value">Elinaldo Renovato</span></div>
+        <div class="hero-meta-item"><span class="hero-meta-label">Editora</span><span class="hero-meta-value">CPAD</span></div>
+      </div>
+      <div class="hero-actions">
+        <button onclick="openLesson(1)" class="btn-primary">Começar a Lição 1 →</button>
+        <a href="#licoes" class="btn-ghost">Ver todas as lições</a>
+      </div>
+    </section>
+
+    <!-- INTRO -->
+    <section class="section" id="intro">
+      <div class="section-eyebrow">Introdução ao Trimestre</div>
+      <h2 class="section-title">A Fé dos Patriarcas</h2>
+      <p class="section-lead">Homens que aprenderam a crer, obedecer e esperar em Deus.</p>
+      <p style="font-size:16px;line-height:1.8;color:var(--text-mid);margin-bottom:1rem;max-width:720px;">Neste trimestre, estudaremos a inspiradora jornada dos patriarcas Abraão, Isaque e Jacó. Suas histórias nos revelam que a fé não é uma ideia abstrata, mas uma caminhada concreta, marcada por provas, promessas e experiências profundas com o Senhor.</p>
+      <p style="font-size:16px;line-height:1.8;color:var(--text-mid);margin-bottom:1.5rem;max-width:720px;">A vida de Abraão nos mostra que a fé genuína exige deixar a segurança do conhecido para confiar na direção divina. Em Isaque, contemplamos o cumprimento das promessas de Deus no tempo certo. Em Jacó, vemos o processo de transformação de um homem comum em um instrumento da aliança.</p>
+      <div class="callout">
+        <div class="callout-icon">✦</div>
+        <p class="callout-text"><strong>Verdade central do trimestre:</strong> O Deus de ontem é o mesmo de hoje — fiel, soberano e digno de total confiança. Que cada lição desperte em nós a coragem de Abraão, a perseverança de Isaque e a rendição de Jacó.</p>
+      </div>
+    </section>
+
+    <!-- PATRIARCAS -->
+    <section class="section" id="patriarcas">
+      <div class="section-eyebrow">Os Três Patriarcas</div>
+      <h2 class="section-title">Homens de Fé, Homens Imperfeitos</h2>
+      <p class="section-lead">Cada patriarca revela uma dimensão única da fidelidade de Deus.</p>
+      <div class="patriarchs">
+        <div class="patriarch-card">
+          <div class="patriarch-icon">A</div>
+          <div class="patriarch-name">Abraão</div>
+          <div class="patriarch-subtitle">Pai da Fé · Lições 1–5</div>
+          <p class="patriarch-desc">Chamado a deixar tudo sem saber o destino. Sua coragem de obedecer sem hesitar tornou-o o pai de muitas nações.</p>
+          <div class="patriarch-lessons">Gênesis 12 · 13 · 16 · 17 · 18</div>
+        </div>
+        <div class="patriarch-card">
+          <div class="patriarch-icon">I</div>
+          <div class="patriarch-name">Isaque</div>
+          <div class="patriarch-subtitle">Herdeiro da Promessa · Lições 6–8</div>
+          <p class="patriarch-desc">O filho milagroso que encarna o cumprimento das promessas divinas. Sua fé serena e perseverança são modelo para o cristão.</p>
+          <div class="patriarch-lessons">Gênesis 21 · 22 · 26</div>
+        </div>
+        <div class="patriarch-card">
+          <div class="patriarch-icon">J</div>
+          <div class="patriarch-name">Jacó</div>
+          <div class="patriarch-subtitle">O Transformado · Lições 9–13</div>
+          <p class="patriarch-desc">De enganador a príncipe de Deus. A luta em Peniel foi o ponto de virada que o transformou em Israel.</p>
+          <div class="patriarch-lessons">Gênesis 27 · 28 · 32 · 33</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- LIÇÕES GRID -->
+    <section class="section" id="licoes">
+      <div class="section-eyebrow">Todas as Lições</div>
+      <h2 class="section-title">13 Lições · Abril a Junho 2026</h2>
+      <p class="section-lead">Clique em qualquer lição para abrir o conteúdo completo.</p>
+      <div class="lessons-grid" id="lessons-grid"></div>
+    </section>
+
+    <!-- LEITURAS -->
+    <section class="section" id="leituras">
+      <div class="section-eyebrow">Para Aprofundar</div>
+      <h2 class="section-title">Leituras Recomendadas</h2>
+      <p class="section-lead">Obras indicadas ao longo do trimestre para enriquecer o estudo.</p>
+      <div class="prereqs-grid">
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>Dicionário Bíblico Baker</strong><span>Mais de 1.000 verbetes claros — arqueologia, geografia, história e teologia. Editado pela CPAD.</span></div></div>
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>História dos Hebreus — Flávio Josefo</strong><span>O principal relato extra-bíblico dos acontecimentos contidos nas Escrituras.</span></div></div>
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>História de Israel no Antigo Testamento</strong><span>Reconstrói a história de Israel com textos bíblicos, documentos extrabíblicos e arqueológicos.</span></div></div>
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>Bíblia de Estudo Pentecostal — CPAD</strong><span>Notas detalhadas sobre os patriarcas e as promessas do pacto abraâmico.</span></div></div>
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>Famílias em Conflito — Dra. Elaine Cruz</strong><span>Através das histórias de Jacó, Lia e Raquel, reconhece feridas profundas tratadas por Deus.</span></div></div>
+        <div class="prereq-item"><div class="prereq-check"></div><div class="prereq-text"><strong>Dicionário Bíblico Wycliffe — CPAD</strong><span>Referência completa para estudo dos personagens, lugares e termos bíblicos.</span></div></div>
+      </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer>
+      <div class="footer-grid">
+        <div>
+          <div class="footer-brand">Lições Bíblicas</div>
+          <div class="footer-brand-sub">CPAD · Adultos · 2026</div>
+          <p class="footer-desc">Material de estudo da Escola Bíblica Dominical das Assembleias de Deus no Brasil. 2º Trimestre de 2026.</p>
+        </div>
+        <div>
+          <div class="footer-col-title">Navegação</div>
+          <ul class="footer-links">
+            <li><a href="#home">Início</a></li>
+            <li><a href="#patriarcas">Os Patriarcas</a></li>
+            <li><a href="#licoes">Todas as Lições</a></li>
+            <li><a href="#leituras">Leituras Recomendadas</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="footer-col-title">Lições</div>
+          <ul class="footer-links">
+            <li><a onclick="openLesson(1)">Lição 1 — Chamado de Abrão</a></li>
+            <li><a onclick="openLesson(5)">Lição 5 — Sodoma e Gomorra</a></li>
+            <li><a onclick="openLesson(7)">Lição 7 — Entrega de Isaque</a></li>
+            <li><a onclick="openLesson(11)">Lição 11 — Jacó em Peniel</a></li>
+            <li><a onclick="openLesson(13)">Lição 13 — O Legado de Fé</a></li>
+          </ul>
+        </div>
+      </div>
+      <div class="footer-bottom">
+        <span>© 2026 CGADB · Casa Publicadora das Assembleias de Deus</span>
+        <span style="color:rgba(255,255,255,0.3)">cpad.com.br · Av. Brasil, 34.401 · Bangu · Rio de Janeiro</span>
+      </div>
+    </footer>
+
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal-overlay" onclick="handleOverlayClick(event)">
+  <div class="modal-panel" id="modal-panel">
+    <div class="modal-header">
+      <div>
+        <div class="modal-kick" id="modal-kick"></div>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-date" id="modal-date"></div>
+      </div>
+      <button class="modal-close" onclick="closeModal()">✕</button>
+    </div>
+    <div class="modal-body" id="modal-body"></div>
+  </div>
+</div>
+
+<script>
+const LESSONS = [
+  { num:1, title:"Abraão: Seu Chamado e Sua Jornada de Fé", date:"5 de Abril de 2026 · Dia da Páscoa", ref:"Gênesis 12.1–9", badge:"Lição 1", lesDate:"5 Abr · Páscoa",
+    verse:'"Ora, o SENHOR disse a Abrão: Sai-te da tua terra, e da tua parentela, e da casa de teu pai, para a terra que eu te mostrarei."', verseRef:"Gênesis 12.1",
+    truth:"O chamado de Deus na vida de Abrão e na nossa exige obediência irrestrita, fé e perseverança.",
+    topic:"O chamado de Deus exige obediência irrestrita. Abrão partiu sem saber o destino, guiado apenas pela voz do Senhor.",
+    reading:[{day:"Segunda",ref:"Gn 12.3",topic:"O chamado para todas as famílias da Terra"},{day:"Terça",ref:"Gn 12.1",topic:"O chamado de Abraão e a origem de uma nação"},{day:"Quarta",ref:"Hb 11.1",topic:"Abraão não sabia definir a fé, mas a viveu"},{day:"Quinta",ref:"Gn 12.10",topic:"Obstáculos no chamado divino"},{day:"Sexta",ref:"Gn 12.15,16",topic:"Desafios éticos na chamada"},{day:"Sábado",ref:"Gn 12.17,18",topic:"Deus zela pelos que Ele chama"}],
+    sections:[{title:"I – Deus Chama Abrão",text:"Deus chamou Abrão e ordenou que ele saísse de sua terra e fosse para um lugar desconhecido. Ele não tinha um mapa, nem sabia o destino final — apenas a voz de Deus lhe indicando o caminho. Isso nos ensina que Deus sabe o que faz, mesmo quando não revela o trajeto completo."},{title:"II – A Obediência de Abrão",text:"Como homem de fé, Abrão atendeu ao chamado divino sem hesitar. Mesmo sem conhecer a definição bíblica de fé (Hb 11.1), Abrão agiu com fé em sua decisão. Ele creu em Deus e partiu para o lugar determinado pelo Senhor."},{title:"III – As Lutas ao Chegar em Canaã",text:"Depois que Abrão chegou a Canaã, deparou-se com uma fome severa. Desceu ao Egito, onde, temendo pela sua vida, apresentou Sarai como sua irmã. Abrão falhou, mas pela misericórdia de Deus foi restaurado."}],
+    review:["De acordo com a lição, o que exigiu o chamado de Abrão?","Quais são as bênçãos prometidas a Abrão segundo Gênesis 12.1–3?","Segundo a lição, qual o significado do nome Abraão?","Para onde Abrão foi antes de dirigir-se a Canaã?","O que Abrão encontrou ao chegar a Canaã?"]},
+
+  { num:2, title:"A Fé de Abrão nas Promessas de Deus", date:"12 de Abril de 2026", ref:"Gênesis 13.7–18", badge:"Lição 2", lesDate:"12 Abr",
+    verse:'"E apareceu o SENHOR a Abrão e disse: À tua semente darei esta terra. E edificou ali um altar ao SENHOR, que lhe aparecera."', verseRef:"Gênesis 12.7",
+    truth:"Quando Deus faz uma promessa incondicional, Ele a cumpre plenamente.",
+    topic:"Os altares de Abrão marcam sua adoração a cada passo. Quando Deus promete, Ele cumpre — no seu tempo.",
+    reading:[{day:"Segunda",ref:"Hb 11.8",topic:"A grande fé de Abraão"},{day:"Terça",ref:"Hb 11.17-19",topic:"A fé de Abraão é provada"},{day:"Quarta",ref:"Tg 2.23",topic:"Abraão, o amigo de Deus"},{day:"Quinta",ref:"Gn 17.5",topic:"Abraão, pai de multidão de nações"},{day:"Sexta",ref:"Gn 15.18-21",topic:"O concerto de Deus com Abrão"},{day:"Sábado",ref:"Gl 3.7",topic:"Abraão, pai dos filhos da fé"}],
+    sections:[{title:"I – Abrão Volta do Egito para Canaã",text:"Abrão e Ló retornaram do Egito com grandes riquezas. A terra não comportava os dois e surgiu contenda entre seus pastores. Abrão tomou a iniciativa de resolver o conflito de forma generosa, oferecendo a Ló a primeira escolha da terra."},{title:"II – As Consequências das Escolhas",text:"Ló escolheu as terras férteis pelas aparências, sem buscar a direção de Deus. Abrão permaneceu em Canaã. Deus aprovou a escolha de Abrão e renovou suas promessas: sua descendência seria como o pó da terra."},{title:"III – Os Altares Erguidos por Abrão",text:"Abrão construiu quatro altares ao longo de sua jornada: em Siquém, Betei, Hebrom e Moriá. Cada altar era um ato de adoração e gratidão. Abrão nos ensina a adorar a Deus em cada fase da jornada, boa ou difícil."}],
+    review:["Qual o motivo que levou Ló e Abrão a se separarem?","Como agiu Abrão diante da contenda dos pastores?","O que demonstra o agir de maneira pacífica?","O que fez Abrão ao tomar conhecimento do que havia acontecido com Ló?","Qual o nome da cidade onde Abrão ergueu o primeiro altar?"]},
+
+  { num:3, title:"A Impaciência na Espera do Cumprimento da Promessa", date:"19 de Abril de 2026", ref:"Gênesis 16.1–16", badge:"Lição 3", lesDate:"19 Abr",
+    verse:'"E disse Sarai a Abrão: Eis que o Senhor me tem impedido de gerar; entra, pois, à minha serva; porventura, terei filhos dela."', verseRef:"Gênesis 16.2",
+    truth:"A impaciência é antagônica à fé. Deus é fiel e cumpre com suas promessas no tempo certo.",
+    topic:"Sarai e Abrão tentaram ajudar a Deus — e as consequências não foram boas.",
+    reading:[{day:"Segunda",ref:"Gn 16.2",topic:"Sarai dá lugar à impaciência"},{day:"Terça",ref:"1 Pe 5.7",topic:"Lançar a ansiedade sobre Deus"},{day:"Quarta",ref:"Sl 40.1",topic:"Esperar com paciência no Senhor"},{day:"Quinta",ref:"Rm 12.12",topic:"Pacientes na tribulação"},{day:"Sexta",ref:"2 Pe 3.9",topic:"Deus é longânimo"},{day:"Sábado",ref:"1 Ts 5.14",topic:"Devemos ser pacientes para com todos"}],
+    sections:[{title:"I – O Pai da Fé e a Tentativa de Ajudar a Deus",text:"O tempo passou e a promessa parecia não se cumprir. Sarai pensou em uma solução humana e sugeriu que Abrão se unisse a Agar, sua serva egípcia. A impaciência tornou-se maior que a fé. O que eles não perceberam é que o Senhor usa o tempo e a espera para forjar o nosso caráter."},{title:"II – As Consequências de Agir por Conta Própria",text:"Agar engravidou e passou a desprezar Sarai. O erro trouxe conflito, desprezo e tristeza para o lar. Agar fugiu, mas o Anjo do Senhor a encontrou no deserto com uma promessa: teria um filho chamado Ismael — 'Deus ouviu'."},{title:"III – O Deus que Conduz a História",text:"Mesmo diante dos erros humanos, Deus conduz a história. Ele cuidou de Agar, honrou Ismael e continuou seu plano para Abrão. O Senhor já havia determinado o momento certo em que Isaque, o filho da promessa, viria ao mundo."}],
+    review:["O que Deus usa para forjar o nosso caráter?","O que acontece quando deixamos a impaciência tomar o nosso coração?","Segundo o Salmo 40.1, como devemos esperar?","Quais foram as primeiras consequências do erro de Sarai?","Como deveria se chamar o filho de Abrão com Agar? Qual o significado do seu nome?"]},
+
+  { num:4, title:"A Confirmação de Uma Promessa", date:"26 de Abril de 2026", ref:"Gênesis 17.1–9", badge:"Lição 4", lesDate:"26 Abr",
+    verse:'"E estabelecerei o meu concerto entre mim e ti e a tua semente depois de ti em suas gerações, por concerto perpétuo."', verseRef:"Gênesis 17.7",
+    truth:"Deus é fiel para cumprir tudo aquilo que nos prometeu.",
+    topic:"Deus renova o concerto e muda os nomes de Abrão e Sarai, confirmando o pacto eterno.",
+    reading:[{day:"Segunda",ref:"Gn 17.4",topic:"O concerto é renovado"},{day:"Terça",ref:"Jr 1.12",topic:"Deus vela pela sua palavra para a cumprir"},{day:"Quarta",ref:"Gn 17.5",topic:"Deus muda o nome de Abrão"},{day:"Quinta",ref:"Gn 17.15",topic:"Deus muda o nome de Sarai"},{day:"Sexta",ref:"2 Co 5.17",topic:"Mudança total para quem está em Cristo"},{day:"Sábado",ref:"Cl 3.10",topic:"Vestindo-nos com o novo"}],
+    sections:[{title:"I – Deus Muda o Nome de Abrão e de Sarai",text:"Quando Abrão estava com 99 anos, Deus renovou o concerto e mudou seu nome de Abrão (pai exaltado) para Abraão (pai de multidão de nações). Sarai passou a chamar-se Sara — mãe de nações. Deus promove mudanças significativas na vida daqueles que nEle confiam."},{title:"II – A Confirmação do Concerto",text:"O concerto com Abraão visava trazer salvação a toda a raça humana. O Messias nasceria da semente de Abraão. Este concerto foi executado com êxito por meio de Jesus Cristo e seus discípulos, que transmitiram o Evangelho por todo o mundo."},{title:"III – O Pacto Perpétuo da Circuncisão",text:"Na renovação do concerto, Deus incluiu o pacto da circuncisão como sinal visível da aliança. Na Nova Aliança, somente a circuncisão do coração, mediante a graça e a fé em Jesus Cristo, é capaz de nos fazer levar uma vida de obediência ao Senhor."}],
+    review:["Cite fatores que influenciavam a escolha dos nomes no Antigo Testamento.","Qual o significado do nome 'Abraão'?","Qual o significado do nome 'Sara'?","Qual era o objetivo do concerto com os patriarcas?","Quais as promessas que acompanhavam o pacto de Deus com Abraão?"]},
+
+  { num:5, title:"O Juízo contra Sodoma e Gomorra", date:"3 de Maio de 2026", ref:"Gênesis 18.23–32", badge:"Lição 5", lesDate:"3 Mai",
+    verse:'"Disse mais: Ora, não se ire o Senhor que ainda só mais esta vez falo: se, porventura, se acharem ali dez? E disse: Não a destruirei, por amor dos dez."', verseRef:"Gênesis 18.32",
+    truth:"Deus é misericordioso e dá tempo para o arrependimento, mas quando o homem não quer, seu juízo é sem misericórdia.",
+    topic:"A intercessão de Abraão pelos justos revela seu coração generoso. Deus é misericordioso, mas Sua longanimidade tem limite.",
+    reading:[{day:"Segunda",ref:"Sl 25.14",topic:"Deus revela seus segredos para os que o temem"},{day:"Terça",ref:"Gn 18.32",topic:"Abraão intercede por Sodoma e Gomorra"},{day:"Quarta",ref:"1 Tm 2.1",topic:"Devemos interceder por todos"},{day:"Quinta",ref:"Ez 22.30",topic:"Deus busca por intercessores perseverantes"},{day:"Sexta",ref:"Rm 8.26",topic:"O Espírito Santo intercede por nós"},{day:"Sábado",ref:"Rm 8.34",topic:"Jesus, nosso intercessor"}],
+    sections:[{title:"I – Os Anjos Visitam Abraão",text:"O Senhor visitou Abraão nos carvalhais de Manre com três mensageiros. Abraão demonstrou generosa hospitalidade e serviu aos visitantes com alegria. Os mensageiros anunciaram o nascimento de Isaque — a promessa mais aguardada. Sara riu ao ouvir, mas Deus viu fé em seu coração."},{title:"II – Deus Anuncia seus Planos a Abraão",text:"O Senhor revelou a Abraão seu plano de destruir Sodoma e Gomorra. Diante da revelação, Abraão colocou-se como intercessor, rogando a Deus para que poupasse os justos. Ele negociou com Deus de cinquenta até dez justos."},{title:"III – A Destruição de Sodoma e Gomorra",text:"A destruição foi total. Ló e sua família foram salvos. Sua esposa, ao desobedecer e olhar para trás, ficou convertida numa estátua de sal. Essas cidades tornaram-se símbolo de advertência divina. Deus é amor, mas também é justiça."}],
+    review:["Como inicia o capítulo 18 de Gênesis?","O que indica 'quando tinha aquecido o dia'?","O que Sara fez ao ouvir que teria um filho?","A que o pecado leva?","O que aconteceu com a esposa de Ló ao desobedecer a ordem divina?"]},
+
+  { num:6, title:"O Nascimento de Isaque", date:"10 de Maio de 2026", ref:"Gênesis 21.1–7", badge:"Lição 6", lesDate:"10 Mai",
+    verse:'"Haveria coisa alguma difícil ao SENHOR? Ao tempo determinado, tornarei a ti por este tempo da vida, e Sara terá um filho."', verseRef:"Gênesis 18.14",
+    truth:"Deus é Onipotente e não há nada que Ele não possa realizar segundo a sua vontade.",
+    topic:"A cem e noventa anos, o impossível aconteceu. Deus é Onipotente e cumpre no tempo certo.",
+    reading:[{day:"Segunda",ref:"Gn 18.14",topic:"A promessa de Deus a Abraão é reiterada"},{day:"Terça",ref:"Gn 21.2",topic:"No tempo determinado a promessa se cumpre"},{day:"Quarta",ref:"Lc 1.37",topic:"Para Deus não há nada absolutamente impossível"},{day:"Quinta",ref:"At 3.25",topic:"O destaque da promessa abraâmica"},{day:"Sexta",ref:"Dt 7.9",topic:"Deus é fiel e guarda o concerto"},{day:"Sábado",ref:"Gn 21.33",topic:"Deus cumpre os propósitos através das gerações"}],
+    sections:[{title:"I – As Consequências da Impaciência de Sara",text:"Quando Isaque nasceu, Abraão deu-lhe o nome escolhido por Deus — Isaque, que significa 'riso'. Abraão e Sara não riram de Deus, mas da situação física deles. Depois que Isaque cresceu, Ismael passou a zombar do filho da promessa, causando novo conflito."},{title:"II – Abraão Tem que Tomar uma Atitude",text:"Sara pediu a Abraão que expulsasse Agar e Ismael. Deus disse a Abraão que apoiasse Sara, pois cuidaria de Agar e Ismael. Abraão, com o coração dividido e machucado — resultado da tentativa de 'ajudar' a Deus — obedeceu."},{title:"III – Agar e Ismael Deixam a Casa de Abraão",text:"No deserto de Berseba, quando a água acabou, Agar chorou desesperadamente. O Anjo do Senhor a encontrou e Deus abriu seus olhos para ver um poço. Como ouviu a voz de Ismael, Ele ouve a nossa voz e atende ao nosso clamor."}],
+    review:["Quem escolheu o nome de Isaque e qual o seu significado?","Qual foi a segunda providência de Abraão depois do nascimento de Isaque?","O que fez Abraão para comemorar o desmame de Isaque?","O que Abraão ofereceu a Agar antes de ela deixar a sua casa?","Para onde foi Agar e Ismael ao saírem da casa de Abraão?"]},
+
+  { num:7, title:"Uma Prova de Fé: A Entrega de Isaque", date:"17 de Maio de 2026", ref:"Gênesis 22.1–11", badge:"Lição 7", lesDate:"17 Mai",
+    verse:'"E disse: Toma agora o teu filho, o teu único filho, Isaque, a quem amas, e vai-te à terra de Moriá; e oferece-o ali em holocausto."', verseRef:"Gênesis 22.2",
+    truth:"Abraão confiava no Senhor a ponto de dizer ao seu filho: 'Deus proverá para si o cordeiro'.",
+    topic:"Abraão confiava no Senhor a ponto de declarar 'Deus proverá'. A maior prova de fé dos patriarcas.",
+    reading:[{day:"Segunda",ref:"Gn 22.7",topic:"Perguntas e respostas difíceis em meio à prova"},{day:"Terça",ref:"Hb 11.6",topic:"Para agradar a Deus, é preciso ter fé"},{day:"Quarta",ref:"Hb 11.1",topic:"Fé, o firme fundamento das coisas que se esperam"},{day:"Quinta",ref:"Hb 11.17,18",topic:"Pela fé, Abraão ofereceu Isaque quando foi provado"},{day:"Sexta",ref:"Rm 1.17",topic:"A fé como princípio que sustenta o justo"},{day:"Sábado",ref:"Tg 2.17",topic:"A verdadeira fé manifesta-se em atitudes"}],
+    sections:[{title:"I – Abraão Tem a sua Fé Provada",text:"Deus chamou Abraão e determinou que ele sacrificasse seu único filho em Moriá. Abraão levantou-se de madrugada e foi para o lugar indicado. Disse aos servos: 'Eu e o moço iremos até ali; e, havendo adorado, tornaremos a vós' — no plural, demonstrando fé na ressurreição."},{title:"II – A Promessa Confirmada",text:"Abraão dispôs-se a obedecer pela fé, crendo que Deus poderia até dos mortos ressuscitar Isaque. Quando levantou o cutelo, o Anjo do Senhor o deteve. Deus aceitou seu gesto e renovou as promessas que já lhe fizera antes. Um cordeiro preso pelos chifres foi o sacrifício."},{title:"III – Abraão Ofereceu seu Único Filho",text:"Isaque também era um jovem de fé. Quando seu pai disse 'Deus proverá cordeiro para si, meu filho', Isaque creu e submeteu-se resignadamente. Este acontecimento prefigura a entrega de Jesus Cristo por nós."}],
+    review:["O que Deus pediu para Abraão fazer?","Abraão questionou o pedido de Deus? O que ele demonstrou?","O que Abraão disse aos ajudantes demonstrando a sua confiança?","Por que era necessário que Jesus se fizesse semelhante à descendência de Abraão?","Segundo Gênesis 23.8,9, qual o local da morte de Sara?"]},
+
+  { num:8, title:"Isaque: Herdeiro da Promessa", date:"24 de Maio de 2026 · Dia de Pentecostes", ref:"Gênesis 26.1–5, 12–14, 24–25", badge:"Lição 8", lesDate:"24 Mai · Pentecostes",
+    verse:'"E semeou Isaque naquela mesma terra e colheu, naquele mesmo ano, cem medidas, porque o Senhor o abençoava."', verseRef:"Gênesis 26.12",
+    truth:"Deus abençoou Abraão em tudo, e Isaque, o filho da promessa, também seria abençoado. Quando Deus age, ninguém pode impedi-lo.",
+    topic:"Quando Deus age, ninguém pode impedi-lo. Isaque foi abençoado mesmo diante da inveja.",
+    reading:[{day:"Segunda",ref:"Gn 26.14",topic:"A inveja dos filisteus diante das bênçãos de Isaque"},{day:"Terça",ref:"Gn 26.3",topic:"A bênção sobre a descendência"},{day:"Quarta",ref:"Js 23.14",topic:"Nenhuma palavra vinda de Deus pode falhar"},{day:"Quinta",ref:"Sl 119.89",topic:"A Palavra de Deus está firmada no céu"},{day:"Sexta",ref:"Jr 1.12",topic:"Deus tem compromisso com a sua palavra"},{day:"Sábado",ref:"Nm 23.19",topic:"O atributo imutável de Deus"}],
+    sections:[{title:"I – A Fome na Terra",text:"Assim como Abraão enfrentou uma fome, Isaque também teve essa experiência. Deus apareceu a Isaque e ordenou que ele não descesse ao Egito, mas habitasse na terra de Gerar. O Senhor confirmou pessoalmente a Isaque o juramento que fez a Abraão."},{title:"II – A Inveja Contra Isaque",text:"Os filisteus invejaram Isaque pela sua prosperidade e entulharam todos os seus poços. Mas Isaque estava debaixo da proteção e bênção de Deus. A cada poço contestado, ele abria um novo. A inveja é a 'podridão dos ossos' — ela revela a índole perversa de quem a nutre."},{title:"III – Deus Aparece a Isaque",text:"Deus apareceu a Isaque naquela mesma noite e disse: 'Não temas, porque eu sou contigo.' Isaque edificou ali um altar e invocou o nome do Senhor. Os filisteus finalmente reconheceram a mão de Deus sobre Isaque e pediram um pacto de paz."}],
+    review:["Abraão foi para o Egito devido à fome, mas Isaque deveria fazer o mesmo?","Onde Isaque habitou para fugir da fome?","O que Isaque disse a Abimeleque a respeito de Rebeca?","O que a inveja dos filisteus levou-os a fazer contra Isaque?","Qual o significado do nome do poço de Seba?"]},
+
+  { num:9, title:"Jacó e Esaú: Irmãos em Conflito", date:"31 de Maio de 2026", ref:"Gênesis 27.1–5, 41–44", badge:"Lição 9", lesDate:"31 Mai",
+    verse:'"Duas nações estão no teu ventre, e dois povos se dividirão das suas entranhas: um povo será mais forte do que o outro povo, e o maior servirá ao menor."', verseRef:"Gênesis 27.23",
+    truth:"Os pais não devem ter preferência entre seus filhos e devem tratá-los da mesma forma.",
+    topic:"A predileção dos pais e o desprezo de Esaú pela primogenitura criaram divisões profundas.",
+    reading:[{day:"Segunda",ref:"Sl 133.1",topic:"Os irmãos devem viver em união"},{day:"Terça",ref:"1 Co 1.10",topic:"Evite as dissensões"},{day:"Quarta",ref:"Gn 27.10-13",topic:"A mãe induziu o filho a mentir"},{day:"Quinta",ref:"Dt 6.6-9",topic:"Os pais devem ser exemplos"},{day:"Sexta",ref:"Ef 6.4",topic:"Princípios do Senhor para os pais"},{day:"Sábado",ref:"Rm 12.10",topic:"O valor do amor fraternal"}],
+    sections:[{title:"I – Os Filhos de Isaque",text:"Isaque orou ao Senhor por um filho. Rebeca ficou grávida de gêmeos que lutavam no seu ventre. O primeiro nasceu ruivo e cabeludo — Esaú. O segundo nasceu agarrado ao calcanhar do irmão e foi chamado Jacó, 'aquele que segura pelo calcanhar'. É a primeira gestação múltipla registrada na Bíblia."},{title:"II – Esaú Vende sua Primogenitura",text:"Isaque amava Esaú e Rebeca amava Jacó. Essa predileção só trouxe prejuízos. Certo dia, Jacó preparou um ensopado e Esaú voltou faminto. Esaú vendeu seu direito de primogenitura por um prato de ensopado, demonstrando o pouco valor que dava às bênçãos espirituais."},{title:"III – Rebeca Induz Jacó ao Pecado",text:"Isaque, já velho, pediu a Esaú que preparasse um guisado para abençoá-lo. Rebeca ouviu e elaborou um plano para que Jacó recebesse a bênção no lugar do irmão. Jacó inicialmente resistiu, mas cedeu. Isaque foi enganado. A trama foi descoberta e Esaú prometeu matar o irmão."}],
+    review:["Em que Rebeca era semelhante a Sara?","O que tornou a gestação de Rebeca diferente?","Qual o significado do nome Esaú?","A qual dos filhos Isaque amava? A qual dos filhos Rebeca amava?","As 12 tribos de Israel vieram de qual família?"]},
+
+  { num:10, title:"A Experiência Transformadora de Jacó", date:"7 de Junho de 2026", ref:"Gênesis 28.10–17", badge:"Lição 10", lesDate:"7 Jun",
+    verse:'"E eis que estou contigo, e te guardarei por onde quer que fores, e te farei tornar a esta terra, porque te não deixarei, até que te haja feito o que te tenho dito."', verseRef:"Gênesis 28.15",
+    truth:"Após um encontro com Deus, Jacó é transformado. Ninguém sai da presença do Senhor da mesma maneira.",
+    topic:"Em fuga e sozinho, Jacó sonha com a escada celestial. Ninguém sai da presença do Senhor da mesma maneira.",
+    reading:[{day:"Segunda",ref:"Gn 17.5",topic:"Deus transformou Abrão em Abraão"},{day:"Terça",ref:"Gn 17.15",topic:"Deus transformou Sarai em Sara"},{day:"Quarta",ref:"Gn 32.28",topic:"Deus transformou Jacó em Israel"},{day:"Quinta",ref:"Jo 1.42",topic:"Deus transformou completamente a vida de Pedro"},{day:"Sexta",ref:"At 13.9",topic:"Deus transformou a vida de Saulo"},{day:"Sábado",ref:"Jo 20.16; Mc 5.19",topic:"Jesus transforma vidas"}],
+    sections:[{title:"I – Um Sonho que Mudou uma Vida",text:"Durante sua fuga para a casa de Labão, Jacó dormiu com a cabeça sobre uma pedra. Em sonho, viu uma escada cujo topo tocava os céus, com anjos subindo e descendo. No topo, Deus se apresentou e renovou as promessas do concerto, prometendo estar com Jacó onde quer que fosse."},{title:"II – As Descobertas de Jacó",text:"Ao acordar, Jacó exclamou: 'Na verdade o Senhor está neste lugar, e eu não o sabia.' Era um dos piores momentos de sua vida, mas foi exatamente nesse momento que Deus se revelou. Jacó chamou o lugar de Betei — Casa de Deus — e disse ser a porta dos céus."},{title:"III – A Coluna de Betei",text:"Cheio de gratidão, Jacó tomou a pedra que servira de travesseiro, levantou-a como coluna e derramou azeite sobre ela. Fez um voto: se Deus o guardasse e o trouxesse de volta em paz, o Senhor seria o seu Deus e ele daria o dízimo de tudo quanto Deus lhe desse."}],
+    review:["O que Jacó viu em seu sonho?","O que Hebreus 1.14 diz a respeito dos anjos?","De acordo com a lição, quais são as descobertas de Jacó?","O que significa 'Betei'?","Qual foi o voto de Jacó (Gn 28.20–22)?"]},
+
+  { num:11, title:"Jacó: De Enganador a Homem de Honra", date:"14 de Junho de 2026 · Dia do Pastor", ref:"Gênesis 32.22–31", badge:"Lição 11", lesDate:"14 Jun · Dia do Pastor",
+    verse:'"Então, disse: Não se chamará mais o teu nome Jacó, mas Israel, pois, como príncipe, lutaste com Deus e com os homens e prevaleceste."', verseRef:"Gênesis 32.28",
+    truth:"Somente Deus pode transformar o caráter e a vida do ser humano.",
+    topic:"A luta em Peniel e o novo nome: Israel. Somente Deus pode transformar o caráter e a vida do ser humano.",
+    reading:[{day:"Segunda",ref:"2 Co 3.18",topic:"Transformados de glória em glória"},{day:"Terça",ref:"At 3.19",topic:"Arrependimento e conversão"},{day:"Quarta",ref:"Cl 3.9,10",topic:"Vestidos do novo homem"},{day:"Quinta",ref:"Rm 12.2",topic:"A renovação do entendimento"},{day:"Sexta",ref:"Gl 5.22",topic:"Quem é de Cristo tem o fruto do Espírito"},{day:"Sábado",ref:"2 Co 5.17",topic:"Sendo nova criatura em Cristo"}],
+    sections:[{title:"I – A Família de Jacó",text:"Jacó encontrou Raquel e a amou. Sem dote, trabalhou sete anos para tê-la como esposa. Mas Labão o enganou colocando Leia no lugar de Raquel na noite de núpcias. Jacó colheu o que havia semeado. O amor não desistiu — ele trabalhou mais sete anos por Raquel."},{title:"II – Jacó Deseja Retornar à sua Terra",text:"Depois de anos trabalhando para Labão, Deus mandou Jacó retornar. Labão tentou impedi-lo, mas Jacó fugiu. Ao saber que Esaú vinha com 400 homens, Jacó ficou com medo e clamou a Deus. Dividiu sua família em dois grupos como precaução."},{title:"III – Jacó no Vau do Jaboque",text:"Jacó ficou só e lutou com um varão (anjo) até o romper do dia. Sua coxa se deslocou, mas ele persistiu: 'Não te deixarei ir, se me não abençoares.' Deus mudou seu nome para Israel. Em Peniel, Jacó declarou: 'Vi Deus face a face.' Ninguém sai da presença de Deus da mesma maneira."}],
+    review:["Qual o local do primeiro encontro entre Jacó e Raquel?","Qual o nome da filha de Labão que ele usou para enganar Jacó?","Quantos anos Jacó trabalhou por Leia e Raquel?","Quais os nomes dos filhos de Jacó com Leia e sua serva Zilpa?","Quais os nomes dos filhos de Jacó com Raquel e sua serva Bila?"]},
+
+  { num:12, title:"A Reconciliação de Jacó com Esaú", date:"21 de Junho de 2026", ref:"Gênesis 33.1–10", badge:"Lição 12", lesDate:"21 Jun",
+    verse:'"Então, Esaú correu-lhe ao encontro e abraçou-o; e lançou-se sobre o seu pescoço e beijou-o; e choraram."', verseRef:"Gênesis 33.4",
+    truth:"Em Deus, sempre há possibilidade de perdão e reconciliação.",
+    topic:"Em Deus, sempre há possibilidade de perdão e reconciliação. O abraço entre os irmãos é um dos momentos mais tocantes do Gênesis.",
+    reading:[{day:"Segunda",ref:"Jo 13.34,35",topic:"Amar uns aos outros"},{day:"Terça",ref:"Mt 6.12",topic:"Perdoando como somos perdoados"},{day:"Quarta",ref:"Cl 3.13",topic:"Perdoando uns aos outros"},{day:"Quinta",ref:"Mt 6.15",topic:"Quem não perdoa não será perdoado"},{day:"Sexta",ref:"Hb 10.17",topic:"Deus perdoa e esquece a ofensa"},{day:"Sábado",ref:"Mt 18.21,22",topic:"Até setenta vezes sete"}],
+    sections:[{title:"I – Irmãos em Conflito",text:"Jacó, transformado após a luta em Peniel, retornava para sua terra. Ao avistar Esaú com 400 homens, tomou a iniciativa de ir ao encontro do irmão e inclinou-se à terra sete vezes. A humildade tem poder para dissipar a ira e nos conceder paz."},{title:"II – O Encontro entre Jacó e Esaú",text:"O inesperado aconteceu: Esaú correu ao encontro de Jacó, abraçou-o, lançou-se sobre seu pescoço e beijou-o. Os dois choraram. Somente Deus poderia promover tão grande reconciliação. A mão de Deus se moveu entre os dois irmãos dissipando toda a ira de Esaú."},{title:"III – A Família de Jacó Segue seu Caminho",text:"Depois do encontro, Esaú voltou para Seir e Jacó foi para Sucote — 'abrigo'. Perdoar não significa necessariamente andar junto. O que não podemos é guardar rancor no coração. Jacó levantou ali um altar e o chamou de 'Deus, o Deus de Israel'."}],
+    review:["O que a luta entre Jacó e o anjo resultou?","Somente quem pode transformar o ser humano?","Por que Esaú perdeu a sua bênção?","Depois do encontro com Esaú, Jacó foi para qual cidade? Qual o significado do seu nome?","Para onde Deus ordenou que Jacó retornasse? Ele cumpriu de imediato?"]},
+
+  { num:13, title:"O Legado de Fé de Abraão, Isaque e Jacó", date:"28 de Junho de 2026", ref:"Hebreus 11.8–12, 17–21", badge:"Lição 13", lesDate:"28 Jun",
+    verse:'"Pela fé, Abraão, sendo chamado, obedeceu, indo para um lugar que havia de receber por herança; e saiu, sem saber para onde ia."', verseRef:"Hebreus 11.8",
+    truth:"Abraão, Isaque e Jacó deixaram um legado de fé em Deus para as futuras gerações.",
+    topic:"Os três patriarcas estão na galeria da fé de Hebreus 11. Eles deixaram um legado inestimável para toda a humanidade.",
+    reading:[{day:"Segunda",ref:"Gn 12.1-3",topic:"O legado da obediência de Abraão"},{day:"Terça",ref:"Hb 11.8",topic:"O legado da confiança nas promessas"},{day:"Quarta",ref:"Gn 22.9-12",topic:"O legado da entrega total"},{day:"Quinta",ref:"Gn 24.12-14",topic:"O legado espiritual de Isaque"},{day:"Sexta",ref:"Gn 26.24,25",topic:"O legado da perseverança nas promessas"},{day:"Sábado",ref:"Gn 32.24-28",topic:"O legado da transformação de Jacó"}],
+    sections:[{title:"I – O Legado de Abraão",text:"A herança de fé de Abraão não se limitou a Israel — ela alcança todas as nações e famílias da terra. O Messias nasceria da semente de Abraão. Na genealogia de Mateus, Jesus, o Messias, é descendente de Davi, filho de Abraão. Os que creem em Jesus, pela fé, 'são filhos de Abraão' (Gl 3.7)."},{title:"II – O Legado de Isaque",text:"O nascimento de Isaque simboliza a fidelidade de Deus e a concretização do seu plano. Isaque cresceu debaixo da promessa e aprendeu com o exemplo de seu pai a depender de Deus. Edificou altares, invocou o nome do Senhor e perseverou diante da inveja dos vizinhos."},{title:"III – O Legado de Jacó",text:"Jacó teve dois encontros transformadores com Deus: em Betei quando fugia, e em Peniel quando regressava. Embora imperfeito, sua história mostra que a conversão sincera faz com que Deus derrame a sua bênção. O Senhor mudou seu nome para Israel — e seu nome foi dado ao Estado de Israel."}],
+    review:["Qual foi o alcance do legado de fé de Abraão?","De quem eram os descendentes do Messias?","O que é fé?","Qual o significado do nome Isaque?","Segundo a lição, o que o arrependimento pode mudar?"]}
+];
+
+/* ── gera os cards na grade ── */
+const grid = document.getElementById('lessons-grid');
+LESSONS.forEach(l => {
+  const card = document.createElement('div');
+  card.className = 'lesson-card';
+  card.onclick = () => openLesson(l.num);
+  card.innerHTML = `
+    <div class="lesson-card-header">
+      <span class="lesson-badge">${l.badge}</span>
+      <span class="lesson-date">${l.lesDate}</span>
+    </div>
+    <div class="lesson-card-title">${l.title}</div>
+    <p class="lesson-card-text">${l.topic}</p>
+    <div class="lesson-card-verse">${l.verse} (${l.verseRef})</div>
+  `;
+  grid.appendChild(card);
+});
+
+/* ── abre o modal ── */
+function openLesson(num) {
+  const l = LESSONS.find(x => x.num === num);
+  if (!l) return;
+
+  document.getElementById('modal-kick').textContent = `Lição ${l.num} · ${l.ref}`;
+  document.getElementById('modal-title').textContent = l.title;
+  document.getElementById('modal-date').textContent = l.date;
+
+  const readHtml = l.reading.map(r => `
+    <div class="m-read-item">
+      <span class="m-read-day">${r.day}</span>
+      <div>
+        <div class="m-read-ref">${r.ref}</div>
+        <div class="m-read-topic">${r.topic}</div>
+      </div>
+    </div>`).join('');
+
+  const sectionsHtml = l.sections.map(s => `
+    <div class="m-section-title">${s.title}</div>
+    <p class="m-text">${s.text}</p>`).join('');
+
+  const reviewHtml = l.review.map(q => `<li>${q}</li>`).join('');
+
+  const prevBtn = num > 1  ? `<button class="btn-ghost" onclick="openLesson(${num-1})" style="font-family:'Source Sans 3',sans-serif;font-size:13px;font-weight:400;padding:9px 20px;border-radius:6px;border:0.5px solid rgba(255,255,255,0.25);background:transparent;color:rgba(255,255,255,0.7);cursor:pointer;transition:all .2s;" onmouseover="this.style.background='rgba(255,255,255,0.08)';this.style.color='#fff'" onmouseout="this.style.background='transparent';this.style.color='rgba(255,255,255,0.7)'">← Lição ${num-1}</button>` : '';
+  const nextBtn = num < 13 ? `<button class="btn-primary" onclick="openLesson(${num+1})" style="font-size:13px;padding:9px 20px;">Lição ${num+1} →</button>` : '';
+
+  document.getElementById('modal-body').innerHTML = `
+    <div class="m-2col">
+      <div class="m-block">
+        <div class="m-block-lbl">Texto Áureo</div>
+        <p class="m-verse">${l.verse}</p>
+        <span class="m-verse-ref">${l.verseRef}</span>
+      </div>
+      <div class="m-block">
+        <div class="m-block-lbl">Verdade Prática</div>
+        <p class="m-truth">${l.truth}</p>
+      </div>
+    </div>
+
+    <div class="m-block">
+      <div class="m-block-lbl">Leitura Diária</div>
+      <div class="m-read-grid">${readHtml}</div>
+    </div>
+
+    <div style="margin-top:1.5rem;">${sectionsHtml}</div>
+
+    <div class="m-review">
+      <div class="m-review-title">Revisando o Conteúdo</div>
+      <ol>${reviewHtml}</ol>
+    </div>
+
+    <div class="m-nav">${prevBtn}${nextBtn}</div>
+  `;
+
+  document.getElementById('modal-overlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+  document.getElementById('modal-body').scrollTop = 0;
+
+  /* destaca item ativo na sidebar */
+  document.querySelectorAll('.lesson-link').forEach((el, i) => {
+    el.classList.toggle('active', i === num - 1);
+  });
+}
+
+function closeModal() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  document.body.style.overflow = '';
+  document.querySelectorAll('.lesson-link').forEach(el => el.classList.remove('active'));
+}
+
+function handleOverlayClick(e) {
+  if (e.target === document.getElementById('modal-overlay')) closeModal();
+}
+
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+/* nav ativa no scroll */
+const navLinks = document.querySelectorAll('nav.top-nav a');
+const sections = document.querySelectorAll('[id]');
+new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting)
+      navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-40% 0px -55% 0px' }).observe(...sections);
+sections.forEach(s => {
+  new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (e.isIntersecting)
+        navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { rootMargin: '-40% 0px -55% 0px' }).observe(s);
+});
+</script>
+</body>
+</html>
