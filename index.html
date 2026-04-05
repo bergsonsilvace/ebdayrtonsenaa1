@@ -2296,7 +2296,7 @@ async function renderProfessores() {
     <div class="av av-gold">${ini(p.nome)}</div>
     <div class="ai-info">
       <div class="ai-nome">${p.nome}</div>
-      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = Array.isArray(p.turmas) && p.turmas.length ? p.turmas : p.turma === 'todas' ? ['criancas','jovens','adultos'] : [p.turma]; return arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
+      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = Array.isArray(p.turmas) && p.turmas.length ? p.turmas : p.turma === 'todas' ? ['criancas','jovens','adultos'] : [p.turma]; return arr.length === 3 ? 'Todas as turmas' : arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
     </div>
     <div class="ai-acts">
       <button class="btn-ic" onclick="editProf('${p.id}')" title="Editar">✎</button>
