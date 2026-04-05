@@ -2296,7 +2296,7 @@ async function renderProfessores() {
     <div class="av av-gold">${ini(p.nome)}</div>
     <div class="ai-info">
       <div class="ai-nome">${p.nome}</div>
-      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = p.turmas && p.turmas.length ? p.turmas : [p.turma]; return arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
+      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = Array.isArray(p.turmas) && p.turmas.length ? p.turmas : p.turma === 'todas' ? ['criancas','jovens','adultos'] : [p.turma]; return arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
     </div>
     <div class="ai-acts">
       <button class="btn-ic" onclick="editProf('${p.id}')" title="Editar">✎</button>
@@ -2346,16 +2346,26 @@ async function salvarProf() {
   if (!nome) { toast('Preencha o nome', 'er'); return; }
   const login = document.getElementById('pe-login').value.trim();
   const senha = document.getElementById('pe-senha').value;
-  const turma = document.getElementById('pe-turma').value;
-  const nasc = document.getElementById('pe-nasc').value || null;
+  const editId = document.getElementById('pe-id').value;
+  const nasc = dataParaISO(document.getElementById('pe-nasc').value) || null;
   const tel = document.getElementById('pe-tel').value || null;
   const email = document.getElementById('pe-email')?.value?.trim() || null;
   const endereco = document.getElementById('pe-endereco')?.value?.trim() || null;
-  const editId = document.getElementById('pe-id').value;
   const tambemAluno = document.getElementById('pe-tambem-aluno')?.checked || false;
   const turmaAluno = tambemAluno ? (document.getElementById('pe-turma-aluno')?.value || null) : null;
   if (!editId && login && !senha) { toast('Digite uma senha para o login', 'er'); return; }
-  const dado = { nome, turma };
+
+  // Pegar turmas do array de checkboxes
+  const turmasSel = ['criancas','jovens','adultos'].filter(t => {
+    const el = document.getElementById('pe-turma-' + t);
+    return el && el.checked;
+  });
+  if (!turmasSel.length) { toast('Selecione pelo menos uma turma', 'er'); return; }
+  // turma principal (campo legado) = todas se múltiplas, senão a única
+  const turma = turmasSel.length > 1 ? 'todas' : turmasSel[0];
+  const turmas = turmasSel; // array real
+
+  const dado = { nome, turma, turmas };
   if (nasc) dado.nasc = nasc;
   if (tel) dado.tel = tel;
   if (email) dado.email = email;
