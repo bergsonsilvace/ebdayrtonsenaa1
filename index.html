@@ -672,7 +672,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 <body>
 
 <!-- SPLASH SCREEN -->
-<div id="pwa-splash">
+<div id="pwa-splash" style="display:none!important">
   <div class="splash-icon">✦</div>
   <div class="splash-nome">EBD <em>Frequência</em></div>
   <div class="splash-sub">ADTC Ayrton Senna 1</div>
@@ -5772,6 +5772,10 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 // ── START ──
+// Mostrar login imediatamente
+document.addEventListener('DOMContentLoaded', function() {
+  mostrarTela('login');
+});
 initSB();
 </script>
 
