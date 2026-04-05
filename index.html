@@ -2379,11 +2379,58 @@ async function salvarProf() {
     if (editId) result = await sbUpdate('professores', editId, dado);
     else result = await sbInsert('professores', dado);
     if (result === null) return;
+
+    // Se professor também é aluno, criar/atualizar registro na tabela alunos
+    if (tambemAluno && turmaAluno) {
+      await sincronizarProfComoAluno(nome, login, turmaAluno, editId);
+    }
+
     fecharModal('mo-prof');
     toast(editId ? 'Professor atualizado! ✦' : 'Professor cadastrado! ✦', 'ok');
     await renderProfessores();
+    // Atualizar cache de alunos também
+    cacheAlunos = await sbGet('alunos');
   } catch(e) {
     toast('Erro ao salvar: ' + e.message, 'er');
+  }
+}
+
+async function sincronizarProfComoAluno(nome, login, turmaAluno, profEditId) {
+  try {
+    // Buscar todos os alunos da turma e verificar por nome
+    const todosAlunos = await sbGet('alunos');
+    const nomeNorm = nome.toLowerCase().trim();
+    
+    // Verificar se já existe pelo login (se tiver) ou pelo nome
+    const jaExiste = todosAlunos.find(a =>
+      (login && a.login === login) ||
+      a.nome.toLowerCase().trim() === nomeNorm
+    );
+
+    if (jaExiste) {
+      // Já existe — só atualizar turma se mudou
+      if (jaExiste.turma !== turmaAluno) {
+        await sbUpdate('alunos', jaExiste.id, { turma: turmaAluno });
+        toast('Turma do aluno atualizada para ' + TN[turmaAluno] + '! ✦', 'ok');
+      }
+      return;
+    }
+
+    // Não existe — criar como aluno com mesmos dados do professor
+    const senhaEl = document.getElementById('pe-senha');
+    const senha = senhaEl && senhaEl.value ? senhaEl.value : '123456';
+    await sbInsert('alunos', {
+      nome,
+      turma: turmaAluno,
+      login: login || null,
+      senha: login ? senha : null,
+      status: 'ativo',
+      primeiro_acesso: true
+    });
+    toast(nome + ' cadastrado como aluno em ' + TN[turmaAluno] + '! ✦', 'ok');
+  } catch(e) {
+    console.error('Erro ao sincronizar professor como aluno:', e);
+    toast('Professor salvo, mas erro ao criar aluno: ' + e.message, 'er');
   }
 }
 function editProf(id) { abrirModalProf(id); }
