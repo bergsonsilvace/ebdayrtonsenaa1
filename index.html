@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-title" content="EBD Freq">
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;EBD Frequência&quot;,&quot;short_name&quot;:&quot;EBD&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111008&quot;,&quot;theme_color&quot;:&quot;#b8972a&quot;}">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -706,7 +706,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 <div class="offline-banner" id="offline-banner">⚠ Sem conexão — alguns dados podem estar desatualizados</div>
 
 <!-- LOGIN -->
-<div id="scr-login" class="screen">
+<div id="scr-login" class="screen on" style="display:block">
   <div class="lbox">
     <div class="llogo">
       <div class="llogo-icon">✦</div>
@@ -2296,7 +2296,7 @@ async function renderProfessores() {
     <div class="av av-gold">${ini(p.nome)}</div>
     <div class="ai-info">
       <div class="ai-nome">${p.nome}</div>
-      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${TN[p.turma]}</span></div>
+      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = p.turmas && p.turmas.length ? p.turmas : [p.turma]; return arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
     </div>
     <div class="ai-acts">
       <button class="btn-ic" onclick="editProf('${p.id}')" title="Editar">✎</button>
