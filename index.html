@@ -1471,7 +1471,21 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let sbClient = null;
 async function initSB() {
   mostrarSplash();
-  sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  try {
+    // Wait for supabase library to be available
+    let attempts = 0;
+    while (!window.supabase && attempts < 20) {
+      await new Promise(r => setTimeout(r, 100));
+      attempts++;
+    }
+    if (!window.supabase) throw new Error('Supabase library not loaded');
+    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  } catch(e) {
+    console.error('Supabase init error:', e);
+    // Ainda assim mostra login após splash
+    setTimeout(() => mostrarTela('login'), 1800);
+    return;
+  }
   // Mostrar login após splash
   setTimeout(() => mostrarTela('login'), 1800);
   // Carregar configs em background
@@ -3696,7 +3710,21 @@ function verMeuResultado(id) {
 // ══════════════════════════════════════════════
 function mostrarSplash() {
   const splash = document.getElementById('pwa-splash');
-  setTimeout(() => { splash.classList.add('hide'); setTimeout(() => splash.style.display='none', 500); }, 1800);
+  // Esconde após 1.8s normalmente
+  setTimeout(() => {
+    splash.classList.add('hide');
+    setTimeout(() => { splash.style.display = 'none'; }, 500);
+  }, 1800);
+  // Failsafe: sempre esconde após 5s no máximo
+  setTimeout(() => {
+    splash.style.display = 'none';
+    const login = document.getElementById('scr-login');
+    const app = document.getElementById('scr-app');
+    // Se nem login nem app estão visíveis, mostra login
+    if (login && login.style.display === 'none' && app && app.style.display === 'none') {
+      mostrarTela('login');
+    }
+  }, 5000);
 }
 
 // Offline detection
