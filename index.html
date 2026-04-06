@@ -1652,7 +1652,7 @@ function construirNav() {
   const items = [];
   const p = USER.perfil;
   if (p === 'aluno') {
-    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'pix',label:'Pix'});
+    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'});
   } else if (p === 'professor_convidado') {
     items.push({id:'dash',label:'Inicio'},{id:'freq',label:'Aula'},{id:'licoes',label:'Licoes'},{id:'calendario',label:'Calendario'});
   } else {
@@ -1660,7 +1660,7 @@ function construirNav() {
     if (isAdmin()) {
       items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
     } else {
-      items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'});
+      items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'});
       if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
     }
     items.push({id:'historico',label:'Historico'});
@@ -1743,6 +1743,7 @@ async function iniciarApp() {
     items.push({ id:'licoes', label:'Lições' });
     items.push({ id:'provas', label:'Provas' });
     items.push({ id:'calendario', label:'Calendário' });
+    items.push({ id:'escalas', label:'Escalas' });
     items.push({ id:'pix', label:'Pix' });
   } else {
     items.push({ id:'dash', label:'Início' });
@@ -1765,6 +1766,7 @@ async function iniciarApp() {
       items.push({ id:'licoes', label:'Lições' });
       items.push({ id:'provas', label:'Provas' });
       items.push({ id:'calendario', label:'Calendário' });
+      items.push({ id:'escalas', label:'Escalas' });
       if (USER.tambem_aluno && USER.turma_aluno) {
         items.push({ id:'meu-progresso-prof', label:'Meu Progresso' });
       }
@@ -1801,7 +1803,7 @@ async function iniciarApp() {
     ['#freq-ttabs .ttab','#alunos-ttabs .ttab','#rank-ttabs .ttab'].forEach(sel => {
       document.querySelectorAll(sel).forEach(t => {
         const m = t.getAttribute('onclick').match(/'(\w+)'/); if (!m) return;
-        t.style.display = m[1] === USER.turma ? '' : 'none';
+        var profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:(USER.turma==='todas'?['criancas','jovens','adultos']:[USER.turma]); t.style.display = profTs.includes(m[1]) ? '' : 'none';
         if (m[1] === USER.turma) t.classList.add('on'); else t.classList.remove('on');
       });
     });
@@ -2004,6 +2006,7 @@ async function renderDash() {
   await renderMeta(ultima);
   renderAniversariantes(alunos);
   renderAlertasAusencia(alunos, aulas);
+  carregarChavePix();
   renderGrafico(aulaSort.slice(0,8).reverse());
   renderGraficoComparativoTurmas(alunos, aulas);
   renderMuralDash();
@@ -2357,6 +2360,7 @@ async function renderProfessores() {
     </div>
     <div class="ai-acts">
       <button class="btn-ic" onclick="editProf('${p.id}')" title="Editar">✎</button>
+      ${isAdmin()?`<button class="btn-ic" onclick="promoverProf('${p.id}','${p.nome.replace(/'/g,"\\'")}')" title="Promover">⬆</button>`:''}
       <button class="btn-ic danger" onclick="confirmarDel('prof','${p.id}','${p.nome.replace(/'/g,"\\'")}')">✕</button>
     </div>
   </div>`).join('');
@@ -3260,6 +3264,8 @@ let quizScores = {}; // { 'jovens-1': { acertos:4, total:5, data:'...' } }
 async function renderAlunoProgresso() {
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
+  // Mostrar chave pix se configurada
+  carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[USER.turma] || USER.turma}`;
 
   const dados = LICOES[USER.turma] || LICOES['jovens'];
@@ -5882,7 +5888,7 @@ async function mostrarAvisosPopup() {
     document.body.appendChild(overlay);
   } catch(e) { console.error('Avisos popup error:', e); }
 }
-async function marcarAvisoPPLido(id) {
+async function marcarAvisoPPLido(id) { // adm/pastor nao tem avisos_lidos - ignora silenciosamente
   var item = document.getElementById('aviso-pp-' + id);
   if (item) {
     item.style.opacity = '.4';
@@ -6093,6 +6099,68 @@ async function excluirEscala(id) {
     toast('Removida.', '');
     renderEscalas();
   }, 'red');
+}
+
+async function carregarChavePix() {
+  try {
+    var chave = await sbGetConfig('pix_chave');
+    var card = document.getElementById('dash-pix-card');
+    var el = document.getElementById('dash-pix-chave');
+    if (chave && card && el) {
+      el.textContent = chave;
+      card.style.display = 'block';
+    }
+  } catch(e) {}
+}
+function copiarChavePixDash() {
+  var el = document.getElementById('dash-pix-chave');
+  if (!el || !el.textContent) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){ toast('Chave Pix copiada! ✦', 'ok'); }).catch(function(){
+    var ta = document.createElement('textarea'); ta.value = el.textContent;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta); toast('Copiada!', 'ok');
+  });
+}
+
+function promoverProf(profId, nomeProf) {
+  var opcoes = [
+    { valor: 'super', label: 'Superintendente' },
+    { valor: 'pastor', label: 'Pastor' },
+    { valor: 'professor_convidado', label: 'Professor Convidado' }
+  ];
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)';
+  var opHtml = opcoes.map(function(o){
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e0d9cc;border-radius:8px;margin-bottom:8px;cursor:pointer">'
+      + '<input type="radio" name="promocao-prof" value="' + o.valor + '" style="accent-color:#b8972a">'
+      + '<span style="font-size:14px;font-weight:600">' + o.label + '</span></label>';
+  }).join('');
+  modal.innerHTML = '<div style="background:white;border-radius:16px;width:100%;max-width:380px;overflow:hidden">'
+    + '<div style="background:#111;padding:16px 18px;border-bottom:2px solid #b8972a">'
+    + '<div style="font-size:18px;color:white;font-weight:600">Promover ' + nomeProf + '</div>'
+    + '</div><div style="padding:16px">'
+    + '<p style="font-size:13px;color:#666;margin-bottom:14px">Escolha o novo perfil:</p>'
+    + opHtml
+    + '<div style="display:flex;gap:8px;margin-top:12px">'
+    + '<button class="btn btn-ou btn-full" id="btn-cancel-prof-prom">Cancelar</button>'
+    + '<button class="btn btn-gold btn-full" id="btn-confirm-prof-prom">Promover</button>'
+    + '</div></div></div>';
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+  document.getElementById('btn-cancel-prof-prom').onclick = function(){ modal.remove(); };
+  document.getElementById('btn-confirm-prof-prom').onclick = async function(){
+    var sel = document.querySelector('input[name="promocao-prof"]:checked');
+    if (!sel) { toast('Selecione um perfil','er'); return; }
+    var prof = (await sbGet('professores')).find(function(p){ return p.id===profId; });
+    if (!prof) return;
+    try {
+      if (sel.value === 'super') await sbInsert('superintendente', {nome:prof.nome,login:prof.login,senha:prof.senha});
+      else if (sel.value === 'pastor') await sbInsert('pastores', {nome:prof.nome,login:prof.login,senha:prof.senha});
+      modal.remove();
+      toast(nomeProf + ' promovido(a)! ✦', 'ok');
+      renderProfessores();
+    } catch(e) { toast('Erro: '+e.message,'er'); }
+  };
 }
 // ── PWA INSTALL ──
 function instalarApp() {
