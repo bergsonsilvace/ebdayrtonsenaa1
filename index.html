@@ -1586,6 +1586,11 @@ const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos', todas:'To
 const AVC = { criancas:'av-c', jovens:'av-j', adultos:'av-a' };
 const ini = n => n.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
 
+
+function isAdmin() { return USER && ['adm','pastor','super'].includes(USER.perfil); }
+function isProfessor() { return USER && ['professor','professor_convidado'].includes(USER.perfil); }
+function podeGerenciar() { return USER && ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil); }
+
 function mostrarTela(id) {
   // Esconde todas as telas
   document.querySelectorAll('.screen').forEach(s => {
@@ -1638,8 +1643,6 @@ async function doLogin() {
   btn.disabled = false; btn.textContent = 'Entrar';
 }
 
-function isAdmin() { return USER && ['adm','pastor','super'].includes(USER.perfil); }
-function podeGerenciar() { return USER && ['adm','pastor','super','professor'].includes(USER.perfil); }
 document.getElementById('lp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('lu').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lp').focus(); });
 
