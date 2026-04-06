@@ -5786,7 +5786,7 @@ async function mostrarAvisosPopup() {
       return '<div id="aviso-pp-' + a.id + '" style="padding:12px;border:1px solid #e0d9cc;border-radius:8px;margin-bottom:10px;background:#faf5e4">'
         + '<div style="font-size:14px;font-weight:700;margin-bottom:4px">' + (a.titulo||'') + '</div>'
         + '<div style="font-size:13px;color:#666;line-height:1.5">' + (a.texto||'') + '</div>'
-        + '<button class="btn btn-gold btn-sm" style="margin-top:10px;width:100%" onclick="marcarAvisoPPLido(' + JSON.stringify(a.id) + ')">'
+        + '<button class="btn btn-gold btn-sm" style="margin-top:10px;width:100%" data-id="' + a.id + '" onclick="marcarAvisoPPLido(this.dataset.id)">'
         + '\u2713 Marcar como lido</button></div>';
     }).join('');
     overlay.innerHTML = '<div style="background:white;border-radius:16px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">'
@@ -5804,15 +5804,36 @@ async function mostrarAvisosPopup() {
 }
 async function marcarAvisoPPLido(id) {
   var item = document.getElementById('aviso-pp-' + id);
-  if (item) { item.style.opacity='.4'; item.style.pointerEvents='none'; }
+  if (item) {
+    item.style.opacity = '.4';
+    item.style.pointerEvents = 'none';
+    var btn = item.querySelector('button');
+    if (btn) { btn.textContent = '✓ Lido'; btn.disabled = true; }
+  }
   var lidos = (USER.avisos_lidos || []).slice();
   if (!lidos.includes(id)) lidos.push(id);
   USER.avisos_lidos = lidos;
-  var tabela = USER.perfil==='aluno' ? 'alunos' : USER.perfil==='professor' ? 'professores' : 'superintendente';
-  try { await sbUpdate(tabela, USER.id, { avisos_lidos: lidos }); } catch(e) {}
+  // Determinar tabela correta por perfil
+  var tabelaMap = {
+    aluno: 'alunos',
+    professor: 'professores',
+    professor_convidado: 'professores',
+    super: 'superintendente',
+    adm: 'adm',
+    pastor: 'pastores'
+  };
+  var tabela = tabelaMap[USER.perfil];
+  if (tabela) {
+    try { await sbUpdate(tabela, USER.id, { avisos_lidos: lidos }); } catch(e) {}
+  }
+  // Verificar se todos foram lidos
   var pendentes = document.querySelectorAll('#aviso-popup-lista button:not([disabled])');
-  var btn = document.getElementById('btn-fechar-avisos-pp');
-  if (pendentes.length <= 1 && btn) { btn.disabled=false; btn.style.opacity='1'; btn.textContent='Fechar'; }
+  var btnFechar = document.getElementById('btn-fechar-avisos-pp');
+  if (pendentes.length === 0 && btnFechar) {
+    btnFechar.disabled = false;
+    btnFechar.style.opacity = '1';
+    btnFechar.textContent = 'Fechar';
+  }
 }
 function fecharAvisosPopup() {
   var ov = document.getElementById('aviso-popup-overlay');
