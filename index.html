@@ -10,8 +10,8 @@
 <meta name="apple-mobile-web-app-title" content="EBD Freq">
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;EBD Frequência&quot;,&quot;short_name&quot;:&quot;EBD&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111008&quot;,&quot;theme_color&quot;:&quot;#b8972a&quot;}">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
-<script defer src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -1018,6 +1018,29 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <button id="btn-instalar-app" onclick="instalarApp()" class="btn btn-ou btn-full" style="margin-bottom:20px;display:none">📲 Instalar app no celular</button>
     </div>
 
+    <!-- PIX -->
+    <div id="pg-pix" class="page">
+      <div class="ph"><h2>Ofertas <em>via Pix</em></h2><p>Contribua com a obra de Deus</p></div>
+      <div style="background:linear-gradient(135deg,#00a859,#00cc6a);border-radius:var(--r);padding:20px;color:white;text-align:center;margin-bottom:16px" id="pix-card-display">
+        <div style="font-size:36px;margin-bottom:8px">&#128154;</div>
+        <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="pix-nome-display">EBD Frequencia</div>
+        <div style="font-size:12px;opacity:.8" id="pix-banco-display"></div>
+        <div style="font-size:13px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:20px;margin:10px auto;display:inline-block;word-break:break-all" id="pix-chave-display">Chave nao configurada</div>
+        <div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="copiarChavePix()">&#128203; Copiar chave</button></div>
+      </div>
+      <div id="pix-qrcode-wrap" style="text-align:center;margin:16px 0;display:none">
+        <img id="pix-qrcode-img" style="max-width:220px;border-radius:12px;border:4px solid white">
+      </div>
+      <div class="card" id="pix-config-card" style="display:none">
+        <div class="ct">Configurar Pix</div>
+        <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome" placeholder="Nome completo"></div>
+        <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco" placeholder="Ex: Nubank, Caixa..."></div>
+        <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave" placeholder="CPF, e-mail, telefone ou aleatoria"></div>
+        <div class="fg" style="margin-bottom:0"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr" placeholder="https://..."></div>
+        <button class="btn btn-gold btn-full" style="margin-top:12px" onclick="salvarPix()">&#10003; Salvar</button>
+      </div>
+    </div>
+
     <!-- CONFIGURAÇÕES (só admin) -->
     <div id="pg-config" class="page">
       <div class="ph"><h2><em>Configurações</em> da EBD</h2><p>Personalize o sistema</p></div>
@@ -1327,7 +1350,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     <div class="modal" onclick="event.stopPropagation()">
       <div class="mhdr"><h3 class="mtitle" id="mo-prof-titulo">Novo professor</h3><button class="mclose" onclick="fecharModal('mo-prof')">&#x2715;</button></div>
       <input type="hidden" id="pe-id">
-      <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="pe-nome" placeholder="Nome do professor"></div>
+      <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="pe-nome" placeholder="Nome do professor/professora"></div>
+      <div class="fg"><label class="fl">Sexo</label><select class="fc" id="pe-sexo"><option value="M">Masculino (Professor)</option><option value="F">Feminino (Professora)</option></select></div>
       <div class="frow">
         <div class="fg"><label class="fl">Data de nascimento</label><input class="fc date-mask-input" type="text" id="pe-nasc" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="mascaraData(this)"></div>
         <div class="fg"><label class="fl">Telefone</label><input class="fc" id="pe-tel" placeholder="(00) 00000-0000"></div>
@@ -1470,13 +1494,9 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 
 let sbClient = null;
 async function initSB() {
-  try {
-    sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-  } catch(e) {
-    console.error('Supabase erro:', e);
-  }
+  try { sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
   mostrarTela('login');
-  carregarConfigs().catch(()=>{});
+  carregarConfigs().catch(function(){});
 }
 
 // ── STORAGE HELPERS ──
@@ -1561,114 +1581,70 @@ async function doLogin() {
   const btn = document.getElementById('lbtn');
   btn.disabled = true; btn.textContent = 'Verificando...';
   try {
+    const { data: adms } = await sbClient.from('adm').select('*').eq('login', lu).eq('senha', lp);
+    if (adms && adms.length > 0) { USER = { ...adms[0], perfil: 'adm' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
+    const { data: pasts } = await sbClient.from('pastores').select('*').eq('login', lu).eq('senha', lp);
+    if (pasts && pasts.length > 0) { USER = { ...pasts[0], perfil: 'pastor' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
     const { data: supers } = await sbClient.from('superintendente').select('*').eq('login', lu).eq('senha', lp);
-    if (supers && supers.length > 0) {
-      USER = { ...supers[0], perfil: 'super' };
-      btn.disabled = false; btn.textContent = 'Entrar';
-      await finalizarLogin(); return;
-    }
+    if (supers && supers.length > 0) { USER = { ...supers[0], perfil: 'super' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
     const { data: profs } = await sbClient.from('professores').select('*').eq('login', lu).eq('senha', lp);
     if (profs && profs.length > 0) {
-      USER = { ...profs[0], perfil: 'professor' };
-      btn.disabled = false; btn.textContent = 'Entrar';
-      await finalizarLogin(); return;
+      const pd = profs[0];
+      if (!pd.turmas) pd.turmas = pd.turma==='todas'?['criancas','jovens','adultos']:[pd.turma||'adultos'];
+      USER = { ...pd, perfil: pd.perfil_tipo||'professor' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return;
     }
-    // Login de aluno
     const { data: alunos } = await sbClient.from('alunos').select('*').eq('login', lu).eq('senha', lp);
-    if (alunos && alunos.length > 0) {
-      USER = { ...alunos[0], perfil: 'aluno' };
-      btn.disabled = false; btn.textContent = 'Entrar';
-      await finalizarLogin(); return;
-    }
+    if (alunos && alunos.length > 0) { USER = { ...alunos[0], perfil: 'aluno' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
     document.getElementById('lerr').style.display = 'block';
-  } catch(e) { toast('Erro de conexão', 'er'); }
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
   btn.disabled = false; btn.textContent = 'Entrar';
 }
+
+function isAdmin() { return USER && ['adm','pastor','super'].includes(USER.perfil); }
+function podeGerenciar() { return USER && ['adm','pastor','super','professor'].includes(USER.perfil); }
 document.getElementById('lp').addEventListener('keydown', e => { if(e.key==='Enter') doLogin(); });
 document.getElementById('lu').addEventListener('keydown', e => { if(e.key==='Enter') document.getElementById('lp').focus(); });
 
-async function finalizarLogin() {
-  const uid = USER.id;
-  const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
-  PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
-  mostrarTela('app');
-  // Construir nav IMEDIATAMENTE antes de qualquer async
-  construirNav();
-  definirSaudacaoImediata();
-  sbClient.from('perfis').upsert({ ...PERFIL, ultimo_acesso: new Date().toISOString() }, { onConflict: 'usuario_id' }).catch(function(){});
-  await iniciarApp();
-}
 
 function construirNav() {
   if (!USER) return;
   const items = [];
-  if (USER.perfil === 'aluno') {
-    items.push(
-      { id:'pg-aluno', label:'Meu Progresso' },
-      { id:'licoes', label:'Lições' },
-      { id:'provas', label:'Provas' },
-      { id:'calendario', label:'Calendário' }
-    );
+  const p = USER.perfil;
+  if (p === 'aluno') {
+    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'});
+  } else if (p === 'professor_convidado') {
+    items.push({id:'dash',label:'Inicio'},{id:'freq',label:'Aula'},{id:'licoes',label:'Licoes'},{id:'calendario',label:'Calendario'});
   } else {
-    items.push({ id:'dash', label:'Início' }, { id:'mural', label:'Avisos' });
-    if (USER.perfil === 'super') {
-      items.push(
-        { id:'alunos', label:'Alunos' },
-        { id:'professores', label:'Professores' },
-        { id:'freq', label:'Aula' },
-        { id:'mensal', label:'Mensal' },
-        { id:'ranking', label:'Ranking' },
-        { id:'licoes', label:'Lições' },
-        { id:'provas', label:'Provas' },
-        { id:'calendario', label:'Calendário' },
-        { id:'config', label:'Config.' }
-      );
+    items.push({id:'dash',label:'Inicio'},{id:'mural',label:'Avisos'});
+    if (isAdmin()) {
+      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
     } else {
-      items.push(
-        { id:'alunos', label:'Alunos' },
-        { id:'freq', label:'Aula' },
-        { id:'ranking', label:'Ranking' },
-        { id:'licoes', label:'Lições' },
-        { id:'provas', label:'Provas' },
-        { id:'calendario', label:'Calendário' }
-      );
-      if (USER.tambem_aluno && USER.turma_aluno) {
-        items.push({ id:'meu-progresso-prof', label:'Meu Progresso' });
-      }
+      items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'});
+      if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
     }
-    items.push({ id:'historico', label:'Histórico' });
+    items.push({id:'historico',label:'Historico'});
   }
-  // Popular tb-nav (desktop)
   const nav = document.getElementById('tb-nav');
   if (nav) {
     nav.innerHTML = items.map(function(i) {
       return '<button class="tb-btn' + (i.id==='dash'||i.id==='pg-aluno'?' on':'') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
     }).join('');
   }
-  // Popular drawer (mobile)
-  syncDrawerNav(items, USER.perfil === 'aluno' ? 'pg-aluno' : 'dash');
+  syncDrawerNav(items, p==='aluno'?'pg-aluno':'dash');
+}
+async function finalizarLogin() {
+  const uid = USER.id;
+  const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
+  PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
+  mostrarTela('app');
+  construirNav();
+  definirSaudacaoImediata();
+  sbClient.from('perfis').upsert({ ...PERFIL, ultimo_acesso: new Date().toISOString() }, { onConflict: 'usuario_id' }).then(function(){}).catch(function(){});
+  await iniciarApp();
 }
 
 // ── DRAWER MOBILE ──
 function abrirDrawer() {
-  // Re-sync drawer nav before opening (garante que está atualizado)
-  const dn = document.getElementById('drawer-nav');
-  if (dn && !dn.innerHTML.trim() && typeof USER !== 'undefined' && USER) {
-    // Rebuild nav items
-    const itms = [];
-    if (USER.perfil === 'aluno') {
-      [['pg-aluno','Meu Progresso'],['licoes','Lições'],['provas','Provas'],['calendario','Calendário']].forEach(([id,label]) => itms.push({id,label}));
-    } else {
-      itms.push({id:'dash',label:'Início'},{id:'mural',label:'Avisos'});
-      if (USER.perfil === 'super') {
-        [{id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'config',label:'Config.'}].forEach(i => itms.push(i));
-      } else {
-        [{id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'}].forEach(i => itms.push(i));
-      }
-      itms.push({id:'historico',label:'Histórico'});
-    }
-    syncDrawerNav(itms, USER.perfil === 'aluno' ? 'pg-aluno' : 'dash');
-  }
   document.getElementById('drawer-overlay').classList.add('open');
   document.getElementById('drawer').classList.add('open');
   document.body.style.overflow = 'hidden';
@@ -1706,13 +1682,12 @@ function doLogout() {
 
 // ── INIT APP ──
 async function iniciarApp() {
-  try {
   // Topbar
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('tb-uname').textContent = nomeExib;
   const roleLabel = USER.perfil === 'super' ? 'Superintendente' : USER.perfil === 'aluno' ? `Aluno — ${TN[USER.turma]||''}` : 'Professor';
   document.getElementById('tb-urole').textContent = roleLabel;
-  try { atualizarAvatarTopbar(); } catch(e) {}
+  atualizarAvatarTopbar();
 
   // Nav — aluno vê só Lições e Perfil
   const items = [];
@@ -1724,7 +1699,7 @@ async function iniciarApp() {
   } else {
     items.push({ id:'dash', label:'Início' });
     items.push({ id:'mural', label:'Avisos' });
-    if (USER.perfil === 'super') {
+    if (isAdmin()) {
       items.push({ id:'alunos', label:'Alunos' });
       items.push({ id:'professores', label:'Professores' });
       items.push({ id:'freq', label:'Aula' });
@@ -1733,6 +1708,7 @@ async function iniciarApp() {
       items.push({ id:'licoes', label:'Lições' });
       items.push({ id:'provas', label:'Provas' });
       items.push({ id:'calendario', label:'Calendário' });
+      items.push({ id:'pix', label:'Pix' });
       items.push({ id:'config', label:'Config.' });
     } else {
       items.push({ id:'alunos', label:'Alunos' });
@@ -1741,27 +1717,23 @@ async function iniciarApp() {
       items.push({ id:'licoes', label:'Lições' });
       items.push({ id:'provas', label:'Provas' });
       items.push({ id:'calendario', label:'Calendário' });
-      // Se professor também é aluno, adiciona aba Meu Progresso
       if (USER.tambem_aluno && USER.turma_aluno) {
         items.push({ id:'meu-progresso-prof', label:'Meu Progresso' });
       }
     }
     items.push({ id:'historico', label:'Histórico' });
   }
-  // Nav já populada em construirNav() — apenas re-sync para garantir
-  const navEl = document.getElementById('tb-nav');
-  if (navEl) {
-    navEl.innerHTML = items.map(function(i) {
-      return '<button class="tb-btn' + (i.id==='dash'||i.id==='pg-aluno'?' on':'') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
-    }).join('');
-  }
+  document.getElementById('tb-nav').innerHTML = items.map(i =>
+    `<button class="tb-btn${i.id==='dash'?' on':''}" data-pg="${i.id}" onclick="navTo('${i.id}')">${i.label}</button>`
+  ).join('');
   syncDrawerNav(items, USER.perfil === 'aluno' ? 'pg-aluno' : 'dash');
 
   // Data
   const hoje = new Date();
   document.getElementById('dash-date').textContent = hoje.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   // Última aula registrada
-  const ultimaAula = aulaSort.length ? aulaSort[aulaSort.length-1] : null;
+  const _aulasOrd = [...cacheAulas].sort((a,b)=>b.data.localeCompare(a.data));
+  const ultimaAula = _aulasOrd.length ? _aulasOrd[0] : null;
   const dashLastAula = document.getElementById('dash-last-aula');
   if (dashLastAula && ultimaAula) {
     const dtUlt = new Date(ultimaAula.data+'T12:00:00');
@@ -1826,37 +1798,23 @@ async function iniciarApp() {
   popularDropdownLicao(curTurmaFreq);
   // Registrar acesso no log
   registrarAcesso();
+  setTimeout(mostrarAvisosPopup, 1500);
   // Verificar primeiro acesso do aluno
   if (USER.perfil === 'aluno') verificarPrimeiroAcesso();
   // Session timeout
   initSessionTimeout();
   // Popular filtro lição no histórico
   popularFiltroLicao();
-  } catch(err) {
-    console.error('iniciarApp error:', err);
-    construirNavEmergencia();
-  }
-}
-
-function construirNavEmergencia() {
-  if (!USER) return;
-  const itms = [];
-  if (USER.perfil === 'aluno') {
-    [{id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'}].forEach(i=>itms.push(i));
-  } else {
-    itms.push({id:'dash',label:'Início'},{id:'mural',label:'Avisos'});
-    if (USER.perfil === 'super') {
-      [{id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'config',label:'Config.'}].forEach(i=>itms.push(i));
-    } else {
-      [{id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'}].forEach(i=>itms.push(i));
-    }
-    itms.push({id:'historico',label:'Histórico'});
-  }
-  const nav = document.getElementById('tb-nav');
-  if (nav && !nav.innerHTML.trim()) {
-    nav.innerHTML = itms.map(i=>'<button class="tb-btn" data-pg="'+i.id+'" onclick="navTo(\'' + i.id + '\')">'+i.label+'</button>').join('');
-  }
-  try { syncDrawerNav(itms, USER.perfil==='aluno'?'pg-aluno':'dash'); } catch(e){}
+  // Session timeout
+  initSessionTimeout();
+  // Tutorial (professor/super no primeiro acesso)
+  injetarTutorialOverlay();
+  if (USER.perfil !== 'aluno') setTimeout(mostrarTutorial, 1200);
+  // Feedback FAB (só para professor/super)
+  const fab = document.getElementById('feedback-fab');
+  if (fab) fab.style.display = USER.perfil !== 'aluno' ? 'flex' : 'none';
+  // Popular filtro lição no histórico
+  popularFiltroLicao();
 }
 
 function atualizarAvatarTopbar() {
@@ -1906,6 +1864,7 @@ async function _navTo(id) {
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
   else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); renderRanking(); }
   else if (id === 'config') carregarPaginaConfig();
+  else if (id === 'pix') renderPix();
   else if (id === 'perfil') preencherFormPerfil();
   else if (id === 'licoes') renderLicoes();
   else if (id === 'pg-aluno') renderAlunoProgresso();
@@ -2221,7 +2180,7 @@ async function salvarAluno() {
   const dado = {
     nome,
     turma: document.getElementById('ae-turma').value,
-    nasc: document.getElementById('ae-nasc').value || null,
+    nasc: dataParaISO(document.getElementById('ae-nasc').value) || null,
     tel: document.getElementById('ae-tel').value || null,
     status: document.getElementById('ae-status').value,
     responsavel: document.getElementById('ae-responsavel')?.value?.trim() || null,
@@ -2236,11 +2195,29 @@ async function salvarAluno() {
     if (editId) result = await sbUpdate('alunos', editId, dado);
     else result = await sbInsert('alunos', dado);
     if (result === null) return;
+    // Capturar dados antes de fechar modal
+    const _nome = document.getElementById('ae-nome').value.trim();
+    const _tel  = document.getElementById('ae-tel').value.trim();
+    const _login = document.getElementById('ae-login').value.trim();
+    const _senha = document.getElementById('ae-senha').value;
+    const _turma = document.getElementById('ae-turma').value;
     cacheAlunos = await sbGet('alunos');
     fecharModal('mo-aluno');
     renderAlunos();
     renderDash();
-    toast(editId ? 'Aluno atualizado! ✦' : 'Aluno cadastrado! ✦', 'ok');
+    // Se novo aluno com login + senha + telefone, perguntar sobre WhatsApp
+    if (!editId && _login && _senha && _tel) {
+      setTimeout(function(){
+        showConfirm(
+          '📲 Enviar acesso por WhatsApp?',
+          'Deseja enviar login e senha para ' + _nome + ' via WhatsApp?',
+          function(){ enviarCredenciaisWhatsapp(_nome, _tel, _login, _senha, _turma); },
+          ''
+        );
+      }, 500);
+    } else {
+      toast(editId ? 'Aluno atualizado! ✦' : 'Aluno cadastrado! ✦', 'ok');
+    }
   } catch(e) {
     toast('Erro ao salvar: ' + e.message, 'er');
   }
@@ -2296,7 +2273,7 @@ async function renderProfessores() {
     <div class="av av-gold">${ini(p.nome)}</div>
     <div class="ai-info">
       <div class="ai-nome">${p.nome}</div>
-      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{ const arr = Array.isArray(p.turmas) && p.turmas.length ? p.turmas : p.turma === 'todas' ? ['criancas','jovens','adultos'] : [p.turma]; return arr.length === 3 ? 'Todas as turmas' : arr.map(t=>TN[t]||t).join(' · '); })()}</span></div>
+      <div class="ai-meta"><span style="font-size:11px;color:var(--ink-soft)">@${p.login}</span><span class="badge badge-prof">${(()=>{const arr=Array.isArray(p.turmas)&&p.turmas.length?p.turmas:p.turma==='todas'?['criancas','jovens','adultos']:[p.turma];return arr.length===3?'Todas as turmas':arr.map(t=>TN[t]||t).join(' · ');})()}</span></div>
     </div>
     <div class="ai-acts">
       <button class="btn-ic" onclick="editProf('${p.id}')" title="Editar">✎</button>
@@ -2312,6 +2289,7 @@ async function abrirModalProf(id) {
     const p = profs.find(x => x.id === id);
     if (p) {
       document.getElementById('pe-nome').value = p.nome || '';
+      if (document.getElementById('pe-sexo')) document.getElementById('pe-sexo').value = p.sexo || 'M';
       document.getElementById('pe-login').value = p.login || '';
       document.getElementById('pe-senha').value = '';
       carregarTurmasProf(p.turma || 'adultos', p.turmas || null);
@@ -2346,26 +2324,17 @@ async function salvarProf() {
   if (!nome) { toast('Preencha o nome', 'er'); return; }
   const login = document.getElementById('pe-login').value.trim();
   const senha = document.getElementById('pe-senha').value;
-  const editId = document.getElementById('pe-id').value;
+  const turma = document.getElementById('pe-turma').value;
   const nasc = dataParaISO(document.getElementById('pe-nasc').value) || null;
   const tel = document.getElementById('pe-tel').value || null;
   const email = document.getElementById('pe-email')?.value?.trim() || null;
   const endereco = document.getElementById('pe-endereco')?.value?.trim() || null;
+  const editId = document.getElementById('pe-id').value;
   const tambemAluno = document.getElementById('pe-tambem-aluno')?.checked || false;
   const turmaAluno = tambemAluno ? (document.getElementById('pe-turma-aluno')?.value || null) : null;
   if (!editId && login && !senha) { toast('Digite uma senha para o login', 'er'); return; }
-
-  // Pegar turmas do array de checkboxes
-  const turmasSel = ['criancas','jovens','adultos'].filter(t => {
-    const el = document.getElementById('pe-turma-' + t);
-    return el && el.checked;
-  });
-  if (!turmasSel.length) { toast('Selecione pelo menos uma turma', 'er'); return; }
-  // turma principal (campo legado) = todas se múltiplas, senão a única
-  const turma = turmasSel.length > 1 ? 'todas' : turmasSel[0];
-  const turmas = turmasSel; // array real
-
-  const dado = { nome, turma, turmas };
+  const sexo = document.getElementById('pe-sexo') ? document.getElementById('pe-sexo').value : 'M';
+  const dado = { nome, turma, sexo };
   if (nasc) dado.nasc = nasc;
   if (tel) dado.tel = tel;
   if (email) dado.email = email;
@@ -2379,58 +2348,11 @@ async function salvarProf() {
     if (editId) result = await sbUpdate('professores', editId, dado);
     else result = await sbInsert('professores', dado);
     if (result === null) return;
-
-    // Se professor também é aluno, criar/atualizar registro na tabela alunos
-    if (tambemAluno && turmaAluno) {
-      await sincronizarProfComoAluno(nome, login, turmaAluno, editId);
-    }
-
     fecharModal('mo-prof');
     toast(editId ? 'Professor atualizado! ✦' : 'Professor cadastrado! ✦', 'ok');
     await renderProfessores();
-    // Atualizar cache de alunos também
-    cacheAlunos = await sbGet('alunos');
   } catch(e) {
     toast('Erro ao salvar: ' + e.message, 'er');
-  }
-}
-
-async function sincronizarProfComoAluno(nome, login, turmaAluno, profEditId) {
-  try {
-    // Buscar todos os alunos da turma e verificar por nome
-    const todosAlunos = await sbGet('alunos');
-    const nomeNorm = nome.toLowerCase().trim();
-    
-    // Verificar se já existe pelo login (se tiver) ou pelo nome
-    const jaExiste = todosAlunos.find(a =>
-      (login && a.login === login) ||
-      a.nome.toLowerCase().trim() === nomeNorm
-    );
-
-    if (jaExiste) {
-      // Já existe — só atualizar turma se mudou
-      if (jaExiste.turma !== turmaAluno) {
-        await sbUpdate('alunos', jaExiste.id, { turma: turmaAluno });
-        toast('Turma do aluno atualizada para ' + TN[turmaAluno] + '! ✦', 'ok');
-      }
-      return;
-    }
-
-    // Não existe — criar como aluno com mesmos dados do professor
-    const senhaEl = document.getElementById('pe-senha');
-    const senha = senhaEl && senhaEl.value ? senhaEl.value : '123456';
-    await sbInsert('alunos', {
-      nome,
-      turma: turmaAluno,
-      login: login || null,
-      senha: login ? senha : null,
-      status: 'ativo',
-      primeiro_acesso: true
-    });
-    toast(nome + ' cadastrado como aluno em ' + TN[turmaAluno] + '! ✦', 'ok');
-  } catch(e) {
-    console.error('Erro ao sincronizar professor como aluno:', e);
-    toast('Professor salvo, mas erro ao criar aluno: ' + e.message, 'er');
   }
 }
 function editProf(id) { abrirModalProf(id); }
@@ -3754,21 +3676,7 @@ function verMeuResultado(id) {
 // ══════════════════════════════════════════════
 function mostrarSplash() {
   const splash = document.getElementById('pwa-splash');
-  // Esconde após 1.8s normalmente
-  setTimeout(() => {
-    splash.classList.add('hide');
-    setTimeout(() => { splash.style.display = 'none'; }, 500);
-  }, 1800);
-  // Failsafe: sempre esconde após 5s no máximo
-  setTimeout(() => {
-    splash.style.display = 'none';
-    const login = document.getElementById('scr-login');
-    const app = document.getElementById('scr-app');
-    // Se nem login nem app estão visíveis, mostra login
-    if (login && login.style.display === 'none' && app && app.style.display === 'none') {
-      mostrarTela('login');
-    }
-  }, 5000);
+  setTimeout(() => { splash.classList.add('hide'); setTimeout(() => splash.style.display='none', 500); }, 1800);
 }
 
 // Offline detection
@@ -5409,28 +5317,30 @@ function injetarTutorialOverlay() {
 // ═══════════════════════════════════════════════════════════
 function definirSaudacaoImediata() {
   if (!USER) return;
-  const nome = PERFIL && PERFIL.nome_exibicao ? PERFIL.nome_exibicao : (USER.nome || '').split(' ')[0] || 'Bem-vindo';
+  const nome = PERFIL && PERFIL.nome_exibicao ? PERFIL.nome_exibicao : (USER.nome||'').split(' ')[0] || 'Bem-vindo';
   const h = new Date().getHours();
   const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const sexo = USER.sexo || 'M';
+  const profLabel = sexo==='F' ? 'Professora' : 'Professor';
   const tsProf = USER.turmas || [USER.turma];
-  const tsLabel = USER.turma === 'todas' ? 'Todas as turmas' : tsProf.map(function(t){ return TN[t]||t; }).join(' & ');
-  const roleMap = { super: '\u2756 Superintendente', professor: 'Professor \u2014 ' + tsLabel, aluno: 'Aluno \u2014 ' + (TN[USER.turma]||'') };
+  const tsLabel = USER.turma==='todas' ? 'Todas as turmas' : tsProf.map(function(t){ return TN[t]||t; }).join(' & ');
+  const roleMap = {
+    adm: '❖ Administrador',
+    pastor: sexo==='F' ? 'Pastora' : 'Pastor',
+    super: '❖ Superintendente',
+    professor: profLabel + ' — ' + tsLabel,
+    professor_convidado: profLabel + ' Convidado(a)',
+    aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||'')
+  };
   const roleText = roleMap[USER.perfil] || USER.perfil;
-  // Saudação no hero
   const el = document.getElementById('dash-saudacao');
-  if (el) el.textContent = saud + ', ' + nome + '! \u2756';
-  // Badge role no hero (pill Superintendente etc)
+  if (el) el.textContent = saud + ', ' + nome + '! ❖';
   const badge = document.getElementById('dash-role-badge');
   if (badge) badge.textContent = roleText;
-  // Sub EBD nome
-  const sub = document.getElementById('dash-igreja-nome');
-  if (sub && !sub.textContent.trim()) sub.textContent = 'Escola B\u00edblica Dominical';
-  // Topbar nome e role
   const tu = document.getElementById('tb-uname');
   if (tu) tu.textContent = nome;
   const tr = document.getElementById('tb-urole');
   if (tr) tr.textContent = roleText;
-  // Avatar e countdown
   try { atualizarAvatarTopbar(); } catch(e) {}
   try { iniciarCountdown(); } catch(e) {}
 }
@@ -5807,6 +5717,188 @@ function formatarDataLocal(iso) {
   return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
 }
 
+
+// ══════════════════════════════════════════════
+// PIX
+// ══════════════════════════════════════════════
+async function renderPix() {
+  var nome = await sbGetConfig('pix_nome') || 'Igreja AD';
+  var banco = await sbGetConfig('pix_banco') || '';
+  var chave = await sbGetConfig('pix_chave') || '';
+  var qr = await sbGetConfig('pix_qrcode') || '';
+  var el = document.getElementById('pix-nome-display');
+  if (el) el.textContent = nome;
+  var elB = document.getElementById('pix-banco-display');
+  if (elB) elB.textContent = banco;
+  var elC = document.getElementById('pix-chave-display');
+  if (elC) elC.textContent = chave || 'Chave nao configurada';
+  var qrWrap = document.getElementById('pix-qrcode-wrap');
+  var qrImg = document.getElementById('pix-qrcode-img');
+  if (qr && qrWrap && qrImg) { qrWrap.style.display='block'; qrImg.src=qr; }
+  var cfgCard = document.getElementById('pix-config-card');
+  if (cfgCard) {
+    cfgCard.style.display = isAdmin() ? 'block' : 'none';
+    if (isAdmin()) {
+      document.getElementById('pix-cfg-nome').value = nome;
+      document.getElementById('pix-cfg-banco').value = banco;
+      document.getElementById('pix-cfg-chave').value = chave;
+      document.getElementById('pix-cfg-qr').value = qr;
+    }
+  }
+}
+async function salvarPix() {
+  var nome = document.getElementById('pix-cfg-nome').value.trim();
+  var banco = document.getElementById('pix-cfg-banco').value.trim();
+  var chave = document.getElementById('pix-cfg-chave').value.trim();
+  var qr = document.getElementById('pix-cfg-qr').value.trim();
+  await sbSetConfig('pix_nome', nome);
+  await sbSetConfig('pix_banco', banco);
+  await sbSetConfig('pix_chave', chave);
+  await sbSetConfig('pix_qrcode', qr);
+  toast('Pix configurado! \u2756', 'ok');
+  renderPix();
+}
+function copiarChavePix() {
+  var chave = document.getElementById('pix-chave-display').textContent;
+  if (!chave || chave === 'Chave nao configurada') { toast('Nenhuma chave configurada', 'er'); return; }
+  navigator.clipboard.writeText(chave).then(function(){ toast('Chave copiada! \u2756', 'ok'); }).catch(function(){
+    var ta = document.createElement('textarea');
+    ta.value = chave; document.body.appendChild(ta); ta.select();
+    document.execCommand('copy'); document.body.removeChild(ta);
+    toast('Chave copiada!', 'ok');
+  });
+}
+
+// ══════════════════════════════════════════════
+// AVISOS POPUP NO LOGIN
+// ══════════════════════════════════════════════
+async function mostrarAvisosPopup() {
+  try {
+    var avisos = await sbGet('avisos', {}, 'created_at', false);
+    if (!avisos.length) return;
+    var lidos = USER.avisos_lidos || [];
+    var naoLidos = avisos.filter(function(a){ return !lidos.includes(a.id); });
+    if (!naoLidos.length) return;
+    var overlay = document.createElement('div');
+    overlay.id = 'aviso-popup-overlay';
+    overlay.style.cssText = 'position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
+    var itensHtml = naoLidos.map(function(a) {
+      return '<div id="aviso-pp-' + a.id + '" style="padding:12px;border:1px solid #e0d9cc;border-radius:8px;margin-bottom:10px;background:#faf5e4">'
+        + '<div style="font-size:14px;font-weight:700;margin-bottom:4px">' + (a.titulo||'') + '</div>'
+        + '<div style="font-size:13px;color:#666;line-height:1.5">' + (a.texto||'') + '</div>'
+        + '<button class="btn btn-gold btn-sm" style="margin-top:10px;width:100%" onclick="marcarAvisoPPLido(' + JSON.stringify(a.id) + ')">'
+        + '\u2713 Marcar como lido</button></div>';
+    }).join('');
+    overlay.innerHTML = '<div style="background:white;border-radius:16px;width:100%;max-width:400px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">'
+      + '<div style="background:#111;padding:16px 18px;border-bottom:2px solid #b8972a;flex-shrink:0">'
+      + '<div style="display:flex;align-items:center;justify-content:space-between">'
+      + '<div style="font-size:18px;color:white;font-weight:600">\uD83D\uDCE2 Avisos</div>'
+      + '<span style="font-size:12px;color:rgba(255,255,255,.5)">' + naoLidos.length + ' nao lido(s)</span>'
+      + '</div></div>'
+      + '<div style="flex:1;overflow-y:auto;padding:16px" id="aviso-popup-lista">' + itensHtml + '</div>'
+      + '<div style="padding:12px 16px;border-top:1px solid #e0d9cc;flex-shrink:0">'
+      + '<button class="btn btn-ou btn-full" id="btn-fechar-avisos-pp" disabled onclick="fecharAvisosPopup()" style="opacity:.4">Fechar (leia os avisos)</button>'
+      + '</div></div>';
+    document.body.appendChild(overlay);
+  } catch(e) { console.error('Avisos popup error:', e); }
+}
+async function marcarAvisoPPLido(id) {
+  var item = document.getElementById('aviso-pp-' + id);
+  if (item) { item.style.opacity='.4'; item.style.pointerEvents='none'; }
+  var lidos = (USER.avisos_lidos || []).slice();
+  if (!lidos.includes(id)) lidos.push(id);
+  USER.avisos_lidos = lidos;
+  var tabela = USER.perfil==='aluno' ? 'alunos' : USER.perfil==='professor' ? 'professores' : 'superintendente';
+  try { await sbUpdate(tabela, USER.id, { avisos_lidos: lidos }); } catch(e) {}
+  var pendentes = document.querySelectorAll('#aviso-popup-lista button:not([disabled])');
+  var btn = document.getElementById('btn-fechar-avisos-pp');
+  if (pendentes.length <= 1 && btn) { btn.disabled=false; btn.style.opacity='1'; btn.textContent='Fechar'; }
+}
+function fecharAvisosPopup() {
+  var ov = document.getElementById('aviso-popup-overlay');
+  if (ov) ov.remove();
+}
+
+// ══════════════════════════════════════════════
+// WHATSAPP CREDENCIAIS
+// ══════════════════════════════════════════════
+function enviarCredenciaisWhatsapp(nome, tel, login, senha, turma) {
+  if (!tel) { toast('Aluno sem telefone', 'er'); return; }
+  var turmaLabel = TN[turma] || turma;
+  var msg = [
+    'Ola, ' + nome + '!',
+    '',
+    'Seu acesso ao EBD Frequencia foi criado!',
+    '',
+    'Link: https://rtonsenna1.vercel.app',
+    '',
+    'Login: ' + login,
+    'Senha: ' + senha,
+    'Turma: ' + turmaLabel,
+    '',
+    'ADTC Ayrton Senna 1'
+  ].join('\n');
+  var telLimpo = tel.replace(/\D/g, '');
+  var telFull = telLimpo.startsWith('55') ? telLimpo : '55' + telLimpo;
+  window.open('https://wa.me/' + telFull + '?text=' + encodeURIComponent(msg), '_blank');
+}
+
+// ══════════════════════════════════════════════
+// PROMOVER USUARIO
+// ══════════════════════════════════════════════
+async function promoverUsuario(alunoId, nomeAluno) {
+  var opcoes = [
+    { valor: 'professor', label: 'Professor' },
+    { valor: 'professor_convidado', label: 'Professor Convidado' },
+    { valor: 'super', label: 'Superintendente' },
+    { valor: 'pastor', label: 'Pastor' }
+  ];
+  var modal = document.createElement('div');
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)';
+  var opHtml = opcoes.map(function(o){
+    return '<label style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid #e0d9cc;border-radius:8px;margin-bottom:8px;cursor:pointer">'
+      + '<input type="radio" name="promocao" value="' + o.valor + '" style="accent-color:#b8972a">'
+      + '<span style="font-size:14px;font-weight:600">' + o.label + '</span></label>';
+  }).join('');
+  modal.innerHTML = '<div style="background:white;border-radius:16px;width:100%;max-width:380px;overflow:hidden">'
+    + '<div style="background:#111;padding:16px 18px;border-bottom:2px solid #b8972a">'
+    + '<div style="font-size:18px;color:white;font-weight:600">Promover ' + nomeAluno + '</div>'
+    + '</div><div style="padding:16px">'
+    + '<p style="font-size:13px;color:#666;margin-bottom:14px">Escolha o novo perfil:</p>'
+    + opHtml
+    + '<div style="display:flex;gap:8px;margin-top:12px">'
+    + '<button class="btn btn-ou btn-full" id="btn-cancelar-prom">Cancelar</button>'
+    + '<button class="btn btn-gold btn-full" id="btn-confirmar-prom">Promover</button>'
+    + '</div></div></div>';
+  modal.addEventListener('click', function(e){ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+  document.getElementById('btn-cancelar-prom').onclick = function(){ modal.remove(); };
+  document.getElementById('btn-confirmar-prom').onclick = function(){
+    confirmarPromocao(alunoId, nomeAluno, modal);
+  };
+}
+async function confirmarPromocao(alunoId, nomeAluno, modal) {
+  var sel = document.querySelector('input[name="promocao"]:checked');
+  if (!sel) { toast('Selecione um perfil', 'er'); return; }
+  var novoPerfil = sel.value;
+  var aluno = cacheAlunos.find(function(a){ return a.id === alunoId; });
+  if (!aluno) return;
+  try {
+    if (novoPerfil === 'professor' || novoPerfil === 'professor_convidado') {
+      await sbInsert('professores', { nome:aluno.nome, turma:aluno.turma||'adultos', turmas:[aluno.turma||'adultos'], login:aluno.login, senha:aluno.senha, perfil_tipo:novoPerfil, status:'ativo' });
+    } else if (novoPerfil === 'super') {
+      await sbInsert('superintendente', { nome:aluno.nome, login:aluno.login, senha:aluno.senha });
+    } else if (novoPerfil === 'pastor') {
+      await sbInsert('pastores', { nome:aluno.nome, login:aluno.login, senha:aluno.senha });
+    }
+    await sbUpdate('alunos', alunoId, { pode_promover: true });
+    if (modal) modal.remove();
+    toast(nomeAluno + ' promovido(a)! \u2756', 'ok');
+    cacheAlunos = await sbGet('alunos');
+    renderAlunos();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
 // ── PWA INSTALL ──
 function instalarApp() {
   if (deferredPrompt) {
@@ -5829,9 +5921,7 @@ window.addEventListener('beforeinstallprompt', e => {
 });
 
 // ── START ──
-document.addEventListener('DOMContentLoaded', function() {
-  initSB();
-});
+initSB();
 </script>
 
 <!-- FEEDBACK FAB -->
