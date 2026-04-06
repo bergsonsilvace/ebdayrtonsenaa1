@@ -1018,6 +1018,44 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <button id="btn-instalar-app" onclick="instalarApp()" class="btn btn-ou btn-full" style="margin-bottom:20px;display:none">📲 Instalar app no celular</button>
     </div>
 
+    <!-- ESCALAS -->
+    <div id="pg-escalas" class="page">
+      <div class="ph"><h2>Escala de <em>Professores</em></h2><p>Organize quem vai dar aula em cada lição</p></div>
+      <div class="card" style="margin-bottom:12px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <div style="flex:1;min-width:120px">
+            <label class="fl">Turma</label>
+            <select class="fc" id="esc-turma" onchange="renderEscalas()">
+              <option value="criancas">Crianças</option>
+              <option value="jovens">Jovens</option>
+              <option value="adultos">Adultos</option>
+            </select>
+          </div>
+          <div style="flex:1;min-width:120px">
+            <label class="fl">Mês</label>
+            <input type="month" class="fc" id="esc-mes" onchange="renderEscalas()">
+          </div>
+        </div>
+      </div>
+      <div id="lista-escalas"></div>
+      <button class="btn btn-gold btn-full" style="margin-top:12px" onclick="abrirModalEscala()">+ Adicionar escala</button>
+
+      <!-- Modal escala -->
+      <div class="mo" id="mo-escala" style="display:none" onclick="fecharModal('mo-escala')">
+        <div class="mbox" onclick="event.stopPropagation()">
+          <div class="mhdr"><h3 class="mtitle">Escala de Professor</h3><button class="mclose" onclick="fecharModal('mo-escala')">✕</button></div>
+          <div class="fg"><label class="fl">Data da aula</label><input type="date" class="fc" id="esc-data"></div>
+          <div class="fg"><label class="fl">Lição</label><select class="fc" id="esc-licao-sel"><option value="">— Selecionar —</option></select></div>
+          <div class="fg"><label class="fl">Professor</label><select class="fc" id="esc-prof-sel"><option value="">— Selecionar —</option></select></div>
+          <div class="fg" style="margin-bottom:0"><label class="fl">Observação</label><input class="fc" id="esc-obs" placeholder="Opcional..."></div>
+          <div style="display:flex;gap:8px;margin-top:14px">
+            <button class="btn btn-ou btn-full" onclick="fecharModal('mo-escala')">Cancelar</button>
+            <button class="btn btn-gold btn-full" onclick="salvarEscala()">✓ Salvar</button>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- PIX -->
     <div id="pg-pix" class="page">
       <div class="ph"><h2>Ofertas <em>via Pix</em></h2><p>Contribua com a obra de Deus</p></div>
@@ -1611,13 +1649,13 @@ function construirNav() {
   const items = [];
   const p = USER.perfil;
   if (p === 'aluno') {
-    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'});
+    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'pix',label:'Pix'});
   } else if (p === 'professor_convidado') {
     items.push({id:'dash',label:'Inicio'},{id:'freq',label:'Aula'},{id:'licoes',label:'Licoes'},{id:'calendario',label:'Calendario'});
   } else {
     items.push({id:'dash',label:'Inicio'},{id:'mural',label:'Avisos'});
     if (isAdmin()) {
-      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
+      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
     } else {
       items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'});
       if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
@@ -1636,6 +1674,12 @@ async function finalizarLogin() {
   const uid = USER.id;
   const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
   PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
+  // ADM tem acesso total - simula super para ter todas as funcionalidades
+  if (USER.perfil === 'adm') {
+    USER.turma = USER.turma || 'todas';
+    USER.tambem_aluno = true;
+    USER.turma_aluno = USER.turma_aluno || 'adultos';
+  }
   mostrarTela('app');
   construirNav();
   definirSaudacaoImediata();
@@ -1696,6 +1740,7 @@ async function iniciarApp() {
     items.push({ id:'licoes', label:'Lições' });
     items.push({ id:'provas', label:'Provas' });
     items.push({ id:'calendario', label:'Calendário' });
+    items.push({ id:'pix', label:'Pix' });
   } else {
     items.push({ id:'dash', label:'Início' });
     items.push({ id:'mural', label:'Avisos' });
@@ -1758,7 +1803,8 @@ async function iniciarApp() {
       });
     });
     document.getElementById('alunos-sub').textContent = 'Turma: ' + TN[USER.turma];
-    document.getElementById('btn-novo-aluno').style.display = 'none';
+    // Alunos não podem cadastrar novos alunos, mas professores sim
+    if (USER.perfil === 'aluno') document.getElementById('btn-novo-aluno').style.display = 'none';
     document.getElementById('dash-aula-btn').style.display = '';
   } else {
     document.getElementById('alunos-sub').textContent = 'Gerencie os alunos matriculados por turma';
@@ -1865,6 +1911,7 @@ async function _navTo(id) {
   else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); renderRanking(); }
   else if (id === 'config') carregarPaginaConfig();
   else if (id === 'pix') renderPix();
+  else if (id === 'escalas') { renderEscalas(); popularModalEscala(); }
   else if (id === 'perfil') preencherFormPerfil();
   else if (id === 'licoes') renderLicoes();
   else if (id === 'pg-aluno') renderAlunoProgresso();
@@ -1907,7 +1954,21 @@ async function renderDash() {
   const hora = new Date().getHours();
   const saud = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
   document.getElementById('dash-saudacao').textContent = `${saud}, ${primeiroNome}! ✦`;
-  document.getElementById('dash-role-badge').textContent = USER.perfil === 'super' ? '✦ Superintendente' : `Professor — ${TN[USER.turma]||''}`;
+  document.getElementById('dash-role-badge').textContent = (function(){
+    var sexo = USER.sexo || 'M';
+    var profLabel = sexo==='F' ? 'Professora' : 'Professor';
+    var tsProf = USER.turmas || [USER.turma];
+    var tsLabel = USER.turma==='todas' ? 'Todas as turmas' : tsProf.map(function(t){return TN[t]||t;}).join(' & ');
+    var map = {
+      adm: '✦ Administrador',
+      pastor: sexo==='F' ? 'Pastora' : 'Pastor',
+      super: '✦ Superintendente',
+      professor: profLabel + ' — ' + tsLabel,
+      professor_convidado: profLabel + ' Convidado(a)',
+      aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||'')
+    };
+    return map[USER.perfil] || USER.perfil;
+  })();
 
   // Foto no hero
   const heroFoto = document.getElementById('hero-foto');
@@ -2091,6 +2152,20 @@ function selTurmaAlunos(turma, el) {
   if (el) el.classList.add('on');
   renderAlunos();
 }
+
+function toggleStatusAluno(id, statusAtual) {
+  var novoStatus = statusAtual === 'ativo' ? 'inativo' : 'ativo';
+  showConfirm(
+    novoStatus === 'inativo' ? 'Inativar aluno?' : 'Ativar aluno?',
+    novoStatus === 'inativo' ? 'O aluno não aparecerá nas chamadas.' : 'O aluno voltará a aparecer nas chamadas.',
+    async function() {
+      await sbUpdate('alunos', id, { status: novoStatus });
+      cacheAlunos = await sbGet('alunos');
+      renderAlunos();
+      toast(novoStatus === 'inativo' ? 'Aluno inativado.' : 'Aluno ativado! ✦', 'ok');
+    }, novoStatus === 'inativo' ? 'red' : ''
+  );
+}
 function renderAlunos() {
   const lista = cacheAlunos.filter(a => {
     if (a.turma !== curTurmaAlunos) return false;
@@ -2098,7 +2173,7 @@ function renderAlunos() {
     return (a.status||'ativo') === filtroStatusAlunos;
   });
   const box = document.getElementById('lista-alunos');
-  const podeEditar = USER?.perfil === 'super';
+  const podeEditar = podeGerenciar();
   if (!lista.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>'; return; }
   const hoje = new Date(); const mes = hoje.getMonth()+1; const diaH = hoje.getDate();
   box.innerHTML = lista.map(a => {
@@ -2123,6 +2198,8 @@ function renderAlunos() {
       <div class="ai-acts">
         <button class="btn-ic" onclick="verHistoricoAluno('${a.id}')" title="Histórico">📋</button>
         ${podeEditar?`<button class="btn-ic" onclick="editAluno('${a.id}')" title="Editar">✎</button>
+        <button class="btn-ic" onclick="toggleStatusAluno('${a.id}','${a.status||'ativo'}')" title="${(a.status||'ativo')==='ativo'?'Inativar':'Ativar'}">${(a.status||'ativo')==='ativo'?'⏸':'▶'}</button>
+        ${isAdmin()?`<button class="btn-ic" onclick="promoverUsuario('${a.id}','${a.nome.replace(/'/g,"\\'")}')">⬆</button>`:''}
         <button class="btn-ic danger" onclick="confirmarDel('aluno','${a.id}','${a.nome.replace(/'/g,"\\'")}')">✕</button>`:''}
       </div>
     </div>`;
@@ -5813,14 +5890,12 @@ async function marcarAvisoPPLido(id) {
   var lidos = (USER.avisos_lidos || []).slice();
   if (!lidos.includes(id)) lidos.push(id);
   USER.avisos_lidos = lidos;
-  // Determinar tabela correta por perfil
+  // Apenas perfis com coluna avisos_lidos
   var tabelaMap = {
     aluno: 'alunos',
     professor: 'professores',
     professor_convidado: 'professores',
-    super: 'superintendente',
-    adm: 'adm',
-    pastor: 'pastores'
+    super: 'superintendente'
   };
   var tabela = tabelaMap[USER.perfil];
   if (tabela) {
@@ -5920,6 +5995,102 @@ async function confirmarPromocao(alunoId, nomeAluno, modal) {
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
 }
 
+
+// ══════════════════════════════════════════════
+// ESCALAS DE PROFESSORES
+// ══════════════════════════════════════════════
+async function renderEscalas() {
+  var turma = document.getElementById('esc-turma') ? document.getElementById('esc-turma').value : 'adultos';
+  var mes = document.getElementById('esc-mes') ? document.getElementById('esc-mes').value : '';
+  var box = document.getElementById('lista-escalas');
+  if (!box) return;
+  try {
+    var todas = await sbGet('escalas', { turma: turma }, 'data', true);
+    if (mes) todas = todas.filter(function(e){ return e.data && e.data.startsWith(mes); });
+    if (!todas.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-txt">Nenhuma escala cadastrada</div></div>';
+      return;
+    }
+    box.innerHTML = todas.map(function(e) {
+      var dt = new Date(e.data + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'numeric',month:'short'});
+      return '<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:12px;padding:12px 14px">'
+        + '<div style="font-size:13px;color:var(--ink-soft);min-width:80px">' + dt + '</div>'
+        + '<div style="flex:1">'
+        + '<div style="font-size:14px;font-weight:600">' + (e.professor_nome || '—') + '</div>'
+        + (e.num_licao ? '<div style="font-size:11px;color:var(--ink-soft)">Lição ' + e.num_licao + '</div>' : '')
+        + (e.obs ? '<div style="font-size:11px;color:var(--ink-soft)">' + e.obs + '</div>' : '')
+        + '</div>'
+        + (isAdmin() || isProfessor() ? '<button class="btn-ic danger" onclick="excluirEscala(\'' + e.id + '\')">✕</button>' : '')
+        + '</div>';
+    }).join('');
+  } catch(ex) { box.innerHTML = '<div class="empty"><div class="empty-txt">Erro ao carregar escalas</div></div>'; }
+}
+
+async function popularModalEscala() {
+  // Popular select de professores
+  var sel = document.getElementById('esc-prof-sel');
+  if (!sel) return;
+  try {
+    var profs = await sbGet('professores');
+    sel.innerHTML = '<option value="">— Selecionar —</option>'
+      + profs.map(function(p){ return '<option value="' + p.id + '" data-nome="' + p.nome + '">' + p.nome + '</option>'; }).join('');
+  } catch(e) {}
+  // Popular licoes conforme turma
+  var turmaEl = document.getElementById('esc-turma');
+  var turma = turmaEl ? turmaEl.value : 'adultos';
+  var licSel = document.getElementById('esc-licao-sel');
+  if (licSel && LICOES[turma]) {
+    licSel.innerHTML = '<option value="">— Selecionar —</option>'
+      + LICOES[turma].licoes.map(function(l){ return '<option value="' + l.num + '">' + l.num + ' — ' + l.titulo + ' (' + l.data + ')</option>'; }).join('');
+  }
+}
+
+function abrirModalEscala() {
+  popularModalEscala();
+  var turmaEl = document.getElementById('esc-turma');
+  var mesEl = document.getElementById('esc-mes');
+  // Pre-preencher data com próxima segunda
+  var hoje = new Date();
+  var diasAteSeg = (1 - hoje.getDay() + 7) % 7 || 7;
+  var proxSeg = new Date(hoje);
+  proxSeg.setDate(hoje.getDate() + diasAteSeg);
+  var dataEl = document.getElementById('esc-data');
+  if (dataEl) dataEl.value = proxSeg.toISOString().split('T')[0];
+  document.getElementById('mo-escala').style.display = 'block';
+}
+
+async function salvarEscala() {
+  var turma = document.getElementById('esc-turma').value;
+  var data = document.getElementById('esc-data').value;
+  var licaoNum = document.getElementById('esc-licao-sel').value;
+  var profSel = document.getElementById('esc-prof-sel');
+  var profId = profSel ? profSel.value : '';
+  var profNome = profSel && profSel.selectedIndex > 0 ? profSel.options[profSel.selectedIndex].getAttribute('data-nome') : '';
+  var obs = document.getElementById('esc-obs').value.trim();
+  if (!data) { toast('Selecione a data', 'er'); return; }
+  if (!profId) { toast('Selecione o professor', 'er'); return; }
+  try {
+    await sbInsert('escalas', {
+      turma: turma,
+      data: data,
+      num_licao: licaoNum ? parseInt(licaoNum) : null,
+      professor_id: profId,
+      professor_nome: profNome,
+      obs: obs || null
+    });
+    fecharModal('mo-escala');
+    toast('Escala salva! ✦', 'ok');
+    renderEscalas();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+async function excluirEscala(id) {
+  showConfirm('Excluir escala?', 'Esta escala será removida.', async function() {
+    await sbDelete('escalas', id);
+    toast('Removida.', '');
+    renderEscalas();
+  }, 'red');
+}
 // ── PWA INSTALL ──
 function instalarApp() {
   if (deferredPrompt) {
