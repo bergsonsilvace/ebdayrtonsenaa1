@@ -293,15 +293,23 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .al-pr{background:var(--tc-bg);color:var(--tc)}.al-au{background:var(--red-bg);color:var(--red)}.al-na{background:#f0f0f0;color:#888}
 
 /* RANKING */
-.rank-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--cb)}
+.rank-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--cb);transition:background .15s;border-radius:10px}
 .rank-item:last-child{border:none}.rank-item:first-child{padding-top:0}
+.rank-item.rank-top1{background:linear-gradient(135deg,rgba(184,151,42,.13),rgba(232,212,138,.07));border:1px solid rgba(184,151,42,.3);padding:12px 10px;margin-bottom:6px;border-radius:12px}
+.rank-item.rank-top2{background:linear-gradient(135deg,rgba(160,160,160,.1),rgba(200,200,200,.05));border:1px solid rgba(150,150,150,.25);padding:10px;margin-bottom:5px;border-radius:10px}
+.rank-item.rank-top3{background:linear-gradient(135deg,rgba(180,120,60,.1),rgba(210,160,90,.05));border:1px solid rgba(180,120,60,.22);padding:10px;margin-bottom:5px;border-radius:10px}
 .rank-pos{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--ink-soft);min-width:28px;text-align:center}
 .rank-pos.top{color:var(--gold)}
+.rank-medalha{font-size:22px;min-width:28px;text-align:center;line-height:1}
 .rank-bar-wrap{flex:1}
 .rank-nome{font-size:13px;font-weight:500;margin-bottom:4px}
+.rank-info{font-size:11px;color:var(--ink-soft);margin-bottom:4px}
 .rank-bar{background:var(--cb);border-radius:10px;height:5px;overflow:hidden}
 .rank-fill{background:var(--gold);border-radius:10px;height:5px}
-.rank-pct{font-size:12px;color:var(--ink-soft);min-width:36px;text-align:right}
+.rank-fill-top1{background:linear-gradient(90deg,#b8972a,#e8d48a)}
+.rank-fill-top2{background:linear-gradient(90deg,#aaa,#ddd)}
+.rank-fill-top3{background:linear-gradient(90deg,#b47c3c,#d4a464)}
+.rank-pct{font-size:12px;color:var(--ink-soft);min-width:42px;text-align:right}
 
 /* CALENDARIO */
 .cal-item{display:flex;align-items:center;gap:10px;padding:10px;border:1px solid var(--cb);border-radius:var(--rsm);margin-bottom:7px;background:white}
@@ -461,7 +469,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .pts-item-n{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white}
 .pts-item-l{font-size:10px;color:rgba(255,255,255,.4)}
 /* RANKING PONTOS */
-.rank-pts{font-size:11px;color:var(--gold-deep);font-weight:700;background:var(--gold-pale);padding:2px 8px;border-radius:10px}
+.rank-pts{font-size:11px;color:var(--gold-deep);font-weight:700;background:var(--gold-pale);padding:3px 9px;border-radius:10px;white-space:nowrap}
 /* FICHA ALUNO */
 .ficha-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb);font-size:13px}
 .ficha-row:last-child{border:none}.ficha-row:first-child{padding-top:0}
@@ -968,7 +976,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- RANKING -->
     <div id="pg-ranking" class="page">
-      <div class="ph"><h2>Ranking de <em>Frequência</em></h2><p>Alunos com melhor presença</p></div>
+      <div class="ph"><h2>Ranking da <em>Escola Bíblica</em></h2><p>Classificação dos alunos por presença e desempenho</p></div>
       <div class="ttabs" id="rank-ttabs">
         <button class="ttab tc on" onclick="selTurmaRanking('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
         <button class="ttab tj" onclick="selTurmaRanking('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
@@ -2932,33 +2940,81 @@ function selTurmaRanking(turma, el) {
   if (el) el.classList.add('on');
   renderRanking();
 }
+
+// Calcula a idade em anos a partir de data de nascimento (YYYY-MM-DD)
+function _idadeParaDesempate(nasc) {
+  if (!nasc) return -1;
+  try {
+    const dn = new Date(nasc + 'T12:00:00');
+    const hoje = new Date();
+    let idade = hoje.getFullYear() - dn.getFullYear();
+    const m = hoje.getMonth() - dn.getMonth();
+    if (m < 0 || (m === 0 && hoje.getDate() < dn.getDate())) idade--;
+    return isNaN(idade) ? -1 : idade;
+  } catch(e) { return -1; }
+}
+
 function renderRanking() {
-  const alunos = cacheAlunos.filter(a=>a.turma===curTurmaRank&&(a.status||'ativo')==='ativo');
-  const aulasT = cacheAulas.filter(a=>a.turma===curTurmaRank);
+  const alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status || 'ativo') === 'ativo');
+  const aulasT = cacheAulas.filter(a => a.turma === curTurmaRank);
   const box = document.getElementById('lista-ranking');
   if (!alunos.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>'; return; }
+
   let ranking;
+
   if (rankTipo === 'pts') {
+    // Ordena por: 1) pontuação total  2) nº presenças  3) idade
+    const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
       const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, quizScores, PROVAS);
-      return { aluno:a, valor:pts.total, label:pts.total+' pts', pct:Math.min(Math.round((pts.total/300)*100),100) };
-    }).sort((a,b)=>b.valor-a.valor);
+      const presTotal = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
+      const pctBar = Math.min(Math.round((pts.total / maxPts) * 100), 100);
+      return { aluno: a, valor: pts.total, presencas: presTotal, label: pts.total + ' pts', pct: pctBar, idade: _idadeParaDesempate(a.nasc) };
+    }).sort((a, b) => {
+      if (b.valor !== a.valor) return b.valor - a.valor;
+      if (b.presencas !== a.presencas) return b.presencas - a.presencas;
+      return b.idade - a.idade;
+    });
   } else {
+    // Ordena por: 1) nº presenças  2) % frequência  3) pontuação  4) idade
     if (!aulasT.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-txt">Nenhuma aula registrada nesta turma</div></div>'; return; }
     ranking = alunos.map(a => {
-      const presencas = aulasT.filter(au=>(au.presencas||{})[a.id]==='presente').length;
-      const pct = aulasT.length ? Math.round((presencas/aulasT.length)*100) : 0;
-      return { aluno:a, valor:pct, label:pct+'%', pct };
-    }).sort((a,b)=>b.valor-a.valor);
+      const presencas = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
+      const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
+      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, quizScores, PROVAS);
+      return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: pts.total, idade: _idadeParaDesempate(a.nasc) };
+    }).sort((a, b) => {
+      if (b.valor !== a.valor) return b.valor - a.valor;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      return b.idade - a.idade;
+    });
   }
-  box.innerHTML = ranking.map((r,i) => `<div class="rank-item">
-    <div class="rank-pos ${i<3?'top':''}">${i+1}</div>
-    <div class="rank-bar-wrap">
-      <div class="rank-nome">${r.aluno.nome}</div>
-      <div class="rank-bar"><div class="rank-fill" style="width:${r.pct}%"></div></div>
-    </div>
-    <div class="rank-pct ${rankTipo==='pts'?'rank-pts':''}">${r.label}</div>
-  </div>`).join('');
+
+  const MEDALHAS = ['🥇', '🥈', '🥉'];
+  const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
+  const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
+
+  box.innerHTML = ranking.map((r, i) => {
+    const isTop = i < 3;
+    const topClass = isTop ? TOP_CLASS[i] : '';
+    const fillClass = isTop ? FILL_CLASS[i] : FILL_CLASS[3];
+    const posHtml = isTop
+      ? `<div class="rank-medalha">${MEDALHAS[i]}</div>`
+      : `<div class="rank-pos">${i + 1}</div>`;
+    const infoHtml = rankTipo === 'freq'
+      ? `<div class="rank-info">${r.presencas} de ${r.total} aulas</div>`
+      : `<div class="rank-info">${r.presencas} presença${r.presencas !== 1 ? 's' : ''}</div>`;
+    return `<div class="rank-item ${topClass}">
+      ${posHtml}
+      <div class="rank-bar-wrap">
+        <div class="rank-nome">${r.aluno.nome}</div>
+        ${infoHtml}
+        <div class="rank-bar"><div class="${fillClass}" style="width:${r.pct}%"></div></div>
+      </div>
+      <div class="rank-pct ${rankTipo === 'pts' ? 'rank-pts' : ''}">${r.label}</div>
+    </div>`;
+  }).join('');
 }
 
 // ── PERFIL ──
@@ -4135,10 +4191,14 @@ _Sistema EBD — ADTC Ayrton Senna 1_`;
 let rankTipo = 'freq';
 function setRankTipo(tipo, el) {
   rankTipo = tipo;
-  document.getElementById('rank-tipo-freq').style.background = tipo === 'freq' ? 'var(--ink)' : '';
-  document.getElementById('rank-tipo-freq').style.color = tipo === 'freq' ? 'white' : '';
-  document.getElementById('rank-tipo-pts').style.background = tipo === 'pts' ? 'var(--ink)' : '';
-  document.getElementById('rank-tipo-pts').style.color = tipo === 'pts' ? 'white' : '';
+  const btnFreq = document.getElementById('rank-tipo-freq');
+  const btnPts = document.getElementById('rank-tipo-pts');
+  const subtitulo = document.getElementById('rank-subtitulo');
+  btnFreq.style.background = tipo === 'freq' ? 'var(--ink)' : '';
+  btnFreq.style.color = tipo === 'freq' ? 'white' : '';
+  btnPts.style.background = tipo === 'pts' ? 'var(--ink)' : '';
+  btnPts.style.color = tipo === 'pts' ? 'white' : '';
+  if (subtitulo) subtitulo.textContent = tipo === 'freq' ? 'Frequência' : 'Pontuação Geral';
   renderRanking();
 }
 
