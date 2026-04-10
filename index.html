@@ -1020,38 +1020,96 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- ESCALAS -->
     <div id="pg-escalas" class="page">
-      <div class="ph"><h2>Escala de <em>Professores</em></h2><p>Organize quem vai dar aula em cada lição</p></div>
-      <div class="card" style="margin-bottom:12px">
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <div style="flex:1;min-width:120px">
-            <label class="fl">Turma</label>
-            <select class="fc" id="esc-turma" onchange="renderEscalas()">
-              <option value="criancas">Crianças</option>
-              <option value="jovens">Jovens</option>
-              <option value="adultos">Adultos</option>
-            </select>
-          </div>
-          <div style="flex:1;min-width:120px">
-            <label class="fl">Mês</label>
-            <input type="month" class="fc" id="esc-mes" onchange="renderEscalas()">
+      <div class="ph">
+        <h2>Escala de <em>Professores</em></h2>
+        <p>Organize as lições e professores por semana</p>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+        <button class="ttab tc on" id="esc-tab-criancas" onclick="filtrarEscalaTab('criancas',this)"><span class="dot dot-c"></span> Crianças</button>
+        <button class="ttab tj" id="esc-tab-jovens" onclick="filtrarEscalaTab('jovens',this)"><span class="dot dot-j"></span> Jovens</button>
+        <button class="ttab ta" id="esc-tab-adultos" onclick="filtrarEscalaTab('adultos',this)"><span class="dot dot-a"></span> Adultos</button>
+        <div style="flex:1;min-width:130px;max-width:180px">
+          <input type="month" class="fc" id="esc-mes" onchange="renderEscalas()" style="height:36px">
+        </div>
+        <button class="btn btn-gold btn-sm" onclick="abrirModalEscala()" style="white-space:nowrap">+ Nova escala</button>
+      </div>
+
+      <!-- Lista de escalas -->
+      <div id="lista-escalas"></div>
+    </div>
+
+    <!-- MODAL ESCALA (fora da page para não ser cortado) -->
+    <div id="mo-escala-overlay" style="display:none;position:fixed;inset:0;z-index:500;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(3px)" onclick="fecharModalEscala()">
+      <div style="background:white;border-radius:16px;width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden" onclick="event.stopPropagation()">
+        <!-- Header -->
+        <div style="background:var(--ink);padding:16px 20px;border-bottom:2px solid var(--gold);flex-shrink:0">
+          <div style="display:flex;align-items:center;justify-content:space-between">
+            <div>
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-l);margin-bottom:4px" id="esc-modal-subtitulo">Nova Escala</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:white;font-weight:600">Escala de Professor</div>
+            </div>
+            <button onclick="fecharModalEscala()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
           </div>
         </div>
-      </div>
-      <div id="lista-escalas"></div>
-      <button class="btn btn-gold btn-full" style="margin-top:12px" onclick="abrirModalEscala()">+ Adicionar escala</button>
 
-      <!-- Modal escala -->
-      <div class="mo" id="mo-escala" style="display:none" onclick="fecharModal('mo-escala')">
-        <div class="mbox" onclick="event.stopPropagation()">
-          <div class="mhdr"><h3 class="mtitle">Escala de Professor</h3><button class="mclose" onclick="fecharModal('mo-escala')">✕</button></div>
-          <div class="fg"><label class="fl">Data da aula</label><input type="date" class="fc" id="esc-data"></div>
-          <div class="fg"><label class="fl">Lição</label><select class="fc" id="esc-licao-sel"><option value="">— Selecionar —</option></select></div>
-          <div class="fg"><label class="fl">Professor</label><select class="fc" id="esc-prof-sel"><option value="">— Selecionar —</option></select></div>
-          <div class="fg" style="margin-bottom:0"><label class="fl">Observação</label><input class="fc" id="esc-obs" placeholder="Opcional..."></div>
-          <div style="display:flex;gap:8px;margin-top:14px">
-            <button class="btn btn-ou btn-full" onclick="fecharModal('mo-escala')">Cancelar</button>
-            <button class="btn btn-gold btn-full" onclick="salvarEscala()">✓ Salvar</button>
+        <!-- Body scrollável -->
+        <div style="flex:1;overflow-y:auto;padding:20px">
+          <input type="hidden" id="esc-edit-id">
+
+          <!-- Turma (tabs) -->
+          <div style="margin-bottom:16px">
+            <label class="fl" style="margin-bottom:8px">Turma</label>
+            <div style="display:flex;gap:8px">
+              <button type="button" class="esc-turma-btn esc-tb-on" data-turma="criancas" onclick="selecionarTurmaEscala('criancas')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--tc);background:var(--tc-bg);font-weight:700;font-size:13px;cursor:pointer;color:var(--tc)">🟢 Crianças</button>
+              <button type="button" class="esc-turma-btn" data-turma="jovens" onclick="selecionarTurmaEscala('jovens')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--cb);background:white;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink-soft)">🔵 Jovens</button>
+              <button type="button" class="esc-turma-btn" data-turma="adultos" onclick="selecionarTurmaEscala('adultos')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--cb);background:white;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink-soft)">🔴 Adultos</button>
+            </div>
+            <input type="hidden" id="esc-turma-sel" value="criancas">
           </div>
+
+          <!-- Linha: Data + Lição -->
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px">
+            <div>
+              <label class="fl">Data da aula</label>
+              <input type="date" class="fc" id="esc-data">
+            </div>
+            <div>
+              <label class="fl">Lição</label>
+              <select class="fc" id="esc-licao-sel">
+                <option value="">— Selecionar —</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Professor principal -->
+          <div style="margin-bottom:12px">
+            <label class="fl">Professor(a) responsável</label>
+            <select class="fc" id="esc-prof-sel">
+              <option value="">— Selecionar —</option>
+            </select>
+          </div>
+
+          <!-- Auxiliar -->
+          <div style="margin-bottom:12px">
+            <label class="fl">Auxiliar / Apoio <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label>
+            <select class="fc" id="esc-aux-sel">
+              <option value="">— Nenhum —</option>
+            </select>
+          </div>
+
+          <!-- Observações -->
+          <div style="margin-bottom:0">
+            <label class="fl">Observações <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label>
+            <textarea class="fc" id="esc-obs" rows="2" placeholder="Ex: Trazer material extra, confirmar com o professor..." style="resize:vertical"></textarea>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <div style="padding:14px 20px;border-top:1px solid var(--cb);display:flex;gap:10px;flex-shrink:0">
+          <button class="btn btn-ou btn-full" onclick="fecharModalEscala()">Cancelar</button>
+          <button class="btn btn-gold btn-full" onclick="salvarEscala()">✓ Salvar escala</button>
         </div>
       </div>
     </div>
@@ -1798,22 +1856,44 @@ async function iniciarApp() {
   document.getElementById('freq-data').value = hoje.toISOString().split('T')[0];
 
   // Configurar turma por perfil
-  if (USER.perfil === 'professor' && USER.turma !== 'todas') {
-    curTurmaFreq = USER.turma; curTurmaAlunos = USER.turma; curTurmaRank = USER.turma;
-    ['#freq-ttabs .ttab','#alunos-ttabs .ttab','#rank-ttabs .ttab'].forEach(sel => {
-      document.querySelectorAll(sel).forEach(t => {
+  if (isProfessor()) {
+    // Pegar turmas REAIS do professor (array do banco)
+    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas
+      : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
+
+    // Definir turma inicial como a primeira turma do professor
+    const primeiraTurma = profTurmas[0];
+    curTurmaFreq = primeiraTurma;
+    curTurmaAlunos = primeiraTurma;
+    curTurmaRank = primeiraTurma;
+
+    // Filtrar e mostrar apenas as tabs das turmas do professor
+    ['#freq-ttabs .ttab','#alunos-ttabs .ttab','#rank-ttabs .ttab'].forEach(function(sel) {
+      var primeiroVisivel = null;
+      document.querySelectorAll(sel).forEach(function(t) {
         const m = t.getAttribute('onclick').match(/'(\w+)'/); if (!m) return;
-        var profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:(USER.turma==='todas'?['criancas','jovens','adultos']:[USER.turma]); t.style.display = profTs.includes(m[1]) ? '' : 'none';
-        if (m[1] === USER.turma) t.classList.add('on'); else t.classList.remove('on');
+        const pertence = profTurmas.includes(m[1]);
+        t.style.display = pertence ? '' : 'none';
+        t.classList.remove('on');
+        if (pertence && !primeiroVisivel) primeiroVisivel = m[1];
       });
+      // Marcar primeira turma como ativa
+      if (primeiroVisivel) {
+        const btnAtivo = document.querySelector(sel.replace('.ttab', '[onclick*="' + primeiroVisivel + '"]'));
+        if (btnAtivo) btnAtivo.classList.add('on');
+      }
     });
-    document.getElementById('alunos-sub').textContent = 'Turma: ' + TN[USER.turma];
-    // Alunos não podem cadastrar novos alunos, mas professores sim
-    if (USER.perfil === 'aluno') document.getElementById('btn-novo-aluno').style.display = 'none';
+
+    // Subtítulo mostrando as turmas reais
+    const turmasLabel = profTurmas.length === 3
+      ? 'Todas as turmas'
+      : profTurmas.map(function(t){ return TN[t]||t; }).join(' e ');
+    document.getElementById('alunos-sub').textContent = 'Turma: ' + turmasLabel;
     document.getElementById('dash-aula-btn').style.display = '';
   } else {
     document.getElementById('alunos-sub').textContent = 'Gerencie os alunos matriculados por turma';
-    if (USER.perfil === 'super') {
+    if (isAdmin()) {
       document.getElementById('dash-aula-btn').style.display = 'none';
     }
   }
@@ -1835,7 +1915,18 @@ async function iniciarApp() {
   }
 
   // Carregar dados
-  cacheAlunos = await sbGet('alunos');
+  if (isProfessor()) {
+    // Professor carrega APENAS alunos das suas turmas (backend filter)
+    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas : [USER.turma];
+    // Buscar alunos de cada turma do professor
+    const alunosArrays = await Promise.all(
+      profTurmas.map(function(t){ return sbGet('alunos', { turma: t }); })
+    );
+    cacheAlunos = alunosArrays.reduce(function(acc, arr){ return acc.concat(arr); }, []);
+  } else {
+    cacheAlunos = await sbGet('alunos');
+  }
   cacheAulas = await sbGet('aulas', {}, 'data', false);
 
   // Preencher perfil
@@ -1906,17 +1997,41 @@ async function _navTo(id) {
   const dbtn = document.querySelector(`.drawer-btn[onclick*="'${id}'"]`); if (dbtn) dbtn.classList.add('on');
   document.getElementById('main-content').scrollTop = 0;
 
-  if (id === 'dash') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); renderDash(); }
+  if (id === 'dash') {
+    if (isProfessor()) {
+      const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
+      const arrays = await Promise.all(profTs.map(function(t){ return sbGet('alunos',{turma:t}); }));
+      cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
+    } else {
+      cacheAlunos = await sbGet('alunos');
+    }
+    cacheAulas = await sbGet('aulas',{},'data',false);
+    renderDash();
+  }
   else if (id === 'mural') renderMural();
-  else if (id === 'alunos') { cacheAlunos = await sbGet('alunos'); renderAlunos(); }
-  else if (id === 'professores') renderProfessores();
+  else if (id === 'alunos') {
+    if (isProfessor()) {
+      const profTurmas = Array.isArray(USER.turmas)&&USER.turmas.length ? USER.turmas : [USER.turma];
+      const arrays = await Promise.all(profTurmas.map(function(t){ return sbGet('alunos',{turma:t}); }));
+      cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
+    } else {
+      cacheAlunos = await sbGet('alunos');
+    }
+    renderAlunos();
+  }
+  else if (id === 'professores') { await renderProfessores(); }
   else if (id === 'freq') { renderFreq(); popularDropdownLicao(curTurmaFreq); }
   else if (id === 'historico') { cacheAulas = await sbGet('aulas',{},'data',false); renderHist(); }
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
   else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); renderRanking(); }
   else if (id === 'config') carregarPaginaConfig();
   else if (id === 'pix') renderPix();
-  else if (id === 'escalas') { renderEscalas(); popularModalEscala(); }
+  else if (id === 'escalas') {
+    var agora = new Date();
+    var mesEl = document.getElementById('esc-mes');
+    if (mesEl && !mesEl.value) mesEl.value = agora.getFullYear() + '-' + String(agora.getMonth()+1).padStart(2,'0');
+    renderEscalas();
+  }
   else if (id === 'perfil') preencherFormPerfil();
   else if (id === 'licoes') renderLicoes();
   else if (id === 'pg-aluno') renderAlunoProgresso();
@@ -1947,7 +2062,10 @@ function marcarDirty() { isDirty = true; document.getElementById('unsaved-banner
 async function renderDash() {
   const alunos = cacheAlunos;
   let aulas = cacheAulas;
-  if (USER.perfil === 'professor' && USER.turma !== 'todas') aulas = aulas.filter(a => a.turma === USER.turma);
+  if (isProfessor()) {
+    const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
+    aulas = aulas.filter(function(a){ return profTs.includes(a.turma); });
+  }
   document.getElementById('ds-total').textContent = alunos.filter(a => (a.status||'ativo') === 'ativo').length;
   document.getElementById('ds-aulas').textContent = aulas.length;
   document.getElementById('ds-cri').textContent = alunos.filter(a => a.turma==='criancas'&&(a.status||'ativo')==='ativo').length + ' ativos';
@@ -1962,8 +2080,12 @@ async function renderDash() {
   document.getElementById('dash-role-badge').textContent = (function(){
     var sexo = USER.sexo || 'M';
     var profLabel = sexo==='F' ? 'Professora' : 'Professor';
-    var tsProf = USER.turmas || [USER.turma];
-    var tsLabel = USER.turma==='todas' ? 'Todas as turmas' : tsProf.map(function(t){return TN[t]||t;}).join(' & ');
+    var tsProf = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas
+      : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
+    var tsLabel = tsProf.length === 3
+      ? 'Todas as turmas'
+      : tsProf.map(function(t){return TN[t]||t;}).join(' e ');
     var map = {
       adm: '✦ Administrador',
       pastor: sexo==='F' ? 'Pastora' : 'Pastor',
@@ -2153,6 +2275,15 @@ async function deletarAviso(id) {
 
 // ── ALUNOS ──
 function selTurmaAlunos(turma, el) {
+  // Bloquear acesso a turma não vinculada ao professor
+  if (isProfessor()) {
+    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas : [USER.turma];
+    if (!profTurmas.includes(turma)) {
+      toast('Você não tem acesso a esta turma', 'er');
+      return;
+    }
+  }
   curTurmaAlunos = turma;
   document.querySelectorAll('#alunos-ttabs .ttab').forEach(t => t.classList.remove('on'));
   if (el) el.classList.add('on');
@@ -2349,7 +2480,7 @@ async function redefinirSenha(tabela, id, nome) {
 }
 
 async function renderProfessores() {
-  const lista = await sbGet('professores');
+  const lista = await sbGet('professores'); // sempre do banco
   const box = document.getElementById('lista-professores');
   if (!lista.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👨‍🏫</div><div class="empty-txt">Nenhum professor cadastrado</div></div>'; return; }
   box.innerHTML = lista.map(p => `<div class="ai">
@@ -2418,7 +2549,7 @@ async function salvarProf() {
   const turmaAluno = tambemAluno ? (document.getElementById('pe-turma-aluno')?.value || null) : null;
   if (!editId && login && !senha) { toast('Digite uma senha para o login', 'er'); return; }
   const sexo = document.getElementById('pe-sexo') ? document.getElementById('pe-sexo').value : 'M';
-  const dado = { nome, turma, sexo };
+  const dado = { nome, turma, turmas: turmasSel, sexo, tambem_aluno: tambemAluno, turma_aluno: turmaAluno || null };
   if (nasc) dado.nasc = nasc;
   if (tel) dado.tel = tel;
   if (email) dado.email = email;
@@ -2432,14 +2563,73 @@ async function salvarProf() {
     if (editId) result = await sbUpdate('professores', editId, dado);
     else result = await sbInsert('professores', dado);
     if (result === null) return;
+
+    // AUTO-MATRÍCULA: se professor também é aluno, criar/atualizar na tabela alunos
+    if (tambemAluno && turmaAluno) {
+      await sincronizarProfComoAluno({
+        id: result.id,
+        nome: nome,
+        login: login || null,
+        senha: dado.senha || null,
+        turma: turmaAluno
+      }, editId);
+    }
+
     fecharModal('mo-prof');
     toast(editId ? 'Professor atualizado! ✦' : 'Professor cadastrado! ✦', 'ok');
     await renderProfessores();
+    // Atualizar cache de alunos também para outros usuários verem
+    if (isProfessor()) {
+      const profTs = Array.isArray(USER.turmas)&&USER.turmas.length ? USER.turmas : [USER.turma];
+      const arrays = await Promise.all(profTs.map(function(t){ return sbGet('alunos',{turma:t}); }));
+      cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
+    } else {
+      cacheAlunos = await sbGet('alunos');
+    }
   } catch(e) {
     toast('Erro ao salvar: ' + e.message, 'er');
   }
 }
 function editProf(id) { abrirModalProf(id); }
+
+
+// ══════════════════════════════════════════════
+// SINCRONIZAÇÃO PROFESSOR → ALUNO
+// ══════════════════════════════════════════════
+async function sincronizarProfComoAluno(profData, editId) {
+  try {
+    // Verificar se já existe aluno com mesmo login ou nome
+    const todosAlunos = await sbGet('alunos');
+    const jaExiste = todosAlunos.find(function(a) {
+      return (profData.login && a.login === profData.login) ||
+             a.nome.toLowerCase().trim() === profData.nome.toLowerCase().trim();
+    });
+
+    if (jaExiste) {
+      // Já existe: só atualizar turma se mudou
+      if (jaExiste.turma !== profData.turma) {
+        await sbUpdate('alunos', jaExiste.id, { turma: profData.turma });
+        toast(profData.nome + ' — turma atualizada para ' + (TN[profData.turma]||profData.turma) + '! ✦', 'ok');
+      }
+    } else {
+      // Criar como aluno
+      const senhaEl = document.getElementById('pe-senha');
+      const senha = senhaEl && senhaEl.value ? senhaEl.value : '123456';
+      await sbInsert('alunos', {
+        nome: profData.nome,
+        turma: profData.turma,
+        login: profData.login || null,
+        senha: profData.login ? senha : null,
+        status: 'ativo',
+        primeiro_acesso: true
+      });
+      toast(profData.nome + ' matriculado(a) como aluno em ' + (TN[profData.turma]||profData.turma) + '! ✦', 'ok');
+    }
+  } catch(e) {
+    console.error('Erro ao sincronizar prof como aluno:', e);
+    toast('Professor salvo, mas erro ao criar aluno: ' + e.message, 'er');
+  }
+}
 
 // ── FREQUÊNCIA ──
 function popularDropdownLicao(turma) {
@@ -2466,6 +2656,15 @@ function selecionarLicaoDropdown() {
 }
 
 function selTurmaFreq(turma, el) {
+  // Bloquear acesso a turma não vinculada ao professor
+  if (isProfessor()) {
+    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas : [USER.turma];
+    if (!profTurmas.includes(turma)) {
+      toast('Você não tem acesso a esta turma', 'er');
+      return;
+    }
+  }
   if (isDirty) { showConfirm('Trocar de turma?','Dados não salvos. Deseja trocar?',()=>{ isDirty=false; document.getElementById('unsaved-banner').style.display='none'; _selTurmaFreq(turma,el); },'red'); return; }
   _selTurmaFreq(turma, el);
 }
@@ -2652,7 +2851,11 @@ function editarAulaAtual() {
 // ── HISTÓRICO ──
 function renderHist() {
   let aulas=[...cacheAulas].sort((a,b)=>b.data.localeCompare(a.data));
-  if (USER?.perfil==='professor'&&USER.turma!=='todas') aulas=aulas.filter(a=>a.turma===USER.turma);
+  if (isProfessor()) {
+    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas : [USER.turma];
+    aulas = aulas.filter(function(a){ return profTurmas.includes(a.turma); });
+  }
   const ft=document.getElementById('hf-turma').value; const fm=document.getElementById('hf-mes').value; const fl=document.getElementById('hf-licao')?.value||'';
   if (ft) aulas=aulas.filter(a=>a.turma===ft); if(fm)aulas=aulas.filter(a=>a.data.startsWith(fm));
   const box=document.getElementById('lista-hist');
@@ -4113,6 +4316,9 @@ async function renderCalendario() {
   inicioGrid.setDate(inicioGrid.getDate() - primeiroDia.getDay());
 
   const hoje = new Date();
+  // Pre-carregar escalas para exibição no calendário
+  try { window._escalasCache = await sbGet('escalas'); } catch(e) { window._escalasCache = []; }
+
   const hojeStr = hoje.toISOString().split('T')[0];
 
   const grid = document.getElementById('cal-grid');
@@ -4231,21 +4437,28 @@ async function selecionarDiaCalendario(dataStr, el) {
 
   // Lições programadas
   licoesFiltradas.forEach(l => {
+    // Verificar se tem escala cadastrada para esta lição
+    const escalaLicao = (window._escalasCache||[]).find(function(e){
+      return e.turma===l.turma && parseInt(e.num_licao)===parseInt(l.num);
+    });
+    const profBadge = escalaLicao && escalaLicao.professor_nome
+      ? `<span style="background:var(--tc-bg);color:var(--tc);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">👤 ${escalaLicao.professor_nome}</span>`
+      : `<span style="color:var(--gold-deep);font-weight:600;font-size:11px">› Atribuir professor</span>`;
     bodyHtml += `<div class="cal-ev-card" style="border-left:4px solid var(--tj);padding-left:14px;margin-bottom:7px;cursor:pointer;transition:all .15s"
       onclick="abrirDetalheLicao(${JSON.stringify(l).replace(/"/g,'&quot;')})"
       onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)'"
       onmouseout="this.style.transform='';this.style.boxShadow=''">
       <div class="cal-ev-card-titulo">📖 Lição ${l.num} — ${l.titulo}</div>
-      <div class="cal-ev-card-meta">
+      <div class="cal-ev-card-meta" style="display:flex;flex-wrap:wrap;gap:4px;align-items:center">
         <span>${TN[l.turma]}</span>
         <span>${l.texto}</span>
-        <span style="color:var(--tj);font-weight:600">› Ver detalhes</span>
+        ${profBadge}
       </div>
     </div>`;
   });
 
-  // Eventos cadastrados
-  eventosDB.forEach(ev => {
+  // Eventos cadastrados (excluir tipo 'licao' - já mostrados via LICOES[])
+  eventosDB.filter(function(ev){ return ev.tipo !== 'licao'; }).forEach(ev => {
     const tipo = ev.tipo || 'outro';
     const hora = ev.horario ? ev.horario : '';
     const turmaEv = ev.turma_evento && ev.turma_evento !== 'todas' ? TN[ev.turma_evento] : 'Todas as turmas';
@@ -4306,8 +4519,8 @@ function fecharDetalheEvento() {
 function abrirDetalheEvento(ev) {
   fecharDetalheEvento();
 
-  const tipoIcon  = { especial:'✦', reuniao:'👥', aniversario:'🎂', sem_ebd:'📵', feriado:'🚫', outro:'📌' };
-  const tipoNome  = { especial:'Culto Especial', reuniao:'Reunião', aniversario:'Aniversário da Igreja', sem_ebd:'Sem EBD', feriado:'Feriado', outro:'Evento' };
+  const tipoIcon  = { especial:'✦', reuniao:'👥', aniversario:'🎂', sem_ebd:'📵', feriado:'🚫', outro:'📌', licao:'📖' };
+  const tipoNome  = { especial:'Culto Especial', reuniao:'Reunião', aniversario:'Aniversário da Igreja', sem_ebd:'Sem EBD', feriado:'Feriado', outro:'Evento', licao:'Lição' };
   const tipoCor   = { especial:'var(--gold)', reuniao:'var(--tj)', aniversario:'#e91e8c', sem_ebd:'var(--ink-soft)', feriado:'var(--red)', outro:'var(--tc)' };
 
   const tipo    = ev.tipo || 'outro';
@@ -4383,79 +4596,211 @@ function abrirDetalheLicao(l) {
   fecharPopupCal();
 
   const [d, m] = l.data.split('/');
-  const dt = new Date(`2026-${m.padStart(2,'0')}-${d.padStart(2,'0')}T12:00:00`)
+  const dataISO = '2026-' + m.padStart(2,'0') + '-' + d.padStart(2,'0');
+  const dt = new Date(dataISO + 'T12:00:00')
     .toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long', year:'numeric' });
   const turmaLabel = TN[l.turma] || l.turma;
+  const dotCor = { criancas:'var(--tc)', jovens:'var(--tj)', adultos:'var(--gold-deep)' };
 
   const modal = document.createElement('div');
-  modal.style.cssText = 'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fadeIn .2s';
-  modal.innerHTML = `
-    <div style="background:white;border-radius:var(--rlg);width:100%;max-width:400px;overflow:hidden;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1);max-height:90vh;display:flex;flex-direction:column">
-      <!-- Header -->
-      <div class="ev-detail-header" style="flex-shrink:0;border-bottom:3px solid var(--tj)">
-        <div class="ev-detail-tipo-badge" style="background:var(--tj-bg);color:var(--tj);border:1px solid rgba(28,63,110,.2)">
-          📖 Lição ${l.num} · ${turmaLabel}
-        </div>
-        <div class="ev-detail-titulo">${l.titulo}</div>
-        <div class="ev-detail-data">${dt.charAt(0).toUpperCase() + dt.slice(1)}</div>
-      </div>
-      <!-- Body -->
-      <div class="ev-detail-body" style="flex:1;overflow-y:auto">
-        <div class="ev-detail-row">
-          <div class="ev-detail-icon">📅</div>
-          <div class="ev-detail-info">
-            <div class="ev-detail-label">Data</div>
-            <div class="ev-detail-val">${l.data}</div>
-          </div>
-        </div>
-        <div class="ev-detail-row">
-          <div class="ev-detail-icon">📖</div>
-          <div class="ev-detail-info">
-            <div class="ev-detail-label">Texto Principal</div>
-            <div class="ev-detail-val" style="color:var(--tj);font-weight:600">${l.texto}</div>
-          </div>
-        </div>
-        <div class="ev-detail-row">
-          <div class="ev-detail-icon">👥</div>
-          <div class="ev-detail-info">
-            <div class="ev-detail-label">Turma</div>
-            <div class="ev-detail-val">${turmaLabel}</div>
-          </div>
-        </div>
-        <div class="ev-detail-row" style="border:none">
-          <div class="ev-detail-icon">💬</div>
-          <div class="ev-detail-info">
-            <div class="ev-detail-label">Resumo</div>
-            <div class="ev-detail-val" style="font-weight:400;color:var(--ink-mid);line-height:1.6;font-size:13px">${l.resumo}</div>
-          </div>
-        </div>
-      </div>
-      <!-- Observação da lição -->
-      <div id="lic-obs-area-${l.turma}-${l.num}" style="padding:0 18px 4px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin-bottom:6px">Observação do professor</div>
-        <div id="lic-obs-txt-${l.turma}-${l.num}" style="font-size:13px;color:var(--ink-mid);font-style:italic;margin-bottom:6px">Carregando...</div>
-        <textarea id="lic-obs-input-${l.turma}-${l.num}" class="fc" rows="2" placeholder="Adicione uma observação para esta lição..." style="display:none;font-size:13px;resize:none"></textarea>
-        <div id="lic-obs-btns-${l.turma}-${l.num}" style="display:none;gap:6px;margin-top:6px;display:none">
-          <button class="btn btn-gold btn-sm" onclick="salvarObsLicao('${l.turma}','${l.num}')">✓ Salvar</button>
-          <button class="btn btn-ou btn-sm" onclick="cancelarObsLicao('${l.turma}','${l.num}')">Cancelar</button>
-        </div>
-      </div>
-      <!-- Footer -->
-      <div style="padding:14px 18px;border-top:1px solid var(--cb);display:flex;gap:8px;flex-shrink:0;flex-wrap:wrap">
-        ${USER && USER.perfil !== 'aluno' ? `<button class="btn btn-ou btn-sm" onclick="editarObsLicao('${l.turma}','${l.num}')">✎ Observação</button>` : ''}
-        <button class="btn btn-gold btn-sm" onclick="fecharDetalheEvento();navTo('licoes')" style="flex:1">
-          Ver lição completa →
-        </button>
-        <button class="btn btn-dk btn-sm" onclick="fecharDetalheEvento()">Fechar</button>
-      </div>
-    </div>`;
+  modal.id = 'ev-detail-licao-overlay';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:500;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.55);backdrop-filter:blur(3px)';
 
-  modal.addEventListener('click', e => { if (e.target === modal) fecharDetalheEvento(); });
+  modal.innerHTML =
+    '<div style="background:white;border-radius:16px;width:100%;max-width:480px;overflow:hidden;max-height:92vh;display:flex;flex-direction:column">'
+    // HEADER
+    + '<div style="background:var(--ink);padding:16px 18px;border-bottom:3px solid var(--gold);flex-shrink:0">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between">'
+    + '<div>'
+    + '<div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-l);margin-bottom:3px">Lição ' + l.num + ' · ' + turmaLabel + '</div>'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:19px;color:white;font-weight:600;line-height:1.2">' + l.titulo + '</div>'
+    + '<div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:4px;text-transform:capitalize">' + dt + '</div>'
+    + '</div>'
+    + '<button onclick="fecharDetalheEvento()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer;flex-shrink:0">✕</button>'
+    + '</div></div>'
+    // BODY
+    + '<div style="flex:1;overflow-y:auto;padding:16px 18px" id="det-licao-body">'
+    // Texto bíblico
+    + '<div style="background:var(--gold-pale);border-radius:8px;padding:10px 12px;margin-bottom:14px;display:flex;gap:10px;align-items:center">'
+    + '<span style="font-size:18px">📖</span>'
+    + '<div><div style="font-size:10px;text-transform:uppercase;color:var(--gold-deep);font-weight:700;letter-spacing:.06em">Texto Principal</div>'
+    + '<div style="font-size:14px;font-weight:600;color:var(--ink)">' + l.texto + '</div></div>'
+    + '</div>'
+    // Resumo
+    + '<div style="font-size:13px;color:var(--ink-mid);line-height:1.6;margin-bottom:16px">' + (l.resumo || '') + '</div>'
+    // Seção escala
+    + '<div style="border-top:1px solid var(--cb);padding-top:14px">'
+    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:10px">📋 Escala desta lição</div>'
+    + '<div id="det-escala-info" style="margin-bottom:10px"><div style="font-size:13px;color:var(--ink-soft);font-style:italic">Carregando...</div></div>'
+    // Campos editáveis (só para quem pode gerenciar)
+    + (podeGerenciar() ? (
+        '<div id="det-escala-form" style="display:none">'
+        + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">'
+        + '<div><label class="fl">Professor(a)</label><select class="fc" id="det-prof-sel"><option value="">— Selecionar —</option></select></div>'
+        + '<div><label class="fl">Auxiliar</label><select class="fc" id="det-aux-sel"><option value="">— Nenhum —</option></select></div>'
+        + '</div>'
+        + '<div style="margin-bottom:10px"><label class="fl">Observações</label><textarea class="fc" id="det-obs-input" rows="2" placeholder="Opcional..." style="resize:none"></textarea></div>'
+        + '<div style="display:flex;gap:8px">'
+        + '<button class="btn btn-ou btn-sm btn-full" onclick="cancelarEscalaCal()">Cancelar</button>'
+        + '<button class="btn btn-gold btn-sm btn-full" onclick="salvarEscalaPeloCal()">✓ Salvar escala</button>'
+        + '</div></div>'
+        + '<input type="hidden" id="det-escala-id" value="">'
+        + '<input type="hidden" id="det-data-iso" value="' + dataISO + '">'
+        + '<input type="hidden" id="det-turma" value="' + l.turma + '">'
+        + '<input type="hidden" id="det-licao-num" value="' + l.num + '">'
+        + '<input type="hidden" id="det-licao-titulo" value="' + l.titulo + '">'
+    ) : '')
+    + '</div>'
+    + '</div>'
+    // FOOTER
+    + '<div style="padding:12px 18px;border-top:1px solid var(--cb);display:flex;gap:8px;flex-wrap:wrap;flex-shrink:0">'
+    + (podeGerenciar() ? '<button class="btn btn-ou btn-sm" id="btn-editar-escala-cal" onclick="toggleFormEscalaCal()">✎ Atribuir professor</button>' : '')
+    + '<button class="btn btn-gold btn-sm" style="flex:1" onclick="fecharDetalheEvento();navTo(\'licoes\')">Ver lição completa →</button>'
+    + '<button class="btn btn-dk btn-sm" onclick="fecharDetalheEvento()">Fechar</button>'
+    + '</div>'
+    + '</div>';
+
+  modal.addEventListener('click', function(e){ if (e.target === modal) fecharDetalheEvento(); });
   document.body.appendChild(modal);
   evDetailEl = modal;
-  // Carregar observação existente
-  carregarObsLicao(l.turma, l.num);
+
+  // Carregar escala existente
+  carregarEscalaDaLicao(l.turma, l.num, dataISO);
 }
+
+async function carregarEscalaDaLicao(turma, numLicao, dataISO) {
+  var infoEl = document.getElementById('det-escala-info');
+  if (!infoEl) return;
+  try {
+    var escalas = await sbGet('escalas');
+    var escala = escalas.find(function(e) {
+      return e.turma === turma && (
+        (e.num_licao && parseInt(e.num_licao) === parseInt(numLicao)) ||
+        (e.data === dataISO)
+      );
+    });
+
+    var escalaIdEl = document.getElementById('det-escala-id');
+    if (escalaIdEl) escalaIdEl.value = escala ? escala.id : '';
+
+    if (escala && escala.professor_nome) {
+      infoEl.innerHTML =
+        '<div style="display:flex;flex-direction:column;gap:6px">'
+        + '<div style="display:flex;align-items:center;gap:8px">'
+        + '<span style="background:var(--tc-bg);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">👤</span>'
+        + '<div><div style="font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:600">Professor(a)</div>'
+        + '<div style="font-size:14px;font-weight:700">' + escala.professor_nome + '</div></div>'
+        + '</div>'
+        + (escala.auxiliar_nome ? '<div style="display:flex;align-items:center;gap:8px">'
+          + '<span style="background:var(--gold-pale);border-radius:50%;width:32px;height:32px;display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">🤝</span>'
+          + '<div><div style="font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:600">Auxiliar</div>'
+          + '<div style="font-size:13px;font-weight:600">' + escala.auxiliar_nome + '</div></div>'
+          + '</div>' : '')
+        + (escala.obs ? '<div style="background:var(--cream);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--ink-mid);font-style:italic">💬 ' + escala.obs + '</div>' : '')
+        + '</div>';
+
+      // Pré-preencher botão
+      var btnEd = document.getElementById('btn-editar-escala-cal');
+      if (btnEd) btnEd.textContent = '✎ Editar escala';
+    } else {
+      infoEl.innerHTML =
+        '<div style="background:var(--cream);border-radius:8px;padding:10px 12px;font-size:13px;color:var(--ink-soft);display:flex;align-items:center;gap:8px">'
+        + '<span>📋</span><span>Nenhum professor atribuído ainda.</span>'
+        + (podeGerenciar() ? '<button class="btn btn-gold btn-sm" style="margin-left:auto" onclick="toggleFormEscalaCal()">+ Atribuir</button>' : '')
+        + '</div>';
+    }
+
+    // Popular selects do form
+    if (podeGerenciar()) {
+      await popularSelectProfs('det-prof-sel', false);
+      await popularSelectProfs('det-aux-sel', true);
+      // Pré-preencher com dados existentes
+      if (escala) {
+        setTimeout(function() {
+          var ps = document.getElementById('det-prof-sel');
+          var as = document.getElementById('det-aux-sel');
+          var oi = document.getElementById('det-obs-input');
+          if (ps && escala.professor_id) ps.value = escala.professor_id;
+          if (as && escala.auxiliar_id) as.value = escala.auxiliar_id;
+          if (oi) oi.value = escala.obs || '';
+        }, 200);
+      }
+    }
+  } catch(e) {
+    if (infoEl) infoEl.innerHTML = '<div style="font-size:13px;color:var(--ink-soft)">Erro ao carregar escala.</div>';
+  }
+}
+
+function toggleFormEscalaCal() {
+  var form = document.getElementById('det-escala-form');
+  var btn = document.getElementById('btn-editar-escala-cal');
+  if (!form) return;
+  var visible = form.style.display !== 'none' && form.style.display !== '';
+  form.style.display = visible ? 'none' : 'block';
+  if (btn) btn.style.display = visible ? '' : 'none';
+}
+
+function cancelarEscalaCal() {
+  var form = document.getElementById('det-escala-form');
+  var btn = document.getElementById('btn-editar-escala-cal');
+  if (form) form.style.display = 'none';
+  if (btn) btn.style.display = '';
+}
+
+async function salvarEscalaPeloCal() {
+  var turma = document.getElementById('det-turma').value;
+  var dataISO = document.getElementById('det-data-iso').value;
+  var numLicao = document.getElementById('det-licao-num').value;
+  var licaoTitulo = document.getElementById('det-licao-titulo').value;
+  var escalaId = document.getElementById('det-escala-id').value;
+  var profSel = document.getElementById('det-prof-sel');
+  var auxSel = document.getElementById('det-aux-sel');
+  var obsEl = document.getElementById('det-obs-input');
+
+  var profId = profSel ? profSel.value : '';
+  var profNome = profSel && profSel.selectedIndex > 0 ? profSel.options[profSel.selectedIndex].getAttribute('data-nome') : '';
+  var auxId = auxSel ? auxSel.value : '';
+  var auxNome = auxSel && auxSel.selectedIndex > 0 ? auxSel.options[auxSel.selectedIndex].getAttribute('data-nome') : '';
+  var obs = obsEl ? obsEl.value.trim() : '';
+
+  if (!profId) { toast('Selecione o professor', 'er'); return; }
+
+  var dado = {
+    turma: turma,
+    data: dataISO,
+    num_licao: numLicao ? parseInt(numLicao) : null,
+    licao_titulo: licaoTitulo || null,
+    professor_id: profId,
+    professor_nome: profNome,
+    auxiliar_id: auxId || null,
+    auxiliar_nome: auxNome || null,
+    obs: obs || null
+  };
+
+  try {
+    var resultado;
+    if (escalaId) {
+      resultado = await sbUpdate('escalas', escalaId, dado);
+    } else {
+      resultado = await sbInsert('escalas', dado);
+    }
+
+    if (resultado) {
+      // Atualizar cache de escalas para o calendário refletir imediatamente
+      window._escalasCache = await sbGet('escalas');
+    }
+
+    toast('Escala salva! ✦', 'ok');
+    fecharDetalheEvento();
+    // Recarregar calendário para mostrar o professor na lição
+    if (document.getElementById('pg-calendario') &&
+        document.getElementById('pg-calendario').classList.contains('on')) {
+      renderCalendario();
+    }
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+
 
 
 // ══════════════════════════════════════════════
@@ -5408,8 +5753,13 @@ function definirSaudacaoImediata() {
   const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   const sexo = USER.sexo || 'M';
   const profLabel = sexo==='F' ? 'Professora' : 'Professor';
-  const tsProf = USER.turmas || [USER.turma];
-  const tsLabel = USER.turma==='todas' ? 'Todas as turmas' : tsProf.map(function(t){ return TN[t]||t; }).join(' & ');
+  // Turmas reais do professor (lidas do banco)
+  const tsProf = Array.isArray(USER.turmas) && USER.turmas.length
+    ? USER.turmas
+    : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
+  const tsLabel = tsProf.length === 3
+    ? 'Todas as turmas'
+    : tsProf.map(function(t){ return TN[t]||t; }).join(' e ');
   const roleMap = {
     adm: '❖ Administrador',
     pastor: sexo==='F' ? 'Pastora' : 'Pastor',
@@ -6005,101 +6355,235 @@ async function confirmarPromocao(alunoId, nomeAluno, modal) {
 }
 
 
+
 // ══════════════════════════════════════════════
 // ESCALAS DE PROFESSORES
 // ══════════════════════════════════════════════
-async function renderEscalas() {
-  var turma = document.getElementById('esc-turma') ? document.getElementById('esc-turma').value : 'adultos';
-  var mes = document.getElementById('esc-mes') ? document.getElementById('esc-mes').value : '';
-  var box = document.getElementById('lista-escalas');
-  if (!box) return;
-  try {
-    var todas = await sbGet('escalas', { turma: turma }, 'data', true);
-    if (mes) todas = todas.filter(function(e){ return e.data && e.data.startsWith(mes); });
-    if (!todas.length) {
-      box.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-txt">Nenhuma escala cadastrada</div></div>';
-      return;
-    }
-    box.innerHTML = todas.map(function(e) {
-      var dt = new Date(e.data + 'T12:00:00').toLocaleDateString('pt-BR', {weekday:'short',day:'numeric',month:'short'});
-      return '<div class="card" style="margin-bottom:8px;display:flex;align-items:center;gap:12px;padding:12px 14px">'
-        + '<div style="font-size:13px;color:var(--ink-soft);min-width:80px">' + dt + '</div>'
-        + '<div style="flex:1">'
-        + '<div style="font-size:14px;font-weight:600">' + (e.professor_nome || '—') + '</div>'
-        + (e.num_licao ? '<div style="font-size:11px;color:var(--ink-soft)">Lição ' + e.num_licao + '</div>' : '')
-        + (e.obs ? '<div style="font-size:11px;color:var(--ink-soft)">' + e.obs + '</div>' : '')
-        + '</div>'
-        + (isAdmin() || isProfessor() ? '<button class="btn-ic danger" onclick="excluirEscala(\'' + e.id + '\')">✕</button>' : '')
-        + '</div>';
-    }).join('');
-  } catch(ex) { box.innerHTML = '<div class="empty"><div class="empty-txt">Erro ao carregar escalas</div></div>'; }
+var escalaTabAtual = 'criancas';
+
+function filtrarEscalaTab(turma, el) {
+  escalaTabAtual = turma;
+  document.querySelectorAll('[id^="esc-tab-"]').forEach(function(b){ b.classList.remove('on'); });
+  if (el) el.classList.add('on');
+  renderEscalas();
 }
 
-async function popularModalEscala() {
-  // Popular select de professores
-  var sel = document.getElementById('esc-prof-sel');
-  if (!sel) return;
+async function renderEscalas() {
+  var box = document.getElementById('lista-escalas');
+  if (!box) return;
+  var mes = document.getElementById('esc-mes') ? document.getElementById('esc-mes').value : '';
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">Carregando...</div>';
   try {
-    var profs = await sbGet('professores');
-    sel.innerHTML = '<option value="">— Selecionar —</option>'
-      + profs.map(function(p){ return '<option value="' + p.id + '" data-nome="' + p.nome + '">' + p.nome + '</option>'; }).join('');
-  } catch(e) {}
-  // Popular licoes conforme turma
-  var turmaEl = document.getElementById('esc-turma');
-  var turma = turmaEl ? turmaEl.value : 'adultos';
-  var licSel = document.getElementById('esc-licao-sel');
-  if (licSel && LICOES[turma]) {
-    licSel.innerHTML = '<option value="">— Selecionar —</option>'
-      + LICOES[turma].licoes.map(function(l){ return '<option value="' + l.num + '">' + l.num + ' — ' + l.titulo + ' (' + l.data + ')</option>'; }).join('');
+    var todas = await sbGet('escalas', { turma: escalaTabAtual }, 'data', true);
+    if (mes) todas = todas.filter(function(e){ return e.data && e.data.startsWith(mes); });
+    if (!todas.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">📅</div><div class="empty-txt">Nenhuma escala cadastrada para esta turma</div></div>';
+      return;
+    }
+    var TNC = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+    var dotC = { criancas:'dot-c', jovens:'dot-j', adultos:'dot-a' };
+    box.innerHTML = todas.map(function(e) {
+      var dt = new Date(e.data + 'T12:00:00');
+      var dtStr = dt.toLocaleDateString('pt-BR', { weekday:'long', day:'numeric', month:'long' });
+      var hoje = new Date(); hoje.setHours(0,0,0,0);
+      var isPassada = dt < hoje;
+      var isHoje = dt.toDateString() === hoje.toDateString();
+      var cardBg = isHoje ? 'background:linear-gradient(135deg,var(--ink),#1a2744);color:white'
+                 : isPassada ? 'background:#f9f9f9;opacity:.7' : 'background:white';
+      var corText = isHoje ? 'color:rgba(255,255,255,.7)' : 'color:var(--ink-soft)';
+      var statusBadge = isHoje ? '<span style="background:var(--gold);color:var(--ink);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;margin-left:6px">HOJE</span>'
+                      : isPassada ? '<span style="background:#eee;color:#999;font-size:10px;padding:2px 8px;border-radius:10px;margin-left:6px">Passou</span>' : '';
+      var podeEd = podeGerenciar();
+      return '<div style="border-radius:12px;padding:14px 16px;margin-bottom:10px;border:1px solid var(--cb);' + cardBg + '">'
+        + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
+        + '<div style="flex:1">'
+        + '<div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">'
+        + '<span class="dot ' + (dotC[e.turma]||'dot-a') + '"></span>'
+        + '<span style="font-weight:700;font-size:14px">' + (TNC[e.turma]||e.turma) + '</span>'
+        + statusBadge
+        + '</div>'
+        + '<div style="font-size:12px;' + corText + ';margin-bottom:8px;text-transform:capitalize">' + dtStr + '</div>'
+        + (e.num_licao ? '<div style="font-size:13px;font-weight:600;margin-bottom:4px">📖 Lição ' + e.num_licao + (e.licao_titulo ? ' — ' + e.licao_titulo : '') + '</div>' : '')
+        + '<div style="font-size:13px;margin-bottom:2px">👤 <strong>' + (e.professor_nome || '—') + '</strong></div>'
+        + (e.auxiliar_nome ? '<div style="font-size:12px;' + corText + '">🤝 Aux: ' + e.auxiliar_nome + '</div>' : '')
+        + (e.obs ? '<div style="font-size:11px;' + corText + ';margin-top:6px;font-style:italic">💬 ' + e.obs + '</div>' : '')
+        + '</div>'
+        + (podeEd ? '<div style="display:flex;flex-direction:column;gap:4px;flex-shrink:0">'
+            + '<button class="btn-ic" onclick="editarEscala(\'' + e.id + '\')" title="Editar">✎</button>'
+            + '<button class="btn-ic danger" onclick="excluirEscala(\'' + e.id + '\')" title="Excluir">✕</button>'
+            + '</div>' : '')
+        + '</div></div>';
+    }).join('');
+  } catch(ex) {
+    box.innerHTML = '<div class="empty"><div class="empty-txt">Erro ao carregar: ' + ex.message + '</div></div>';
   }
 }
 
-function abrirModalEscala() {
-  popularModalEscala();
-  var turmaEl = document.getElementById('esc-turma');
-  var mesEl = document.getElementById('esc-mes');
-  // Pre-preencher data com próxima segunda
-  var hoje = new Date();
-  var diasAteSeg = (1 - hoje.getDay() + 7) % 7 || 7;
-  var proxSeg = new Date(hoje);
-  proxSeg.setDate(hoje.getDate() + diasAteSeg);
-  var dataEl = document.getElementById('esc-data');
-  if (dataEl) dataEl.value = proxSeg.toISOString().split('T')[0];
-  document.getElementById('mo-escala').style.display = 'block';
+async function abrirModalEscala(editId) {
+  document.getElementById('esc-edit-id').value = editId || '';
+  document.getElementById('esc-modal-subtitulo').textContent = editId ? 'Editar Escala' : 'Nova Escala';
+
+  // Preencher mês atual como default na data
+  if (!editId) {
+    var hoje = new Date();
+    var diasAteSeg = (1 - hoje.getDay() + 7) % 7 || 7;
+    var proxSeg = new Date(hoje);
+    proxSeg.setDate(hoje.getDate() + diasAteSeg);
+    document.getElementById('esc-data').value = proxSeg.toISOString().split('T')[0];
+    selecionarTurmaEscala(escalaTabAtual);
+    document.getElementById('esc-obs').value = '';
+  }
+
+  // Popular professores
+  await popularSelectProfs('esc-prof-sel');
+  await popularSelectProfs('esc-aux-sel', true);
+
+  // Popular lições da turma atual
+  popularLicoesEscala(document.getElementById('esc-turma-sel').value);
+
+  // Se editando, preencher campos
+  if (editId) {
+    try {
+      var todas = await sbGet('escalas');
+      var e = todas.find(function(x){ return x.id === editId; });
+      if (e) {
+        selecionarTurmaEscala(e.turma || 'adultos');
+        document.getElementById('esc-data').value = e.data || '';
+        popularLicoesEscala(e.turma || 'adultos');
+        setTimeout(function(){
+          if (document.getElementById('esc-licao-sel')) document.getElementById('esc-licao-sel').value = e.num_licao || '';
+          if (document.getElementById('esc-prof-sel')) document.getElementById('esc-prof-sel').value = e.professor_id || '';
+          if (document.getElementById('esc-aux-sel')) document.getElementById('esc-aux-sel').value = e.auxiliar_id || '';
+        }, 100);
+        document.getElementById('esc-obs').value = e.obs || '';
+      }
+    } catch(ex) {}
+  }
+
+  var overlay = document.getElementById('mo-escala-overlay');
+  if (overlay) { overlay.style.display = 'flex'; }
+}
+
+function fecharModalEscala() {
+  var overlay = document.getElementById('mo-escala-overlay');
+  if (overlay) overlay.style.display = 'none';
+}
+
+function selecionarTurmaEscala(turma) {
+  document.getElementById('esc-turma-sel').value = turma;
+  var cores = { criancas:'var(--tc)', jovens:'var(--primary)', adultos:'var(--red)' };
+  var bgs = { criancas:'var(--tc-bg)', jovens:'#e8f0ff', adultos:'var(--warn-bg)' };
+  document.querySelectorAll('.esc-turma-btn').forEach(function(btn) {
+    var t = btn.getAttribute('data-turma');
+    if (t === turma) {
+      btn.style.border = '2px solid ' + (cores[t]||'var(--gold)');
+      btn.style.background = bgs[t] || 'var(--gold-pale)';
+      btn.style.color = cores[t] || 'var(--ink)';
+      btn.style.fontWeight = '700';
+    } else {
+      btn.style.border = '2px solid var(--cb)';
+      btn.style.background = 'white';
+      btn.style.color = 'var(--ink-soft)';
+      btn.style.fontWeight = '600';
+    }
+  });
+  popularLicoesEscala(turma);
+}
+
+function popularLicoesEscala(turma) {
+  var sel = document.getElementById('esc-licao-sel');
+  if (!sel || !LICOES[turma]) return;
+  sel.innerHTML = '<option value="">— Selecionar lição —</option>'
+    + LICOES[turma].licoes.map(function(l){
+        return '<option value="' + l.num + '" data-titulo="' + l.titulo + '">' + l.num + ' — ' + l.titulo + ' (' + l.data + ')</option>';
+      }).join('');
+}
+
+async function popularSelectProfs(selId, comNenhum) {
+  var sel = document.getElementById(selId);
+  if (!sel) return;
+  var placeholder = comNenhum ? '<option value="">— Nenhum —</option>' : '<option value="">— Selecionar professor —</option>';
+  try {
+    var profs = await sbGet('professores');
+    sel.innerHTML = placeholder + profs.map(function(p){
+      return '<option value="' + p.id + '" data-nome="' + p.nome + '">' + p.nome + '</option>';
+    }).join('');
+  } catch(e) { sel.innerHTML = placeholder; }
 }
 
 async function salvarEscala() {
-  var turma = document.getElementById('esc-turma').value;
+  var editId = document.getElementById('esc-edit-id').value;
+  var turma = document.getElementById('esc-turma-sel').value;
   var data = document.getElementById('esc-data').value;
-  var licaoNum = document.getElementById('esc-licao-sel').value;
+  var licaoSel = document.getElementById('esc-licao-sel');
+  var licaoNum = licaoSel ? licaoSel.value : '';
+  var licaoTitulo = licaoSel && licaoSel.selectedIndex > 0 ? licaoSel.options[licaoSel.selectedIndex].getAttribute('data-titulo') : '';
   var profSel = document.getElementById('esc-prof-sel');
   var profId = profSel ? profSel.value : '';
   var profNome = profSel && profSel.selectedIndex > 0 ? profSel.options[profSel.selectedIndex].getAttribute('data-nome') : '';
+  var auxSel = document.getElementById('esc-aux-sel');
+  var auxId = auxSel ? auxSel.value : '';
+  var auxNome = auxSel && auxSel.selectedIndex > 0 ? auxSel.options[auxSel.selectedIndex].getAttribute('data-nome') : '';
   var obs = document.getElementById('esc-obs').value.trim();
+
   if (!data) { toast('Selecione a data', 'er'); return; }
   if (!profId) { toast('Selecione o professor', 'er'); return; }
+
+  var dado = {
+    turma: turma,
+    data: data,
+    num_licao: licaoNum ? parseInt(licaoNum) : null,
+    licao_titulo: licaoTitulo || null,
+    professor_id: profId || null,
+    professor_nome: profNome || null,
+    auxiliar_id: auxId || null,
+    auxiliar_nome: auxNome || null,
+    obs: obs || null
+  };
+
   try {
-    await sbInsert('escalas', {
-      turma: turma,
-      data: data,
-      num_licao: licaoNum ? parseInt(licaoNum) : null,
-      professor_id: profId,
-      professor_nome: profNome,
-      obs: obs || null
-    });
-    fecharModal('mo-escala');
-    toast('Escala salva! ✦', 'ok');
+    var resultado;
+    if (editId) {
+      resultado = await sbUpdate('escalas', editId, dado);
+    } else {
+      resultado = await sbInsert('escalas', dado);
+    }
+
+    // Sincronizar com Calendário automaticamente
+    if (resultado) {
+      window._escalasCache = await sbGet('escalas');
+    }
+
+    fecharModalEscala();
+    toast((editId ? 'Escala atualizada' : 'Escala salva') + '! ✦', 'ok');
     renderEscalas();
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
 }
 
+async function sincronizarEscalaCalendario(escala, tipo) {
+  // As lições já aparecem no calendário via LICOES[] (objeto JS pré-carregado).
+  // Não precisamos criar eventos no banco - só garantir que _escalasCache está atualizado
+  // para que o calendário exiba o professor corretamente ao recarregar.
+  try {
+    window._escalasCache = await sbGet('escalas');
+  } catch(e) {}
+}
+
+async function editarEscala(id) {
+  await abrirModalEscala(id);
+}
+
 async function excluirEscala(id) {
-  showConfirm('Excluir escala?', 'Esta escala será removida.', async function() {
-    await sbDelete('escalas', id);
-    toast('Removida.', '');
-    renderEscalas();
+  showConfirm('Excluir escala?', 'A atribuição do professor será removida.', async function() {
+    try {
+      await sbDelete('escalas', id);
+      window._escalasCache = await sbGet('escalas');
+      toast('Escala excluída! ✦', 'ok');
+      renderEscalas();
+    } catch(e) { toast('Erro: ' + e.message, 'er'); }
   }, 'red');
 }
+
 
 async function carregarChavePix() {
   try {
