@@ -398,8 +398,63 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .lp-review ol{padding-left:16px;display:flex;flex-direction:column;gap:7px}
 .lp-review li{font-size:13px;color:var(--ink-mid);line-height:1.6}
 .lp-nav{display:flex;gap:8px;margin-top:14px;flex-wrap:wrap}
+
+/* LIÇÕES — MOBILE RESPONSIVO */
+@media(max-width:480px){
+  #lista-licoes > div{padding:12px!important;gap:9px!important}
+  #lic-panel{width:100vw!important;border-left:none!important}
+  #lp-body{padding:12px!important}
+  .lp-block{padding:12px!important}
+  .lp-verse{font-size:15px!important}
+  .lp-truth{font-size:14px!important}
+  .lp-review li{font-size:12px!important}
+  .lp-nav{flex-direction:column!important}
+  .lp-nav .btn{width:100%!important;justify-content:center!important}
+  #licoes-ttabs{gap:4px!important}
+  #licoes-ttabs .ttab{padding:7px 5px!important;font-size:11px!important}
+  #licoes-tema-card{padding:12px!important}
+}
+
+/* LEITURA BÍBLICA INTERATIVA */
+.lb-ref-btn{display:flex;align-items:center;justify-content:space-between;width:100%;background:var(--gold-pale);border:1px solid rgba(184,151,42,.3);border-radius:var(--rsm);padding:10px 14px;cursor:pointer;transition:all .2s;font-family:'Outfit',sans-serif}
+.lb-ref-btn:hover{background:var(--gold-l);border-color:var(--gold)}
+.lb-ref-txt{font-size:14px;font-weight:700;color:var(--gold-deep)}
+.lb-ref-icon{font-size:13px;color:var(--gold-deep);transition:transform .25s}
+.lb-ref-icon.open{transform:rotate(180deg)}
+.lb-versos{overflow:hidden;max-height:0;transition:max-height .35s ease,opacity .25s ease;opacity:0;margin-top:0}
+.lb-versos.open{max-height:800px;opacity:1;margin-top:8px}
+.lb-verso-loading{font-size:12px;color:var(--ink-soft);padding:8px 0;text-align:center;font-style:italic}
+.lb-verso-texto{font-family:'Cormorant Garamond',serif;font-size:16px;font-style:italic;color:#2a2018;line-height:1.8;padding:10px 14px;background:white;border-radius:var(--rsm);border:1px solid var(--cb)}
+.lb-verso-ref{font-size:11px;color:var(--ink-soft);text-align:right;margin-top:4px;font-weight:600}
+
 /* ALUNO AREA */
 .pg-aluno-hero{background:var(--ink);border-radius:var(--rlg);padding:22px;margin-bottom:14px}
+
+/* RESPONSÁVEL */
+.resp-filho-card{background:white;border:1px solid var(--cb);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
+.resp-filho-card:hover,.resp-filho-card:active{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 3px 12px rgba(0,0,0,.08)}
+.resp-filho-av{width:44px;height:44px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;flex-shrink:0;overflow:hidden}
+.resp-filho-av img{width:100%;height:100%;object-fit:cover}
+.resp-filho-info{flex:1;min-width:0}
+.resp-filho-nome{font-size:14px;font-weight:600;color:var(--ink);margin-bottom:2px}
+.resp-filho-meta{font-size:11px;color:var(--ink-soft);display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.resp-filho-arrow{font-size:18px;color:var(--ink-soft);flex-shrink:0}
+.resp-back-btn{display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--gold-deep);font-size:13px;font-weight:600;cursor:pointer;padding:4px 0;margin-bottom:14px;font-family:'Outfit',sans-serif}
+.resp-back-btn:hover{color:var(--ink)}
+.resp-filho-hero{background:var(--ink);border-radius:var(--rlg);padding:18px 20px;margin-bottom:14px;display:flex;align-items:center;gap:14px}
+.resp-filho-hero-av{width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.12);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white;flex-shrink:0;overflow:hidden}
+.resp-filho-hero-av img{width:100%;height:100%;object-fit:cover}
+.resp-filho-hero-info{flex:1}.resp-filho-hero-nome{font-family:'Cormorant Garamond',serif;font-size:20px;color:white;font-weight:600;margin-bottom:2px}
+.resp-filho-hero-meta{font-size:12px;color:rgba(255,255,255,.45)}
+.resp-stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px}
+.resp-stat{background:white;border:1px solid var(--cb);border-radius:var(--rsm);padding:11px;text-align:center}
+.resp-stat-n{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;color:var(--ink);line-height:1;margin-bottom:2px}
+.resp-stat-l{font-size:10px;color:var(--ink-soft)}
+.resp-presenca-item{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)}
+.resp-presenca-item:last-child{border:none}.resp-presenca-item:first-child{padding-top:0}
+.resp-pres-data{font-size:12px;color:var(--ink-soft);min-width:52px}
+.resp-pres-licao{flex:1;font-size:12px;color:var(--ink-mid);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.resp-pres-status{padding:2px 9px;border-radius:20px;font-size:11px;font-weight:600;flex-shrink:0}
 /* PROVAS & SIMULADOS */
 .prova-card{background:white;border:1px solid var(--cb);border-radius:var(--r);padding:15px;margin-bottom:10px;transition:all .2s}
 .prova-card:hover{border-color:var(--gold)}
@@ -974,6 +1029,27 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       </div>
     </div>
 
+    <!-- RESPONSÁVEL — MEUS FILHOS -->
+    <div id="pg-responsavel" class="page">
+      <div id="resp-lista-view">
+        <div class="ph"><h2>👨‍👩‍👧‍👦 Meus <em>Filhos</em></h2><p id="resp-subtitulo">Acompanhe o progresso de cada filho</p></div>
+        <div id="resp-lista-filhos"></div>
+      </div>
+      <div id="resp-filho-view" style="display:none">
+        <button class="resp-back-btn" onclick="voltarListaFilhos()">← Voltar</button>
+        <div class="resp-filho-hero" id="resp-filho-hero-card"></div>
+        <div class="resp-stat-grid" id="resp-filho-stats"></div>
+        <div class="card" style="margin-bottom:12px">
+          <div class="ct">Histórico de presenças</div>
+          <div id="resp-filho-presencas"></div>
+        </div>
+        <div class="card" style="margin-bottom:12px" id="resp-filho-provas-card" style="display:none">
+          <div class="ct">Provas e Simulados</div>
+          <div id="resp-filho-provas"></div>
+        </div>
+      </div>
+    </div>
+
     <!-- RANKING -->
     <div id="pg-ranking" class="page">
       <div class="ph"><h2>Ranking da <em>Escola Bíblica</em></h2><p>Classificação dos alunos por presença e desempenho</p></div>
@@ -1160,6 +1236,28 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="fg" style="margin:0"><label class="fl">Meta — Adultos</label><input class="fc" type="number" id="cfg-meta-a" placeholder="Ex: 30" min="0"></div>
       </div>
       <button class="btn btn-gold btn-full" onclick="salvarConfig()" style="margin-bottom:12px">✓ Salvar configurações</button>
+      <!-- SQL para tabelas de responsáveis -->
+      <div class="card" style="margin-bottom:12px;border-color:#b8d0f5;background:#f0f5ff">
+        <div class="chdr"><div class="ct" style="color:#1c3f6e">👨‍👩‍👧 Tabelas de Responsáveis</div><button class="btn btn-ou btn-sm" onclick="copiarSQLResponsaveis()">📋 Copiar SQL</button></div>
+        <div style="font-size:12px;color:var(--ink-mid);line-height:1.6;margin-bottom:10px">Execute este SQL no Supabase → SQL Editor para ativar o sistema de responsáveis:</div>
+        <pre id="sql-responsaveis" style="font-size:11px;background:#1e1e2e;color:#cdd6f4;padding:12px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;line-height:1.5">-- Tabela de vínculo responsável (pai/mãe) ↔ filho
+-- Ambos já são alunos cadastrados na tabela "alunos"
+CREATE TABLE IF NOT EXISTS responsavel_aluno (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  responsavel_id UUID REFERENCES alunos(id) ON DELETE CASCADE,
+  aluno_id       UUID REFERENCES alunos(id) ON DELETE CASCADE,
+  created_at TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(responsavel_id, aluno_id)
+);
+
+-- Habilitar RLS
+ALTER TABLE responsavel_aluno ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_resp_aluno" ON responsavel_aluno FOR ALL USING (true) WITH CHECK (true);
+
+-- Adicionar coluna perfil_responsavel na tabela alunos (se não existir)
+ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false;</pre>
+        <div id="sql-resp-status" style="margin-top:8px;font-size:12px;color:var(--tc);display:none">✓ SQL copiado!</div>
+      </div>
       <div class="card" style="margin-bottom:20px">
         <div class="chdr"><div class="ct">Log de acessos</div><button class="btn btn-ou btn-sm" onclick="carregarLogAcessos()">↺ Atualizar</button></div>
         <div id="lista-log-acessos"><div class="empty-txt" style="padding:10px 0;color:var(--ink-soft)">Clique em Atualizar para carregar</div></div>
@@ -1198,7 +1296,10 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div id="quiz-area" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
           <div style="font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;font-weight:600" id="quiz-prog"></div>
-          <div style="display:flex;gap:3px" id="quiz-dots"></div>
+          <div style="display:flex;align-items:center;gap:6px">
+            <div style="display:flex;gap:3px" id="quiz-dots"></div>
+            <button onclick="navTo('licoes')" style="width:32px;height:32px;min-width:32px;background:white;border:1px solid var(--cb);border-radius:7px;color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .15s;touch-action:manipulation" title="Cancelar quiz" onmouseover="this.style.borderColor='var(--red)';this.style.color='var(--red)'" onmouseout="this.style.borderColor='var(--cb)';this.style.color='var(--ink-soft)'">✕</button>
+          </div>
         </div>
         <div class="card" style="margin-bottom:12px">
           <div style="font-size:15px;font-weight:500;line-height:1.5;margin-bottom:16px" id="quiz-pergunta"></div>
@@ -1344,7 +1445,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     </div>
 
 </div>
-<div id="lic-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:400;animation:fadeIn .2s" onclick="fecharLicao()">
+<div id="lic-overlay" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:490;animation:fadeIn .2s" onclick="fecharLicao()">
   <div id="lic-panel" onclick="event.stopPropagation()" style="position:fixed;top:0;right:0;bottom:0;width:min(680px,100vw);background:var(--cream);display:flex;flex-direction:column;overflow:hidden;border-left:2px solid var(--gold);animation:slideInRight .3s cubic-bezier(.4,0,.2,1)">
     <!-- header do painel -->
     <div style="background:var(--ink);padding:18px 20px;flex-shrink:0;border-bottom:2px solid var(--gold)">
@@ -1354,7 +1455,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white;line-height:1.2;margin-bottom:3px" id="lp-titulo"></div>
           <div style="font-size:12px;color:rgba(255,255,255,.4)" id="lp-data"></div>
         </div>
-        <button onclick="fecharLicao()" style="width:32px;height:32px;background:rgba(201,151,58,.15);border:0.5px solid rgba(201,151,58,.4);border-radius:6px;color:var(--gold-l);font-size:16px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s" onmouseover="this.style.background='rgba(201,151,58,.3)'" onmouseout="this.style.background='rgba(201,151,58,.15)'">✕</button>
+        <button onclick="fecharLicao()" style="min-width:44px;min-height:44px;width:44px;height:44px;background:rgba(201,151,58,.15);border:0.5px solid rgba(201,151,58,.4);border-radius:8px;color:var(--gold-l);font-size:20px;display:flex;align-items:center;justify-content:center;flex-shrink:0;cursor:pointer;transition:all .15s;-webkit-tap-highlight-color:transparent;touch-action:manipulation" onmouseover="this.style.background='rgba(201,151,58,.3)'" onmouseout="this.style.background='rgba(201,151,58,.15)'">✕</button>
       </div>
     </div>
     <!-- corpo do painel -->
@@ -1429,6 +1530,17 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="fg"><label class="fl">Nome do responsável</label><input class="fc" id="ae-responsavel" placeholder="Nome do pai/mãe/responsável"></div>
         <div class="fg" style="margin:0"><label class="fl">Telefone do responsável</label><input class="fc" id="ae-tel-resp" placeholder="(00) 00000-0000" type="tel"></div>
       </div>
+      <!-- VÍNCULO COM RESPONSÁVEL CADASTRADO -->
+      <div style="background:#e8f0ff;border:1px solid #b8d0f5;border-radius:var(--r);padding:13px;margin-bottom:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#1c3f6e;font-weight:700;margin-bottom:10px">👨‍👩‍👧 Vincular Responsável(is)</div>
+        <div class="fg" style="margin-bottom:8px">
+          <label class="fl">Buscar responsável cadastrado</label>
+          <input class="fc" id="ae-resp-busca" placeholder="Digite o nome para buscar..." oninput="buscarResponsaveis(this.value)">
+        </div>
+        <div id="ae-resp-sugestoes" style="margin-bottom:8px"></div>
+        <div id="ae-resp-vinculados" style="display:flex;flex-direction:column;gap:5px"></div>
+        <input type="hidden" id="ae-resp-ids" value="[]">
+      </div>
       <div style="background:var(--cream);border:1px solid var(--cb);border-radius:var(--r);padding:13px;margin-bottom:10px">
         <div class="ficha-secao" style="margin-top:0">Endereço</div>
         <div class="fg" style="margin:0"><label class="fl">Endereço completo</label><input class="fc" id="ae-endereco" placeholder="Rua, número, bairro..."></div>
@@ -1440,6 +1552,15 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="fg"><label class="fl">Senha</label><input class="fc" type="password" id="ae-senha" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
         </div>
         <div style="font-size:11px;color:var(--ink-soft);margin-top:6px">Deixe em branco para n&atilde;o criar acesso agora</div>
+        <!-- Vincular por login existente -->
+        <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--cb)">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#1c3f6e;font-weight:700;margin-bottom:8px">👨‍👩‍👧 Vincular pelo login do responsável</div>
+          <div class="fg" style="margin-bottom:4px">
+            <label class="fl">Login do pai/mãe (já cadastrado)</label>
+            <input class="fc" id="ae-resp-login" placeholder="Ex: joao.silva (login existente)">
+          </div>
+          <div style="font-size:11px;color:var(--ink-soft)">Se o pai/mãe já tem login no app, cole aqui. Ele será vinculado automaticamente como responsável deste aluno.</div>
+        </div>
       </div>
       <div class="mfoot">
         <button class="btn btn-ou btn-full" onclick="fecharModal('mo-aluno')">Cancelar</button>
@@ -1648,6 +1769,7 @@ let quizAtual = null;
 let freqPresencas = {}, freqVisitantes = [], isDirty = false, aulaAtualId = null;
 let cacheAlunos = [], cacheAulas = [], chartFreq = null;
 let cfgNomeIgreja = 'Igreja Assembleia de Deus', cfgNomeEBD = 'Escola Bíblica Dominical';
+var _lbAberta = {}; // estado de leitura bíblica expandida por lição
 const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos', todas:'Todas as turmas' };
 const AVC = { criancas:'av-c', jovens:'av-j', adultos:'av-a' };
 const ini = n => n.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
@@ -1703,7 +1825,18 @@ async function doLogin() {
       USER = { ...pd, perfil: pd.perfil_tipo||'professor' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return;
     }
     const { data: alunos } = await sbClient.from('alunos').select('*').eq('login', lu).eq('senha', lp);
-    if (alunos && alunos.length > 0) { USER = { ...alunos[0], perfil: 'aluno' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
+    if (alunos && alunos.length > 0) {
+      const a = alunos[0];
+      // Verificar se é responsável (tem filhos vinculados)
+      if (a.eh_responsavel) {
+        USER = { ...a, perfil: 'responsavel' };
+      } else {
+        USER = { ...a, perfil: 'aluno' };
+      }
+      btn.disabled=false; btn.textContent='Entrar';
+      await finalizarLogin();
+      return;
+    }
     document.getElementById('lerr').style.display = 'block';
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
   btn.disabled = false; btn.textContent = 'Entrar';
@@ -1719,6 +1852,8 @@ function construirNav() {
   const p = USER.perfil;
   if (p === 'aluno') {
     items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'});
+  } else if (p === 'responsavel') {
+    items.push({id:'responsavel',label:'Meus Filhos'},{id:'licoes',label:'Lições'},{id:'calendario',label:'Calendário'},{id:'pix',label:'Pix'});
   } else if (p === 'professor_convidado') {
     items.push({id:'dash',label:'Inicio'},{id:'freq',label:'Aula'},{id:'licoes',label:'Licoes'},{id:'calendario',label:'Calendario'});
   } else {
@@ -1737,7 +1872,7 @@ function construirNav() {
       return '<button class="tb-btn' + (i.id==='dash'||i.id==='pg-aluno'?' on':'') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
     }).join('');
   }
-  syncDrawerNav(items, p==='aluno'?'pg-aluno':'dash');
+  syncDrawerNav(items, p==='aluno'?'pg-aluno':p==='responsavel'?'responsavel':'dash');
 }
 async function finalizarLogin() {
   const uid = USER.id;
@@ -1783,7 +1918,7 @@ function tentarLogout() {
 }
 function doLogout() {
   USER = null; PERFIL = null; freqPresencas = {}; freqVisitantes = []; isDirty = false;
-  cacheAlunos = []; cacheAulas = [];
+  cacheAlunos = []; cacheAulas = []; _respFilhoAtual = null;
   if (chartFreq) { chartFreq.destroy(); chartFreq = null; }
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
   if (cronoInterval) { clearInterval(cronoInterval); cronoInterval = null; }
@@ -1798,7 +1933,10 @@ async function iniciarApp() {
   // Topbar
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('tb-uname').textContent = nomeExib;
-  const roleLabel = USER.perfil === 'super' ? 'Superintendente' : USER.perfil === 'aluno' ? `Aluno — ${TN[USER.turma]||''}` : 'Professor';
+  const roleLabel = USER.perfil === 'super' ? 'Superintendente'
+    : USER.perfil === 'aluno' ? `Aluno — ${TN[USER.turma]||''}`
+    : USER.perfil === 'responsavel' ? 'Responsável'
+    : 'Professor';
   document.getElementById('tb-urole').textContent = roleLabel;
   atualizarAvatarTopbar();
 
@@ -1810,6 +1948,11 @@ async function iniciarApp() {
     items.push({ id:'provas', label:'Provas' });
     items.push({ id:'calendario', label:'Calendário' });
     items.push({ id:'escalas', label:'Escalas' });
+    items.push({ id:'pix', label:'Pix' });
+  } else if (USER.perfil === 'responsavel') {
+    items.push({ id:'responsavel', label:'Meus Filhos' });
+    items.push({ id:'licoes', label:'Lições' });
+    items.push({ id:'calendario', label:'Calendário' });
     items.push({ id:'pix', label:'Pix' });
   } else {
     items.push({ id:'dash', label:'Início' });
@@ -1842,7 +1985,7 @@ async function iniciarApp() {
   document.getElementById('tb-nav').innerHTML = items.map(i =>
     `<button class="tb-btn${i.id==='dash'?' on':''}" data-pg="${i.id}" onclick="navTo('${i.id}')">${i.label}</button>`
   ).join('');
-  syncDrawerNav(items, USER.perfil === 'aluno' ? 'pg-aluno' : 'dash');
+  syncDrawerNav(items, USER.perfil === 'aluno' ? 'pg-aluno' : USER.perfil === 'responsavel' ? 'responsavel' : 'dash');
 
   // Data
   const hoje = new Date();
@@ -1922,6 +2065,15 @@ async function iniciarApp() {
     return;
   }
 
+  // Responsável: ver filhos
+  if (USER.perfil === 'responsavel') {
+    preencherFormPerfil();
+    await carregarConfigs();
+    await renderFilhosResponsavel();
+    _navTo('responsavel');
+    return;
+  }
+
   // Carregar dados
   if (isProfessor()) {
     // Professor carrega APENAS alunos das suas turmas (backend filter)
@@ -1997,7 +2149,8 @@ async function _navTo(id) {
     'pg-provas-aluno': 'pg-pg-provas-aluno',
     'fazer-prova': 'pg-fazer-prova',
     'resultado-prova': 'pg-resultado-prova',
-    'provas': USER && USER.perfil === 'aluno' ? 'pg-pg-provas-aluno' : 'pg-provas'
+    'provas': USER && USER.perfil === 'aluno' ? 'pg-pg-provas-aluno' : 'pg-provas',
+    'responsavel': 'pg-responsavel'
   };
   const elId = idMap[id] || 'pg-' + id;
   const pg = document.getElementById(elId); if (pg) pg.classList.add('on');
@@ -2043,6 +2196,7 @@ async function _navTo(id) {
   else if (id === 'perfil') preencherFormPerfil();
   else if (id === 'licoes') renderLicoes();
   else if (id === 'pg-aluno') renderAlunoProgresso();
+  else if (id === 'responsavel') renderFilhosResponsavel();
   else if (id === 'meu-progresso-prof') {
     // Professor visualiza próprio progresso como aluno
     const turmaOriginal = USER.turma;
@@ -2344,6 +2498,7 @@ function renderAlunos() {
         <button class="btn-ic" onclick="verHistoricoAluno('${a.id}')" title="Histórico">📋</button>
         ${podeEditar?`<button class="btn-ic" onclick="editAluno('${a.id}')" title="Editar">✎</button>
         <button class="btn-ic" onclick="toggleStatusAluno('${a.id}','${a.status||'ativo'}')" title="${(a.status||'ativo')==='ativo'?'Inativar':'Ativar'}">${(a.status||'ativo')==='ativo'?'⏸':'▶'}</button>
+        ${isAdmin()?`<button class="btn-ic" title="Vincular responsável" onclick="abrirModalVincularResp('${a.id}','${a.nome.replace(/'/g,"\\'")}')">👨‍👩‍👧</button>`:''}
         ${isAdmin()?`<button class="btn-ic" onclick="promoverUsuario('${a.id}','${a.nome.replace(/'/g,"\\'")}')">⬆</button>`:''}
         <button class="btn-ic danger" onclick="confirmarDel('aluno','${a.id}','${a.nome.replace(/'/g,"\\'")}')">✕</button>`:''}
       </div>
@@ -2371,6 +2526,9 @@ function abrirModalAluno(id) {
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value=a.responsavel||'';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value=a.tel_responsavel||'';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value=a.endereco||'';
+    if (document.getElementById('ae-resp-login')) document.getElementById('ae-resp-login').value='';
+    // Carregar responsáveis vinculados
+    carregarRespVinculadosModal(id);
     if (prev) {
       if (a.foto_url) { prev.innerHTML=`<img src="${a.foto_url}" alt="foto">`; prev.dataset.foto=a.foto_url; }
       else { prev.innerHTML='📷'; delete prev.dataset.foto; }
@@ -2386,6 +2544,11 @@ function abrirModalAluno(id) {
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value='';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value='';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value='';
+    if (document.getElementById('ae-resp-login')) document.getElementById('ae-resp-login').value='';
+    document.getElementById('ae-resp-ids').value='[]';
+    document.getElementById('ae-resp-busca').value='';
+    document.getElementById('ae-resp-sugestoes').innerHTML='';
+    document.getElementById('ae-resp-vinculados').innerHTML='';
     if (prev) { prev.innerHTML='📷'; delete prev.dataset.foto; }
   }
   document.getElementById('mo-aluno').style.display = 'block';
@@ -2417,6 +2580,17 @@ async function salvarAluno() {
     if (editId) result = await sbUpdate('alunos', editId, dado);
     else result = await sbInsert('alunos', dado);
     if (result === null) return;
+    const alunoId = result.id;
+    // Salvar vínculos de responsáveis
+    const respIds = JSON.parse(document.getElementById('ae-resp-ids').value || '[]');
+    if (respIds.length > 0) {
+      await sincronizarVinculosResp(alunoId, respIds);
+    }
+    // Vincular pelo login se preenchido (busca aluno existente com esse login)
+    const respLogin = document.getElementById('ae-resp-login')?.value?.trim();
+    if (respLogin) {
+      await criarLoginResponsavel(respLogin, null, nome, alunoId);
+    }
     // Capturar dados antes de fechar modal
     const _nome = document.getElementById('ae-nome').value.trim();
     const _tel  = document.getElementById('ae-tel').value.trim();
@@ -3085,6 +3259,21 @@ async function salvarPerfil() {
 }
 
 // ── CONFIGURAÇÕES ──
+function copiarSQLResponsaveis() {
+  var el = document.getElementById('sql-responsaveis');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){
+    var st = document.getElementById('sql-resp-status');
+    if (st) { st.style.display='block'; setTimeout(function(){ st.style.display='none'; },2500); }
+  }).catch(function(){
+    var ta=document.createElement('textarea'); ta.value=el.textContent;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    var st = document.getElementById('sql-resp-status');
+    if (st) { st.style.display='block'; setTimeout(function(){ st.style.display='none'; },2500); }
+  });
+}
+
 async function carregarPaginaConfig() {
   document.getElementById('cfg-nome-igreja').value = cfgNomeIgreja;
   document.getElementById('cfg-nome-ebd').value = cfgNomeEBD;
@@ -3239,19 +3428,19 @@ const LICOES = {
     comentarista: 'Comentarista: Elinaldo Renovato',
     periodo: '2º Trimestre 2026 — Abril a Junho',
     licoes: [
-      { num:1, data:'06/04', titulo:'Chamado e Jornada de Fé', texto:'Hb 11.8', resumo:'Abraão respondeu ao chamado de Deus com obediência imediata, deixando tudo sem saber o destino, demonstrando que a fé genuína exige deixar a segurança do conhecido para confiar na direção divina.', perguntas:[{q:'O que caracterizou a resposta de Abraão ao chamado de Deus?',a:'Obediência imediata e incondicional, mesmo sem saber o destino.',op:['Hesitação e muitas perguntas antes de obedecer','Obediência imediata e incondicional, mesmo sem saber o destino','Uma longa negociação com Deus sobre as condições','Obediência parcial, levando apenas parte da família']},{q:'O que Deus prometeu a Abraão no chamado?',a:'Fazer dele uma grande nação, abençoá-lo e tornar seu nome grande, para que ele fosse uma bênção.',op:['Riquezas materiais e saúde para toda a vida','Fazer dele uma grande nação, abençoá-lo e tornar seu nome grande','Um filho imediatamente após o chamado','Proteção contra todos os inimigos de Israel']},{q:'Qual é a lição central sobre a fé extraída da vida de Abraão nesta lição?',a:'A fé genuína exige deixar a segurança do conhecido para confiar plenamente na direção divina.',op:['A fé só funciona quando entendemos completamente o plano de Deus','A fé genuína exige deixar a segurança do conhecido para confiar na direção divina','A fé precisa ser confirmada por sinais e milagres visíveis','A fé é principalmente uma questão de sentimentos e emoções']},{q:'Para onde Deus chamou Abraão?',a:'Para Canaã, a terra que Deus mostraria a ele.',op:['Para o Egito, onde encontraria prosperidade','Para Canaã, a terra que Deus mostraria a ele','Para o Monte Sinai, onde receberia as leis divinas','Para Babilônia, onde fundaria uma grande nação']},{q:'O que significa "caminhar pela fé e não pelo sentido"?',a:'Obedecer e confiar em Deus mesmo quando não vemos o caminho completo nem entendemos todos os detalhes do plano divino.',op:['Ignorar os sentimentos e viver apenas pela razão','Obedecer e confiar em Deus mesmo sem ver o caminho completo ou entender todos os detalhes','Buscar sinais sobrenaturais antes de tomar qualquer decisão','Evitar todo planejamento humano e agir apenas por impulsos espirituais']}]},
-      { num:2, data:'13/04', titulo:'A Fé nas Promessas de Deus', texto:'Rm 4.20,21', resumo:'Abraão creu em Deus contra toda esperança humana, e isso lhe foi imputado como justiça. A fé bíblica não depende das circunstâncias, mas da fidelidade de Deus que prometeu.', perguntas:[{q:'Como Deus confirmou seu pacto com Abraão?',a:'Através de um ritual de aliança onde Deus mesmo passou entre os animais divididos, assumindo toda a responsabilidade do pacto.',op:['Através de uma visão e de uma voz audível do céu','Através de um ritual de aliança onde Deus passou entre os animais divididos','Através de um anjo que visitou Abraão em sua tenda','Através da bênção de Melquisedeque, sacerdote de Deus']},{q:'O que Romanos 4 nos ensina sobre a fé de Abraão?',a:'Que ele creu contra toda esperança, sem vacilar na promessa de Deus, e isso lhe foi imputado como justiça.',op:['Que a fé de Abraão era baseada em suas obras e obediência','Que ele creu contra toda esperança sem vacilar, e isso lhe foi imputado como justiça','Que Abraão duvidou várias vezes antes de alcançar uma fé madura','Que a fé de Abraão foi recompensada com riquezas materiais imediatas']},{q:'Qual é a aplicação prática desta lição para o cristão de hoje?',a:'Confiar nas promessas de Deus mesmo quando as circunstâncias parecem impossíveis, pois Deus é fiel ao que prometeu.',op:['Esperar sinais e confirmações antes de crer nas promessas divinas','Confiar nas promessas de Deus mesmo quando as circunstâncias parecem impossíveis','Buscar sempre confirmação humana antes de agir pela fé','Aguardar o cumprimento completo antes de agradecer a Deus']},{q:'Qual promessa Deus confirmou a Abraão?',a:'Que seus descendentes herdariam a terra de Canaã e seriam numerosos como as estrelas.',op:['Que Abraão nunca passaria por sofrimentos ou dificuldades','Que seus descendentes herdariam Canaã e seriam numerosos como as estrelas','Que Isaaque nasceria dentro de um ano','Que Abraão viveria por centenas de anos para ver o cumprimento']},{q:'Por que a fé de Abraão é modelo para todos os crentes?',a:'Porque ele creu em Deus em circunstâncias humanamente impossíveis, sem vacilar na promessa, mostrando que a fé genuína confia no caráter de Deus acima das circunstâncias.',op:['Porque ele nunca duvidou de Deus em nenhuma situação','Porque creu em circunstâncias humanamente impossíveis sem vacilar, confiando no caráter de Deus','Porque foi o único homem na Bíblia a receber promessas específicas de Deus','Porque suas obras e obediência foram perfeitas durante toda a vida']}]},
-      { num:3, data:'20/04', titulo:'A Impaciência na Espera', texto:'Gl 4.22,23', resumo:'A tentativa de Abraão e Sara de antecipar o cumprimento da promessa através de Agar resultou em conflito e dor. A impaciência humana sempre complica o que Deus planejou fazer de forma perfeita.', perguntas:[{q:'Qual foi a consequência da impaciência de Abraão e Sara?',a:'Conflito, dor e complicações que persistiram por gerações — o nascimento de Ismael e a tensão com Agar.',op:['O adiamento indefinido da promessa de Deus','Conflito, dor e complicações geracionais — o nascimento de Ismael e a tensão com Agar','A perda das bênçãos que Deus havia prometido a Abraão','O afastamento de Deus por causa da desobediência']},{q:'O que a história de Agar nos ensina sobre tentar "ajudar" Deus?',a:'Que antecipar os planos de Deus através de meios humanos sempre gera complicações — Deus não precisa de nossa ajuda para cumprir suas promessas.',op:['Que às vezes Deus usa meios humanos para cumprir suas promessas','Que antecipar os planos de Deus por meios humanos sempre gera complicações','Que Deus aprova quando tomamos iniciativa em situações de espera','Que Deus perdoa facilmente os erros cometidos com boas intenções']},{q:'Como a impaciência afeta a vida espiritual do crente?',a:'Leva a decisões precipitadas que complicam o que Deus planejou, gerando consequências dolorosas que poderiam ter sido evitadas com a espera em Deus.',op:['É um sinal saudável de que o crente deseja ver Deus agir','Leva a decisões precipitadas que complicam o plano de Deus, gerando consequências dolorosas','Demonstra fé ativa e iniciativa espiritual louvável','É natural e Deus sempre corrige os excessos da impaciência sem consequências']},{q:'O que devemos fazer quando a promessa de Deus demora a se cumprir?',a:'Esperar no Senhor, renovando as forças na sua presença, confiando que Ele é fiel e age no tempo perfeito.',op:['Tomar iniciativa para acelerar o cumprimento por meios humanos','Esperar no Senhor, renovando as forças, confiando que Ele age no tempo perfeito','Questionar se a promessa ainda é válida para nossa situação','Aceitar que talvez a promessa não seja para nós e seguir em frente']},{q:'Qual contraste Paulo estabelece em Gálatas 4 usando Ismael e Isaque?',a:'Ismael representa o que nasce da carne e do esforço humano; Isaque representa o que nasce da promessa e do poder de Deus.',op:['Ismael representa o Antigo Testamento; Isaque o Novo Testamento','Ismael representa esforço humano; Isaque representa promessa e poder de Deus','Ismael representa os gentios; Isaque representa o povo de Israel','Ismael representa o pecado; Isaque representa a redenção']}]},
-      { num:4, data:'27/04', titulo:'A Confirmação de Uma Promessa', texto:'Gn 17.1', resumo:'Deus renova o pacto com Abraão, muda seu nome e institui a circuncisão como sinal da aliança. A fidelidade de Deus às suas promessas transcende o tempo e as limitações humanas.', perguntas:[{q:'Por que Deus mudou o nome de Abrão para Abraão?',a:'Porque Abraão significa "pai de muitas nações" — a mudança de nome confirmou e ampliou a promessa de Deus sobre seu destino.',op:['Para diferenciar Abraão de outros líderes de seu tempo','Porque Abraão significa "pai de muitas nações" — confirmando e ampliando a promessa divina','Para marcar o início de um novo período de sua vida após os erros','Como sinal de punição pelos erros cometidos com Agar']},{q:'Qual era o significado da circuncisão instituída por Deus?',a:'Era o sinal do pacto entre Deus e Abraão — uma marca física que identificava os pertencentes à aliança de Deus.',op:['Era uma prática de higiene que Deus aprovou por motivos de saúde','Era o sinal do pacto — marca física que identificava os pertencentes à aliança de Deus','Era um ritual de purificação dos pecados cometidos anteriormente','Era uma tradição cultural que Deus incorporou à religião de Israel']},{q:'O que a renovação do pacto nos ensina sobre a fidelidade de Deus?',a:'Que Deus é fiel às suas promessas mesmo quando passam anos, e que Ele confirma seus propósitos repetidamente para fortalecer nossa fé.',op:['Que Deus precisa renovar os pactos porque os homens frequentemente os quebram','Que Deus é fiel mesmo depois de anos, confirmando seus propósitos para fortalecer nossa fé','Que as promessas de Deus têm prazo de validade e precisam ser renovadas','Que a renovação do pacto dependia da obediência perfeita de Abraão']},{q:'Quando Deus apareceu a Abraão nesta passagem, qual era sua condição física?',a:'Tinha 99 anos — humanamente falando, a promessa de um filho era impossível.',op:['Tinha 75 anos — no início de sua jornada de fé','Tinha 99 anos — humanamente a promessa de um filho era impossível','Tinha 60 anos — ainda em boa condição física','Tinha 110 anos — bem além dos limites humanos']},{q:'O que significa "andar na presença de Deus e ser perfeito"?',a:'Viver em comunhão contínua com Deus, com integridade e consagração total, reconhecendo que Ele observa todos os caminhos.',op:['Ser sem pecado e nunca cometer erros de qualquer natureza','Viver em comunhão contínua com Deus, com integridade e consagração total','Realizar sacrifícios e rituais religiosos com perfeição formal','Alcançar um estado espiritual elevado inacessível à maioria dos crentes']}]},
-      { num:5, data:'04/05', titulo:'O Juízo contra Sodoma', texto:'Gn 18.25', resumo:'A intercessão de Abraão por Sodoma revela um Deus que ouve a oração do justo, e ao mesmo tempo um Deus que é justo e não pode deixar o pecado sem consequências.', perguntas:[{q:'O que a intercessão de Abraão por Sodoma revela sobre sua relação com Deus?',a:'Que Abraão tinha uma intimidade especial com Deus, podendo interceder com confiança, e que Deus ouve e responde à oração dos justos.',op:['Que Abraão tinha autoridade para negociar os decretos divinos','Que Abraão tinha intimidade especial com Deus e que Deus ouve a oração dos justos','Que Deus sempre muda seus planos quando um justo intercede','Que a intercessão humana é mais eficaz que a justiça divina']},{q:'Por que Sodoma foi destruída?',a:'Por causa da extrema perversidade de seus habitantes — seu clamor de pecado havia chegado até Deus.',op:['Por recusar os anjos enviados por Deus','Por causa da extrema perversidade — seu clamor de pecado havia chegado a Deus','Por perseguir o povo de Abraão nas terras vizinhas','Por praticar rituais de adoração a outros deuses']},{q:'O que o resgate de Ló nos ensina?',a:'Que Deus não abandona os seus — mesmo na cidade perversa, Ló foi lembrado por Deus por causa de Abraão.',op:['Que Ló merecia ser salvo por sua própria justiça pessoal','Que Deus não abandona os seus — Ló foi lembrado por Deus por causa de Abraão','Que todos os habitantes que quisessem fugir poderiam ser salvos','Que Ló foi salvo porque intercedeu por si mesmo']},{q:'Qual é o ensinamento sobre a justiça de Deus nesta passagem?',a:'Que o "Juiz de toda a terra" não pode deixar o pecado sem punição — Deus é justo e não pode ser indiferente ao mal.',op:['Que Deus é misericordioso e sempre perdoa quando há intercessão','Que o Juiz de toda a terra não pode deixar o pecado sem punição — Deus é justo','Que a justiça divina depende da quantidade de justos em um lugar','Que Deus pune coletivamente, sem distinção entre justos e ímpios']},{q:'Qual lição sobre a oração de intercessão extraímos desta passagem?',a:'Que devemos interceder pelos outros com persistência e confiança, sabendo que Deus ouve e age conforme sua sabedoria e justiça.',op:['Que a intercessão intensa pode mudar os decretos eternos de Deus','Que devemos interceder com persistência, sabendo que Deus ouve e age com sabedoria','Que a intercessão só é eficaz quando o justo vive no mesmo lugar do pecador','Que Deus sempre responde a intercessão exatamente como pedimos']}]},
-      { num:6, data:'11/05', titulo:'O Nascimento de Isaque', texto:'Hb 11.11', resumo:'O nascimento de Isaque foi o cumprimento da promessa impossível — Deus agiu no tempo certo, demonstrando que nada é impossível para Ele, e que seu cumprimento supera qualquer expectativa humana.', perguntas:[{q:'O que o nascimento de Isaque demonstra sobre Deus?',a:'Que Deus cumpre suas promessas no tempo certo, mesmo quando parecem humanamente impossíveis.',op:['Que Deus usa a biologia humana apenas como instrumento secundário','Que Deus cumpre suas promessas no tempo certo, mesmo quando parecem humanamente impossíveis','Que a fé de Sara foi o elemento decisivo para o milagre acontecer','Que Deus recompensa a paciência com bênçãos materiais abundantes']},{q:'Qual foi a reação de Sara ao anúncio do nascimento de Isaque?',a:'Ela riu por incredulidade — parecia humanamente impossível na sua idade.',op:['Ela chorou de gratidão e adorou a Deus imediatamente','Ela riu por incredulidade — parecia humanamente impossível na sua idade','Ela aceitou com calma, pois já esperava o cumprimento da promessa','Ela ficou em silêncio, com medo de se iludir novamente']},{q:'O que significa o nome "Isaque"?',a:'"Riso" — em memória do riso de Sara, transformado em alegria pelo cumprimento da promessa de Deus.',op:['"Filho prometido" — referência à promessa divina a Abraão','"Riso" — em memória do riso de Sara, transformado em alegria','"Herdeiro" — indicando seu papel no plano divino','"Milagre" — reconhecendo o poder sobrenatural de Deus']},{q:'Por que Ismael e Agar foram enviados embora?',a:'Porque Sara não queria que Ismael, filho da escrava, fosse herdeiro junto com Isaque.',op:['Porque Ismael havia cometido um crime grave contra a família','Porque Sara não queria que Ismael fosse herdeiro junto com Isaque','Porque Deus revelou a Abraão que deveria separar os dois filhos','Porque Agar havia conspirado contra Sara diversas vezes']},{q:'Como Deus cuidou de Agar e Ismael após serem enviados embora?',a:'Deus os viu em sua angústia, abriu seus olhos para uma fonte de água e prometeu que Ismael também seria uma grande nação.',op:['Enviou um anjo para guiá-los até um lugar seguro no Egito','Deus os viu, abriu seus olhos para uma fonte e prometeu que Ismael seria uma grande nação','Abençoou Ismael através de Abraão com muitas riquezas','Fez com que tribos vizinhas os acolhessem e cuidassem deles']}]},
-      { num:7, data:'18/05', titulo:'Uma Prova de Fé', texto:'Hb 11.17-19', resumo:'O sacrifício de Isaque foi a maior prova de fé de Abraão — ele obedeceu completamente, confiando que Deus ressuscitaria seu filho se necessário. Deus proveu o cordeiro, prefigurando Cristo.', perguntas:[{q:'Por que Deus ordenou que Abraão sacrificasse Isaque?',a:'Para provar a fé de Abraão — não para que o sacrifício se concluísse, mas para revelar o coração de total consagração de Abraão a Deus.',op:['Porque Deus precisava de um sacrifício humano naquele momento histórico','Para provar a fé de Abraão — revelar seu coração de total consagração a Deus','Para punir Abraão por erros cometidos anteriormente com Agar','Para testar se Isaque era digno de ser o filho da promessa']},{q:'O que a obediência de Abraão revela sobre sua fé?',a:'Que ele acreditava que Deus poderia ressuscitar Isaque, pois sabia que a promessa passava por ele — uma fé que confia em Deus acima de tudo.',op:['Que ele não entendia completamente o que Deus estava pedindo','Que cria que Deus poderia ressuscitar Isaque — fé que confia em Deus acima de tudo','Que estava disposto a obedecer mesmo achando que Deus estava errado','Que tinha certeza que Deus interviria antes do sacrifício ser consumado']},{q:'O que o carneiro preso pelos chifres no mato representa teologicamente?',a:'A substituição expiatória — prefiguração de Cristo, o Cordeiro de Deus que morreria em nosso lugar.',op:['A provisão material que Deus sempre oferece aos seus fiéis','A substituição expiatória — prefiguração de Cristo, o Cordeiro que morre em nosso lugar','O poder da oração em momentos de extrema necessidade','A libertação divina que sempre chega no último momento']},{q:'O que significa o nome "Jeová-Jirê" dado por Abraão ao lugar?',a:'"O Senhor proverá" — testemunho de que Deus é o provedor fiel em todas as circunstâncias.',op:['"O Senhor é poderoso" — reconhecendo o poder milagroso de Deus','"O Senhor proverá" — Deus é o provedor fiel em todas as circunstâncias','"O Senhor salva" — lembrança do livramento de Isaque','"O Senhor está aqui" — presença de Deus no momento da prova']},{q:'Quais bênçãos Deus prometeu após a prova do sacrifício?',a:'Multiplicar sua descendência como as estrelas e a areia, e que por sua descendência todas as nações da terra seriam abençoadas.',op:['Vida longa e prosperidade material abundante para Abraão','Multiplicar sua descendência e que por ela todas as nações seriam abençoadas','Que Isaque herdaria toda a terra de Canaã imediatamente','Que nunca mais passaria por provas tão difíceis em sua vida']}]},
-      { num:8, data:'25/05', titulo:'Herdeiro da Promessa', texto:'Gn 26.3', resumo:'Isaque passou pela mesma prova do pai — a fome — mas Deus o instruiu a ficar em Canaã. Sua fé serena e perseverança são modelo para o cristão que enfrenta tentações de fugir das dificuldades.', perguntas:[{q:'O que Deus instruiu Isaque a fazer durante a fome?',a:'Ficar em Canaã e não descer ao Egito — confiar na promessa e não fugir das dificuldades.',op:['Ir ao Egito buscar provisões e depois retornar','Ficar em Canaã e não descer ao Egito — confiar na promessa sem fugir','Buscar ajuda dos reis vizinhos e depois retornar','Ir onde a terra fosse mais fértil e depois voltar para Canaã']},{q:'Qual pecado semelhante ao de Abraão Isaque cometeu em Gerara?',a:'Mentiu sobre sua esposa Rebeca, dizendo que era sua irmã, com medo de ser morto.',op:['Construiu um altar para outro deus por medo dos filisteus','Mentiu sobre sua esposa Rebeca dizendo que era sua irmã, com medo','Fugiu de Canaã sem consultar Deus durante a fome','Fez aliança com inimigos sem consultar Deus']},{q:'O que Deus prometeu a Isaque nesta passagem?',a:'Estar com ele, abençoá-lo, multiplicar sua descendência e dar-lhe a terra — as mesmas promessas feitas a Abraão.',op:['Que nunca mais haveria fome em Canaã durante sua vida','Estar com ele, abençoá-lo, multiplicar sua descendência e dar-lhe a terra','Que seria protegido de todos os inimigos sem precisar lutar','Que encontraria água em abundância em qualquer lugar que fosse']},{q:'O que demonstra a perseverança de Isaque ao cavar os poços?',a:'Que a herança das promessas de Deus exige perseverança — mesmo quando outros nos tomam o que é nosso, continuamos avançando na fé.',op:['Que os recursos materiais são sinal de aprovação divina','Que a herança das promessas exige perseverança — seguimos avançando mesmo quando tomam o que é nosso','Que Isaque era um habilidoso geólogo que encontrava água facilmente','Que devemos sempre ceder nossos direitos para evitar conflitos']},{q:'Qual é a aplicação desta lição para o cristão que enfrenta dificuldades?',a:'Permanecer onde Deus chamou mesmo na adversidade, confiar na promessa, perseverar sem fugir das dificuldades.',op:['Buscar sempre ambientes mais favoráveis quando as dificuldades surgem','Permanecer onde Deus chamou, confiar na promessa e perseverar sem fugir','Ceder o que nos pertence para manter a paz com todos','Aguardar que Deus resolva as situações sem tomar nenhuma iniciativa']}]},
-      { num:9, data:'01/06', titulo:'Jacó e Esaú: Irmãos em Conflito', texto:'Rm 9.13', resumo:'A rivalidade entre Jacó e Esaú revela a soberania de Deus na eleição, mas também as consequências do engano e da valorização das coisas eternas sobre as temporais.', perguntas:[{q:'O que a venda da primogenitura por Esaú revela sobre seus valores?',a:'Que Esaú era profano — valorizava o imediato e o material acima do eterno e espiritual.',op:['Que Esaú era pragmático e sabia gerenciar recursos escassos','Que era profano — valorizava o imediato e material acima do eterno e espiritual','Que Esaú confiava que Jacó lhe devolveria os direitos no futuro','Que a fome extrema pode justificar decisões precipitadas']},{q:'Qual lição espiritual Hebreus 12 extrai da história de Esaú?',a:'Que devemos guardar a herança espiritual e não trocá-la por satisfações temporárias — ser profano como Esaú tem consequências irreversíveis.',op:['Que o primogênito sempre tem direitos especiais que devem ser respeitados','Que devemos guardar a herança espiritual sem trocá-la por satisfações temporárias','Que Deus premia os mais esforçados e inteligentes como Jacó','Que conflitos familiares devem ser resolvidos com mediação externa']},{q:'O que o engano de Jacó nos revela sobre seu caráter neste estágio?',a:'Que ele era astuto e manipulador, mas que Deus trabalharia nele ao longo do tempo para transformar seu caráter.',op:['Que qualquer meio é justificável quando buscamos as bênçãos de Deus','Que era astuto e manipulador, mas Deus trabalharia para transformar seu caráter','Que Deus aprova a esperteza quando usada para fins espirituais','Que o engano foi inspirado por Deus para cumprir a profecia']},{q:'Qual foi a consequência imediata do engano de Jacó?',a:'Ter que fugir de casa por causa da ira de Esaú, separando-se de sua família por muitos anos.',op:['Perder a bênção que havia roubado porque Isaque a revogou','Ter que fugir de casa por causa da ira de Esaú, separando-se da família por anos','Ser amaldiçoado por seu pai Isaque pela desonestidade','Reconciliar-se imediatamente com Esaú após a confissão']},{q:'O que a soberania de Deus na eleição de Jacó nos ensina?',a:'Que os propósitos de Deus não dependem dos méritos humanos — Ele escolhe e trabalha através de pessoas imperfeitas para cumprir seus planos.',op:['Que Deus escolhe os mais inteligentes e astutos para seus propósitos','Que os propósitos de Deus não dependem dos méritos humanos — Ele usa pessoas imperfeitas','Que a eleição divina remove a responsabilidade moral das escolhas','Que Deus sempre prefere os mais novos e humildes aos mais velhos']}]},
-      { num:10, data:'08/06', titulo:'A Experiência Transformadora', texto:'Gn 32.28', resumo:'A luta de Jacó em Peniel e a escada em Betel representam momentos de encontro transformador com Deus. Jacó saiu mancando, mas com um novo nome e uma nova identidade.', perguntas:[{q:'O que a visão da escada em Betel revelou a Jacó?',a:'A presença e a proteção de Deus sobre ele — que Deus estava com ele onde quer que fosse e cumpriria suas promessas.',op:['Que ele precisava construir um templo em Betel para adorar a Deus','A presença e proteção de Deus — que Ele estava com Jacó e cumpriria suas promessas','Que os anjos seriam seus guias físicos durante toda a jornada','Que Betel seria a capital do reino prometido a seus descendentes']},{q:'O que a luta de Jacó em Peniel representa espiritualmente?',a:'O confronto com Deus que todo crente precisa ter — uma rendição total que transforma o caráter e a identidade.',op:['A resistência necessária do crente contra os ataques espirituais do inimigo','O confronto com Deus que todo crente precisa ter — rendição total que transforma','Uma metáfora para os conflitos familiares que devem ser resolvidos','Um evento único e irrepetível específico para a história de Israel']},{q:'Por que Jacó disse "não te deixarei ir enquanto não me abençoares"?',a:'Demonstrava a perseverança e o desejo intenso de Jacó pela bênção de Deus — mesmo machucado, se agarrou a Deus com determinação.',op:['Porque não sabia que era Deus com quem lutava e queria vencer','Demonstrava perseverança e desejo intenso pela bênção — mesmo machucado, se agarrou a Deus','Porque queria provar sua força física diante de Deus','Porque entendia que a bênção era a única forma de se reconciliar com Esaú']},{q:'O que significa a mudança do nome de Jacó para Israel?',a:'"O que luta com Deus e prevalece" — uma nova identidade que reconhece que ele não mais prevalece por sua astúcia, mas por sua dependência de Deus.',op:['"O escolhido de Deus" — confirmando a eleição divina sobre sua vida','"O que luta com Deus e prevalece" — nova identidade de dependência, não astúcia','"O servo do Senhor" — indicando seu papel de liderança sobre os filhos','"O abençoado" — em memória das bênçãos recebidas de Deus']},{q:'Qual é o significado espiritual de Jacó sair mancando após Peniel?',a:'Que o encontro transformador com Deus nos marca permanentemente — nossa fraqueza humana é lembrada para que dependamos de Deus e não de nossas forças.',op:['Que Deus pune os que lutam contra Ele mesmo quando vencem','Que o encontro com Deus nos marca permanentemente — fraqueza que nos faz depender dEle','Que as lutas espirituais sempre deixam marcas físicas nos crentes','Que Jacó havia pecado e a mancadura era consequência de seus erros']}]},
-      { num:11, data:'15/06', titulo:'De Enganador a Homem de Honra', texto:'Gn 35.1', resumo:'A transformação de Jacó culmina na reconciliação com Esaú e na renovação do pacto em Betel. O processo de Deus em nossas vidas sempre visa nossa transformação completa de caráter.', perguntas:[{q:'Como foi o encontro de Jacó com Esaú após anos de separação?',a:'Inesperadamente cheio de graça e reconciliação — Esaú correu ao encontro de Jacó e o abraçou com choro, sem rancor.',op:['Com conflito inicial que foi resolvido após longa negociação','Inesperadamente cheio de graça — Esaú correu e abraçou Jacó sem rancor','Com frieza inicial mas com reconciliação posterior através dos presentes','Com ressentimento de Esaú que precisou de intercessão divina para perdoar']},{q:'O que a reconciliação entre Jacó e Esaú nos ensina sobre o perdão?',a:'Que Deus pode transformar corações e restaurar relacionamentos que pareciam destruídos para sempre, e que o perdão liberta tanto quem perdoa quanto quem é perdoado.',op:['Que o tempo cura todas as feridas mesmo sem intervenção divina','Que Deus transforma corações e restaura relacionamentos destruídos — o perdão liberta','Que devemos esperar que o outro tome a iniciativa da reconciliação','Que presentes e compensações materiais são necessários para o perdão real']},{q:'Por que Deus convocou Jacó a voltar para Betel?',a:'Para que cumprisse o voto feito em Betel e para renovar o pacto com ele — um chamado de volta ao lugar do encontro original com Deus.',op:['Para protegê-lo de seus inimigos que o perseguiam na região','Para que cumprisse o voto e Deus renovasse o pacto — voltar ao lugar do encontro original','Para que se distanciasse de Esaú e evitasse novos conflitos','Para que iniciasse a construção do tabernáculo em Betel']},{q:'O que Jacó exigiu de sua família antes de subir para Betel?',a:'Que se livrassem dos deuses estrangeiros e se purificassem — uma preparação espiritual para o encontro com o Deus vivo.',op:['Que fizessem um jejum de três dias antes da adoração','Que se livrassem dos deuses estrangeiros e se purificassem para o encontro com Deus','Que construíssem tendas para a celebração em Betel','Que recolhessem ofertas para apresentar a Deus em Betel']},{q:'O que a transformação de Jacó nos ensina sobre o processo de Deus em nossas vidas?',a:'Que Deus é paciente e persistente em sua obra de transformação — Ele não desiste de nós mesmo quando falhamos, mas continua moldando nosso caráter ao longo do tempo.',op:['Que a transformação espiritual acontece subitamente através de um único encontro','Que Deus é paciente e persistente — não desiste de nós, continua moldando nosso caráter','Que somente os que sofrem muito conseguem a transformação completa','Que a transformação depende principalmente do esforço e disciplina do próprio crente']}]},
-      { num:12, data:'22/06', titulo:'A Reconciliação com Esaú', texto:'Rm 12.18', resumo:'A reconciliação de Jacó com Esaú é um testemunho do poder transformador da graça de Deus. O mesmo Deus que nos transforma também nos capacita a buscar a paz com aqueles que prejudicamos.', perguntas:[{q:'O que motivou Jacó a ser humilde e generoso com Esaú no reencontro?',a:'A transformação interior operada por Deus em Peniel — um coração transformado age com graça e humildade mesmo com quem nos prejudicou.',op:['O medo de que Esaú ainda quisesse se vingar dele','A transformação interior operada em Peniel — coração transformado age com graça e humildade','O conselho de seus servos que mediaram a reconciliação','A orientação direta de um anjo antes do encontro com Esaú']},{q:'Qual é o princípio cristão sobre reconciliação que esta história ilustra?',a:'Devemos, na medida do possível, buscar a paz com todos, tomando a iniciativa da reconciliação mesmo quando não somos os únicos culpados.',op:['Devemos aguardar que o ofendido tome a iniciativa do perdão','Devemos buscar a paz com todos, tomando a iniciativa mesmo quando não somos os únicos culpados','Devemos aceitar a reconciliação apenas quando o outro demonstra arrependimento genuíno','A reconciliação verdadeira requer supervisão de líderes espirituais']},{q:'Por que Jacó insistiu em oferecer presentes a Esaú mesmo quando ele recusou?',a:'Porque os presentes eram uma expressão sincera de reconciliação e honra — Jacó queria demonstrar genuinamente sua mudança de coração.',op:['Porque queria compensar financeiramente o roubo da bênção','Os presentes eram expressão sincera de reconciliação — queria demonstrar sua mudança de coração','Porque era a tradição cultural obrigatória do seu tempo','Porque queria garantir a proteção de Esaú durante a jornada']},{q:'O que podemos aprender com a generosidade de Esaú ao perdoar Jacó?',a:'Que o perdão genuíno não guarda rancor nem exige compensação — liberta o coração e restaura relacionamentos.',op:['Que o tempo apaga automaticamente as mágoas profundas','O perdão genuíno não guarda rancor nem exige compensação — liberta e restaura','Que os laços de sangue sempre superam as ofensas mais graves','Que Esaú foi fraco ao perdoar sem exigir nenhuma retribuição']},{q:'Como esta história se aplica às nossas relações familiares e sociais?',a:'Devemos buscar ativamente a reconciliação, ser humildes o suficiente para reconhecer nossos erros e confiar que Deus pode amolecer corações endurecidos.',op:['Devemos aceitar que alguns conflitos são irreconciliáveis por natureza','Devemos buscar ativamente a reconciliação, ser humildes e confiar que Deus amolece corações','Devemos sempre aguardar o momento certo determinado por Deus para buscar a paz','Devemos aceitar a ruptura quando o outro não demonstra arrependimento']}]},
-      { num:13, data:'29/06', titulo:'O Legado de Fé', texto:'Hb 11.21', resumo:'O legado dos patriarcas não foi de perfeição, mas de fé persistente. Eles morreram sem ver o cumprimento completo das promessas, mas creram e foram aprovados por Deus — deixando um legado de fé para as gerações.', perguntas:[{q:'O que Hebreus 11 destaca como o maior legado dos patriarcas?',a:'A fé persistente — eles morreram sem receber o cumprimento completo das promessas, mas creram em Deus e foram aprovados por Ele.',op:['A perfeição moral e a ausência de falhas em suas vidas','A fé persistente — morreram sem ver o cumprimento completo, mas creram e foram aprovados','As grandes riquezas e territórios conquistados pela fé','Os milagres que realizaram ao longo de suas vidas']},{q:'O que significa a expressão "confessaram que eram estrangeiros e peregrinos na terra"?',a:'Que os patriarcas entendiam que sua verdadeira pátria era celestial — viviam neste mundo com a consciência de que pertenciam a um Reino eterno.',op:['Que eram fisicamente estrangeiros em Canaã sem direitos legais','Que entendiam que sua verdadeira pátria era celestial — pertenciam a um Reino eterno','Que eram nômades que não se adaptavam a nenhuma terra específica','Que preferiam não se envolver com a política e cultura dos povos locais']},{q:'O que a bênção de Jacó sobre seus filhos nos revela sobre a fé?',a:'Que a fé olha além do presente — Jacó abençoou seus filhos com profecia e visão do futuro, confiando no plano de Deus para as gerações seguintes.',op:['Que os patriarcas tinham poderes proféticos especiais exclusivos','Que a fé olha além do presente — Jacó abençoou com profecia, confiando no plano de Deus','Que devemos abençoar nossos filhos de acordo com suas personalidades','Que as bênçãos patriarcais são transferíveis automaticamente para os descendentes']},{q:'Qual é a "melhor pátria" mencionada em Hebreus 11.16?',a:'A pátria celestial — o Reino eterno de Deus, pelo qual os patriarcas esperavam e que dá sentido à caminhada de fé neste mundo.',op:['A terra de Canaã que seria finalmente possuída pelos descendentes','A pátria celestial — o Reino eterno de Deus que dá sentido à caminhada de fé','O Egito, onde Israel encontraria provisão e segurança por gerações','Jerusalém, que seria edificada por Davi e Salomão']},{q:'Que tipo de legado devemos deixar para as próximas gerações, baseado nesta lição?',a:'Um legado de fé persistente — não de perfeição, mas de vida consagrada a Deus, de confiança nas promessas divinas e de caminhada fiel mesmo nas dificuldades.',op:['Um legado de riquezas materiais e territórios conquistados','Um legado de fé persistente — vida consagrada, confiança nas promessas, caminhada fiel','Um legado de posições de liderança e influência religiosa','Um legado de tradições e rituais religiosos bem preservados']}]}
+      {num:1,data:'05/04',titulo:'ABRAÃO: SEU CHAMADO E SUA JORNADA DE FÉ',texto:'Gn 12.1',resumo:'O chamado de Deus na vida de Abrão e na nossa exige obediência irrestrita, fé e perseverança.',textoAureo:'Ora, o SENHOR disse a Abrão: Sai-te da tua terra, e da tua parentela, e da casa de teu pai, para a terra que eu te mostrarei.',textoAureoRef:'Gn 12.1',verdade:'O chamado de Deus na vida de Abrão e na nossa exige obediência irrestrita, fé e perseverança.',leituraBiblica:'Gênesis 12.1-9',leituradiaria:[{dia:'Segunda',ref:'Gn 12.3',tema:'O chamado para todas as famílias da Terra'},{dia:'Terça',ref:'Gn 12.1',tema:'O chamado de Abrão e a origem de uma nação'},{dia:'Quarta',ref:'Hb 11.1',tema:'Abrão não sabia definir a fé, mas a viveu'},{dia:'Quinta',ref:'Gn 12.10',tema:'Obstáculos no chamado divino'},{dia:'Sexta',ref:'Gn 12.15,16',tema:'Desafios éticos na chamada'},{dia:'Sábado',ref:'Gn 12.17,18',tema:'Deus zela pelos que Ele chama'}],perguntas:[{q:'De acordo com a lição, o que exigiu o chamado de Abrão?',a:'Exigiu fé e obediência irrestrita.',correta:1,op:['Apenas riqueza e prosperidade','Exigiu fé e obediência irrestrita.','Coragem física e habilidade militar','Conhecimento das Escrituras']},{q:'Quais são as bênçãos prometidas a Abrão segundo Gênesis 12.1-3?',a:'Deus prometeu abençoá-lo grandemente (Gn 12.2b), engrandecer o nome de Abrão (v. 2): e "e abençoarei os que te abençoarem e amaldiçoarei os que te amaldiçoarem [...]" (Gn 12.3).',correta:0,op:['Deus prometeu abençoá-lo grandemente (Gn 12.2b), engrandecer o nome de Abrão (v. 2): e "e abençoarei os que te abençoarem e amaldiçoarei os que te amaldiçoarem [...]" (Gn 12.3).','Somente prosperidade pessoal','Apenas proteção contra inimigos','Promessas condicionais à obediência']},{q:'Segundo a lição, qual o significado do nome Abrão?',a:'"Pai de muitas nações".',correta:3,op:['Homem abençoado por Deus','Servo fiel do Senhor','Pai de Isaque','"Pai de muitas nações".']},{q:'O que aprendemos com a chamada de Abrão?',a:'Aprendemos com a chamada de Abrão que, durante a nossa jornada nesta terra, precisamos abandonar algumas práticas que não são mais compatíveis com a fé em Deus.',correta:2,op:['Que devemos orar mais e jejuar','Que a fé independe de obras','Aprendemos com a chamada de Abrão que, durante a nossa jornada nesta terra, precisamos abandonar algumas práticas que não são mais compatíveis com a fé em Deus.','Que Deus chama apenas os perfeitos']},{q:'O que Abrão encontrou ao chegar a Canaã? Para onde ele se dirigiu?',a:'Ele encontrou fome. Abrão foi para o Egito.',correta:1,op:['Ele encontrou paz e ficou em Canaã','Ele encontrou fome. Abrão foi para o Egito.','Cananeus hostis e voltou a Harã','Encontrou riquezas e seguiu para Moabe']}]},
+      {num:2,data:'12/04',titulo:'A FÉ DE ABRÃO NAS PROMESSAS DE DEUS',texto:'Gn 12.7',resumo:'Quando Deus faz uma promessa incondicional, Ele a cumpre plenamente.',textoAureo:'E apareceu o SENHOR a Abrão e disse: À tua semente darei esta terra. E edificou ali um altar ao SENHOR, que lhe aparecera.',textoAureoRef:'Gn 12.7',verdade:'Quando Deus faz uma promessa incondicional, Ele a cumpre plenamente.',leituraBiblica:'Gênesis 13.7-18',leituradiaria:[{dia:'Segunda',ref:'Hb 11.8',tema:'A grande fé de Abrão'},{dia:'Terça',ref:'Hb 11.17-19',tema:'A fé de Abrão é provada'},{dia:'Quarta',ref:'Tg 2.23',tema:'Abrão, o amigo de Deus'},{dia:'Quinta',ref:'Gn 17.5',tema:'Abrão, pai de multidão de nações'},{dia:'Sexta',ref:'Gn 15.18-21',tema:'O concerto de Deus com Abrão'},{dia:'Sábado',ref:'Gl 3.7',tema:'Abrão, pai dos filhos da fé'}],perguntas:[{q:'Segundo a lição, qual o motivo que levou Ló e Abrão a se separarem?',a:'Por causa da riqueza de Abrão e de Ló, no retorno a Canaã, a terra não comportava as famílias do tio e do sobrinho, e os pastores brigavam por pastagens.',correta:2,op:['Porque Ló estava doente','Por questões políticas com os cananeus','Por causa da riqueza de Abrão e de Ló, no retorno a Canaã, a terra não comportava as famílias do tio e do sobrinho, e os pastores brigavam por pastagens.','Porque Deus ordenou a separação']},{q:'Como agiu Abrão diante da contenda dos pastores?',a:'Abrão agiu como um pacificador.',correta:1,op:['Com agressividade e disputas legais','Abrão agiu como um pacificador.','Pedindo que Ló saísse da terra','Buscando mediação dos cananeus']},{q:'De acordo com a lição, o que demonstra o agir de maneira pacífica?',a:'Agir de maneira pacífica não significa ser fraco ou covarde, mas demonstra o caráter de quem tem uma fé alicerçada em Deus.',correta:0,op:['Agir de maneira pacífica não significa ser fraco ou covarde, mas demonstra o caráter de quem tem uma fé alicerçada em Deus.','Ser fraco e sem opinião','Ser covarde diante dos inimigos','Depender sempre dos outros']},{q:'O que fez Abrão ao tomar conhecimento do que havia acontecido com Ló?',a:'Quando Abrão toma conhecimento do que havia acontecido com seu sobrinho, saíram ele e todos os seus empregados em defesa de Ló.',correta:3,op:['Enviou presentes e ficou em casa','Ignorou o problema','Pediu ajuda aos reis aliados','Quando Abrão toma conhecimento do que havia acontecido com seu sobrinho, saíram ele e todos os seus empregados em defesa de Ló.']},{q:'Qual o nome da cidade onde Abrão ergueu o primeiro altar?',a:'Abrão construiu o primeiro altar em Siquém.',correta:2,op:['Em Ur dos Caldeus','Em Harã','Abrão construiu o primeiro altar em Siquém.','Em Belém']}]},
+      {num:3,data:'19/04',titulo:'A IMPACIÊNCIA NA ESPERA DO CUMPRIMENTO DA PROMESSA',texto:'Gn 16.2',resumo:'A impaciência é antagônica a fé, por isso não devemos ser dominados por ela. Deus é fiel e cumpre com suas promessas no tempo certo.',textoAureo:'E disse Sarai a Abrão: Eis que o Senhor me tem impedido de gerar; entra, pois, à minha serva; porventura, terei filhos dela. E ouviu Abrão a voz de Sarai.',textoAureoRef:'Gn 16.2',verdade:'A impaciência é antagônica a fé, por isso não devemos ser dominados por ela. Deus é fiel e cumpre com suas promessas no tempo certo.',leituraBiblica:'Gênesis 16.1-16',leituradiaria:[{dia:'Segunda',ref:'Gn 16.2',tema:'Sarai dá lugar à impaciência'},{dia:'Terça',ref:'1 Pe 5.7',tema:'Lançar a ansiedade sobre Deus'},{dia:'Quarta',ref:'Sl 40.1',tema:'Esperar com paciência no Senhor'},{dia:'Quinta',ref:'Rm 12.12',tema:'Pacientes na tribulação'},{dia:'Sexta',ref:'2 Pe 3.9',tema:'Deus é longânimo'},{dia:'Sábado',ref:'1 Ts 5.14',tema:'Devemos ser pacientes para com todos'}],perguntas:[{q:'Segundo a lição, o que Deus usa para forjar o nosso caráter?',a:'O Senhor usa o tempo, a espera, para forjar o nosso caráter.',correta:3,op:['A bênção foi cumprida imediatamente','Deus nunca prometeu um filho','Abrão rejeitou a sugestão','O Senhor usa o tempo, a espera, para forjar o nosso caráter.']},{q:'O que acontece quando deixamos a impaciência tomar o nosso coração?',a:'Quando deixamos que a ansiedade e a impaciência tomem o primeiro lugar em nosso coração, a nossa fé sucumbe e acabamos cometendo muitos erros.',correta:2,op:['Com paciência e oração','Pedindo ajuda aos sacerdotes','Quando deixamos que a ansiedade e a impaciência tomem o primeiro lugar em nosso coração, a nossa fé sucumbe e acabamos cometendo muitos erros.','Consultando os sábios do Egito']},{q:'Segundo o Salmo 40.1, como devemos esperar?',a:'Devemos esperar com paciência no Senhor.',correta:1,op:['Uma bênção disfarçada de Deus','Devemos esperar com paciência no Senhor.','Um erro que Deus não conhecia','Uma decisão aprovada pelo Senhor']},{q:'Quais foram as primeiras consequências do erro de Sarai?',a:'As primeiras consequências foram a competição e a soberba.',correta:0,op:['As primeiras consequências foram a competição e a soberba.','Ismael foi reconhecido como herdeiro','Sarai reconciliou-se com Agar','Agar ficou como chefe dos servos']},{q:'Como deveria se chamar o filho de Abrão com Agar? Qual o significado do seu nome?',a:'Ismael. O significado do nome Ismael é "Deus ouviu".',correta:3,op:['Isaque e Ismael eram gêmeos','Isaque nasceu antes de Ismael','Isaque era filho de Agar','Ismael. O significado do nome Ismael é "Deus ouviu".']}]},
+      {num:4,data:'26/04',titulo:'A RENOVAÇÃO DA ALIANÇA',texto:'Gn 17.5',resumo:'Deus é fiel para cumprir as suas promessas, por isso Ele renova a sua aliança com o seu povo.',textoAureo:'E não se chamará mais o teu nome Abrão, mas Abraão será o teu nome; porque por pai de multidão de nações te tenho posto.',textoAureoRef:'Gn 17.5',verdade:'Deus é fiel para cumprir as suas promessas, por isso Ele renova a sua aliança com o seu povo.',leituraBiblica:'Gênesis 17.1-10',leituradiaria:[{dia:'Segunda',ref:'Gn 17.1',tema:'Deus é Todo-Poderoso'},{dia:'Terça',ref:'Gn 17.2',tema:'O concerto de Deus com Abraão'},{dia:'Quarta',ref:'Gn 17.4',tema:'Abraão, pai de muitas nações'},{dia:'Quinta',ref:'Gn 17.10',tema:'O sinal da aliança'},{dia:'Sexta',ref:'Gn 17.15',tema:'O novo nome de Sarai'},{dia:'Sábado',ref:'Gn 17.19',tema:'A promessa de Isaque'}],perguntas:[{q:'Cite alguns fatores que, no Antigo Testamento, influenciavam na escolha dos nomes.',a:'Existiam vários fatores que influenciavam na escolha, como, por exemplo, a vontade de Deus, as circunstâncias do nascimento ou até mesmo as características físicas do bebê, como no caso de Esaú, que nasceu ruivo e bem cabeludo (Gn 25.25).',correta:0,op:['Existiam vários fatores que influenciavam na escolha, como, por exemplo, a vontade de Deus, as circunstâncias do nascimento ou até mesmo as características físicas do bebê, como no caso de Esaú, que nasceu ruivo e bem cabeludo (Gn 25.25).','Que Abrão não precisava de aliança','Que era apenas simbólica','Que dependia só do esforço humano']},{q:'Qual o significado do nome "Abraão"?',a:'No caso de Abrão, seu nome original significa "pai exaltado"; porém, diante do plano de Deus em sua vida, esse nome não parecia adequado, e o Senhor lhe mudou o nome para Abraão, confirmando que seria pai de multidão (Gn 17.4).',correta:3,op:['Abrão vendeu suas posses','Pediu um sinal miraculoso','Conversou com Ló sobre a aliança','No caso de Abrão, seu nome original significa "pai exaltado"; porém, diante do plano de Deus em sua vida, esse nome não parecia adequado, e o Senhor lhe mudou o nome para Abraão, confirmando que seria pai de multidão (Gn 17.4).']},{q:'Qual o significado do nome "Sara"?',a:'Sara significa "mãe de nações".',correta:2,op:['Uma bênção de longa vida','Proteção contra todos os inimigos','Sara significa "mãe de nações".','Filhos de linhagem real']},{q:'Qual era o objetivo do concerto com os patriarcas?',a:'O propósito único e supremo era trazer salvação não apenas a uma nação (Israel), mas também a toda a raça humana.',correta:1,op:['Para selar aliança com os cananeus','O propósito único e supremo era trazer salvação não apenas a uma nação (Israel), mas também a toda a raça humana.','Para marcar posse da terra pelos servos','Para celebrar o nascimento de Ismael']},{q:'Quais as promessas que viriam acompanhadas do pacto de Deus com Abraão?',a:'O pacto de Deus com Abraão viria acompanhado de várias promessas: Deus seria o escudo e o galardão de Abraão (Gn 15.1), lhe daria muitos descendentes (Gn 15.5) e também a terra de Canaã como herança (Gn 15.7).',correta:0,op:['O pacto de Deus com Abraão viria acompanhado de várias promessas: Deus seria o escudo e o galardão de Abraão (Gn 15.1), lhe daria muitos descendentes (Gn 15.5) e também a terra de Canaã como herança (Gn 15.7).','Tinha 75 anos','Tinha 100 anos','Tinha 80 anos']}]},
+      {num:5,data:'03/05',titulo:'O JUÍZO CONTRA SODOMA E GOMORRA',texto:'Gn 18.32',resumo:'Deus é misericordioso e dá tempo para o arrependimento, mas, quando o homem não quer, seu juízo é sem misericórdia.',textoAureo:'Disse mais: Ora, não se ire o Senhor que ainda só mais esta vez falo: se, porventura, se acharem ali dez? E disse: Não a destruirei, por amor dos dez.',textoAureoRef:'Gn 18.32',verdade:'Deus é misericordioso e dá tempo para o arrependimento, mas, quando o homem não quer, seu juízo é sem misericórdia.',leituraBiblica:'Gênesis 18.23-32',leituradiaria:[{dia:'Segunda',ref:'Sl 25.14',tema:'Deus revela seus segredos para os que o temem'},{dia:'Terça',ref:'Gn 18.32',tema:'Abraão intercede por Sodoma e Gomorra'},{dia:'Quarta',ref:'1 Tm 2.1',tema:'Devemos interceder por todos'},{dia:'Quinta',ref:'Ez 22.30',tema:'Deus busca por intercessores perseverantes'},{dia:'Sexta',ref:'Rm 8.26',tema:'O Espírito Santo intercede por nós'},{dia:'Sábado',ref:'Rm 8.34',tema:'Jesus, nosso intercessor'}],perguntas:[{q:'Como se inicia o capítulo 18 de Gênesis?',a:'O capítulo 18 de Gênesis tem início com a visitação do Senhor a Abraão nos carvalhais de Manre (v. 1).',correta:1,op:['Sodoma atacou Gomorra','O capítulo 18 de Gênesis tem início com a visitação do Senhor a Abraão nos carvalhais de Manre (v. 1).','Por causa da idolatria local','Os reis se rebelaram']},{q:'Segundo a lição, o que quer dizer "quando tinha aquecido o dia"?',a:'Isso quer dizer que a visitação se deu por volta do meio-dia, quando o calor está mais forte.',correta:0,op:['Isso quer dizer que a visitação se deu por volta do meio-dia, quando o calor está mais forte.','Pediu perdão apenas para os reis','Fugiu com sua família antes','Intercedeu apenas por Ló']},{q:'O que Sara fez ao ouvir da parte de Deus que ela teria um filho?',a:'Ao ouvir que teria um filho, Sara riu.',correta:3,op:['Nenhum justo habitava em Sodoma','Deus só salva quem merece','A intercessão é inútil','Ao ouvir que teria um filho, Sara riu.']},{q:'A que o pecado leva?',a:'À destruição e à morte.',correta:2,op:['Moisés','José','À destruição e à morte.','Samuel']},{q:'O que aconteceu com a esposa de Ló ao desobedecer a ordem divina?',a:'Ela "ficou convertida numa estátua de sal".',correta:1,op:['Deus destruiu Sodoma com Ló dentro','Ela "ficou convertida numa estátua de sal".','Ló foi preso pelos anjos','Ló escolheu ficar em Sodoma']}]},
+      {num:6,data:'10/05',titulo:'O NASCIMENTO DE ISAQUE',texto:'Gn 18.14',resumo:'Deus é Onipotente e não há nada que Ele não possa realizar segundo a sua vontade.',textoAureo:'Haveria coisa alguma difícil ao SENHOR? Ao tempo determinado, tornarei a ti por este tempo da vida, e Sara terá um filho.',textoAureoRef:'Gn 18.14',verdade:'Deus é Onipotente e não há nada que Ele não possa realizar segundo a sua vontade.',leituraBiblica:'Gênesis 21.1-7',leituradiaria:[{dia:'Segunda',ref:'Gn 18.14',tema:'A promessa de Deus a Abraão é reiterada'},{dia:'Terça',ref:'Gn 21.2',tema:'No tempo determinado por Deus a promessa se cumpre'},{dia:'Quarta',ref:'Lc 1.37',tema:'Para Deus não há nada absolutamente impossível'},{dia:'Quinta',ref:'At 3.25',tema:'O destaque da promessa abraâmica'},{dia:'Sexta',ref:'Dt 7.9',tema:'Deus é fiel e guarda o concerto'},{dia:'Sábado',ref:'Gn 21.33',tema:'Deus cumpre os propósitos através das gerações'}],perguntas:[{q:'Quem escolheu o nome de Isaque e qual o seu significado?',a:'Foi Deus quem escolheu esse nome (Gn 17.19). Isaque, no hebraico, significa "riso".',correta:2,op:['Um milagre de Moisés','Pela promessa feita a Noé','Foi Deus quem escolheu esse nome (Gn 17.19). Isaque, no hebraico, significa "riso".','Por mérito próprio de Sarai']},{q:'De acordo com a lição, qual foi a segunda providência de Abraão depois do nascimento de Isaque?',a:'A segunda providência de Abraão foi circuncidar Isaque.',correta:1,op:['Obedeceu às leis de Canaã','A segunda providência de Abraão foi circuncidar Isaque.','Abrão jejuou por quarenta dias','Os sacerdotes intercederam']},{q:'O que fez Abraão para comemorar o desmame de Isaque?',a:'Abraão fez um grande banquete.',correta:0,op:['Abraão fez um grande banquete.','Deus é cruel com os idosos','A promessa foi cumprida parcialmente','Sara nunca acreditou na promessa']},{q:'O que Abraão ofereceu a Agar antes de ela e seu filho deixarem a sua casa?',a:'Ele tomou pão e um odre de água.',correta:3,op:['Moisés','Elias','Ismael','Ele tomou pão e um odre de água.']},{q:'Para onde foi Agar e Ismael ao saírem da casa de Abraão?',a:'Foram para o deserto de Parã (Gn 21.17-21).',correta:2,op:['Ismael e Isaque eram gêmeos','Isaque nasceu antes de Ismael','Foram para o deserto de Parã (Gn 21.17-21).','Isaque era filho de Agar']}]},
+      {num:7,data:'17/05',titulo:'A PROVA DE FÉ DE ABRAÃO',texto:'Gn 22.2',resumo:'A fé de Abraão foi provada ao extremo, mas ele permaneceu fiel, crendo que Deus é poderoso para cumprir as suas promessas.',textoAureo:'E disse: Toma agora o teu filho, o teu único filho, Isaque, a quem amas, e vai-te à terra de Moriá; e oferece-o ali em holocausto sobre uma das montanhas, que eu te direi.',textoAureoRef:'Gn 22.2',verdade:'A fé de Abraão foi provada ao extremo, mas ele permaneceu fiel, crendo que Deus é poderoso para cumprir as suas promessas.',leituraBiblica:'Gênesis 22.1-14',leituradiaria:[{dia:'Segunda',ref:'Gn 22.2',tema:'Deus pede o filho da promessa em sacrifício'},{dia:'Terça',ref:'Gn 22.3',tema:'A obediência imediata de Abraão'},{dia:'Quarta',ref:'Gn 22.8',tema:'Deus proverá para si o cordeiro'},{dia:'Quinta',ref:'Gn 22.12',tema:'Abraão demonstra que teme a Deus'},{dia:'Sexta',ref:'Hb 11.17',tema:'Pela fé, Abraão ofereceu Isaque'},{dia:'Sábado',ref:'Tg 2.21',tema:'Abraão foi justificado pelas obras'}],perguntas:[{q:'Segundo a lição, o que Deus pediu para Abraão fazer?',a:'Deus chamou o patriarca e determinou que ele sacrificasse seu único filho na terra de Moriá.',correta:3,op:['No monte Sinai','Na planície de Moabe','No deserto de Parã','Deus chamou o patriarca e determinou que ele sacrificasse seu único filho na terra de Moriá.']},{q:'Abraão questionou o pedido de Deus? O que ele demonstrou?',a:'Abraão obedece sem questionar. Ele mostrou que era homem de fé no mais profundo sentido da expressão.',correta:2,op:['Para punir Abraão por seus erros','Era um ritual canaaneu','Abraão obedece sem questionar. Ele mostrou que era homem de fé no mais profundo sentido da expressão.','Precisava de sacrifício humano']},{q:'O que Abraão disse aos seus ajudantes e que demonstrava a sua confiança?',a:'"Eu e o moço iremos até ali; e, havendo adorado, tornaremos a vós" (v.5). Ele não disse "eu tornarei", mas "eu e o moço tornaremos a vós"!',correta:1,op:['Deus abandona nos momentos difíceis','"Eu e o moço iremos até ali; e, havendo adorado, tornaremos a vós" (v.5). Ele não disse "eu tornarei", mas "eu e o moço tornaremos a vós"!','Obediência não é necessária para a fé','Deus só testa os perfeitos']},{q:'Por que era necessário que Jesus se fizesse semelhante à descendência de Abraão?',a:'Era necessário para ser misericordioso e fiel sumo sacerdote do povo judeu (v. 17b), para "expiar os pecados do povo" (v. 17c) e interceder e "socorrer aos que são tentados" (v. 18).',correta:0,op:['Era necessário para ser misericordioso e fiel sumo sacerdote do povo judeu (v. 17b), para "expiar os pecados do povo" (v. 17c) e interceder e "socorrer aos que são tentados" (v. 18).','Ló','Ismael','Eliezer']},{q:'Segundo Gênesis 23.8,9, qual o local da morte de Sara?',a:'Quiriate-Arba (Hebrom, na terra de Canaã).',correta:3,op:['Isaque foi sacrificado','Um anjo trocou Isaque por cordeiro','Abraão recusou e voltou para casa','Quiriate-Arba (Hebrom, na terra de Canaã).']}]},
+      {num:8,data:'24/05',titulo:'ISAQUE: HERDEIRO DA PROMESSA',texto:'Gn 26.12',resumo:'Deus abençoou Abraão em tudo, e Isaque, o filho da promessa, também seria abençoado. Quando Deus age, ninguém pode impedi-lo.',textoAureo:'E semeou Isaque naquela mesma terra e colheu, naquele mesmo ano, cem medidas, porque o Senhor o abençoava.',textoAureoRef:'Gn 26.12',verdade:'Deus abençoou Abraão em tudo, e Isaque, o filho da promessa, também seria abençoado. Quando Deus age, ninguém pode impedi-lo.',leituraBiblica:'Gênesis 26.1-5, 12-14, 24, 25',leituradiaria:[{dia:'Segunda',ref:'Gn 26.14',tema:'A inveja dos filisteus diante das bênçãos de Isaque'},{dia:'Terça',ref:'Gn 26.3',tema:'A bênção sobre a descendência'},{dia:'Quarta',ref:'Js 23.14',tema:'Nenhuma palavra vinda de Deus pode falhar'},{dia:'Quinta',ref:'Sl 119.89',tema:'A Palavra de Deus está firmada no Céu'},{dia:'Sexta',ref:'Jr 1.12',tema:'Deus tem compromisso com a sua Palavra'},{dia:'Sábado',ref:'Nm 23.19',tema:'O atributo imutável de Deus'}],perguntas:[{q:'Abraão foi para o Egito devido à fome, mas Isaque deveria fazer o mesmo?',a:'Não. Deus apareceu a Isaque e ordenou que ele não descesse ao Egito (v. 1), mas habitasse na terra que Ele mostraria.',correta:0,op:['Não. Deus apareceu a Isaque e ordenou que ele não descesse ao Egito (v. 1), mas habitasse na terra que Ele mostraria.','Em Harã como seu pai Abraão','No Egito seguindo tradição familiar','Em Ur dos Caldeus terra natal']},{q:'Onde Isaque habitou para fugir da fome?',a:'Ele habitou na terra de Gerar, terra do rei Abimeleque, rei dos filisteus (Gn 26.6).',correta:3,op:['Construiu cidade em homenagem a Deus','Fugiu para o Egito por causa da fome','Lutou contra os filisteus','Ele habitou na terra de Gerar, terra do rei Abimeleque, rei dos filisteus (Gn 26.6).']},{q:'O que Isaque disse a Abimeleque a respeito de Rebeca?',a:'Disse que era sua irmã.',correta:2,op:['Isaque era mais importante que Abraão','As promessas mudam de geração em geração','Disse que era sua irmã.','Isaque deveria buscar suas próprias promessas']},{q:'O que a inveja dos filisteus levou-os a fazer contra Isaque?',a:'Dominados pela inveja, atacaram Isaque entulhando seus poços.',correta:1,op:['Obedeceu imediatamente e foi para Harã','Dominados pela inveja, atacaram Isaque entulhando seus poços.','Discutiu com Deus sobre a decisão','Pediu confirmação de Rebeca']},{q:'Qual o significado do nome do poço de Seba?',a:'Seba, no hebraico, significa "juramento"; esse último poço, aberto pelos servos de Isaque, foi denominado "poço do juramento".',correta:0,op:['Seba, no hebraico, significa "juramento"; esse último poço, aberto pelos servos de Isaque, foi denominado "poço do juramento".','Moabe e Amom filhos de Ló','Simeão e Levi filhos de Jacó','Gade e Aser filhos de Jacó']}]},
+      {num:9,data:'31/05',titulo:'JACÓ E ESAÚ: IRMÃOS EM CONFLITO',texto:'Gn 27.23',resumo:'Os pais não devem ter preferência entre seus filhos e deve tratá-los da mesma forma.',textoAureo:'[...] Duas nações estão no teu ventre, e dois povos se dividirão das tuas entranhas: um povo será mais forte do que o outro povo, e o maior servirá ao menor.',textoAureoRef:'Gn 27.23',verdade:'Os pais não devem ter preferência entre seus filhos e deve tratá-los da mesma forma.',leituraBiblica:'Gênesis 27.1-5, 41-44',leituradiaria:[{dia:'Segunda',ref:'Sl 133.1',tema:'Os irmãos devem viver em união'},{dia:'Terça',ref:'1 Co 1.10',tema:'Evite as dissensões'},{dia:'Quarta',ref:'Gn 27.10-13',tema:'A mãe induziu o filho a mentir'},{dia:'Quinta',ref:'Dt 6.6-9',tema:'Os pais devem ser exemplos'},{dia:'Sexta',ref:'Ef 6.4',tema:'Princípios do Senhor para os pais'},{dia:'Sábado',ref:'Rm 12.10',tema:'O valor do amor fraternal'}],perguntas:[{q:'Em que Rebeca era semelhante à Sara?',a:'Como Sara, Rebeca também era estéril.',correta:1,op:['Esaú enganou Jacó e tomou a bênção','Como Sara, Rebeca também era estéril.','Jacó roubou o rebanho de Esaú','Rebeca favorecia Esaú sobre Jacó']},{q:'O que tornou a gestação de Rebeca diferente?',a:'Sua gravidez era diferente, pois os bebês lutavam no seu ventre.',correta:0,op:['Sua gravidez era diferente, pois os bebês lutavam no seu ventre.','Esaú brigou com Isaque pela bênção','Jacó pediu conselho aos sacerdotes','Rebeca e Isaque trocaram os filhos']},{q:'Qual o significado do nome Esaú?',a:'Esaú significa "peludo".',correta:3,op:['Esaú era mais justo que Jacó','As bênçãos paternas não tinham valor','Isaque cometeu erro irreparável','Esaú significa "peludo".']},{q:'A qual dos filhos Isaque amava? A qual dos filhos Rebeca amava?',a:'Isaque amava Esaú, e Rebeca amava Jacó.',correta:2,op:['Para o Egito onde tinha amigos','Para Moabe em busca de refúgio','Isaque amava Esaú, e Rebeca amava Jacó.','Para o deserto do Sinai']},{q:'As 12 tribos de Israel vieram de qual família?',a:'Vieram da família de Jacó.',correta:1,op:['Vinte anos trabalhando para o tio','Vieram da família de Jacó.','Sete anos apenas por Leia','Três anos um por cada filha']}]},
+      {num:10,data:'07/06',titulo:'A EXPERIÊNCIA TRANSFORMADORA DE JACÓ',texto:'Gn 28.15',resumo:'Após um encontro com Deus, Jacó é transformado. Ninguém sai da presença do Senhor da mesma maneira.',textoAureo:'E eis que estou contigo, e te guardarei por onde quer que fores, e te farei tornar a esta terra, porque te não deixarei, até que te haja feito o que te tenho dito.',textoAureoRef:'Gn 28.15',verdade:'Após um encontro com Deus, Jacó é transformado. Ninguém sai da presença do Senhor da mesma maneira.',leituraBiblica:'Gênesis 28.10-17',leituradiaria:[{dia:'Segunda',ref:'Gn 17.5',tema:'Deus transformou Abrão em Abraão'},{dia:'Terça',ref:'Gn 17.15',tema:'Deus transformou Sarai em Sara'},{dia:'Quarta',ref:'Gn 32.28',tema:'Deus transformou Jacó em Israel'},{dia:'Quinta',ref:'Jo 1.42',tema:'Deus transformou completamente a vida de Pedro'},{dia:'Sexta',ref:'At 13.9',tema:'Deus transformou a vida de Saulo'},{dia:'Sábado',ref:'Jo 20.16; Mc 5.19',tema:'Jesus transforma vidas'}],perguntas:[{q:'O que Jacó viu em seu sonho?',a:'Em seu sonho, ele viu uma escada cujo topo tocava nos céus. Os anjos de Deus subiam e desciam por ela (Gn 28.12).',correta:2,op:['Em Harã na casa de seu tio Labão','No Egito durante a fuga de Esaú','Em seu sonho, ele viu uma escada cujo topo tocava nos céus. Os anjos de Deus subiam e desciam por ela (Gn 28.12).','Em Belém terra dos ancestrais']},{q:'O que Hebreus 1.14 diz a respeito dos anjos?',a:'A Bíblia diz que os anjos são espíritos ministradores (Hb 1.14).',correta:1,op:['Deus falaria só por sonhos','A Bíblia diz que os anjos são espíritos ministradores (Hb 1.14).','A terra pertencia aos anjos','Jacó deveria voltar imediatamente']},{q:'De acordo com a lição, quais são as descobertas de Jacó?',a:'Jacó descobriu a presença de Deus; a Casa de Deus e a porta dos céus.',correta:0,op:['Jacó descobriu a presença de Deus; a Casa de Deus e a porta dos céus.','Uma escalada rumo ao céu pelos anjos','Um combate espiritual entre anjos','Uma revelação do futuro de Israel']},{q:'O que significa "Betel"?',a:'Betel que significa "Casa de Deus".',correta:3,op:['Jacó construiu um templo no local','Jacó continuou sem reagir','Jacó convocou os anciãos para testemunhar','Betel que significa "Casa de Deus".']},{q:'Qual foi o voto de Jacó (Gn 28.20-22)?',a:'Ele prometeu que, se Deus fosse com ele, e o guardasse na viagem, e lhe desse pão para comer e vestes para vestir e se um dia voltasse em paz à casa de seu pai, o Senhor seria o seu Deus. Também prometeu que certamente daria o dízimo de tudo quanto Deus lhe desse.',correta:2,op:['Era descendente de Noé','Comprou a terra dos cananeus','Ele prometeu que, se Deus fosse com ele, e o guardasse na viagem, e lhe desse pão para comer e vestes para vestir e se um dia voltasse em paz à casa de seu pai, o Senhor seria o seu Deus. Também prometeu que certamente daria o dízimo de tudo quanto Deus lhe desse.','Isaque lhe deu como herança']}]},
+      {num:11,data:'14/06',titulo:'JACÓ E A SUA FAMÍLIA EM HARÃ',texto:'Gn 29.20',resumo:'O amor é paciente e tudo suporta. Por amor a Raquel, Jacó trabalhou muitos anos para o seu sogro Labão.',textoAureo:'E serviu Jacó sete anos por Raquel; e estes lhe pareceram como poucos dias, pelo muito que a amava.',textoAureoRef:'Gn 29.20',verdade:'O amor é paciente e tudo suporta. Por amor a Raquel, Jacó trabalhou muitos anos para o seu sogro Labão.',leituraBiblica:'Gênesis 29.15-20, 23-28',leituradiaria:[{dia:'Segunda',ref:'Gn 29.10',tema:'O primeiro encontro entre Jacó e Raquel'},{dia:'Terça',ref:'Gn 29.18',tema:'O amor de Jacó por Raquel'},{dia:'Quarta',ref:'Gn 29.23',tema:'Labão engana Jacó'},{dia:'Quinta',ref:'Gn 29.30',tema:'Jacó trabalha mais sete anos por Raquel'},{dia:'Sexta',ref:'Gn 30.22',tema:'Deus se lembrou de Raquel'},{dia:'Sábado',ref:'Gn 31.3',tema:'Deus manda Jacó retornar à sua terra'}],perguntas:[{q:'Qual o local do primeiro encontro entre Jacó e Raquel?',a:'Jacó encontrou Raquel, filha de Labão, seu tio, quando ela tentava dar de beber aos rebanhos de seu pai, pois era pastora de ovelhas (Gn 29.10).',correta:3,op:['Na margem do rio Jordão','Na planície de Moabe','Nas montanhas de Gileade','Jacó encontrou Raquel, filha de Labão, seu tio, quando ela tentava dar de beber aos rebanhos de seu pai, pois era pastora de ovelhas (Gn 29.10).']},{q:'Qual o nome da filha de Labão que ele usou para enganar Jacó no dia do casamento?',a:'Leia.',correta:2,op:['Labão deu Leia sem consultar Jacó','Jacó escolheu Leia por ser a mais velha','Leia.','Raquel pediu que sua irmã se casasse primeiro']},{q:'Quantos anos Jacó trabalhou por Leia e Raquel, respectivamente?',a:'Ele trabalhou sete anos (por cada uma, totalizando 14 anos de serviço direto pelas esposas).',correta:1,op:['Cinco anos por cada uma totalizando dez','Ele trabalhou sete anos (por cada uma, totalizando 14 anos de serviço direto pelas esposas).','Catorze anos por Leia e sete por Raquel','Sete anos por Leia e nada por Raquel']},{q:'Quais os nomes dos filhos de Jacó com Leia e sua serva Zilpa?',a:'Com Leia, Jacó teve os seguintes filhos: Rúben, Simeão, Levi, Judá, Issacar e Zebulom, totalizando seis filhos, e mais uma filha, a quem deu o nome de Diná. Com a serva de Leia, Zilpa, teve dois filhos, Gade e Aser.',correta:0,op:['Com Leia, Jacó teve os seguintes filhos: Rúben, Simeão, Levi, Judá, Issacar e Zebulom, totalizando seis filhos, e mais uma filha, a quem deu o nome de Diná. Com a serva de Leia, Zilpa, teve dois filhos, Gade e Aser.','Rúben José Judá e Issacar de Leia','Simeão Levi Benjamim e Dã de Leia','Judá Naftali Gad e Aser de Leia']},{q:'Quais os nomes dos filhos de Jacó com Raquel e sua serva Bila?',a:'Com sua amada esposa, teve dois filhos. São eles: José e Benjamim. Com Bila, serva de Raquel, teve mais dois filhos: Dã e Naftali.',correta:3,op:['Rúben e Simeão com Raquel','José e Benjamim com Bila','Apenas Benjamim era filho de Raquel','Com sua amada esposa, teve dois filhos. São eles: José e Benjamim. Com Bila, serva de Raquel, teve mais dois filhos: Dã e Naftali.']}]},
+      {num:12,data:'21/06',titulo:'A RECONCILIAÇÃO DE JACÓ COM ESAÚ',texto:'Gn 33.4',resumo:'Em Deus, sempre há possibilidade de perdão e reconciliação.',textoAureo:'Então, Esaú correu-lhe ao encontro e abraçou-o; e lançou-se sobre o seu pescoço e beijou-o; e choraram.',textoAureoRef:'Gn 33.4',verdade:'Em Deus, sempre há possibilidade de perdão e reconciliação.',leituraBiblica:'Gênesis 33.1-10',leituradiaria:[{dia:'Segunda',ref:'Jo 13.34,35',tema:'Amar uns aos outros'},{dia:'Terça',ref:'Mt 6.12',tema:'Perdoando como somos perdoados'},{dia:'Quarta',ref:'Cl 3.13',tema:'Perdoando uns aos outros'},{dia:'Quinta',ref:'Mt 6.15',tema:'Quem não perdoa não será perdoado'},{dia:'Sexta',ref:'Hb 10.17',tema:'Deus perdoa e esquece a ofensa'},{dia:'Sábado',ref:'Mt 18.21,22',tema:'Até setenta vezes sete'}],perguntas:[{q:'O que a luta entre Jacó e o anjo resultou?',a:'Essa luta resultou em uma transformação de caráter e em bênção de Deus sobre a vida de Jacó.',correta:0,op:['Essa luta resultou em uma transformação de caráter e em bênção de Deus sobre a vida de Jacó.','Numa guerra entre os irmãos','No templo de Harã durante ritual','Numa assembleia dos clãs de Canaã']},{q:'Somente quem pode transformar o ser humano?',a:'Transformar o ser humano, seu caráter, sua personalidade e suas emoções é algo que somente o Criador pode fazer.',correta:3,op:['Somente os poderosos transformam pessoas','A transformação depende do esforço humano','A religião muda só o comportamento externo','Transformar o ser humano, seu caráter, sua personalidade e suas emoções é algo que somente o Criador pode fazer.']},{q:'Por que Esaú perdeu a sua bênção?',a:'O primogênito e preferido de Isaque perdeu a sua bênção porque era incrédulo e a trocou por um prato de ensopado (cf. 25.31-34).',correta:2,op:['Por não ter obedecido a seu pai Isaque','Era incrédulo desde a infância','O primogênito e preferido de Isaque perdeu a sua bênção porque era incrédulo e a trocou por um prato de ensopado (cf. 25.31-34).','Preferiu a herança material']},{q:'Depois do encontro com Esaú, Jacó foi para qual cidade? Qual o significado do seu nome?',a:'Depois do encontro e do perdão entre os irmãos, Esaú voltou para Seir, e Jacó foi para a cidade de Sucote, que significa "abrigo", e estabelece sua casa lá (Gn 33.16).',correta:1,op:['Para Moabe para visitar parentes','Depois do encontro e do perdão entre os irmãos, Esaú voltou para Seir, e Jacó foi para a cidade de Sucote, que significa "abrigo", e estabelece sua casa lá (Gn 33.16).','Para Harã onde vivia Labão','Para o Egito fugindo de Jacó']},{q:'Para onde Deus ordenou que Jacó retornasse? Ele cumpriu de imediato?',a:'Deus havia ordenado que Jacó retornasse para a casa de seu pai, Isaque. Não sabemos o porquê, mas ele não cumpriu essa determinação divina e instalou-se em Siquém (cf. 31.13; 35.1).',correta:0,op:['Deus havia ordenado que Jacó retornasse para a casa de seu pai, Isaque. Não sabemos o porquê, mas ele não cumpriu essa determinação divina e instalou-se em Siquém (cf. 31.13; 35.1).','Sim Jacó obedeceu imediatamente','Deus nunca ordenou que voltasse','Jacó foi e voltou no mesmo dia']}]},
+      {num:13,data:'28/06',titulo:'O LEGADO DE FÉ DE ABRAÃO, ISAQUE E JACÓ',texto:'Hb 11.8',resumo:'Abraão, Isaque e Jacó deixaram um legado de fé em Deus para as futuras gerações.',textoAureo:'Pela fé, Abraão, sendo chamado, obedeceu, indo para um lugar que havia de receber por herança; e saiu, sem saber para onde ia.',textoAureoRef:'Hb 11.8',verdade:'Abraão, Isaque e Jacó deixaram um legado de fé em Deus para as futuras gerações.',leituraBiblica:'Hebreus 11.8-12, 17-21',leituradiaria:[{dia:'Segunda',ref:'Gn 12.1-3',tema:'O legado da obediência de Abraão'},{dia:'Terça',ref:'Hb 11.8',tema:'O legado da confiança nas promessas'},{dia:'Quarta',ref:'Gn 22.9-12',tema:'O legado da entrega total'},{dia:'Quinta',ref:'Gn 24.12-14',tema:'O legado espiritual de Isaque'},{dia:'Sexta',ref:'Gn 26.24,25',tema:'O legado da perseverança nas promessas'},{dia:'Sábado',ref:'Gn 32.24-28',tema:'O legado da transformação de Jacó'}],perguntas:[{q:'Qual foi o alcance do legado de fé de Abraão?',a:'A herança de fé de Abraão não se limitou a Israel e à Igreja de Cristo; ela alcança todas as nações e famílias da terra.',correta:1,op:['Apenas a Israel e descendentes diretos','A herança de fé de Abraão não se limitou a Israel e à Igreja de Cristo; ela alcança todas as nações e famílias da terra.','Somente à Igreja cristã dos primeiros séculos','Exclusivamente à família de Abraão em Canaã']},{q:'Segundo a lição, de quem eram os descendentes do Messias?',a:'A genealogia de Jesus apresentada no Evangelho de Mateus diz que Jesus, o Messias, era descendente de Davi, filho de Abraão (Mt 1.1).',correta:0,op:['A genealogia de Jesus apresentada no Evangelho de Mateus diz que Jesus, o Messias, era descendente de Davi, filho de Abraão (Mt 1.1).','De Davi filho de Moisés','De Salomão filho de Davi','De Abraão filho de Noé']},{q:'O que é fé?',a:'A Bíblia diz que "a fé é o firme fundamento das coisas que se esperam e a prova das coisas que se não veem" (Hb 11.1).',correta:3,op:['A certeza do que esperamos ver em vida','A crença baseada em evidências concretas','A aceitação de antigas tradições religiosas','A Bíblia diz que "a fé é o firme fundamento das coisas que se esperam e a prova das coisas que se não veem" (Hb 11.1).']},{q:'Qual o significado do nome Isaque?',a:'O nome "Isaque" significa "riso" ou "ele ri".',correta:2,op:['Significa força guerreira','Significa escolhido por Deus','O nome "Isaque" significa "riso" ou "ele ri".','Significa fiel e leal']},{q:'Segundo a lição, o que o arrependimento pode mudar?',a:'O arrependimento muda destinos.',correta:1,op:['A oração intensa muda os planos de Deus','O arrependimento muda destinos.','O arrependimento não tem valor','Só a obediência perfeita muda destinos']}]},
     ]
   }
 };
@@ -3284,7 +3473,7 @@ function renderLicoes() {
     return `<div onclick="abrirLicao('${curTurmaLicoes}',${lic.num})" style="background:white;border:1px solid ${borderColor};border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='${borderColor}';this.style.transform=''">
       <div style="background:var(--ink);color:var(--gold-l);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${lic.num}</div>
       <div style="flex:1;min-width:0">
-        <div style="font-size:14px;font-weight:600;margin-bottom:3px;color:var(--ink)">${lic.titulo}${ehHoje?' 📖':''}</div>
+        <div style="font-size:14px;font-weight:600;margin-bottom:3px;color:var(--ink);word-break:break-word;white-space:normal">${lic.titulo}${ehHoje?' 📖':''}</div>
         <div style="font-size:11px;color:var(--ink-soft);margin-bottom:5px">${lic.data} · <span style="color:var(--gold-deep);font-weight:600">${lic.texto}</span></div>
         <div style="font-size:12px;color:var(--ink-mid);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${lic.resumo}</div>
         ${passou?`<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--tc-bg);color:var(--tc);margin-top:6px">✦ Quiz disponível</div>`:`<div style="font-size:10px;color:var(--ink-soft);margin-top:5px">📅 ${lic.data}</div>`}
@@ -3301,7 +3490,7 @@ function abrirLicao(turma, num) {
 
   // Prepara quiz state
   quizAtual = { turma, licaoNum: num, perguntas: [...lic.perguntas], atual: 0, respostas: [],
-    embaralhadas: lic.perguntas.map(p => ({ ...p, opEmbaralhadas: [...p.op].sort(() => Math.random() - 0.5) }))
+    embaralhadas: lic.perguntas.map(p => ({ ...p, opEmbaralhadas: [...(p.op||[p.a])] }))
   };
 
   document.getElementById('lp-num').textContent = `Lição ${num} · ${turma === 'jovens' ? 'Jovens' : 'Adultos'}`;
@@ -3317,25 +3506,42 @@ function abrirLicao(turma, num) {
   const refs = ['Mt 15.9','Ef 6.12; Cl 2.1','1 Co 1.18-21','Ef 4.14','1 Tm 6.20','Rm 12.2'];
 
   document.getElementById('lp-body').innerHTML = `
-    <!-- texto principal + resumo -->
+    <!-- Texto Áureo -->
     <div class="lp-block" style="background:var(--gold-pale)">
-      <div class="lp-lbl" style="color:var(--gold-deep);border-color:rgba(201,151,58,.25)">Texto Principal</div>
-      <div class="lp-verse" style="font-size:16px;margin-bottom:4px">— ${lic.texto}</div>
+      <div class="lp-lbl" style="color:var(--gold-deep);border-color:rgba(201,151,58,.25)">✦ Texto Áureo — ${lic.texto}</div>
+      <div class="lp-verse" style="font-size:14px;font-style:italic;line-height:1.6;margin-bottom:4px">${lic.textoAureo||''}</div>
     </div>
 
+    <!-- Verdade Prática -->
     <div class="lp-block">
-      <div class="lp-lbl">Resumo da Lição</div>
-      <div class="lp-truth">${lic.resumo}</div>
+      <div class="lp-lbl">💡 Verdade Prática</div>
+      <div class="lp-truth">${lic.verdade||lic.resumo}</div>
     </div>
+
+    <!-- Leitura Bíblica em Classe -->
+    ${lic.leituraBiblica ? `<div class="lp-block">
+      <div class="lp-lbl">📖 Leitura Bíblica em Classe</div>
+      <button class="lb-ref-btn" id="lb-btn-${num}" onclick="toggleLeituraBiblica(${num})">
+        <span class="lb-ref-txt">📖 ${lic.leituraBiblica}</span>
+        <span class="lb-ref-icon" id="lb-icon-${num}">▼</span>
+      </button>
+      <div class="lb-versos" id="lb-versos-${num}">
+        <div class="lb-verso-loading" id="lb-loading-${num}">Toque na referência acima para expandir os versículos</div>
+      </div>
+    </div>` : ''}
 
     <!-- leitura semanal -->
-    <div class="lp-block">
-      <div class="lp-lbl">Leitura Semanal</div>
-      ${dias.map((dia, i) => `<div class="lp-read-item">
-        <div class="lp-read-day">${dia}</div>
-        <div><div class="lp-read-ref">${refs[i % refs.length]}</div><div class="lp-read-topic">Estudo complementar do dia</div></div>
+    ${(() => {
+      const dias = lic.leituraDiaria || lic.leituradiaria || [];
+      if (!dias.length) return '';
+      return `<div class="lp-block">
+      <div class="lp-lbl">📅 Leitura Semanal</div>
+      ${dias.map(d => `<div class="lp-read-item">
+        <div class="lp-read-day">${d.dia}</div>
+        <div><div class="lp-read-ref">${d.ref}</div><div class="lp-read-topic">${d.tema}</div></div>
       </div>`).join('')}
-    </div>
+    </div>`;
+    })()}
 
     <!-- perguntas de revisão -->
     <div class="lp-review">
@@ -3345,20 +3551,110 @@ function abrirLicao(turma, num) {
 
     <!-- botão quiz -->
     <div class="lp-nav" style="margin-top:16px">
-      ${quizDisp ? `<button class="btn btn-gold" style="flex:1;justify-content:center" onclick="fecharLicao();iniciarQuizDireto()">✦ Fazer Quiz desta Lição</button>` : `<div style="font-size:12px;color:var(--ink-soft);padding:10px;background:var(--gold-pale);border-radius:var(--rsm);width:100%;text-align:center">📅 Quiz disponível a partir de ${lic.data}</div>`}
-      ${num > 1 ? `<button class="btn btn-ou" onclick="abrirLicao('${turma}',${num-1})">← Anterior</button>` : ''}
-      ${num < dados.licoes.length ? `<button class="btn btn-ou" onclick="abrirLicao('${turma}',${num+1})">Próxima →</button>` : ''}
+      ${quizDisp ? `<button class="btn btn-gold" style="flex:1;justify-content:center;min-height:44px;touch-action:manipulation" onclick="fecharLicao();iniciarQuizDireto()">✦ Fazer Quiz desta Lição</button>` : `<div style="font-size:12px;color:var(--ink-soft);padding:10px;background:var(--gold-pale);border-radius:var(--rsm);width:100%;text-align:center">📅 Quiz disponível a partir de ${lic.data}</div>`}
+      ${num > 1 ? `<button class="btn btn-ou" style="min-height:44px;touch-action:manipulation" onclick="abrirLicao('${turma}',${num-1})">← Anterior</button>` : ''}
+      ${num < dados.licoes.length ? `<button class="btn btn-ou" style="min-height:44px;touch-action:manipulation" onclick="abrirLicao('${turma}',${num+1})">Próxima →</button>` : ''}
+    </div>
+    <div style="padding:0 0 8px">
+      <button class="btn btn-ou btn-full" style="min-height:44px;touch-action:manipulation;margin-top:8px" onclick="fecharLicao()">✕ Fechar</button>
     </div>
   `;
 
   const overlay = document.getElementById('lic-overlay');
   overlay.style.display = 'flex';
   document.body.style.overflow = 'hidden';
+  _lbAberta = {}; // reset estado da leitura bíblica interativa
 }
 
 function fecharLicao() {
   document.getElementById('lic-overlay').style.display = 'none';
   document.body.style.overflow = '';
+}
+
+// Estado de abertura das leituras bíblicas
+function toggleLeituraBiblica(num) {
+  var versosEl = document.getElementById('lb-versos-' + num);
+  var iconEl   = document.getElementById('lb-icon-' + num);
+  if (!versosEl) return;
+
+  var isOpen = versosEl.classList.contains('open');
+
+  if (isOpen) {
+    // Fechar
+    versosEl.classList.remove('open');
+    if (iconEl) { iconEl.classList.remove('open'); iconEl.textContent = '▼'; }
+    return;
+  }
+
+  // Abrir
+  versosEl.classList.add('open');
+  if (iconEl) { iconEl.classList.add('open'); iconEl.textContent = '▲'; }
+
+  // Se já carregou, não busca de novo
+  if (_lbAberta[num]) return;
+  _lbAberta[num] = true;
+
+  // Pegar referência da lição atual
+  var dados = LICOES[quizAtual ? quizAtual.turma : curTurmaLicoes];
+  if (!dados) return;
+  var lic = dados.licoes.find(function(l){ return l.num === num; });
+  if (!lic || !lic.leituraBiblica) return;
+
+  buscarVersiculosBiblia(lic.leituraBiblica, num);
+}
+
+// Mapeamento de abreviações para nomes aceitos pela API
+function _normalizarRefBiblia(ref) {
+  // Normaliza separador: "Gênesis 12.1-9" → "Gênesis 12:1-9"
+  return ref
+    .replace(/\s+/g, ' ')
+    .replace(/\./g, ':')
+    .trim();
+}
+
+async function buscarVersiculosBiblia(referencia, num) {
+  var loadingEl = document.getElementById('lb-loading-' + num);
+  var versosEl  = document.getElementById('lb-versos-' + num);
+  if (!versosEl) return;
+
+  if (loadingEl) {
+    loadingEl.textContent = 'Carregando versículos…';
+    loadingEl.style.display = 'block';
+  }
+
+  // Usa a API pública bible-api.com (PT - João Ferreira de Almeida)
+  var refNorm = _normalizarRefBiblia(referencia);
+
+  try {
+    var url = 'https://bible-api.com/' + encodeURIComponent(refNorm) + '?translation=almeida';
+    var resp = await fetch(url);
+    var data = await resp.json();
+
+    if (data && data.verses && data.verses.length) {
+      // Montar HTML dos versículos
+      var html = '<div class="lb-verso-texto">';
+      html += data.verses.map(function(v) {
+        return '<span style="font-size:10px;font-weight:700;color:var(--gold-deep);margin-right:4px;vertical-align:super">' + v.verse + '</span>' + v.text.trim() + ' ';
+      }).join('');
+      html += '</div>';
+      html += '<div class="lb-verso-ref">' + (data.reference || referencia) + '</div>';
+      if (loadingEl) loadingEl.style.display = 'none';
+      // Inserir após o loading
+      var extra = document.createElement('div');
+      extra.innerHTML = html;
+      versosEl.appendChild(extra);
+    } else {
+      throw new Error('sem versículos');
+    }
+  } catch(e) {
+    // Fallback: mostrar mensagem com link
+    if (loadingEl) {
+      loadingEl.innerHTML = '<div style="font-size:13px;color:var(--ink-mid);line-height:1.6">'
+        + '📖 <strong>' + referencia + '</strong><br>'
+        + '<span style="font-size:12px;color:var(--ink-soft)">Leia esta passagem na sua Bíblia ou em um aplicativo bíblico.</span>'
+        + '</div>';
+    }
+  }
 }
 
 function iniciarQuizDireto() {
@@ -3392,9 +3688,10 @@ function renderPergunta() {
     return `<div class="${cls}"></div>`;
   }).join('');
   document.getElementById('quiz-pergunta').textContent = perg.q;
-  document.getElementById('quiz-opcoes').innerHTML = perg.opEmbaralhadas.map((op, i) =>
-    `<button class="quiz-opt" onclick="responder(${i})">${op}</button>`
-  ).join('');
+  document.getElementById('quiz-opcoes').innerHTML = perg.opEmbaralhadas.map((op, i) => {
+    const letra = ['A','B','C','D'][i] || (i+1);
+    return `<button class="quiz-opt" onclick="responder(${i})"><strong style="margin-right:8px;opacity:.6">${letra})</strong>${op}</button>`;
+  }).join('');
   document.getElementById('quiz-next-btn').style.display = 'none';
 }
 
@@ -3403,7 +3700,7 @@ function responder(idx) {
   const perg = q.embaralhadas[q.atual];
   const opcoes = document.querySelectorAll('.quiz-opt');
   const escolhida = perg.opEmbaralhadas[idx];
-  const certa = perg.a;
+  const certa = (perg.op && perg.correta != null) ? perg.op[perg.correta] : perg.a;
   const acertou = escolhida === certa;
   q.respostas.push(acertou);
 
@@ -3460,7 +3757,7 @@ function mostrarResultado() {
       return `<div class="qr-item">
         <div class="qr-q">${i+1}. ${p.q}</div>
         <div class="qr-resp ${certo?'qr-certo':'qr-errado'}">${certo?'✓ Correto':'✗ Incorreto'}</div>
-        ${!certo?`<div style="font-size:12px;color:var(--tc);margin-top:4px;line-height:1.4">Resposta: ${p.a}</div>`:''}
+        ${!certo?`<div style="font-size:12px;color:var(--tc);margin-top:4px;line-height:1.4">Resposta correta: ${(p.op && p.correta != null) ? p.op[p.correta] : p.a}</div>`:''}
       </div>`;
     }).join('');
 
@@ -3473,8 +3770,7 @@ function refazerQuiz() {
   // Re-embaralhar opções
   const lic = LICOES[quizAtual.turma].licoes.find(l => l.num === quizAtual.licaoNum);
   quizAtual.embaralhadas = lic.perguntas.map(p => {
-    const ops = [...p.op].sort(() => Math.random() - 0.5);
-    return { ...p, opEmbaralhadas: ops };
+    return { ...p, opEmbaralhadas: [...(p.op||[p.a])] };
   });
   iniciarQuiz();
 }
@@ -3682,6 +3978,16 @@ function abrirModalProva(id) {
   document.getElementById('pv-id').value = id || '';
   extrasCount = 0;
   document.getElementById('pv-extras-list').innerHTML = '';
+  const editId = id || '';
+  // Ao editar prova, carregar questões existentes no formulário
+  if (editId) {
+    setTimeout(() => {
+      const prova = PROVAS.find(p => p.id === editId);
+      if (prova && prova.questoes) {
+        prova.questoes.forEach(q => adicionarQuestaoExtra(q));
+      }
+    }, 100);
+  }
   if (id) {
     const p = PROVAS.find(x => x.id === id);
     if (p) {
@@ -3718,23 +4024,30 @@ function atualizarLicoesModal(editId) {
   }).join('');
 }
 
-function adicionarQuestaoExtra() {
+function adicionarQuestaoExtra(dadosEdit) {
   extrasCount++;
   const id = `extra-${extrasCount}`;
   const box = document.getElementById('pv-extras-list');
   const div = document.createElement('div');
   div.id = id;
   div.style.cssText = 'border:1px solid var(--cb);border-radius:var(--r);padding:12px;margin-bottom:8px;background:var(--gold-pale)';
+  const letras = ['A','B','C','D'];
+  const radios = letras.map((l,i) => `
+    <label style="display:flex;align-items:center;gap:6px;margin-bottom:4px;cursor:pointer">
+      <input type="radio" name="${id}-correta" value="${i}" ${dadosEdit && dadosEdit.correta===i ? 'checked' : i===0 ? 'checked' : ''} style="accent-color:var(--tc)">
+      <span style="font-size:11px;font-weight:700;color:var(--ink-soft);width:16px">${l})</span>
+      <input class="fc" placeholder="Opção ${l}..." id="${id}-op${i}" style="margin:0;flex:1" value="${dadosEdit ? (dadosEdit.op||[])[i]||'' : ''}">
+    </label>`).join('');
   div.innerHTML = `
     <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
       <div style="font-size:11px;font-weight:700;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.08em">Questão extra ${extrasCount}</div>
       <button onclick="document.getElementById('${id}').remove()" style="background:none;border:none;color:var(--red);cursor:pointer;font-size:16px">✕</button>
     </div>
-    <div class="fg"><input class="fc" placeholder="Pergunta..." id="${id}-q" style="margin-bottom:6px"></div>
-    <div class="fg"><input class="fc" placeholder="Opção A (correta)" id="${id}-a" style="margin-bottom:4px;border-color:var(--tc)"></div>
-    <div class="fg"><input class="fc" placeholder="Opção B" id="${id}-b" style="margin-bottom:4px"></div>
-    <div class="fg"><input class="fc" placeholder="Opção C" id="${id}-c" style="margin-bottom:4px"></div>
-    <div class="fg" style="margin:0"><input class="fc" placeholder="Opção D" id="${id}-d"></div>
+    <div class="fg"><input class="fc" placeholder="Digite a pergunta..." id="${id}-q" style="margin-bottom:10px" value="${dadosEdit ? dadosEdit.q||'' : ''}"></div>
+    <div style="font-size:10px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-soft);font-weight:700;margin-bottom:6px">
+      Alternativas — selecione a correta com o 🔘
+    </div>
+    ${radios}
   `;
   box.appendChild(div);
 }
@@ -3756,14 +4069,18 @@ function coletarQuestoes(turma, licoesSel) {
   // Questões extras
   let i = 1;
   while (document.getElementById(`extra-${i}`)) {
+    const div = document.getElementById(`extra-${i}`);
     const q = document.getElementById(`extra-${i}-q`)?.value?.trim();
-    const a = document.getElementById(`extra-${i}-a`)?.value?.trim();
-    const b = document.getElementById(`extra-${i}-b`)?.value?.trim();
-    const c = document.getElementById(`extra-${i}-c`)?.value?.trim();
-    const d = document.getElementById(`extra-${i}-d`)?.value?.trim();
-    if (q && a) {
-      const ops = [a, b, c, d].filter(Boolean);
-      questoes.push({ q, a, op: ops, origem: 'extra' });
+    const op0 = document.getElementById(`extra-${i}-op0`)?.value?.trim() || '';
+    const op1 = document.getElementById(`extra-${i}-op1`)?.value?.trim() || '';
+    const op2 = document.getElementById(`extra-${i}-op2`)?.value?.trim() || '';
+    const op3 = document.getElementById(`extra-${i}-op3`)?.value?.trim() || '';
+    const radio = div?.querySelector(`input[name="extra-${i}-correta"]:checked`);
+    const correta = radio ? parseInt(radio.value) : 0;
+    const ops = [op0, op1, op2, op3];
+    const aCorreta = ops[correta] || op0;
+    if (q && aCorreta) {
+      questoes.push({ q, a: aCorreta, correta, op: ops, origem: 'extra' });
     }
     i++;
   }
@@ -5826,7 +6143,8 @@ function definirSaudacaoImediata() {
     super: '❖ Superintendente',
     professor: profLabel + ' — ' + tsLabel,
     professor_convidado: profLabel + ' Convidado(a)',
-    aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||'')
+    aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||''),
+    responsavel: '👨‍👩‍👧 Responsável'
   };
   const roleText = roleMap[USER.perfil] || USER.perfil;
   const el = document.getElementById('dash-saudacao');
@@ -6068,20 +6386,16 @@ function gestorEditarQuestao(idx) {
   var form = document.createElement('div');
   form.className = 'questao-form';
   form.id = 'qform-'+idx;
-  var opsHtml = '';
-  (p.op||[]).forEach(function(op,j) {
-    opsHtml += '<input id="qf-op-'+idx+'-'+j+'" value="'+escHtml(op)+'" placeholder="Op&ccedil;&atilde;o '+(j+1)+(j===0?' (correta)':'')+'"'+(j===0?' class="questao-form-correta"':'')+' style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">';
-  });
-  if ((p.op||[]).length < 4) {
-    opsHtml += '<input id="qf-op-'+idx+'-'+(p.op||[]).length+'" placeholder="+ Nova op&ccedil;&atilde;o (opcional)" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">';
-  }
-  form.innerHTML = '<div class="questao-form-titulo">Editando Quest&atilde;o '+(idx+1)+'</div>'
+  var corretaAtual = (p.correta != null) ? p.correta : 0;
+  // Preencher ops até 4 alternativas
+  var opsAtual = (p.op||[]).slice(0,4);
+  while (opsAtual.length < 4) opsAtual.push('');
+  form.innerHTML = '<div class="questao-form-titulo">Editando Questão '+(idx+1)+'</div>'
     + '<label class="questao-form-label">Enunciado</label>'
     + '<textarea id="qf-enunciado-'+idx+'" rows="3" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:8px;font-family:Outfit,sans-serif;resize:vertical">'+escHtml(p.q)+'</textarea>'
-    + '<label class="questao-form-label">Op&ccedil;&otilde;es (1&ordf; = correta)</label>'
-    + opsHtml
+    + _buildOpInputs('qf-ed-'+idx, opsAtual, corretaAtual)
     + '<div style="display:flex;gap:8px;margin-top:4px">'
-    + '<button class="btn btn-gold btn-sm" onclick="gestorSalvarEdicao('+idx+')">\u2713 Salvar</button>'
+    + '<button class="btn btn-gold btn-sm" onclick="gestorSalvarEdicao('+idx+')">✓ Salvar</button>'
     + '<button class="btn btn-ou btn-sm" onclick="gestorCancelarEdicao('+idx+')">Cancelar</button>'
     + '</div>';
   card.after(form);
@@ -6093,14 +6407,17 @@ function gestorSalvarEdicao(idx) {
   var ta = document.getElementById('qf-enunciado-'+idx);
   var enunciado = ta ? ta.value.trim() : '';
   if (!enunciado) { toast('Digite o enunciado','er'); return; }
-  var ops = [], j = 0;
-  while (document.getElementById('qf-op-'+idx+'-'+j)) {
-    var v = document.getElementById('qf-op-'+idx+'-'+j).value.trim();
-    if (v) ops.push(v);
-    j++;
+  var ops = [];
+  for (var j=0; j<4; j++) {
+    var el = document.getElementById('qf-ed-'+idx+'-op-'+j);
+    if (el) ops.push(el.value.trim());
   }
-  if (ops.length < 2) { toast('Adicione pelo menos 2 opções','er'); return; }
-  _gestorPergs[idx] = { q: enunciado, a: ops[0], op: ops };
+  var ops_filtrado = ops.filter(function(o){ return o; });
+  if (ops_filtrado.length < 2) { toast('Adicione pelo menos 2 alternativas','er'); return; }
+  if (ops.length < 4 || ops.some(function(o){ return !o; })) { toast('Preencha as 4 alternativas','er'); return; }
+  var hidCorreta = document.getElementById('qf-ed-'+idx+'-correta');
+  var corretaIdx = hidCorreta ? parseInt(hidCorreta.value) : 0;
+  _gestorPergs[idx] = { q: enunciado, a: ops[corretaIdx], op: ops, correta: corretaIdx };
   _gestorAlterado = true;
   gestorCancelarEdicao(idx);
   gestorRenderQuestoes();
@@ -6123,6 +6440,52 @@ function gestorRemoverQuestao(idx) {
   }, 'red');
 }
 
+function _buildOpInputs(prefix, ops, corretaIdx) {
+  var letras = ['A','B','C','D'];
+  var html = '<div style="margin-bottom:10px">';
+  html += '<label class="questao-form-label" style="margin-bottom:6px">Alternativas</label>';
+  html += '<div style="background:#f9f6f0;border-radius:8px;padding:10px;margin-bottom:8px">';
+  html += '<div style="font-size:10px;color:var(--ink-soft);margin-bottom:8px;font-weight:600">Selecione qual é a alternativa CORRETA clicando no botão ao lado dela:</div>';
+  for (var j=0; j<4; j++) {
+    var isCorr = j === (corretaIdx||0);
+    var val = (ops && ops[j]) ? ops[j] : '';
+    html += '<div style="display:flex;gap:6px;align-items:center;margin-bottom:6px">';
+    var onclk = '_selecionarCorreta(' + JSON.stringify(prefix) + ',' + j + ')';
+    html += '<button type="button" onclick="' + escHtml(onclk) + '" '
+      + 'id="'+prefix+'-btn-'+j+'" '
+      + 'title="Marcar como correta" '
+      + 'style="width:28px;height:28px;border-radius:50%;border:2px solid '+(isCorr?'var(--tc)':'var(--cb)')+';background:'+(isCorr?'var(--tc)':'white')+';color:'+(isCorr?'white':'var(--ink-soft)')+';font-size:13px;cursor:pointer;flex-shrink:0;transition:all .2s">'
+      + (isCorr?'✓':letras[j])+'</button>';
+    html += '<input id="'+prefix+'-op-'+j+'" value="'+escHtml(val)+'" '
+      + 'placeholder="Alternativa '+letras[j]+(isCorr?' (correta)':'')+'" '
+      + 'style="flex:1;padding:8px 10px;border:1.5px solid '+(isCorr?'var(--tc)':'var(--cb)')+';background:'+(isCorr?'var(--tc-bg)':'white')+';border-radius:var(--rsm);font-size:13px;font-family:Outfit,sans-serif;transition:all .2s">';
+    html += '</div>';
+  }
+  html += '</div>';
+  html += '<input type="hidden" id="'+prefix+'-correta" value="'+(corretaIdx||0)+'">';
+  html += '</div>';
+  return html;
+}
+
+function _selecionarCorreta(prefix, idx) {
+  var letras = ['A','B','C','D'];
+  for (var j=0; j<4; j++) {
+    var btn = document.getElementById(prefix+'-btn-'+j);
+    var inp = document.getElementById(prefix+'-op-'+j);
+    if (!btn || !inp) continue;
+    var isCorr = j === idx;
+    btn.style.background = isCorr ? 'var(--tc)' : 'white';
+    btn.style.borderColor = isCorr ? 'var(--tc)' : 'var(--cb)';
+    btn.style.color = isCorr ? 'white' : 'var(--ink-soft)';
+    btn.textContent = isCorr ? '✓' : letras[j];
+    inp.style.borderColor = isCorr ? 'var(--tc)' : 'var(--cb)';
+    inp.style.background = isCorr ? 'var(--tc-bg)' : 'white';
+    inp.placeholder = 'Alternativa ' + letras[j] + (isCorr ? ' (correta)' : '');
+  }
+  var hid = document.getElementById(prefix+'-correta');
+  if (hid) hid.value = idx;
+}
+
 function gestorAdicionarQuestao() {
   document.querySelectorAll('.questao-form').forEach(function(f){ f.remove(); });
   document.querySelectorAll('.questao-card').forEach(function(c){ c.classList.remove('editando'); });
@@ -6131,17 +6494,13 @@ function gestorAdicionarQuestao() {
   var form = document.createElement('div');
   form.className = 'questao-form';
   form.id = 'qform-novo';
-  form.innerHTML = '<div class="questao-form-titulo">Nova Quest&atilde;o '+ (_gestorPergs.length+1)+'</div>'
+  form.innerHTML = '<div class="questao-form-titulo">Nova Questão ' + (_gestorPergs.length+1) + '</div>'
     + '<label class="questao-form-label">Enunciado</label>'
-    + '<textarea id="qf-novo-enunciado" rows="3" placeholder="Digite o enunciado..." style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:8px;font-family:Outfit,sans-serif;resize:vertical"></textarea>'
-    + '<label class="questao-form-label">Op&ccedil;&otilde;es (1&ordf; = correta)</label>'
-    + '<input id="qf-novo-op-0" placeholder="Op&ccedil;&atilde;o A &mdash; correta" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--tc);background:var(--tc-bg);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">'
-    + '<input id="qf-novo-op-1" placeholder="Op&ccedil;&atilde;o B" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">'
-    + '<input id="qf-novo-op-2" placeholder="Op&ccedil;&atilde;o C" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">'
-    + '<input id="qf-novo-op-3" placeholder="Op&ccedil;&atilde;o D" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:6px;font-family:Outfit,sans-serif">'
+    + '<textarea id="qf-novo-enunciado" rows="3" placeholder="Digite o enunciado da pergunta..." style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:8px;font-family:Outfit,sans-serif;resize:vertical"></textarea>'
+    + _buildOpInputs('qf-novo', [], 0)
     + '<div style="display:flex;gap:8px;margin-top:4px">'
-    + '<button class="btn btn-gold btn-sm" onclick="gestorConfirmarNova()">\u2713 Adicionar</button>'
-    + '<button class="btn btn-ou btn-sm" onclick="document.getElementById(\'qform-novo\').remove()">Cancelar</button>'
+    + '<button class="btn btn-gold btn-sm" onclick="gestorConfirmarNova()">✓ Adicionar</button>'
+    + '<button class="btn btn-ou btn-sm" onclick="gestorCancelarNova()">Cancelar</button>'
     + '</div>';
   body.appendChild(form);
   form.scrollIntoView({ behavior:'smooth', block:'center' });
@@ -6149,6 +6508,8 @@ function gestorAdicionarQuestao() {
   if (ta) ta.focus();
 }
 
+
+function gestorCancelarNova() { var f=document.getElementById('qform-novo'); if(f) f.remove(); }
 function gestorConfirmarNova() {
   var ta = document.getElementById('qf-novo-enunciado');
   var enunciado = ta ? ta.value.trim() : '';
@@ -6158,13 +6519,16 @@ function gestorConfirmarNova() {
     var el = document.getElementById('qf-novo-op-'+j);
     if (el && el.value.trim()) ops.push(el.value.trim());
   }
-  if (ops.length < 2) { toast('Adicione pelo menos 2 opções','er'); return; }
-  _gestorPergs.push({ q: enunciado, a: ops[0], op: ops });
+  if (ops.length < 2) { toast('Adicione pelo menos 2 alternativas','er'); return; }
+  if (ops.length < 4) { toast('Preencha as 4 alternativas (A, B, C, D)','er'); return; }
+  var hidCorreta = document.getElementById('qf-novo-correta');
+  var corretaIdx = hidCorreta ? parseInt(hidCorreta.value) : 0;
+  _gestorPergs.push({ q: enunciado, a: ops[corretaIdx], op: ops, correta: corretaIdx });
   _gestorAlterado = true;
   var form = document.getElementById('qform-novo');
   if (form) form.remove();
   gestorRenderQuestoes();
-  toast('Questão adicionada!','ok');
+  toast('Questão adicionada! ✦','ok');
 }
 
 function gestorSalvarAlteracoes() {
@@ -6203,6 +6567,368 @@ function fecharGestorQuestoes() {
 function escHtml(str) {
   if (!str) return '';
   return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ══════════════════════════════════════════════
+// SISTEMA DE RESPONSÁVEIS
+// ══════════════════════════════════════════════
+
+// ── Helpers Supabase para responsáveis ──
+async function sbGetVinculos(alunoId) {
+  try {
+    const { data } = await sbClient.from('responsavel_aluno').select('*').eq('aluno_id', alunoId);
+    return data || [];
+  } catch(e) { return []; }
+}
+async function sbGetFilhosDoResp(respId) {
+  try {
+    const { data } = await sbClient.from('responsavel_aluno').select('*').eq('responsavel_id', respId);
+    return data || [];
+  } catch(e) { return []; }
+}
+async function sbUpsertVinculo(respId, alunoId) {
+  try {
+    // Verificar se já existe
+    const { data: ex } = await sbClient.from('responsavel_aluno').select('id').eq('responsavel_id', respId).eq('aluno_id', alunoId);
+    if (ex && ex.length > 0) return ex[0]; // já vinculado
+    const { data, error } = await sbClient.from('responsavel_aluno').insert({ responsavel_id: respId, aluno_id: alunoId }).select().single();
+    if (error) throw error;
+    return data;
+  } catch(e) { console.error('Erro ao vincular:', e); return null; }
+}
+async function sbRemoverVinculo(respId, alunoId) {
+  try {
+    await sbClient.from('responsavel_aluno').delete().eq('responsavel_id', respId).eq('aluno_id', alunoId);
+  } catch(e) {}
+}
+
+// ── Marcar aluno existente como responsável ──
+async function criarLoginResponsavel(login, senha, nomeAluno, alunoId) {
+  // Esta função agora só é chamada se o campo de login do responsável foi preenchido
+  // Nesse caso, busca o aluno com esse login e o vincula como responsável
+  try {
+    const { data: ex } = await sbClient.from('alunos').select('id,nome').eq('login', login);
+    if (ex && ex.length > 0) {
+      const pai = ex[0];
+      // Marcar como responsável
+      await sbUpdate('alunos', pai.id, { eh_responsavel: true });
+      await sbUpsertVinculo(pai.id, alunoId);
+      toast(pai.nome + ' vinculado como responsável! ✦', 'ok');
+      return pai.id;
+    } else {
+      toast('Nenhum aluno encontrado com o login "' + login + '". Cadastre-o primeiro.', 'er');
+      return null;
+    }
+  } catch(e) {
+    toast('Erro ao vincular responsável: ' + e.message, 'er');
+    return null;
+  }
+}
+
+// ── Sincronizar vínculos e marcar responsáveis ──
+async function sincronizarVinculosResp(alunoId, respIds) {
+  for (const rid of respIds) {
+    await sbUpsertVinculo(rid, alunoId);
+    // Marcar o pai como responsável na tabela alunos
+    try { await sbUpdate('alunos', rid, { eh_responsavel: true }); } catch(e) {}
+  }
+}
+
+// ── Buscar responsáveis para autocomplete ──
+async function buscarResponsaveis(query) {
+  const sug = document.getElementById('ae-resp-sugestoes');
+  if (!sug) return;
+  if (!query || query.length < 2) { sug.innerHTML = ''; return; }
+  try {
+    // Busca nos alunos já cadastrados (pais/mães são alunos adultos)
+    const { data } = await sbClient.from('alunos').select('id,nome,login,turma').ilike('nome', '%' + query + '%').limit(10);
+    if (!data || !data.length) {
+      sug.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:6px 0">Nenhum aluno encontrado com esse nome</div>';
+      return;
+    }
+    // Pegar ids já vinculados para marcar
+    const idsEl = document.getElementById('ae-resp-ids');
+    const jaVinc = JSON.parse(idsEl ? idsEl.value || '[]' : '[]');
+    sug.innerHTML = data.map(function(r) {
+      const jaEsta = jaVinc.includes(r.id);
+      return '<div onclick="' + (jaEsta ? '' : 'adicionarRespVinculo(\'' + r.id + '\',\'' + escHtml(r.nome) + '\')') + '" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid ' + (jaEsta ? '#9ecfb7' : 'var(--cb)') + ';border-radius:7px;margin-bottom:5px;cursor:' + (jaEsta ? 'default' : 'pointer') + ';background:' + (jaEsta ? '#f0f9f4' : 'white') + ';transition:all .15s" ' + (jaEsta ? '' : 'onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--cb)\'"') + '>'
+        + '<div style="width:28px;height:28px;background:#e8f0ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1c3f6e;flex-shrink:0">' + ini(r.nome) + '</div>'
+        + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + escHtml(r.nome) + '</div>'
+        + '<div style="font-size:10px;color:var(--ink-soft)">' + (TN[r.turma]||r.turma||'') + (r.login ? ' · login: ' + escHtml(r.login) : ' · sem login') + '</div></div>'
+        + '<span style="font-size:11px;font-weight:700;color:' + (jaEsta ? 'var(--tc)' : 'var(--gold-deep)') + '">' + (jaEsta ? '✓ Vinculado' : '+ Vincular') + '</span></div>';
+    }).join('');
+  } catch(e) { sug.innerHTML = ''; }
+}
+
+function adicionarRespVinculo(respId, respNome) {
+  const idsEl = document.getElementById('ae-resp-ids');
+  const vinBox = document.getElementById('ae-resp-vinculados');
+  const sug = document.getElementById('ae-resp-sugestoes');
+  if (!idsEl || !vinBox) return;
+  let ids = JSON.parse(idsEl.value || '[]');
+  if (ids.includes(respId)) { toast('Responsável já vinculado', ''); return; }
+  ids.push(respId);
+  idsEl.value = JSON.stringify(ids);
+  // Renderizar tag
+  const tag = document.createElement('div');
+  tag.id = 'resp-tag-' + respId;
+  tag.style.cssText = 'display:flex;align-items:center;gap:8px;padding:7px 10px;background:#e8f0ff;border:1px solid #b8d0f5;border-radius:7px';
+  tag.innerHTML = '<span style="font-size:13px;font-weight:600;flex:1;color:#1c3f6e">👤 ' + escHtml(respNome) + '</span>'
+    + '<button type="button" onclick="removerRespVinculoModal(\'' + respId + '\')" style="background:none;border:none;color:#c0392b;font-size:14px;cursor:pointer;flex-shrink:0">✕</button>';
+  vinBox.appendChild(tag);
+  if (sug) sug.innerHTML = '';
+  if (document.getElementById('ae-resp-busca')) document.getElementById('ae-resp-busca').value = '';
+}
+
+function removerRespVinculoModal(respId) {
+  const idsEl = document.getElementById('ae-resp-ids');
+  if (!idsEl) return;
+  let ids = JSON.parse(idsEl.value || '[]');
+  ids = ids.filter(function(x){ return x !== respId; });
+  idsEl.value = JSON.stringify(ids);
+  const tag = document.getElementById('resp-tag-' + respId);
+  if (tag) tag.remove();
+}
+
+async function carregarRespVinculadosModal(alunoId) {
+  const vinBox = document.getElementById('ae-resp-vinculados');
+  const idsEl = document.getElementById('ae-resp-ids');
+  if (!vinBox || !idsEl) return;
+  vinBox.innerHTML = '';
+  idsEl.value = '[]';
+  try {
+    const vinculos = await sbGetVinculos(alunoId);
+    if (!vinculos.length) return;
+    const ids = vinculos.map(function(v){ return v.responsavel_id; });
+    idsEl.value = JSON.stringify(ids);
+    // Busca na tabela alunos — pais são alunos cadastrados
+    const { data: resps } = await sbClient.from('alunos').select('id,nome').in('id', ids);
+    if (!resps) return;
+    resps.forEach(function(r) {
+      adicionarRespVinculo(r.id, r.nome);
+    });
+  } catch(e) {}
+}
+
+// ── Modal de vínculo rápido (pelo ícone na lista de alunos) ──
+async function abrirModalVincularResp(alunoId, nomeAluno) {
+  var prev = document.getElementById('modal-vincular-resp');
+  if (prev) prev.remove();
+  var modal = document.createElement('div');
+  modal.id = 'modal-vincular-resp';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);animation:fadeIn .2s';
+  modal.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">'
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--cb)">'
+    + '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:20px">👨‍👩‍👧 Responsáveis de <em style="color:var(--gold-deep)">' + escHtml(nomeAluno) + '</em></h3>'
+    + '<button onclick="fecharModalVincularResp()" style="width:30px;height:30px;border:1px solid var(--cb);border-radius:7px;background:white;color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</button>'
+    + '</div>'
+    // Vinculados
+    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin-bottom:8px">Responsáveis vinculados</div>'
+    + '<div id="mvr-lista" style="margin-bottom:16px"><div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:10px">Carregando...</div></div>'
+    // Busca nos alunos cadastrados
+    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin-bottom:6px">Buscar pai/mãe já cadastrado(a)</div>'
+    + '<div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;line-height:1.5">O responsável precisa já estar cadastrado como aluno. Digite o nome para encontrá-lo.</div>'
+    + '<input class="fc" id="mvr-busca" placeholder="Ex: Maria Santos, João Silva..." oninput="buscarRespModal(this.value,\'' + alunoId + '\')" style="margin-bottom:8px">'
+    + '<div id="mvr-sugestoes" style="margin-bottom:12px"></div>'
+    + '<button class="btn btn-ou btn-full" onclick="fecharModalVincularResp()">Fechar</button>'
+    + '</div>';
+  modal.addEventListener('click', function(e){ if(e.target===modal) fecharModalVincularResp(); });
+  document.body.appendChild(modal);
+  carregarListaVinculosModal(alunoId);
+}
+function fecharModalVincularResp() {
+  var m = document.getElementById('modal-vincular-resp');
+  if (m) m.remove();
+}
+
+async function carregarListaVinculosModal(alunoId) {
+  var lista = document.getElementById('mvr-lista');
+  if (!lista) return;
+  try {
+    var vinculos = await sbGetVinculos(alunoId);
+    if (!vinculos.length) { lista.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:10px">Nenhum responsável vinculado ainda</div>'; return; }
+    var ids = vinculos.map(function(v){ return v.responsavel_id; });
+    // Busca na tabela alunos — pais já são alunos cadastrados
+    var { data: resps } = await sbClient.from('alunos').select('id,nome,login,tel,turma').in('id', ids);
+    if (!resps || !resps.length) { lista.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:6px 0">Nenhum responsável encontrado</div>'; return; }
+    lista.innerHTML = resps.map(function(r){
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb)">'
+        + '<div style="width:32px;height:32px;background:#e8f0ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1c3f6e;flex-shrink:0">' + ini(r.nome) + '</div>'
+        + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + escHtml(r.nome) + '</div>'
+        + '<div style="font-size:10px;color:var(--ink-soft)">' + (TN[r.turma]||'') + (r.tel?' · '+r.tel:'') + (r.login?' · login: '+escHtml(r.login):'') + '</div></div>'
+        + '<button onclick="desvincularResp(\'' + r.id + '\',\'' + alunoId + '\')" style="padding:4px 9px;border:1px solid #f5b8b8;border-radius:6px;background:white;color:var(--red);font-size:11px;font-weight:700;cursor:pointer">Desvincular</button>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    lista.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar. Verifique se a tabela <strong>responsavel_aluno</strong> existe (Config → SQL).</div>';
+  }
+}
+
+async function buscarRespModal(query, alunoId) {
+  var sug = document.getElementById('mvr-sugestoes');
+  if (!sug) return;
+  if (!query || query.length < 2) { sug.innerHTML = ''; return; }
+  try {
+    // Busca nos alunos cadastrados (pais são alunos adultos)
+    var { data } = await sbClient.from('alunos').select('id,nome,login,turma').ilike('nome', '%' + query + '%').limit(8);
+    if (!data || !data.length) { sug.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:4px 0">Nenhum aluno encontrado com esse nome</div>'; return; }
+    sug.innerHTML = data.map(function(r){
+      return '<div onclick="vincularRespExistente(\'' + r.id + '\',\'' + alunoId + '\')" style="display:flex;align-items:center;gap:8px;padding:8px 10px;border:1px solid var(--cb);border-radius:7px;margin-bottom:5px;cursor:pointer;background:white;transition:all .15s" onmouseover="this.style.borderColor=\'var(--gold)\'" onmouseout="this.style.borderColor=\'var(--cb)\'">'
+        + '<div style="width:28px;height:28px;background:#e8f0ff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#1c3f6e;flex-shrink:0">' + ini(r.nome) + '</div>'
+        + '<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">' + escHtml(r.nome) + '</div>'
+        + '<div style="font-size:10px;color:var(--ink-soft)">' + (TN[r.turma]||'') + (r.login?' · login: '+escHtml(r.login):' · sem login') + '</div></div>'
+        + '<span style="font-size:11px;color:var(--gold-deep);font-weight:700">+ Vincular</span></div>';
+    }).join('');
+  } catch(e) { sug.innerHTML = ''; }
+}
+
+async function vincularRespExistente(respId, alunoId) {
+  var r = await sbUpsertVinculo(respId, alunoId);
+  // Marcar o pai/mãe como responsável
+  try { await sbUpdate('alunos', respId, { eh_responsavel: true }); } catch(e) {}
+  if (r) toast('Responsável vinculado! ✦', 'ok');
+  document.getElementById('mvr-busca').value = '';
+  document.getElementById('mvr-sugestoes').innerHTML = '';
+  carregarListaVinculosModal(alunoId);
+}
+
+async function desvincularResp(respId, alunoId) {
+  showConfirm('Desvincular responsável?', 'O responsável não terá mais acesso a este aluno.', async function(){
+    await sbRemoverVinculo(respId, alunoId);
+    toast('Desvinculado.', '');
+    carregarListaVinculosModal(alunoId);
+  }, 'red');
+}
+
+// ── Tela do Responsável: listar filhos ──
+async function renderFilhosResponsavel() {
+  var box = document.getElementById('resp-lista-filhos');
+  var sub = document.getElementById('resp-subtitulo');
+  if (!box) return;
+  // Garante visualização da lista
+  var listView = document.getElementById('resp-lista-view');
+  var filhoView = document.getElementById('resp-filho-view');
+  if (listView) listView.style.display = '';
+  if (filhoView) filhoView.style.display = 'none';
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">Carregando...</div>';
+  try {
+    var vinculos = await sbGetFilhosDoResp(USER.id);
+    if (!vinculos.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum filho vinculado ainda.<br>Fale com o professor ou superintendente.</div></div>';
+      return;
+    }
+    var alunoIds = vinculos.map(function(v){ return v.aluno_id; });
+    var { data: alunos } = await sbClient.from('alunos').select('*').in('id', alunoIds);
+    if (!alunos || !alunos.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum dado encontrado</div></div>'; return; }
+    if (sub) sub.textContent = alunos.length === 1 ? '1 filho vinculado' : alunos.length + ' filhos vinculados';
+    // Buscar aulas para estatísticas rápidas
+    var aulas = [];
+    try { var { data: a } = await sbClient.from('aulas').select('data,turma,presencas').order('data',{ascending:false}).limit(100); aulas = a||[]; } catch(e){}
+    box.innerHTML = alunos.map(function(a) {
+      var avBg = a.turma==='criancas'?'var(--tc-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
+      var avCor = a.turma==='criancas'?'var(--tc)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
+      var aulasT = aulas.filter(function(x){ return x.turma===a.turma; });
+      var pres = aulasT.filter(function(x){ return (x.presencas||{})[a.id]==='presente'; }).length;
+      var pct = aulasT.length ? Math.round(pres/aulasT.length*100) : null;
+      var pctBadge = pct!==null ? '<span style="font-size:11px;font-weight:700;color:' + (pct>=75?'var(--tc)':pct>=50?'var(--warn)':'var(--red)') + '">' + pct + '% presença</span>' : '';
+      return '<div class="resp-filho-card" onclick="abrirFilhoResponsavel(\'' + a.id + '\')">'
+        + '<div class="resp-filho-av" style="background:' + avBg + ';color:' + avCor + '">'
+        + (a.foto_url ? '<img src="' + a.foto_url + '">' : ini(a.nome)) + '</div>'
+        + '<div class="resp-filho-info">'
+        + '<div class="resp-filho-nome">' + escHtml(a.nome) + '</div>'
+        + '<div class="resp-filho-meta"><span class="badge badge-m">' + (TN[a.turma]||a.turma) + '</span>' + pctBadge + '</div>'
+        + '</div><div class="resp-filho-arrow">›</div></div>';
+    }).join('');
+  } catch(e) {
+    box.innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px">Erro ao carregar. Certifique-se de que a tabela <strong>responsavel_aluno</strong> existe no Supabase (veja Config → SQL).</div>';
+  }
+}
+
+// ── Tela de detalhe de um filho ──
+var _respFilhoAtual = null;
+async function abrirFilhoResponsavel(alunoId) {
+  var listView = document.getElementById('resp-lista-view');
+  var filhoView = document.getElementById('resp-filho-view');
+  if (listView) listView.style.display = 'none';
+  if (filhoView) filhoView.style.display = 'block';
+  var heroCard = document.getElementById('resp-filho-hero-card');
+  var statsEl = document.getElementById('resp-filho-stats');
+  var presEl  = document.getElementById('resp-filho-presencas');
+  if (heroCard) heroCard.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px">Carregando...</div>';
+  try {
+    var { data: a } = await sbClient.from('alunos').select('*').eq('id', alunoId).single();
+    if (!a) { toast('Aluno não encontrado','er'); return; }
+    _respFilhoAtual = a;
+    // Hero
+    var avBg = a.turma==='criancas'?'var(--tc-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
+    var avCor = a.turma==='criancas'?'var(--tc)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
+    heroCard.innerHTML = '<div class="resp-filho-hero-av" style="background:' + avBg + ';color:' + avCor + '">'
+      + (a.foto_url ? '<img src="' + a.foto_url + '">' : ini(a.nome))
+      + '</div><div class="resp-filho-hero-info">'
+      + '<div class="resp-filho-hero-nome">' + escHtml(a.nome) + '</div>'
+      + '<div class="resp-filho-hero-meta">' + (TN[a.turma]||a.turma) + (a.nasc?' · '+calcIdade(a.nasc)+' anos':'') + '</div>'
+      + '</div>';
+    // Aulas da turma
+    var { data: aulas } = await sbClient.from('aulas').select('*').eq('turma', a.turma).order('data',{ascending:false}).limit(50);
+    aulas = aulas || [];
+    var pres = aulas.filter(function(x){ return (x.presencas||{})[a.id]==='presente'; }).length;
+    var aus  = aulas.filter(function(x){ return (x.presencas||{})[a.id]==='ausente'; }).length;
+    var pct  = aulas.length ? Math.round(pres/aulas.length*100) : 0;
+    // Stats
+    statsEl.innerHTML = '<div class="resp-stat"><div class="resp-stat-n">' + pres + '</div><div class="resp-stat-l">Presenças</div></div>'
+      + '<div class="resp-stat"><div class="resp-stat-n">' + aus + '</div><div class="resp-stat-l">Ausências</div></div>'
+      + '<div class="resp-stat"><div class="resp-stat-n" style="color:' + (pct>=75?'var(--tc)':pct>=50?'var(--warn)':'var(--red)') + '">' + pct + '%</div><div class="resp-stat-l">Frequência</div></div>';
+    // Lista de presenças
+    if (!aulas.length) {
+      presEl.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:16px">Nenhuma aula registrada ainda</div>';
+    } else {
+      presEl.innerHTML = aulas.map(function(au) {
+        var est = (au.presencas||{})[a.id];
+        var cls = est==='presente'?'al-pr':est==='ausente'?'al-au':'al-na';
+        var txt = est==='presente'?'Presente':est==='ausente'?'Ausente':'—';
+        var dt = new Date(au.data+'T12:00:00');
+        return '<div class="resp-presenca-item">'
+          + '<div class="resp-pres-data">' + dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) + '</div>'
+          + '<div class="resp-pres-licao">' + escHtml(au.licao||'') + '</div>'
+          + '<span class="resp-pres-status ' + cls + '">' + txt + '</span></div>';
+      }).join('');
+    }
+    // Provas
+    try {
+      var { data: provas } = await sbClient.from('provas').select('*').eq('turma', a.turma).eq('liberada', true);
+      var provasCard = document.getElementById('resp-filho-provas-card');
+      var provasBox  = document.getElementById('resp-filho-provas');
+      if (provas && provas.length && provasCard && provasBox) {
+        provasCard.style.display = 'block';
+        var feitas = provas.filter(function(p){ return p.resultados && p.resultados[a.id]; });
+        provasBox.innerHTML = provas.map(function(p){
+          var res = p.resultados && p.resultados[a.id];
+          var nQ = (p.questoes||[]).length;
+          if (res) {
+            var pct2 = Math.round(res.acertos/nQ*100);
+            var cor = pct2>=70?'var(--tc)':pct2>=50?'var(--warn)':'var(--red)';
+            return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb)">'
+              + '<div style="flex:1;font-size:13px;font-weight:500">' + escHtml(p.nome) + '</div>'
+              + '<span style="font-size:12px;font-weight:700;color:' + cor + '">' + res.acertos + '/' + nQ + ' (' + pct2 + '%)</span></div>';
+          } else {
+            return '<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb)">'
+              + '<div style="flex:1;font-size:13px;font-weight:500;color:var(--ink-soft)">' + escHtml(p.nome) + '</div>'
+              + '<span style="font-size:11px;color:var(--ink-soft)">Pendente</span></div>';
+          }
+        }).join('');
+      } else if (provasCard) provasCard.style.display = 'none';
+    } catch(e) {}
+  } catch(e) {
+    if (heroCard) heroCard.innerHTML = '<div style="color:rgba(255,255,255,.4);font-size:13px">Erro ao carregar dados</div>';
+  }
+}
+
+function voltarListaFilhos() {
+  var listView = document.getElementById('resp-lista-view');
+  var filhoView = document.getElementById('resp-filho-view');
+  if (listView) listView.style.display = '';
+  if (filhoView) filhoView.style.display = 'none';
+  _respFilhoAtual = null;
 }
 
 // ═══════════════════════════════════════════════════════════
