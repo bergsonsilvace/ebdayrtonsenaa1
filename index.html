@@ -1034,6 +1034,9 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div id="resp-lista-view">
         <div class="ph"><h2>👨‍👩‍👧‍👦 Meus <em>Filhos</em></h2><p id="resp-subtitulo">Acompanhe o progresso de cada filho</p></div>
         <div id="resp-lista-filhos"></div>
+        <div id="resp-dica-vazia" style="display:none;margin-top:12px;padding:12px 14px;background:var(--cream);border-radius:8px;font-size:12px;color:var(--ink-soft);text-align:center;line-height:1.6">
+          Seus filhos não aparecem? Peça ao professor para acessar o cadastro do aluno e clicar em <strong>👨‍👩‍👧 Vincular Responsável</strong>.
+        </div>
       </div>
       <div id="resp-filho-view" style="display:none">
         <button class="resp-back-btn" onclick="voltarListaFilhos()">← Voltar</button>
@@ -6582,9 +6585,18 @@ async function sbGetVinculos(alunoId) {
 }
 async function sbGetFilhosDoResp(respId) {
   try {
-    const { data } = await sbClient.from('responsavel_aluno').select('*').eq('responsavel_id', respId);
+    const { data, error } = await sbClient.from('responsavel_aluno').select('*').eq('responsavel_id', respId);
+    if (error) {
+      console.error('Erro responsavel_aluno:', error.message);
+      const box = document.getElementById('resp-lista-filhos');
+      if (box) box.innerHTML = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:10px;padding:16px;font-size:13px;line-height:1.6">'
+        + '<b>⚠️ Tabela ainda não criada no banco.</b><br>'
+        + 'Acesse <b>Config → SQL dos Responsáveis</b> e execute o SQL para ativar este recurso.<br>'
+        + '<span style="font-size:11px;color:#856404">Erro: ' + error.message + '</span></div>';
+      return [];
+    }
     return data || [];
-  } catch(e) { return []; }
+  } catch(e) { console.error('sbGetFilhosDoResp:', e); return []; }
 }
 async function sbUpsertVinculo(respId, alunoId) {
   try {
@@ -6784,18 +6796,29 @@ async function buscarRespModal(query, alunoId) {
 
 async function vincularRespExistente(respId, alunoId) {
   var r = await sbUpsertVinculo(respId, alunoId);
-  // Marcar o pai/mãe como responsável
-  try { await sbUpdate('alunos', respId, { eh_responsavel: true }); } catch(e) {}
-  if (r) toast('Responsável vinculado! ✦', 'ok');
-  document.getElementById('mvr-busca').value = '';
-  document.getElementById('mvr-sugestoes').innerHTML = '';
-  carregarListaVinculosModal(alunoId);
+  if (r) {
+    // Marcar como responsável — agora ele verá os filhos ao logar
+    try { await sbUpdate('alunos', respId, { eh_responsavel: true }); } catch(e) {}
+    toast('Vinculado! ✦ Ele já pode ver este filho ao fazer login.', 'ok');
+    var bEl = document.getElementById('mvr-busca');
+    var sEl = document.getElementById('mvr-sugestoes');
+    if (bEl) bEl.value = '';
+    if (sEl) sEl.innerHTML = '';
+    carregarListaVinculosModal(alunoId);
+  } else {
+    toast('Erro ao vincular. Verifique se a tabela responsavel_aluno existe (Config → SQL).', 'er');
+  }
 }
 
 async function desvincularResp(respId, alunoId) {
   showConfirm('Desvincular responsável?', 'O responsável não terá mais acesso a este aluno.', async function(){
     await sbRemoverVinculo(respId, alunoId);
-    toast('Desvinculado.', '');
+    // Se não tem mais filhos vinculados, remove flag de responsável
+    const restantes = await sbGetFilhosDoResp(respId);
+    if (!restantes.length) {
+      try { await sbUpdate('alunos', respId, { eh_responsavel: false }); } catch(e) {}
+    }
+    toast('Desvinculado com sucesso.', '');
     carregarListaVinculosModal(alunoId);
   }, 'red');
 }
@@ -6814,7 +6837,11 @@ async function renderFilhosResponsavel() {
   try {
     var vinculos = await sbGetFilhosDoResp(USER.id);
     if (!vinculos.length) {
-      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum filho vinculado ainda.<br>Fale com o professor ou superintendente.</div></div>';
+      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div>'
+        + '<div class="empty-txt">Nenhum filho vinculado ainda.</div>'
+        + '<div style="font-size:12px;color:var(--ink-soft);margin-top:8px;line-height:1.6;text-align:center;padding:0 16px">'
+        + 'Peça ao <b>professor</b> ou <b>superintendente</b> para abrir o cadastro do seu filho<br>'
+        + 'e clicar em <b>👨‍👩‍👧 Vincular Responsável</b>.</div></div>';
       return;
     }
     var alunoIds = vinculos.map(function(v){ return v.aluno_id; });
