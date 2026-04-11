@@ -1807,11 +1807,10 @@ async function carregarConfigs() {
 
 // ── LOGIN ──
 
-// ── Verifica se qualquer usuário tem filhos vinculados (funciona para todos os perfis) ──
+// ── Verifica se qualquer usuário tem filhos vinculados ──
 async function checarSeResponsavel(userId) {
   if (!userId) return false;
   try {
-    // Busca na tabela responsavel_aluno usando o ID do usuário logado
     const { data, error } = await sbClient.from('responsavel_aluno')
       .select('id').eq('responsavel_id', userId).limit(1);
     if (error || !data) return false;
@@ -1840,9 +1839,21 @@ async function doLogin() {
     const { data: alunos } = await sbClient.from('alunos').select('*').eq('login', lu).eq('senha', lp);
     if (alunos && alunos.length > 0) {
       const a = alunos[0];
-      // Verificar se é responsável (tem filhos vinculados)
-      if (a.eh_responsavel) {
-        USER = { ...a, perfil: 'responsavel' };
+      // Verificar se é responsável — checa tabela diretamente (campo pode estar desatualizado)
+      let ehResp = a.eh_responsavel;
+      if (!ehResp) {
+        try {
+          const { data: vData } = await sbClient.from('responsavel_aluno')
+            .select('id').eq('responsavel_id', a.id).limit(1);
+          if (vData && vData.length > 0) {
+            ehResp = true;
+            // Corrigir campo desatualizado em background
+            sbClient.from('alunos').update({ eh_responsavel: true }).eq('id', a.id).then(()=>{});
+          }
+        } catch(e) { /* tabela pode não existir */ }
+      }
+      if (ehResp) {
+        USER = { ...a, perfil: 'responsavel', eh_responsavel: true };
       } else {
         USER = { ...a, perfil: 'aluno' };
       }
@@ -1885,7 +1896,6 @@ function construirNav() {
       return '<button class="tb-btn' + (i.id==='dash'||i.id==='pg-aluno'?' on':'') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
     }).join('');
   }
-  // Adicionar "Meus Filhos" para qualquer perfil que tenha filhos vinculados
   if (USER && USER.eh_responsavel && p !== 'aluno' && p !== 'responsavel') {
     items.push({ id:'responsavel', label:'Meus Filhos' });
   }
@@ -1999,11 +2009,10 @@ async function iniciarApp() {
     }
     items.push({ id:'historico', label:'Histórico' });
   }
-  // Adicionar "Meus Filhos" para qualquer perfil que tenha filhos vinculados
+  // Se tem filhos vinculados (qualquer perfil), adicionar "Meus Filhos" no menu
   if (USER.eh_responsavel && USER.perfil !== 'aluno' && USER.perfil !== 'responsavel') {
     items.push({ id:'responsavel', label:'Meus Filhos' });
   }
-
   document.getElementById('tb-nav').innerHTML = items.map(i =>
     `<button class="tb-btn${i.id==='dash'?' on':''}" data-pg="${i.id}" onclick="navTo('${i.id}')">${i.label}</button>`
   ).join('');
@@ -6604,9 +6613,19 @@ async function sbGetVinculos(alunoId) {
 }
 async function sbGetFilhosDoResp(respId) {
   try {
-    const { data } = await sbClient.from('responsavel_aluno').select('*').eq('responsavel_id', respId);
+    const { data, error } = await sbClient.from('responsavel_aluno')
+      .select('*').eq('responsavel_id', respId);
+    if (error) {
+      console.error('[responsavel_aluno erro]', error.message);
+      const box = document.getElementById('resp-lista-filhos');
+      if (box) box.innerHTML = '<div style="background:#fff3cd;border:1px solid #ffc107;border-radius:8px;padding:14px;font-size:13px;line-height:1.7">'
+        + '<b>⚠️ Tabela não encontrada!</b><br>'
+        + 'Execute o SQL em <b>Config → SQL</b> para criar a tabela <code>responsavel_aluno</code>.'
+        + '</div>';
+      return [];
+    }
     return data || [];
-  } catch(e) { return []; }
+  } catch(e) { console.error('[sbGetFilhosDoResp]', e); return []; }
 }
 async function sbUpsertVinculo(respId, alunoId) {
   try {
@@ -6806,17 +6825,39 @@ async function buscarRespModal(query, alunoId) {
 
 async function vincularRespExistente(respId, alunoId) {
   var r = await sbUpsertVinculo(respId, alunoId);
-  // Marcar o pai/mãe como responsável
+  // Marcar como responsável na tabela alunos (se existir registro)
   try { await sbUpdate('alunos', respId, { eh_responsavel: true }); } catch(e) {}
-  if (r) toast('Responsável vinculado! ✦', 'ok');
-  document.getElementById('mvr-busca').value = '';
-  document.getElementById('mvr-sugestoes').innerHTML = '';
-  carregarListaVinculosModal(alunoId);
+  if (r) {
+    toast('✦ Vinculado! O responsável verá os filhos no próximo login.', 'ok');
+    var busca = document.getElementById('mvr-busca');
+    var sug = document.getElementById('mvr-sugestoes');
+    if (busca) busca.value = '';
+    if (sug) sug.innerHTML = '';
+    carregarListaVinculosModal(alunoId);
+    // Se o responsável está logado agora, atualizar imediatamente
+    if (USER && USER.id === respId) {
+      USER.eh_responsavel = true;
+      renderFilhosResponsavel();
+      // Adicionar aba "Meus Filhos" se ainda não estiver
+      if (!document.querySelector('[data-pg="responsavel"]')) {
+        construirNav();
+      }
+    }
+  } else {
+    toast('Erro ao vincular. Verifique se a tabela responsavel_aluno existe no Supabase.', 'er');
+  }
 }
 
 async function desvincularResp(respId, alunoId) {
   showConfirm('Desvincular responsável?', 'O responsável não terá mais acesso a este aluno.', async function(){
     await sbRemoverVinculo(respId, alunoId);
+    // Se não tem mais filhos, remover flag
+    try {
+      var outrosFilhos = await sbGetFilhosDoResp(respId);
+      if (!outrosFilhos.length) {
+        await sbUpdate('alunos', respId, { eh_responsavel: false });
+      }
+    } catch(e) {}
     toast('Desvinculado.', '');
     carregarListaVinculosModal(alunoId);
   }, 'red');
@@ -6834,19 +6875,27 @@ async function renderFilhosResponsavel() {
   if (filhoView) filhoView.style.display = 'none';
   box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">Carregando...</div>';
   try {
-    // Buscar pelo ID do perfil principal E também pelo registro na tabela alunos (mesmo login)
     var vinculos = await sbGetFilhosDoResp(USER.id);
-    // Se não achou e o usuário não é da tabela alunos, tentar pelo registro de aluno com mesmo login
-    if (!vinculos.length && USER.perfil !== 'aluno' && USER.perfil !== 'responsavel' && USER.login) {
+    // Fallback: se não achou pelo ID principal, tenta pelo login na tabela alunos
+    if (!vinculos.length && USER.login && USER.perfil !== 'aluno' && USER.perfil !== 'responsavel') {
       try {
-        var { data: alunoDoResp } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
-        if (alunoDoResp && alunoDoResp.length) {
+        var { data: alunoDoResp } = await sbClient.from('alunos')
+          .select('id').eq('login', USER.login).limit(1);
+        if (alunoDoResp && alunoDoResp.length > 0) {
           vinculos = await sbGetFilhosDoResp(alunoDoResp[0].id);
         }
       } catch(e) {}
     }
     if (!vinculos.length) {
-      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum filho vinculado ainda.<br>Fale com o professor ou superintendente.</div></div>';
+      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div>'
+        + '<div class="empty-txt">Nenhum filho vinculado ainda.</div></div>'
+        + '<div style="margin-top:12px;background:var(--gold-pale);border:1px solid rgba(201,151,58,.3);border-radius:10px;padding:14px;font-size:13px;line-height:1.8">'
+        + '<b>📋 Como vincular:</b><br>'
+        + '1. Peça ao professor/superintendente abrir o cadastro do aluno<br>'
+        + '2. Clicar em <b>👨‍👩‍👧 Vincular responsável</b><br>'
+        + '3. Buscar seu nome e clicar Vincular<br>'
+        + '4. Faça login novamente — seus filhos aparecerão aqui ✦'
+        + '</div>';
       return;
     }
     var alunoIds = vinculos.map(function(v){ return v.aluno_id; });
