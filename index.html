@@ -4026,7 +4026,7 @@ function abrirLicao(turma, num) {
       const dias = lic.leituraDiaria || lic.leituradiaria || [];
       if (!dias.length) return '';
       return `<div class="lp-block">
-      <div class="lp-lbl">\${_isCriancas ? '🕯️ Para Meditar' : '📅 Leitura Semanal'}</div>
+      <div class="lp-lbl">${_isCriancas ? '🕯️ Para Meditar' : '📅 Leitura Semanal'}</div>
       ${dias.map(d => `<div class="lp-read-item">
         <div class="lp-read-day">${d.dia}</div>
         <div><div class="lp-read-ref">${d.ref}</div><div class="lp-read-topic">${d.tema}</div></div>
