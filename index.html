@@ -860,6 +860,19 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="meta-track"><div class="meta-fill" id="meta-fill" style="width:0%"></div></div>
         </div>
       </div>
+      <!-- Card Pix — logo após o hero, igual ao do aluno -->
+      <div class="card" id="dash-pix-card" style="display:none;border-color:var(--gold);background:var(--gold-pale);margin-bottom:12px">
+        <div class="ct" style="color:var(--gold-deep)">🙏 Contribua com sua oferta</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">
+          Sua oferta é uma demonstração de fé e gratidão. Copie a chave Pix abaixo para contribuir:
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--gold);border-radius:var(--r);padding:10px 14px;margin-bottom:8px">
+          <span style="font-size:18px">💛</span>
+          <div id="dash-pix-chave" style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all">—</div>
+          <button onclick="copiarChavePixDash()" style="background:var(--gold);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer">Copiar</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
+      </div>
       <div id="dash-provas-notif"></div>
       <div id="dash-mural"></div>
       <div id="dash-aniversariantes"></div>
@@ -880,14 +893,6 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div class="card" id="dash-chart-card" style="display:none">
         <div class="ct">Frequência — últimas 8 semanas</div>
         <div class="chart-wrap" style="height:190px"><canvas id="chart-freq"></canvas></div>
-      </div>
-      <!-- Card Pix — aparece se chave configurada -->
-      <div class="card" id="dash-pix-card" style="display:none;border-color:var(--gold);background:var(--gold-pale);margin-bottom:12px">
-        <div class="ct" style="color:var(--gold-deep)">💛 Chave Pix da Igreja</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
-          <div id="dash-pix-chave" style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all">—</div>
-          <button onclick="copiarChavePixDash()" style="background:var(--gold);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer">Copiar</button>
-        </div>
       </div>
     </div>
 
@@ -1027,6 +1032,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:white;margin-bottom:3px" id="aluno-saud"></div>
         <div style="font-size:12px;color:rgba(255,255,255,.45)" id="aluno-turma-txt"></div>
       </div>
+      <!-- Notificação de provas disponíveis -->
+      <div id="aluno-provas-notif" style="margin-bottom:4px"></div>
       <!-- Pix — oferta — logo após saudação -->
       <div class="card" id="aluno-pix-card" style="margin-bottom:12px;display:none;border-color:var(--gold);background:var(--gold-pale)">
         <div class="ct" style="color:var(--gold-deep)">🙏 Contribua com sua oferta</div>
@@ -1798,7 +1805,10 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div class="fg"><label class="fl">Título</label><input class="fc" id="av-titulo" placeholder="Título do aviso"></div>
       <div class="fg"><label class="fl">Conteúdo</label><textarea class="fc" id="av-corpo" rows="3" placeholder="Escreva o aviso aqui..."></textarea></div>
       <div class="fg"><label class="fl">Observações <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><textarea class="fc" id="av-obs" rows="2" placeholder="Informações adicionais..."></textarea></div>
-      <div class="fg"><label class="fl">Data do evento <span style="font-size:10px;color:var(--ink-soft)">(opcional — aviso some do popup após esta data)</span></label><input class="fc" type="date" id="av-data-evento"></div>
+      <div class="frow">
+        <div class="fg"><label class="fl">Data do evento <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" type="date" id="av-data-evento" onchange="toggleHorarioAviso()"></div>
+        <div class="fg" id="av-horario-wrap" style="display:none"><label class="fl">Horário <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" type="time" id="av-horario" placeholder="Ex: 18:30"></div>
+      </div>
       <div class="fg" style="margin:0;display:flex;align-items:center;gap:10px"><input type="checkbox" id="av-fixado" style="width:16px;height:16px"><label for="av-fixado" style="font-size:13px;cursor:pointer">📌 Fixar este aviso no topo</label></div>
       <div class="mfoot">
         <button class="btn btn-ou btn-full" onclick="fecharModal('mo-aviso')">Cancelar</button>
@@ -2386,7 +2396,10 @@ async function iniciarApp() {
     if (_modo('aluno') && USER.turma_aluno) USER.turma = USER.turma_aluno;
     renderAlunoProgresso();
     if (_modo('aluno') && USER.turma_aluno) USER.turma = _turmaOriginal;
+    registrarAcesso();
     await _navTo('pg-aluno');
+    // Mostrar popup de avisos para o aluno após carregar
+    setTimeout(mostrarAvisosPopup, 1200);
     return;
   }
 
@@ -2711,14 +2724,13 @@ function renderGrafico(aulas) {
 async function renderMural() {
   const avisos = await sbGet('avisos', {}, 'fixado', false);
   const hoje = _brasilia().split('T')[0];
-  // Filtrar avisos expirados do mural (mas mantém no calendário)
-  const sorted = [...avisos]
-    .filter(a => !a.data_evento || a.data_evento >= hoje || a.fixado)
-    .sort((a,b) => (b.fixado?1:0)-(a.fixado?1:0) || new Date(b.created_at)-new Date(a.created_at));
+  // Ordenar: fixados primeiro, depois por data de criação
+  const sorted = [...avisos].sort((a,b) =>
+    (b.fixado?1:0)-(a.fixado?1:0) || new Date(b.created_at)-new Date(a.created_at)
+  );
   const box = document.getElementById('lista-avisos');
   const btnWrap = document.getElementById('mural-novo-btn-wrap');
-  // Admin, pastor e super podem criar/editar/excluir
-  const podeGerenciarAvisos = ['adm','pastor','super'].includes(USER.perfil) || isAdmin();
+  const podeGerenciarAvisos = ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil) || isAdmin();
   if (podeGerenciarAvisos) {
     btnWrap.innerHTML = `<button class="btn btn-dk btn-sm" style="margin-bottom:14px" onclick="abrirModalAviso()">+ Novo aviso</button>`;
   } else btnWrap.innerHTML = '';
@@ -2734,27 +2746,37 @@ async function renderMural() {
 
   box.innerHTML = sorted.map(a => {
     const tc = tipoConfig[a.tipo] || tipoConfig.info;
-    const dt = new Date(a.created_at+'').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '';
-    return `<div class="aviso-item ${a.fixado?'fixado':''}" style="border-color:${tc.borda};background:${tc.bg}">
-      <div class="aviso-titulo" style="color:${tc.cor}">
+    const expirado = a.data_evento && a.data_evento < hoje;
+    // Usar só a data de criação — sem duplicar com data_evento na meta
+    const dtCriacao = new Date(a.created_at+'').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) : '';
+    const horarioStr = a.horario ? ` · ${a.horario.substring(0,5).replace(':','h')}` : '';
+    return `<div class="aviso-item ${a.fixado?'fixado':''}" style="border-color:${expirado?'#ccc':tc.borda};background:${expirado?'#f9f9f9':tc.bg};opacity:${expirado?'0.75':'1'}">
+      <div class="aviso-titulo" style="color:${expirado?'#999':tc.cor}">
         ${a.fixado?'<span class="aviso-pin">📌</span>':''}
+        ${expirado?'<span style="font-size:10px;background:#e0e0e0;color:#888;padding:2px 7px;border-radius:10px;font-weight:700;margin-right:4px">⏰ Expirado</span>':''}
         <span>${tc.icon} ${a.titulo}</span>
         ${podeGerenciarAvisos?`<span style="margin-left:auto;display:flex;gap:5px">
           <button class="btn-ic" onclick="event.stopPropagation();editarAviso('${a.id}')" title="Editar">✎</button>
           <button class="btn-ic danger" onclick="event.stopPropagation();deletarAviso('${a.id}')" title="Remover">✕</button>
         </span>`:''}
       </div>
-      <div class="aviso-corpo">${a.conteudo}</div>
-      ${a.observacoes ? `<div style="margin-top:6px;font-size:12px;color:${tc.cor};background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;line-height:1.5">📎 ${a.observacoes}</div>` : ''}
-      <div class="aviso-meta" style="display:flex;gap:10px;flex-wrap:wrap">
-        <span>${a.autor} · ${dt}</span>
-        ${dtEvento ? `<span style="color:${tc.cor};font-weight:600">📅 ${dtEvento}</span>` : ''}
-        ${a.turma && a.turma !== 'todas' ? `<span style="color:${tc.cor}">👥 ${TN[a.turma]||a.turma}</span>` : ''}
+      <div class="aviso-corpo" style="color:${expirado?'#aaa':'inherit'}">${a.conteudo}</div>
+      ${a.observacoes ? `<div style="margin-top:6px;font-size:12px;color:${expirado?'#bbb':tc.cor};background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;line-height:1.5">📎 ${a.observacoes}</div>` : ''}
+      <div class="aviso-meta" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+        ${dtEvento ? `<span style="color:${expirado?'#bbb':tc.cor};font-weight:600">📅 ${dtEvento}${horarioStr}</span>` : ''}
+        ${a.turma && a.turma !== 'todas' ? `<span style="color:${expirado?'#bbb':tc.cor}">👥 ${TN[a.turma]||a.turma}</span>` : ''}
+        ${!dtEvento && !a.turma ? `<span style="color:var(--ink-soft);font-size:10px">${a.autor}</span>` : ''}
       </div>
     </div>`;
   }).join('');
 }
+function toggleHorarioAviso() {
+  const data = document.getElementById('av-data-evento').value;
+  const wrap = document.getElementById('av-horario-wrap');
+  if (wrap) wrap.style.display = data ? '' : 'none';
+}
+
 function abrirModalAviso(id) {
   document.getElementById('mo-aviso-titulo').textContent = id ? 'Editar aviso' : 'Novo aviso';
   document.getElementById('av-id').value = id || '';
@@ -2765,6 +2787,9 @@ function abrirModalAviso(id) {
   document.getElementById('av-tipo').value = 'info';
   document.getElementById('av-turma').value = 'todas';
   document.getElementById('av-data-evento').value = '';
+  document.getElementById('av-horario').value = '';
+  const wrap = document.getElementById('av-horario-wrap');
+  if (wrap) wrap.style.display = 'none';
   document.getElementById('mo-aviso').style.display = 'block';
   setTimeout(() => document.getElementById('av-titulo').focus(), 100);
 }
@@ -2780,6 +2805,9 @@ async function editarAviso(id) {
   document.getElementById('av-tipo').value = data.tipo || 'info';
   document.getElementById('av-turma').value = data.turma || 'todas';
   document.getElementById('av-data-evento').value = data.data_evento || '';
+  document.getElementById('av-horario').value = data.horario || '';
+  const wrap = document.getElementById('av-horario-wrap');
+  if (wrap) wrap.style.display = data.data_evento ? '' : 'none';
   document.getElementById('mo-aviso').style.display = 'block';
 }
 async function salvarAviso() {
@@ -2788,32 +2816,65 @@ async function salvarAviso() {
   if (!titulo || !conteudo) { toast('Preencha título e conteúdo', 'er'); return; }
   const editId = document.getElementById('av-id').value;
   const dataEvento = document.getElementById('av-data-evento').value || null;
+  const horario = document.getElementById('av-horario').value || null;
+  const tipo = document.getElementById('av-tipo').value;
+  const turma = document.getElementById('av-turma').value;
+
+  // Dado base — sem horario (caso coluna ainda não exista)
   const dado = {
     titulo, conteudo,
     observacoes: document.getElementById('av-obs').value.trim() || null,
     fixado: document.getElementById('av-fixado').checked,
-    tipo: document.getElementById('av-tipo').value,
-    turma: document.getElementById('av-turma').value,
+    tipo, turma,
     data_evento: dataEvento,
     autor: USER.nome
   };
-  if (editId) await sbUpdate('avisos', editId, dado);
-  else await sbInsert('avisos', dado);
-  // Se tem data de evento e é tipo evento/mudanca, criar no calendário
-  if (dataEvento && ['evento','mudanca'].includes(dado.tipo)) {
-    try {
-      await sbClient.from('aulas').insert({
-        data: dataEvento,
-        turma: dado.turma === 'todas' ? 'adultos' : dado.turma,
-        licao: `📢 ${titulo}`,
-        tipo: 'evento',
-        presencas: {},
-        visitantes: []
-      });
-    } catch(e) {}
+
+  // Tentar salvar com horario; se falhar, salvar sem
+  let salvou = false;
+  if (horario) {
+    const dadoComHorario = { ...dado, horario };
+    const res = editId
+      ? await sbClient.from('avisos').update(dadoComHorario).eq('id', editId)
+      : await sbClient.from('avisos').insert(dadoComHorario);
+    if (!res.error) {
+      salvou = true;
+    } else {
+      console.warn('Falha com horario, tentando sem:', res.error.message);
+    }
   }
-  fecharModal('mo-aviso'); renderMural();
-  toast('Aviso publicado! ✦', 'ok');
+  if (!salvou) {
+    if (editId) await sbUpdate('avisos', editId, dado);
+    else await sbInsert('avisos', dado);
+  }
+
+  // Criar/atualizar no calendário se tem data
+  if (dataEvento) {
+    const tipoIcons = { info:'📢', importante:'⚠️', evento:'🎉', mudanca:'📅', oracao:'🙏' };
+    const icon = tipoIcons[tipo] || '📢';
+    const tituloCalendario = `${icon} ${titulo}`;
+    const calDado = {
+      data: dataEvento,
+      titulo: tituloCalendario,
+      tipo: 'especial',
+      turma_evento: turma || 'todas',
+      descricao: conteudo,
+      ...(horario ? { horario: horario.substring(0,5) } : {})
+    };
+
+    // Sempre tenta inserir — tanto novo quanto edição
+    const { error: calErr } = await sbClient.from('calendario').insert(calDado);
+    if (calErr) {
+      toast('⚠️ Não salvou no calendário: ' + calErr.message, '');
+    } else {
+      toast(editId ? '✦ Aviso atualizado e adicionado ao calendário!' : '✦ Aviso publicado e adicionado ao calendário!', 'ok');
+    }
+  } else {
+    toast(editId ? 'Aviso atualizado! ✦' : 'Aviso publicado! ✦', 'ok');
+  }
+
+  fecharModal('mo-aviso');
+  renderMural();
 }
 async function deletarAviso(id) {
   showConfirm('Remover aviso?', 'Deseja remover este aviso do mural? Eventos no calendário permanecem.', async () => {
@@ -4704,6 +4765,9 @@ async function renderAlunoProgresso() {
   carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
 
+  // Mostrar notificação de provas disponíveis
+  renderProvasNotifAluno(turmaAluno);
+
   // Calcular pontos e presenças reais usando ids corretos
   const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || []);
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
@@ -4831,8 +4895,21 @@ async function renderProvasProf() {
   await carregarProvas();
   document.getElementById('provas-prof-area').style.display = 'block';
   document.getElementById('provas-resultado-area').style.display = 'none';
+
+  // Garantir que a aba avaliacoes está ativa
+  const tabAval = document.getElementById('tab-avaliacoes-prof');
+  const tabDes = document.getElementById('tab-desafios-prof');
+  if (tabAval) tabAval.style.display = '';
+  if (tabDes) tabDes.style.display = 'none';
+  // Atualizar botões de aba
+  document.querySelectorAll('#provas-prof-tabs .ttab').forEach(t => t.classList.remove('on'));
+  const btnAval = document.querySelector('#provas-prof-tabs .ttab:first-child');
+  if (btnAval) btnAval.classList.add('on');
+
   const box = document.getElementById('lista-provas-prof');
-  const minhas = isAdmin() ? PROVAS : PROVAS.filter(p => p.turma === USER.turma || USER.turma === 'todas');
+  // Filtrar só provas/simulados/quizzes — desafios ficam na outra aba
+  const minhas = (isAdmin() ? PROVAS : PROVAS.filter(p => p.turma === USER.turma || USER.turma === 'todas'))
+    .filter(p => p.tipo !== 'desafio');
   if (!minhas.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova criada ainda</div></div>';
     return;
@@ -5157,13 +5234,13 @@ function iniciarProvaAluno(id) {
   const nQ = (p.questoes || []).length;
   const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} minutos` : 'Sem limite de tempo';
   document.getElementById('fp-meta').textContent = `${nQ} questões · ${tempo}`;
-  // Renderizar questões
+  // Renderizar questões — usar data-attributes para evitar bug com aspas no texto
   const box = document.getElementById('fp-questoes');
   box.innerHTML = p.questoes.map((q, i) => `
     <div class="card" style="margin-bottom:12px" id="q-card-${i}">
-      <div class="q-num">Questão ${i+1} de ${nQ} ${q.origem !== 'extra' ? `· ${q.origem}` : ''}</div>
+      <div class="q-num">Questão ${i+1} de ${nQ}${q.origem && q.origem !== 'extra' ? ` · ${q.origem}` : ''}</div>
       <div class="q-texto">${q.q}</div>
-      ${q.op.map((op, j) => `<button class="q-opt" id="q-${i}-${j}" onclick="marcarResposta(${i},${j},'${op.replace(/'/g,"\\'")}')">${op}</button>`).join('')}
+      ${q.op.map((op, j) => `<button class="q-opt" id="q-${i}-${j}" data-qidx="${i}" data-oidx="${j}" onclick="marcarRespostaBtn(this)">${op}</button>`).join('')}
     </div>
   `).join('');
   // Cronômetro
@@ -5194,14 +5271,25 @@ function atualizarCrono() {
   }
 }
 
+// Nova função — lê valor do texto do botão, sem passar no onclick
+function marcarRespostaBtn(btn) {
+  const qIdx = parseInt(btn.dataset.qidx);
+  const opIdx = parseInt(btn.dataset.oidx);
+  const valor = btn.textContent; // texto exato da opção
+  marcarResposta(qIdx, opIdx, valor);
+}
+
 function marcarResposta(qIdx, opIdx, valor) {
   provaRespostas[qIdx] = { idx: opIdx, valor };
-  // Atualizar visual
+  // Atualizar visual — limpar todas e marcar a selecionada
   const q = provaAtiva.questoes[qIdx];
   q.op.forEach((_, j) => {
-    const btn = document.getElementById(`q-${qIdx}-${j}`);
-    if (btn) btn.className = 'q-opt' + (j === opIdx ? ' marcada' : '');
+    const b = document.getElementById(`q-${qIdx}-${j}`);
+    if (b) b.className = 'q-opt' + (j === opIdx ? ' marcada' : '');
   });
+  // Destacar card como respondido
+  const card = document.getElementById(`q-card-${qIdx}`);
+  if (card) card.style.borderColor = 'var(--tc)';
 }
 
 async function entregarProva(automatico = false) {
@@ -5215,6 +5303,16 @@ async function entregarProva(automatico = false) {
       if (!conf) return;
     }
   }
+
+  // Determinar id correto do aluno
+  let alunoId = USER.id;
+  if (_modo('aluno') && USER.perfil !== 'aluno') {
+    try {
+      const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
+      if (al && al.length) alunoId = al[0].id;
+    } catch(e) {}
+  }
+
   // Calcular resultado
   const p = provaAtiva;
   let acertos = 0;
@@ -5222,24 +5320,66 @@ async function entregarProva(automatico = false) {
     if (provaRespostas[i] && provaRespostas[i].valor === q.a) acertos++;
   });
   const pct = Math.round((acertos / p.questoes.length) * 100);
-  // Salvar no Supabase
-  const resultados = { ...(p.resultados || {}), [USER.id]: { acertos, total: p.questoes.length, pct, data: new Date().toISOString() } };
+
+  // Salvar no Supabase com id correto
+  const resultados = { ...(p.resultados || {}), [alunoId]: { acertos, total: p.questoes.length, pct, data: new Date().toISOString() } };
   await sbUpdate('provas', p.id, { resultados });
-  // Atualizar local
+
+  // Atualizar cache local
   const idx = PROVAS.findIndex(x => x.id === p.id);
   if (idx >= 0) PROVAS[idx].resultados = resultados;
+
   // Mostrar resultado
   mostrarResultadoAluno(p, acertos, pct);
+
+  // Atualizar progresso e ranking em background
+  setTimeout(async function() {
+    try { await renderAlunoProgresso(); } catch(e) {}
+  }, 800);
 }
 
 function mostrarResultadoAluno(p, acertos, pct) {
+  const nQ = p.questoes.length;
+  const nota = (pct / 10).toFixed(1);
   const emojis = ['😢','😕','🙂','😊','🌟'];
   const msgs = ['Continue estudando, você consegue!','Quase lá, revise o conteúdo!','Bom trabalho!','Muito bem!','Parabéns, excelente resultado!'];
   const nivel = Math.min(Math.floor(pct / 25), 4);
+  const corNota = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+
   document.getElementById('rp-emoji').textContent = emojis[nivel];
-  document.getElementById('rp-score').textContent = `${acertos}/${p.questoes.length} corretas`;
-  document.getElementById('rp-msg').textContent = msgs[nivel] + ` (${pct}%)`;
+  document.getElementById('rp-score').textContent = `${acertos}/${nQ} corretas`;
+  document.getElementById('rp-msg').textContent = msgs[nivel];
   document.getElementById('rp-nome-prova').textContent = p.nome;
+
+  // Mostrar nota em destaque
+  const notaWrap = document.getElementById('rp-nota-wrap');
+  const notaEl = document.getElementById('rp-nota');
+  if (notaWrap && notaEl) {
+    notaWrap.style.display = 'block';
+    notaEl.style.background = pct >= 70 ? 'var(--gold)' : pct >= 50 ? '#f5a623' : '#e74c3c';
+    notaEl.style.color = pct >= 50 ? 'var(--ink)' : 'white';
+    notaEl.innerHTML = `Nota: <strong>${nota}</strong> <span style="font-size:12px;opacity:.7">/ 10</span>`;
+  }
+
+  // Mostrar pontos ganhos com nova fórmula
+  const pontosWrap = document.getElementById('rp-pontos-wrap');
+  if (pontosWrap) {
+    const nota = pct / 10;
+    const ptPart = 5;
+    let ptDesemp = 0;
+    if (nota >= 9.0)      ptDesemp = 20;
+    else if (nota >= 7.0) ptDesemp = 15;
+    else if (nota >= 5.0) ptDesemp = 10;
+    else if (nota >= 3.0) ptDesemp = 5;
+    const totalPts = ptPart + ptDesemp;
+    pontosWrap.innerHTML = `
+      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+        <span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">+${ptPart} pts participação</span>
+        ${ptDesemp > 0 ? `<span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">+${ptDesemp} pts desempenho</span>` : ''}
+        <span style="background:var(--gold);color:var(--ink);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:700">+${totalPts} pts total ✦</span>
+      </div>`;
+  }
+
   // Revisão das respostas
   document.getElementById('rp-revisao').innerHTML = `<div class="ct">Revisão das respostas</div>` +
     p.questoes.map((q, i) => {
@@ -5337,53 +5477,99 @@ function iniciarCountdown() {
 // ══════════════════════════════════════════════
 async function renderProvasNotifDash() {
   const box = document.getElementById('dash-provas-notif');
-  if (!box || USER.perfil === 'aluno') { if(box) box.innerHTML=''; return; }
+  if (!box) return;
   try {
     const { data } = await sbClient.from('provas').select('*').eq('liberada', true);
     const hoje = new Date().toISOString().split('T')[0];
-    const ativas = (data||[]).filter(p => !p.data_limite || p.data_limite >= hoje);
+    const turmaUsuario = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
+    const ehAluno = USER.perfil === 'aluno' || _modo('aluno');
+
+    const ativas = (data||[]).filter(p => {
+      if (p.data_limite && p.data_limite < hoje) return false;
+      if (p.tipo === 'desafio') return false;
+      // Para aluno: filtrar pela turma dele
+      if (ehAluno && p.turma !== turmaUsuario) return false;
+      return true;
+    });
+
     if (!ativas.length) { box.innerHTML = ''; return; }
     box.innerHTML = ativas.map(p => `
       <div class="prova-notif" onclick="navTo('provas')">
         <div class="prova-notif-icon">📝</div>
         <div class="prova-notif-txt">
           <div class="prova-notif-titulo">${p.nome}</div>
-          <div class="prova-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} liberada${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+          <div class="prova-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} disponível${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
         </div>
         <div class="prova-notif-arrow">›</div>
       </div>`).join('');
   } catch(e) { box.innerHTML = ''; }
 }
 
-// ══════════════════════════════════════════════
-// SISTEMA DE PONTOS
-// ══════════════════════════════════════════════
+async function renderProvasNotifAluno(turmaAluno) {
+  const box = document.getElementById('aluno-provas-notif');
+  if (!box) return;
+  try {
+    const { data } = await sbClient.from('provas').select('*').eq('liberada', true).eq('turma', turmaAluno);
+    const hoje = new Date().toISOString().split('T')[0];
+    const ativas = (data||[]).filter(p =>
+      (!p.data_limite || p.data_limite >= hoje) && p.tipo !== 'desafio'
+    );
+    if (!ativas.length) { box.innerHTML = ''; return; }
+    box.innerHTML = ativas.map(p => `
+      <div class="prova-notif" onclick="navTo('provas')" style="margin-bottom:8px">
+        <div class="prova-notif-icon">📝</div>
+        <div class="prova-notif-txt">
+          <div class="prova-notif-titulo">${p.nome}</div>
+          <div class="prova-notif-sub">${_tipoLabel(p.tipo)} disponível · Toque para fazer${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+        </div>
+        <div class="prova-notif-arrow">›</div>
+      </div>`).join('');
+  } catch(e) { box.innerHTML = ''; }
+}
 // Pontos: presença=10, quiz(acerto)=2pts por acerto, prova=pct*0.5
 function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas) {
   let pts = 0;
   let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
-  // Presenças (+10 por presença)
+
+  // Presenças: +10 por presença
   aulas.filter(a => a.turma === turma).forEach(a => {
     if ((a.presencas||{})[alunoId] === 'presente') { pts += 10; ptsPres++; }
   });
-  // Quizzes (+2 por acerto) — quiz conta, simulado NÃO conta
+
+  // Quizzes: +2 por acerto — simulado NÃO conta
   Object.entries(quizScores).forEach(([key, val]) => {
     if (key.startsWith(turma)) { const bonus = val.acertos * 2; pts += bonus; ptsQ += bonus; }
   });
-  // Provas e Desafios da tabela provas — simulado excluído
+
+  // Provas e Desafios — simulado excluído
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId]).forEach(p => {
-    if (p.tipo === 'simulado') return; // simulado NÃO conta para o ranking
+    if (p.tipo === 'simulado') return; // simulado NÃO conta
     const res = p.resultados[alunoId];
+
     if (p.tipo === 'desafio') {
-      // Desafio: pontua pelo valor fixo definido ou pelo pct
       const bonus = res.pontos || Math.round((res.pct || 0) * 0.5);
       pts += bonus; ptsDesafio += bonus;
     } else {
-      // Prova e Quiz da tabela de provas
-      const bonus = Math.round((res.pct || 0) * 0.5);
+      // PROVA e QUIZ da tabela provas:
+      // 1) +5 pts por ter realizado (participação)
+      // 2) +pts por desempenho baseado na nota
+      const nQ = (p.questoes || []).length;
+      const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
+      const nota = pct / 10;
+
+      const ptParticipacao = 5;
+      let ptDesempenho = 0;
+      if (nota >= 9.0)      ptDesempenho = 20;
+      else if (nota >= 7.0) ptDesempenho = 15;
+      else if (nota >= 5.0) ptDesempenho = 10;
+      else if (nota >= 3.0) ptDesempenho = 5;
+      else                  ptDesempenho = 0;
+
+      const bonus = ptParticipacao + ptDesempenho;
       pts += bonus; ptsProv += bonus;
     }
   });
+
   return { total: pts, presencas: ptsPres, quizzes: ptsQ, provas: ptsProv, desafios: ptsDesafio };
 }
 
@@ -8423,13 +8609,14 @@ async function mostrarAvisosPopup() {
 
     var itensHtml = naoLidos.map(function(a) {
       var tc = tipoConfig[a.tipo] || tipoConfig.info;
-      var dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long'}) : '';
+      var dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '';
+      var horarioStr = a.horario ? ' às ' + a.horario.substring(0,5).replace(':','h') : '';
       return '<div id="aviso-pp-' + a.id + '" style="padding:14px;border:1.5px solid ' + tc.borda + ';border-radius:10px;margin-bottom:10px;background:' + tc.bg + '">'
         + (a.fixado ? '<div style="font-size:10px;color:' + tc.cor + ';font-weight:700;margin-bottom:4px">📌 FIXADO</div>' : '')
         + '<div style="font-size:15px;font-weight:700;color:' + tc.cor + ';margin-bottom:6px">' + tc.icon + ' ' + (a.titulo||'') + '</div>'
         + '<div style="font-size:13px;color:#555;line-height:1.6;margin-bottom:6px">' + (a.conteudo||'') + '</div>'
         + (a.observacoes ? '<div style="font-size:12px;color:' + tc.cor + ';background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;margin-bottom:6px;line-height:1.5">📎 ' + a.observacoes + '</div>' : '')
-        + (dtEvento ? '<div style="font-size:11px;font-weight:700;color:' + tc.cor + ';margin-bottom:8px">📅 ' + dtEvento + '</div>' : '')
+        + (dtEvento ? '<div style="font-size:12px;font-weight:700;color:' + tc.cor + ';margin-bottom:8px;background:rgba(0,0,0,.05);padding:5px 10px;border-radius:6px;display:inline-block">📅 ' + dtEvento + horarioStr + '</div>' : '')
         + '<button class="btn btn-gold btn-sm" style="width:100%" data-id="' + a.id + '" onclick="marcarAvisoPPLido(this.dataset.id)">✓ Marcar como lido</button>'
         + '</div>';
     }).join('');
