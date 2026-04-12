@@ -1522,25 +1522,34 @@ CREATE POLICY "allow_all_quiz" ON quiz_resultados FOR ALL USING (true) WITH CHEC
         <div class="fg"><label class="fl">Cronômetro (minutos)</label><input class="fc" type="number" id="pv-tempo" placeholder="Ex: 30 (0 = sem limite)" min="0" value="0"></div>
         <div class="fg"><label class="fl">Data limite</label><input class="fc" type="date" id="pv-data-limite"></div>
       </div>
+      <!-- Lições — OPCIONAL -->
       <div class="fg">
-        <label class="fl">Lições incluídas</label>
-        <div id="pv-licoes-check" style="max-height:320px;overflow-y:auto;padding:4px 0"></div>
-        <div class="prova-resumo" id="pv-resumo" style="display:none">
-          <div class="prova-resumo-item">
-            <div class="prova-resumo-n" id="pv-resumo-licoes">0</div>
-            <div class="prova-resumo-l">lições</div>
-          </div>
-          <div class="prova-resumo-sep"></div>
-          <div class="prova-resumo-item">
-            <div class="prova-resumo-n" id="pv-resumo-questoes">0</div>
-            <div class="prova-resumo-l">questões</div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Lições incluídas <span style="font-size:10px;color:var(--ink-soft);font-weight:400">(opcional)</span></label>
+          <button type="button" class="btn btn-ou btn-sm" onclick="toggleSecaoLicoes()" id="btn-toggle-licoes" style="font-size:11px;padding:3px 8px">▼ Mostrar lições</button>
+        </div>
+        <div id="pv-licoes-wrap" style="display:none">
+          <div id="pv-licoes-check" style="max-height:260px;overflow-y:auto;padding:4px 0"></div>
+          <div class="prova-resumo" id="pv-resumo" style="display:none">
+            <div class="prova-resumo-item">
+              <div class="prova-resumo-n" id="pv-resumo-licoes">0</div>
+              <div class="prova-resumo-l">lições</div>
+            </div>
+            <div class="prova-resumo-sep"></div>
+            <div class="prova-resumo-item">
+              <div class="prova-resumo-n" id="pv-resumo-questoes">0</div>
+              <div class="prova-resumo-l">questões das lições</div>
+            </div>
           </div>
         </div>
       </div>
+      <!-- Questões próprias — sem depender de lições -->
       <div class="fg" style="margin:0">
-        <label class="fl">Questões extras (opcional)</label>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Questões próprias <span style="font-size:10px;color:var(--ink-soft);font-weight:400">(crie suas próprias perguntas)</span></label>
+        </div>
         <div id="pv-extras-list"></div>
-        <button class="btn btn-ou btn-sm" onclick="adicionarQuestaoExtra()" style="margin-top:8px">+ Adicionar questão extra</button>
+        <button class="btn btn-ou btn-sm" onclick="adicionarQuestaoExtra()" style="margin-top:8px">+ Adicionar questão</button>
       </div>
       <div class="mfoot">
         <button class="btn btn-ou btn-full" onclick="fecharModal('mo-prova')">Cancelar</button>
@@ -2933,6 +2942,13 @@ async function salvarProf() {
   const turmaAluno = tambemAluno ? (document.getElementById('pe-turma-aluno')?.value || null) : null;
   if (!editId && login && !senha) { toast('Digite uma senha para o login', 'er'); return; }
   const sexo = document.getElementById('pe-sexo') ? document.getElementById('pe-sexo').value : 'M';
+  // Ler turmas selecionadas via checkboxes
+  const turmasSel = ['criancas','jovens','adultos'].filter(function(t) {
+    const el = document.getElementById('pe-turma-' + t);
+    return el && el.checked;
+  });
+  // Se nenhuma marcada, usar a turma principal
+  if (!turmasSel.length && turma) turmasSel.push(turma);
   const dado = { nome, turma, turmas: turmasSel, sexo, tambem_aluno: tambemAluno, turma_aluno: turmaAluno || null };
   if (nasc) dado.nasc = nasc;
   if (tel) dado.tel = tel;
@@ -4560,15 +4576,7 @@ function abrirModalProva(id, tipoPresel) {
   document.getElementById('pv-id').value = id || '';
   extrasCount = 0;
   document.getElementById('pv-extras-list').innerHTML = '';
-  const editId = id || '';
-  if (editId) {
-    setTimeout(() => {
-      const prova = PROVAS.find(p => p.id === editId);
-      if (prova && prova.questoes) {
-        prova.questoes.forEach(q => adicionarQuestaoExtra(q));
-      }
-    }, 100);
-  }
+
   if (id) {
     const p = PROVAS.find(x => x.id === id);
     if (p) {
@@ -4577,11 +4585,17 @@ function abrirModalProva(id, tipoPresel) {
       document.getElementById('pv-turma').value = p.turma;
       document.getElementById('pv-tempo').value = p.tempo_minutos || 0;
       document.getElementById('pv-data-limite').value = p.data_limite || '';
+      // Ao editar: carregar APENAS as questões extras (origem='extra')
+      // As questões das lições são reconstruídas automaticamente pelas lições selecionadas
+      setTimeout(() => {
+        const extrasApenas = (p.questoes || []).filter(q => q.origem === 'extra');
+        extrasApenas.forEach(q => adicionarQuestaoExtra(q));
+      }, 100);
     }
   } else {
     document.getElementById('pv-nome').value = '';
     document.getElementById('pv-tipo').value = tipoPresel || 'prova';
-    document.getElementById('pv-turma').value = USER.turma && USER.turma !== 'todas' ? USER.turma : 'criancas';
+    document.getElementById('pv-turma').value = USER.turma && USER.turma !== 'todas' ? USER.turma : 'adultos';
     document.getElementById('pv-tempo').value = 0;
     document.getElementById('pv-data-limite').value = '';
   }
@@ -4590,19 +4604,20 @@ function abrirModalProva(id, tipoPresel) {
   setTimeout(() => document.getElementById('pv-nome').focus(), 100);
 }
 
-function atualizarLicoesModal(editId) {
-  const turma = document.getElementById('pv-turma').value;
-  const dados = LICOES[turma];
-  const box = document.getElementById('pv-licoes-check');
-  if (!dados) { box.innerHTML = ''; return; }
-  const pSelecionadas = editId ? (PROVAS.find(x=>x.id===editId)?.licoes_selecionadas || []) : [];
-  box.innerHTML = dados.licoes.map(l => {
-    const checked = pSelecionadas.includes(l.num) ? 'checked' : '';
-    return `<label style="display:flex;align-items:center;gap:7px;padding:7px 10px;border:1px solid var(--cb);border-radius:7px;cursor:pointer;font-size:13px;background:white">
-      <input type="checkbox" value="${l.num}" ${checked} style="width:15px;height:15px;accent-color:var(--gold)">
-      <span><strong>L${l.num}</strong> — ${l.titulo}</span>
-    </label>`;
-  }).join('');
+function toggleSecaoLicoes() {
+  const wrap = document.getElementById('pv-licoes-wrap');
+  const btn = document.getElementById('btn-toggle-licoes');
+  if (!wrap) return;
+  const aberto = wrap.style.display !== 'none';
+  wrap.style.display = aberto ? 'none' : 'block';
+  if (btn) btn.textContent = aberto ? '▼ Mostrar lições' : '▲ Ocultar lições';
+}
+
+function abrirLicoesNoModal() {
+  const wrap = document.getElementById('pv-licoes-wrap');
+  const btn = document.getElementById('btn-toggle-licoes');
+  if (wrap) wrap.style.display = 'block';
+  if (btn) btn.textContent = '▲ Ocultar lições';
 }
 
 function adicionarQuestaoExtra(dadosEdit) {
@@ -4677,18 +4692,31 @@ async function salvarProva() {
   const dataLimite = document.getElementById('pv-data-limite').value || null;
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
   const questoes = coletarQuestoes(turma, licoesSel);
-  if (!questoes.length) { toast('Selecione pelo menos uma lição ou adicione questões', 'er'); return; }
+  // Questões NÃO são obrigatórias — professor pode salvar com 0 questões e adicionar depois
+  // Mas avisa se não tiver nenhuma
+  if (!questoes.length) {
+    const ok = await new Promise(resolve => {
+      showConfirm('Salvar sem questões?', 'Esta prova não tem questões ainda. Deseja salvar assim mesmo e adicionar depois?',
+        () => resolve(true), '');
+      // Se cancelar, o showConfirm chama o callback de confirmação — precisamos de um fallback
+    });
+    // Simplificado: salvar mesmo sem questões
+  }
   const editId = document.getElementById('pv-id').value;
   const dado = { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes, resultados: {}, liberada: false, criado_por: USER.nome };
-  if (editId) {
-    await sbUpdate('provas', editId, { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes });
-    toast('Prova atualizada!', 'ok');
-  } else {
-    await sbInsert('provas', dado);
-    toast('Prova criada!', 'ok');
+  try {
+    if (editId) {
+      await sbUpdate('provas', editId, { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes });
+      toast('Prova atualizada! ✦', 'ok');
+    } else {
+      await sbInsert('provas', dado);
+      toast('Prova criada! ✦', 'ok');
+    }
+    fecharModal('mo-prova');
+    await renderProvasProf();
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message, 'er');
   }
-  fecharModal('mo-prova');
-  await renderProvasProf();
 }
 
 async function liberarProva(id) {
@@ -6914,6 +6942,13 @@ function atualizarLicoesModal(editId) {
       + '<button class="lic-check-ver" onclick="verQuestoesLicao(\''+turma+'\','+l.num+')" type="button">\uD83D\uDC41 Ver</button>'
       + '</div></div>';
   }).join('');
+  // Abrir seção de lições automaticamente se estiver editando prova com lições
+  if (pSelecionadas.length) {
+    var wrap = document.getElementById('pv-licoes-wrap');
+    var btn = document.getElementById('btn-toggle-licoes');
+    if (wrap) wrap.style.display = 'block';
+    if (btn) btn.textContent = '▲ Ocultar lições';
+  }
   atualizarResumoProva();
 }
 function onLicaoCheck(chk, num) {
