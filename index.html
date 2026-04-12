@@ -873,6 +873,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         </div>
         <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
       </div>
+      <div id="dash-aprovacao-notif"></div>
       <div id="dash-provas-notif"></div>
       <div id="dash-mural"></div>
       <div id="dash-aniversariantes"></div>
@@ -2639,6 +2640,7 @@ async function renderDash() {
   renderMuralDash();
   iniciarCountdown();
   renderProvasNotifDash();
+  renderAprovacaoNotifDash();
   renderAvisoProvasVencendo();
 }
 
@@ -4915,40 +4917,90 @@ async function renderProvasProf() {
     return;
   }
   const hoje = new Date().toISOString().split('T')[0];
+  const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
+  const ehProfSimples = isProfessor() && !isAdmin();
+
   box.innerHTML = minhas.map(p => {
     const encerrada = p.data_limite && p.data_limite < hoje;
-    const status = encerrada ? 'encerrada' : p.liberada ? 'liberada' : 'fechada';
-    const statusLabel = { encerrada:'Encerrada', liberada:'Liberada ✓', fechada:'Não liberada' };
-    const statusClass = { encerrada:'badge-encerrada', liberada:'badge-liberada', fechada:'badge-fechada' };
+    // status_aprovacao: 'pendente' | 'rejeitada' | 'revisao' | 'aprovada' (default)
+    const statusAp = p.status_aprovacao || (p.aprovada === false ? 'pendente' : 'aprovada');
+    const historico = p.historico_aprovacao || [];
+
+    // Badge de status
+    const badgeMap = {
+      pendente:  `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando aprovação</span>`,
+      rejeitada: `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitada</span>`,
+      revisao:   `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`,
+      aprovada:  encerrada ? `<span class="prova-badge badge-encerrada">Encerrada</span>`
+                 : p.liberada ? `<span class="prova-badge badge-liberada">Liberada ✓</span>`
+                 : `<span class="prova-badge badge-fechada">Aprovada</span>`
+    };
+    const statusBadge = badgeMap[statusAp] || badgeMap.aprovada;
+
     const tipoClass = _tipoBadgeClass(p.tipo);
     const nQuestoes = (p.questoes || []).length;
     const nRespostas = Object.keys(p.resultados || {}).length;
     const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
     const dataLim = p.data_limite ? `📅 Até ${new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}` : '';
-    return `<div class="prova-card">
+
+    // Histórico de mensagens
+    const historicoHtml = historico.length ? `
+      <div style="margin-top:10px;border-top:1px solid var(--cb);padding-top:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:8px">💬 Histórico</div>
+        ${historico.map(h => `
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${h.tipo==='aprovacao'?'var(--tc-bg)':h.tipo==='rejeicao'?'var(--red-bg)':h.tipo==='revisao'?'#e8f4fd':'var(--gold-pale)'};display:flex;align-items:center;justify-content:center;font-size:13px">${h.tipo==='aprovacao'?'✓':h.tipo==='rejeicao'?'✕':h.tipo==='revisao'?'🔄':'📝'}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:11px;font-weight:700;color:var(--ink-mid)">${h.autor} <span style="font-weight:400;color:var(--ink-soft)">· ${h.data ? new Date(h.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''}</span></div>
+              <div style="font-size:12px;color:var(--ink);line-height:1.5;margin-top:2px">${h.msg}</div>
+            </div>
+          </div>`).join('')}
+      </div>` : '';
+
+    // Botões por perfil e status
+    let acoes = '';
+    if (podeAprovar && (statusAp === 'pendente' || statusAp === 'revisao')) {
+      acoes += `<button class="btn btn-green btn-sm" onclick="aprovarProva('${p.id}')">✓ Aprovar</button>
+                <button class="btn btn-red btn-sm" onclick="rejeitarProva('${p.id}')">✕ Rejeitar</button>`;
+    }
+    if (statusAp === 'rejeitada' && !podeAprovar) {
+      acoes += `<button class="btn btn-dk btn-sm" onclick="solicitarRevisao('${p.id}')">🔄 Solicitar revisão</button>`;
+    }
+    if (statusAp === 'aprovada' && !encerrada && !p.liberada) {
+      acoes += `<button class="btn btn-green btn-sm" onclick="liberarProva('${p.id}')">▶ Liberar para alunos</button>`;
+    }
+    if (statusAp === 'aprovada' && !encerrada && p.liberada) {
+      acoes += `<button class="btn btn-red btn-sm" onclick="fecharProvaAcesso('${p.id}')">⏹ Fechar acesso</button>`;
+    }
+    if (statusAp === 'aprovada') {
+      acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>
+                <button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
+    }
+
+    const cardBg = statusAp === 'pendente' ? 'border-color:#ffc107;background:#fffdf0'
+      : statusAp === 'rejeitada' ? 'border-color:var(--red);background:var(--red-bg)'
+      : statusAp === 'revisao' ? 'border-color:#90caf9;background:#f0f8ff' : '';
+
+    return `<div class="prova-card" style="${cardBg}">
       <div class="prova-card-head">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="prova-titulo">${p.nome}</div>
           <div class="prova-meta">
             <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
-            <span class="prova-badge ${statusClass[status]}">${statusLabel[status]}</span>
+            ${statusBadge}
             <span>${TN[p.turma]}</span>
             ${tempo ? `<span>${tempo}</span>` : ''}
             ${dataLim ? `<span>${dataLim}</span>` : ''}
           </div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">${nQuestoes} questões · ${nRespostas} responderam</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">${nQuestoes} questões · ${nRespostas} responderam${p.criado_por ? ` · por ${p.criado_por}` : ''}</div>
         </div>
         <div style="display:flex;gap:5px;flex-shrink:0">
           <button class="btn-ic" onclick="editarProva('${p.id}')" title="Editar">✎</button>
           <button class="btn-ic danger" onclick="deletarProva('${p.id}')" title="Excluir">✕</button>
         </div>
       </div>
-      <div class="prova-actions">
-        ${!encerrada && !p.liberada ? `<button class="btn btn-green btn-sm" onclick="liberarProva('${p.id}')">▶ Liberar para alunos</button>` : ''}
-        ${!encerrada && p.liberada ? `<button class="btn btn-red btn-sm" onclick="fecharProvaAcesso('${p.id}')">⏹ Fechar acesso</button>` : ''}
-        <button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Ver resultados</button>
-        <button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')" title="Permitir que alunos refaçam">↺ Permitir refazer</button>
-      </div>
+      ${historicoHtml}
+      <div class="prova-actions" style="margin-top:10px">${acoes}</div>
     </div>`;
   }).join('');
 }
@@ -5076,25 +5128,37 @@ async function salvarProva() {
   const dataLimite = document.getElementById('pv-data-limite').value || null;
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
   const questoes = coletarQuestoes(turma, licoesSel);
-  // Questões NÃO são obrigatórias — professor pode salvar com 0 questões e adicionar depois
-  // Mas avisa se não tiver nenhuma
-  if (!questoes.length) {
-    const ok = await new Promise(resolve => {
-      showConfirm('Salvar sem questões?', 'Esta prova não tem questões ainda. Deseja salvar assim mesmo e adicionar depois?',
-        () => resolve(true), '');
-      // Se cancelar, o showConfirm chama o callback de confirmação — precisamos de um fallback
-    });
-    // Simplificado: salvar mesmo sem questões
-  }
   const editId = document.getElementById('pv-id').value;
-  const dado = { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes, resultados: {}, liberada: false, criado_por: USER.nome };
+
+  // Simulado não precisa de aprovação (não conta no ranking)
+  // Prova e Quiz precisam de aprovação se for professor simples
+  const precisaAprovacao = tipo !== 'simulado';
+  const aprovadaAuto = !precisaAprovacao || isAdmin() || ['pastor','super'].includes(USER.perfil);
+  const statusInicial = aprovadaAuto ? 'aprovada' : 'pendente';
+
+  const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado' }[tipo] || 'Avaliação';
+
+  const dado = {
+    nome, tipo, turma, tempo_minutos: tempo,
+    data_limite: dataLimite, licoes_selecionadas: licoesSel,
+    questoes, resultados: {}, liberada: false,
+    aprovada: aprovadaAuto,
+    status_aprovacao: statusInicial,
+    criado_por: USER.nome,
+    obs_aprovacao: null,
+    historico_aprovacao: []
+  };
   try {
     if (editId) {
       await sbUpdate('provas', editId, { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes });
-      toast('Prova atualizada! ✦', 'ok');
+      toast(`${tipoLabel} atualizada! ✦`, 'ok');
     } else {
       await sbInsert('provas', dado);
-      toast('Prova criada! ✦', 'ok');
+      if (aprovadaAuto) {
+        toast(`${tipoLabel} criada! ✦`, 'ok');
+      } else {
+        toast(`✦ ${tipoLabel} enviada para aprovação! O responsável será notificado.`, 'ok');
+      }
     }
     fecharModal('mo-prova');
     await renderProvasProf();
@@ -5108,6 +5172,108 @@ async function liberarProva(id) {
   toast('Prova liberada para os alunos!', 'ok');
   await renderProvasProf();
 }
+
+async function aprovarProva(id) {
+  showConfirm('Aprovar prova?', 'A prova será aprovada e o professor poderá liberá-la para os alunos.', async () => {
+    const p = PROVAS.find(x => x.id === id);
+    const hist = [...(p?.historico_aprovacao || []), {
+      tipo: 'aprovacao', autor: USER.nome,
+      msg: 'Prova aprovada. Você já pode liberá-la para os alunos.',
+      data: new Date().toISOString()
+    }];
+    await sbUpdate('provas', id, { aprovada: true, status_aprovacao: 'aprovada', obs_aprovacao: null, historico_aprovacao: hist });
+    toast('Prova aprovada! O professor já pode liberá-la.', 'ok');
+    await renderProvasProf();
+    renderAprovacaoNotifDash();
+  }, 'ok');
+}
+
+async function rejeitarProva(id) {
+  const prev = document.getElementById('mo-rejeitar-prova');
+  if (prev) prev.remove();
+  const mo = document.createElement('div');
+  mo.id = 'mo-rejeitar-prova';
+  mo.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)';
+  mo.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;animation:slideUp .3s"><div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;margin-bottom:4px">Rejeitar prova</div><div style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">O professor verá esta observação e poderá corrigir e reenviar.</div><div class="fg" style="margin-bottom:14px"><label class="fl">Motivo / O que precisa corrigir</label><textarea class="fc" id="rej-obs" rows="3" placeholder="Ex: Corrija as questoes 3 e 5..."></textarea></div><div style="display:flex;gap:8px"><button class="btn btn-ou btn-full" onclick="document.getElementById(\'mo-rejeitar-prova\').remove()">Cancelar</button><button class="btn btn-red btn-full" onclick="confirmarRejeicao(\'' + id + '\')">Rejeitar</button></div></div>';
+  mo.addEventListener('click', e => { if (e.target === mo) mo.remove(); });
+  document.body.appendChild(mo);
+  setTimeout(() => document.getElementById('rej-obs') && document.getElementById('rej-obs').focus(), 100);
+}
+
+async function confirmarRejeicao(id) {
+  const obs = document.getElementById('rej-obs') && document.getElementById('rej-obs').value.trim();
+  if (!obs) { toast('Digite o motivo da rejeicao', 'er'); return; }
+  const p = PROVAS.find(x => x.id === id);
+  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'rejeicao', autor: USER.nome, msg: obs, data: new Date().toISOString() }];
+  await sbUpdate('provas', id, { aprovada: false, status_aprovacao: 'rejeitada', obs_aprovacao: obs, historico_aprovacao: hist });
+  document.getElementById('mo-rejeitar-prova') && document.getElementById('mo-rejeitar-prova').remove();
+  toast('Prova rejeitada.', '');
+  await renderProvasProf();
+  renderAprovacaoNotifDash();
+}
+
+async function solicitarRevisao(id) {
+  const prev = document.getElementById('mo-solicitar-revisao');
+  if (prev) prev.remove();
+  const mo = document.createElement('div');
+  mo.id = 'mo-solicitar-revisao';
+  mo.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)';
+  mo.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;animation:slideUp .3s"><div style="font-family:\'Cormorant Garamond\',serif;font-size:20px;font-weight:600;margin-bottom:4px">Solicitar revisao</div><div style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Informe o que foi corrigido para reenviar para aprovacao.</div><div class="fg" style="margin-bottom:14px"><label class="fl">O que foi corrigido</label><textarea class="fc" id="rev-obs" rows="3" placeholder="Ex: Corrigi as questoes 3 e 5 conforme solicitado..."></textarea></div><div style="display:flex;gap:8px"><button class="btn btn-ou btn-full" onclick="document.getElementById(\'mo-solicitar-revisao\').remove()">Cancelar</button><button class="btn btn-dk btn-full" onclick="confirmarRevisao(\'' + id + '\')">Enviar para revisao</button></div></div>';
+  mo.addEventListener('click', e => { if (e.target === mo) mo.remove(); });
+  document.body.appendChild(mo);
+  setTimeout(() => document.getElementById('rev-obs') && document.getElementById('rev-obs').focus(), 100);
+}
+
+async function confirmarRevisao(id) {
+  const obs = (document.getElementById('rev-obs') && document.getElementById('rev-obs').value.trim()) || 'Prova revisada e reenviada para aprovacao.';
+  const p = PROVAS.find(x => x.id === id);
+  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'revisao', autor: USER.nome, msg: obs, data: new Date().toISOString() }];
+  await sbUpdate('provas', id, { status_aprovacao: 'revisao', obs_aprovacao: null, historico_aprovacao: hist });
+  document.getElementById('mo-solicitar-revisao') && document.getElementById('mo-solicitar-revisao').remove();
+  toast('Revisao enviada! O responsavel sera notificado.', 'ok');
+  await renderProvasProf();
+}
+
+async function renderAprovacaoNotifDash() {
+  const box = document.getElementById('dash-aprovacao-notif');
+  if (!box) return;
+  const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
+  if (!podeAprovar) { box.innerHTML = ''; return; }
+  try {
+    // Buscar provas e desafios pendentes
+    const [rProvas, rDesafios] = await Promise.all([
+      sbClient.from('provas').select('id,nome,tipo,status_aprovacao').in('status_aprovacao', ['pendente','revisao']),
+      sbClient.from('desafios').select('id,nome,status_aprovacao').in('status_aprovacao', ['pendente','revisao'])
+    ]);
+    const provasPend = rProvas.data || [];
+    const desafiosPend = rDesafios.data || [];
+    const total = provasPend.length + desafiosPend.length;
+    if (!total) { box.innerHTML = ''; return; }
+
+    const sub = [];
+    const provAg = provasPend.filter(p => p.status_aprovacao === 'pendente').length;
+    const provRev = provasPend.filter(p => p.status_aprovacao === 'revisao').length;
+    const desAg = desafiosPend.filter(d => d.status_aprovacao === 'pendente').length;
+    const desRev = desafiosPend.filter(d => d.status_aprovacao === 'revisao').length;
+    if (provAg) sub.push(`${provAg} prova(s)/quiz aguardando`);
+    if (provRev) sub.push(`${provRev} com revisão`);
+    if (desAg) sub.push(`${desAg} desafio(s) aguardando`);
+    if (desRev) sub.push(`${desRev} desafio(s) em revisão`);
+
+    box.innerHTML = `<div style="background:linear-gradient(135deg,#7a2000,#a83200);border-radius:var(--r);padding:14px;margin-bottom:12px;cursor:pointer" onclick="navTo('provas')">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div style="font-size:24px">⏳</div>
+        <div>
+          <div style="font-size:14px;font-weight:700;color:white">${total} item(ns) para revisar</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">${sub.join(' · ')} · Toque para revisar</div>
+        </div>
+        <div style="color:rgba(255,255,255,.5);font-size:20px;margin-left:auto">›</div>
+      </div>
+    </div>`;
+  } catch(e) { box.innerHTML = ''; }
+}
+
+
 
 async function fecharProvaAcesso(id) {
   showConfirm('Fechar acesso?', 'Os alunos não poderão mais responder esta prova.', async () => {
@@ -6759,6 +6925,10 @@ async function salvarDesafio() {
   const nome = document.getElementById('ds-nome').value.trim();
   if (!nome) { toast('Digite o nome do desafio', 'er'); return; }
   const editId = document.getElementById('ds-id').value;
+
+  // Professor simples precisa de aprovação; admin/pastor/super aprovam automaticamente
+  const aprovadaAuto = isAdmin() || ['pastor','super'].includes(USER.perfil);
+
   const dado = {
     nome,
     descricao: document.getElementById('ds-descricao').value.trim(),
@@ -6770,12 +6940,19 @@ async function salvarDesafio() {
     limite_participantes: parseInt(document.getElementById('ds-limite-part').value) || 0,
     liberado: false,
     cumprimentos: {},
-    criado_por: USER.nome
+    criado_por: USER.nome,
+    aprovado: aprovadaAuto,
+    status_aprovacao: aprovadaAuto ? 'aprovado' : 'pendente',
+    historico_aprovacao: []
   };
   try {
     if (editId) await sbUpdate('desafios', editId, dado);
     else await sbInsert('desafios', dado);
-    toast(editId ? 'Desafio atualizado! ✦' : 'Desafio criado! ✦', 'ok');
+    if (!editId && !aprovadaAuto) {
+      toast('✦ Desafio enviado para aprovação! O responsável será notificado.', 'ok');
+    } else {
+      toast(editId ? 'Desafio atualizado! ✦' : 'Desafio criado! ✦', 'ok');
+    }
     fecharModal('mo-desafio');
     await renderDesafiosProf();
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
@@ -6787,6 +6964,7 @@ async function renderDesafiosProf() {
   if (!box) return;
   const hoje = new Date().toISOString().split('T')[0];
   const meus = isAdmin() ? DESAFIOS : DESAFIOS.filter(d => d.turma === USER.turma);
+  const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
   if (!meus.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-txt">Nenhum desafio criado ainda</div></div>';
     return;
@@ -6797,34 +6975,126 @@ async function renderDesafiosProf() {
     const nCumpriu = Object.keys(d.cumprimentos || {}).filter(k => d.cumprimentos[k].confirmado).length;
     const nPendente = Object.keys(d.cumprimentos || {}).filter(k => !d.cumprimentos[k].confirmado).length;
     const icon = catIcons[d.categoria] || '⭐';
-    return `<div class="prova-card">
+    const statusAp = d.status_aprovacao || (d.aprovado === false ? 'pendente' : 'aprovado');
+    const pendente = statusAp === 'pendente';
+    const revisao = statusAp === 'revisao';
+    const rejeitado = statusAp === 'rejeitado';
+    const historico = d.historico_aprovacao || [];
+
+    let statusBadge = '';
+    if (pendente) statusBadge = `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando aprovação</span>`;
+    else if (rejeitado) statusBadge = `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitado</span>`;
+    else if (revisao) statusBadge = `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`;
+    else statusBadge = `<span class="prova-badge ${d.liberado ? 'badge-liberada' : 'badge-fechada'}">${d.liberado ? 'Liberado ✓' : 'Aprovado'}</span>`;
+
+    const historicoHtml = historico.length ? `
+      <div style="margin-top:10px;border-top:1px solid var(--cb);padding-top:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:8px">💬 Histórico</div>
+        ${historico.map(h => `<div style="display:flex;gap:8px;margin-bottom:6px">
+          <div style="flex-shrink:0;width:24px;height:24px;border-radius:50%;background:${h.tipo==='aprovacao'?'var(--tc-bg)':h.tipo==='rejeicao'?'var(--red-bg)':'#e8f4fd'};display:flex;align-items:center;justify-content:center;font-size:11px">${h.tipo==='aprovacao'?'✓':h.tipo==='rejeicao'?'✕':'🔄'}</div>
+          <div style="flex:1"><div style="font-size:11px;font-weight:700;color:var(--ink-mid)">${h.autor} <span style="font-weight:400;color:var(--ink-soft)">· ${h.data?new Date(h.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}):''}</span></div>
+          <div style="font-size:12px;color:var(--ink);margin-top:1px">${h.msg}</div></div>
+        </div>`).join('')}
+      </div>` : '';
+
+    const cardBg = pendente ? 'border-color:#ffc107;background:#fffdf0'
+      : rejeitado ? 'border-color:var(--red);background:var(--red-bg)'
+      : revisao ? 'border-color:#90caf9;background:#f0f8ff' : '';
+
+    let acoes = '';
+    if ((pendente || revisao) && podeAprovar) {
+      acoes += `<button class="btn btn-green btn-sm" onclick="aprovarDesafio('${d.id}')">✓ Aprovar</button>
+                <button class="btn btn-red btn-sm" onclick="rejeitarDesafio('${d.id}')">✕ Rejeitar</button>`;
+    }
+    if (rejeitado && !podeAprovar) {
+      acoes += `<button class="btn btn-dk btn-sm" onclick="solicitarRevisaoDesafio('${d.id}')">🔄 Solicitar revisão</button>`;
+    }
+    if (statusAp === 'aprovado' || statusAp === 'aprovada') {
+      if (!d.liberado) acoes += `<button class="btn btn-green btn-sm" onclick="liberarDesafio('${d.id}')">▶ Liberar</button>`;
+      else acoes += `<button class="btn btn-red btn-sm" onclick="fecharDesafio('${d.id}')">⏹ Fechar</button>`;
+      acoes += `<button class="btn btn-ou btn-sm" onclick="verCumprimentosDesafio('${d.id}')">👥 Participantes</button>`;
+    }
+
+    return `<div class="prova-card" style="${cardBg}">
       <div class="prova-card-head">
-        <div>
+        <div style="flex:1;min-width:0">
           <div class="prova-titulo">${icon} ${d.nome}</div>
           <div class="prova-meta">
             <span class="prova-badge badge-desafio">DESAFIO</span>
-            <span class="prova-badge ${d.liberado ? 'badge-liberada' : 'badge-fechada'}">${d.liberado ? 'Liberado ✓' : 'Não liberado'}</span>
+            ${statusBadge}
             <span>${TN[d.turma]}</span>
             <span>🏅 ${d.pontos} pts</span>
             ${d.data_limite ? `<span>📅 Até ${new Date(d.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}</span>` : ''}
           </div>
           ${d.descricao ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.5">${d.descricao}</div>` : ''}
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">
-            ✅ ${nCumpriu} cumprido(s) · ⏳ ${nPendente} pendente(s)
-            ${d.limite_participantes > 0 ? ` · Limite: ${d.limite_participantes}` : ''}
-          </div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">✅ ${nCumpriu} cumprido(s) · ⏳ ${nPendente} pendente(s)${d.limite_participantes > 0 ? ` · Limite: ${d.limite_participantes}` : ''}</div>
         </div>
         <div style="display:flex;gap:5px;flex-shrink:0">
           <button class="btn-ic" onclick="abrirModalDesafio('${d.id}')" title="Editar">✎</button>
           <button class="btn-ic danger" onclick="deletarDesafio('${d.id}')" title="Excluir">✕</button>
         </div>
       </div>
-      <div class="prova-actions">
-        ${!d.liberado ? `<button class="btn btn-green btn-sm" onclick="liberarDesafio('${d.id}')">▶ Liberar</button>` : `<button class="btn btn-red btn-sm" onclick="fecharDesafio('${d.id}')">⏹ Fechar</button>`}
-        <button class="btn btn-ou btn-sm" onclick="verCumprimentosDesafio('${d.id}')">👥 Ver participantes</button>
-      </div>
+      ${historicoHtml}
+      <div class="prova-actions" style="margin-top:10px">${acoes}</div>
     </div>`;
   }).join('');
+}
+
+async function aprovarDesafio(id) {
+  showConfirm('Aprovar desafio?', 'O professor poderá liberar o desafio para os alunos.', async () => {
+    const d = DESAFIOS.find(x => x.id === id);
+    const hist = [...(d?.historico_aprovacao || []), { tipo:'aprovacao', autor:USER.nome, msg:'Desafio aprovado. Você já pode liberá-lo.', data:new Date().toISOString() }];
+    await sbUpdate('desafios', id, { aprovado:true, status_aprovacao:'aprovado', historico_aprovacao:hist });
+    toast('Desafio aprovado! ✦', 'ok');
+    await renderDesafiosProf();
+    renderAprovacaoNotifDash();
+  }, 'ok');
+}
+
+async function rejeitarDesafio(id) {
+  const prev = document.getElementById('mo-rejeitar-desafio');
+  if (prev) prev.remove();
+  const mo = document.createElement('div');
+  mo.id = 'mo-rejeitar-desafio';
+  mo.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)';
+  mo.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;animation:slideUp .3s"><div style="font-size:18px;font-weight:700;margin-bottom:4px">Rejeitar desafio</div><div style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">O professor verá o motivo e poderá corrigir.</div><div class="fg" style="margin-bottom:14px"><label class="fl">Motivo</label><textarea class="fc" id="rej-des-obs" rows="3" placeholder="Explique o que precisa ser corrigido..."></textarea></div><div style="display:flex;gap:8px"><button class="btn btn-ou btn-full" onclick="document.getElementById(\'mo-rejeitar-desafio\').remove()">Cancelar</button><button class="btn btn-red btn-full" onclick="confirmarRejeicaoDesafio(\'' + id + '\')">Rejeitar</button></div></div>';
+  mo.addEventListener('click', e => { if (e.target === mo) mo.remove(); });
+  document.body.appendChild(mo);
+  setTimeout(() => document.getElementById('rej-des-obs')?.focus(), 100);
+}
+
+async function confirmarRejeicaoDesafio(id) {
+  const obs = document.getElementById('rej-des-obs')?.value?.trim();
+  if (!obs) { toast('Digite o motivo', 'er'); return; }
+  const d = DESAFIOS.find(x => x.id === id);
+  const hist = [...(d?.historico_aprovacao || []), { tipo:'rejeicao', autor:USER.nome, msg:obs, data:new Date().toISOString() }];
+  await sbUpdate('desafios', id, { aprovado:false, status_aprovacao:'rejeitado', historico_aprovacao:hist });
+  document.getElementById('mo-rejeitar-desafio')?.remove();
+  toast('Desafio rejeitado.', '');
+  await renderDesafiosProf();
+  renderAprovacaoNotifDash();
+}
+
+async function solicitarRevisaoDesafio(id) {
+  const prev = document.getElementById('mo-revisao-desafio');
+  if (prev) prev.remove();
+  const mo = document.createElement('div');
+  mo.id = 'mo-revisao-desafio';
+  mo.style.cssText = 'position:fixed;inset:0;z-index:600;background:rgba(0,0,0,.55);display:flex;align-items:flex-end;justify-content:center;backdrop-filter:blur(3px)';
+  mo.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;animation:slideUp .3s"><div style="font-size:18px;font-weight:700;margin-bottom:4px">Solicitar revisão</div><div style="font-size:13px;color:var(--ink-soft);margin-bottom:14px">Informe o que foi corrigido.</div><div class="fg" style="margin-bottom:14px"><label class="fl">O que foi corrigido</label><textarea class="fc" id="rev-des-obs" rows="3" placeholder="Ex: Corrigi a descrição conforme solicitado..."></textarea></div><div style="display:flex;gap:8px"><button class="btn btn-ou btn-full" onclick="document.getElementById(\'mo-revisao-desafio\').remove()">Cancelar</button><button class="btn btn-dk btn-full" onclick="confirmarRevisaoDesafio(\'' + id + '\')">Enviar para revisão</button></div></div>';
+  mo.addEventListener('click', e => { if (e.target === mo) mo.remove(); });
+  document.body.appendChild(mo);
+  setTimeout(() => document.getElementById('rev-des-obs')?.focus(), 100);
+}
+
+async function confirmarRevisaoDesafio(id) {
+  const obs = document.getElementById('rev-des-obs')?.value?.trim() || 'Desafio revisado.';
+  const d = DESAFIOS.find(x => x.id === id);
+  const hist = [...(d?.historico_aprovacao || []), { tipo:'revisao', autor:USER.nome, msg:obs, data:new Date().toISOString() }];
+  await sbUpdate('desafios', id, { status_aprovacao:'revisao', historico_aprovacao:hist });
+  document.getElementById('mo-revisao-desafio')?.remove();
+  toast('Revisão enviada! ✦', 'ok');
+  await renderDesafiosProf();
 }
 
 async function liberarDesafio(id) {
