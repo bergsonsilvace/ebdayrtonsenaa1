@@ -1348,10 +1348,11 @@ CREATE POLICY "allow_all_quiz" ON quiz_resultados FOR ALL USING (true) WITH CHEC
         <div class="card" style="background:var(--ink);border-color:var(--ink);text-align:center;padding:28px;margin-bottom:14px">
           <div style="font-size:50px;margin-bottom:8px" id="qr-emoji"></div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:28px;color:white;margin-bottom:4px" id="qr-score"></div>
-          <div style="font-size:14px;color:rgba(255,255,255,.5)" id="qr-msg"></div>
+          <div style="font-size:14px;color:rgba(255,255,255,.5);margin-bottom:12px" id="qr-msg"></div>
+          <div id="qr-badge-pts" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap"></div>
         </div>
         <div class="card" id="qr-revisao" style="margin-bottom:14px"></div>
-        <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <div id="qr-btns" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
           <button class="btn btn-gold" onclick="refazerQuiz()">↺ Refazer</button>
           <button class="btn btn-ou" onclick="navTo('licoes')">← Lições</button>
         </div>
@@ -3358,57 +3359,82 @@ async function selTurmaRanking(turma, el) {
 }
 
 // Calcula a idade em anos a partir de data de nascimento (YYYY-MM-DD)
-function _idadeParaDesempate(nasc) {
-  if (!nasc) return -1;
+// Retorna timestamp da data de nascimento para desempate
+// Quem nasceu ANTES (timestamp menor) = mais velho = fica na FRENTE
+// Quem não tem nasc recebe Infinity → vai para o final
+function _nascParaDesempate(nasc) {
+  if (!nasc) return Infinity;
   try {
-    const dn = new Date(nasc + 'T12:00:00');
-    const hoje = new Date();
-    let idade = hoje.getFullYear() - dn.getFullYear();
-    const m = hoje.getMonth() - dn.getMonth();
-    if (m < 0 || (m === 0 && hoje.getDate() < dn.getDate())) idade--;
-    return isNaN(idade) ? -1 : idade;
-  } catch(e) { return -1; }
+    const ts = new Date(nasc + 'T12:00:00').getTime();
+    return isNaN(ts) ? Infinity : ts;
+  } catch(e) { return Infinity; }
 }
+// Mantido por compatibilidade — usa a nova lógica internamente
+function _idadeParaDesempate(nasc) { return _nascParaDesempate(nasc); }
 
 async function renderRanking() {
-  const alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status || 'ativo') === 'ativo');
-  const aulasT = cacheAulas.filter(a => a.turma === curTurmaRank);
   const box = document.getElementById('lista-ranking');
-  if (!alunos.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>'; return; }
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">Carregando ranking...</div>';
 
-  // Carregar quizzes de todos os alunos do banco para pontuar corretamente
+  // Buscar SEMPRE do banco — turma filtrada — dados frescos
+  let alunos = [], aulasT = [];
+  try {
+    const { data: al } = await sbClient.from('alunos')
+      .select('*').eq('turma', curTurmaRank).eq('status', 'ativo');
+    alunos = al || [];
+  } catch(e) { alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo'); }
+
+  try {
+    const { data: au } = await sbClient.from('aulas')
+      .select('*').eq('turma', curTurmaRank);
+    aulasT = au || [];
+    // Atualizar cache
+    const outrasAulas = cacheAulas.filter(a => a.turma !== curTurmaRank);
+    cacheAulas = [...outrasAulas, ...aulasT];
+  } catch(e) { aulasT = cacheAulas.filter(a => a.turma === curTurmaRank); }
+
+  if (!alunos.length) {
+    box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
+    return;
+  }
+
+  // Carregar quizzes de todos os alunos do banco
   await carregarQuizScoresTodos();
+  await carregarProvas();
 
   let ranking;
 
   if (rankTipo === 'pts') {
-    // Ordena por: 1) pontuação total  2) nº presenças  3) idade
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, scoresAluno, PROVAS);
-      const presTotal = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
+      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS);
+      const presTotal = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pctBar = Math.min(Math.round((pts.total / maxPts) * 100), 100);
-      return { aluno: a, valor: pts.total, presencas: presTotal, label: pts.total + ' pts', pct: pctBar, idade: _idadeParaDesempate(a.nasc) };
+      const pctFreq = aulasT.length ? Math.round((presTotal / aulasT.length) * 100) : 0;
+      return { aluno: a, valor: pts.total, presencas: presTotal, pct: pctFreq, label: pts.total + ' pts', pctBar, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
       if (b.presencas !== a.presencas) return b.presencas - a.presencas;
-      return b.idade - a.idade;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      return a.idade - b.idade; // timestamp menor = mais velho = frente
     });
   } else {
-    // Ordena por: 1) nº presenças  2) % frequência  3) pontuação  4) idade
-    if (!aulasT.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-txt">Nenhuma aula registrada nesta turma</div></div>'; return; }
+    if (!aulasT.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">📊</div><div class="empty-txt">Nenhuma aula registrada nesta turma</div></div>';
+      return;
+    }
     ranking = alunos.map(a => {
-      const presencas = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
+      const presencas = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, scoresAluno, PROVAS);
+      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS);
       return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: pts.total, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
       if (b.pct !== a.pct) return b.pct - a.pct;
       if (b.pts !== a.pts) return b.pts - a.pts;
-      return b.idade - a.idade;
+      return a.idade - b.idade; // timestamp menor = mais velho = frente
     });
   }
 
@@ -3431,7 +3457,7 @@ async function renderRanking() {
       <div class="rank-bar-wrap">
         <div class="rank-nome">${r.aluno.nome}</div>
         ${infoHtml}
-        <div class="rank-bar"><div class="${fillClass}" style="width:${r.pct}%"></div></div>
+        <div class="rank-bar"><div class="${fillClass}" style="width:${r.pctBar !== undefined ? r.pctBar : r.pct}%"></div></div>
       </div>
       <div class="rank-pct ${rankTipo === 'pts' ? 'rank-pts' : ''}">${r.label}</div>
     </div>`;
@@ -4274,14 +4300,34 @@ async function mostrarResultado() {
   const acertos = q.respostas.filter(Boolean).length;
   const total = q.perguntas.length;
   const pct = Math.round((acertos / total) * 100);
+  const pontosGanhos = acertos * 2; // 2pts por acerto
 
-  // Salvar pontuação do aluno
-  if (USER && USER.perfil === 'aluno') {
-    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, data: new Date().toISOString() };
-    // Persistir no Supabase para o ranking funcionar
+  // Determinar id real do aluno
+  // Para aluno real: USER.id é o id da tabela alunos ✓
+  // Para admin/prof em modo aluno: buscar id na tabela alunos pelo login
+  let alunoId = USER ? USER.id : null;
+  const ehAluno = USER && USER.perfil === 'aluno';
+  const ehModoAluno = USER && _modo('aluno');
+
+  if (ehModoAluno && USER.perfil !== 'aluno') {
+    // Admin/prof em modo aluno — buscar id real na tabela alunos
     try {
-      await sbClient.from('quiz_resultados').upsert({
-        aluno_id: USER.id,
+      const { data: al } = await sbClient.from('alunos')
+        .select('id').eq('login', USER.login).limit(1);
+      if (al && al.length) alunoId = al[0].id;
+    } catch(e) {}
+  }
+
+  const deveSalvar = ehAluno || ehModoAluno;
+
+  if (deveSalvar && alunoId) {
+    // 1. Salvar em memória imediatamente
+    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, data: new Date().toISOString() };
+
+    // 2. Persistir no Supabase
+    try {
+      const { error } = await sbClient.from('quiz_resultados').upsert({
+        aluno_id: alunoId,
         turma: q.turma,
         licao_num: q.licaoNum,
         acertos: acertos,
@@ -4289,15 +4335,41 @@ async function mostrarResultado() {
         pct: pct,
         data_resposta: new Date().toISOString()
       }, { onConflict: 'aluno_id,turma,licao_num' });
-    } catch(e) { console.warn('Quiz não salvo no banco:', e.message); }
+
+      if (error) {
+        console.error('Erro ao salvar quiz:', error);
+        toast('⚠️ Erro ao salvar resultado: ' + error.message, 'er');
+      } else {
+        // Sucesso — atualizar cache global de scores para o ranking
+        if (!_quizScoresTodos[alunoId]) _quizScoresTodos[alunoId] = {};
+        _quizScoresTodos[alunoId][`${q.turma}-${q.licaoNum}`] = { acertos, total, pct };
+      }
+    } catch(e) {
+      console.error('Exceção ao salvar quiz:', e);
+      toast('⚠️ Não foi possível salvar: ' + e.message, 'er');
+    }
   }
+
+  // Montar tela de resultado
   const emojis = ['😢','😕','🙂','😊','🌟'];
   const msgs = ['Continue estudando!','Quase lá, revise a lição!','Bom trabalho!','Muito bem!','Perfeito! Parabéns!'];
   const nivel = Math.min(Math.floor(pct / 25), 4);
+  const corPct = pct >= 80 ? 'var(--tc)' : pct >= 60 ? 'var(--warn)' : 'var(--red)';
 
   document.getElementById('qr-emoji').textContent = emojis[nivel];
   document.getElementById('qr-score').textContent = `${acertos}/${total} corretas`;
   document.getElementById('qr-msg').textContent = msgs[nivel];
+
+  // Badge de pontos ganhos + status de salvo
+  const qrBadge = document.getElementById('qr-badge-pts');
+  if (qrBadge) {
+    if (deveSalvar && alunoId) {
+      qrBadge.innerHTML = `<span style="background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700">+${pontosGanhos} pts ✦</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px">✅ Salvo no ranking</span>`;
+    } else {
+      qrBadge.innerHTML = '';
+    }
+  }
 
   const lic = LICOES[q.turma].licoes.find(l => l.num === q.licaoNum);
   document.getElementById('qr-revisao').innerHTML = `<div class="ct">Revisão das respostas</div>` +
@@ -4310,8 +4382,31 @@ async function mostrarResultado() {
       </div>`;
     }).join('');
 
+  // Botões na tela de resultado
+  const qrBtns = document.getElementById('qr-btns');
+  if (qrBtns) {
+    qrBtns.innerHTML = `
+      <button class="btn btn-gold" onclick="refazerQuiz()" style="flex:1">↺ Refazer</button>
+      <button class="btn btn-ou" onclick="navTo('licoes')" style="flex:1">← Lições</button>
+      ${deveSalvar ? `<button class="btn btn-dk" onclick="irParaProgresso()" style="flex:1">📊 Meu Progresso</button>` : ''}`;
+  }
+
   document.getElementById('quiz-area').style.display = 'none';
   document.getElementById('quiz-resultado').style.display = 'block';
+
+  // Atualizar progresso em background após salvar
+  if (deveSalvar) {
+    setTimeout(async function() {
+      try { await renderAlunoProgresso(); } catch(e) {}
+    }, 800);
+  }
+}
+
+function irParaProgresso() {
+  // Fechar quiz e ir para Meu Progresso
+  const quizPage = document.getElementById('pg-licoes');
+  if (quizPage) quizPage.classList.remove('on');
+  navTo('pg-aluno');
 }
 
 function refazerQuiz() {
@@ -4381,29 +4476,42 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
 }
 
 async function renderAlunoProgresso() {
+  // Determinar id e turma corretos
+  // No modo aluno de um admin/professor, usar turma_aluno e id do aluno na tabela alunos
+  const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
+  // Para o id: se é modo aluno e não é aluno real, buscar id na tabela alunos pelo login
+  let idAluno = USER.id;
+  if (_modo('aluno') && USER.perfil !== 'aluno') {
+    try {
+      const { data: alunoReal } = await sbClient.from('alunos')
+        .select('id').eq('login', USER.login).limit(1);
+      if (alunoReal && alunoReal.length) idAluno = alunoReal[0].id;
+    } catch(e) {}
+  }
+
   // Buscar dados frescos do banco sempre
-  await carregarQuizScoresDoAluno(USER.id, USER.turma);
+  await carregarQuizScoresDoAluno(idAluno, turmaAluno);
   await carregarProvas();
 
   // Buscar aulas do banco (não usar cache que pode estar vazio)
   let aulasAluno = [];
   try {
-    const { data } = await sbClient.from('aulas').select('*').eq('turma', USER.turma).order('data', { ascending: false });
+    const { data } = await sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false });
     aulasAluno = data || [];
   } catch(e) {}
 
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
   carregarChavePix();
-  document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[USER.turma] || USER.turma}`;
+  document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
 
-  // Calcular pontos e presenças reais
-  const pts = calcularPontosAluno(USER.id, USER.turma, aulasAluno, quizScores, PROVAS || []);
-  const presencasReais = aulasAluno.filter(a => (a.presencas||{})[USER.id] === 'presente').length;
-  const quizzesFeitos = Object.keys(quizScores).filter(k => k.startsWith(USER.turma)).length;
-  const provasFeitas = (PROVAS || []).filter(p => p.turma === USER.turma && p.tipo === 'prova' && p.resultados && p.resultados[USER.id]).length;
-  const desafiosFeitos = (PROVAS || []).filter(p => p.turma === USER.turma && p.tipo === 'desafio' && p.resultados && p.resultados[USER.id]).length;
-  const seq = calcularSemanasSeguidas(USER.id, USER.turma, aulasAluno);
+  // Calcular pontos e presenças reais usando ids corretos
+  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || []);
+  const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
+  const quizzesFeitos = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
+  const provasFeitas = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
+  const desafiosFeitos = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'desafio' && p.resultados && p.resultados[idAluno]).length;
+  const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
 
   // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
@@ -4431,7 +4539,7 @@ async function renderAlunoProgresso() {
     const totalAulas = aulasAluno.length;
     const pctFreq = totalAulas ? Math.round((presencasReais / totalAulas) * 100) : 0;
     const mediaAcertos = quizzesFeitos > 0
-      ? Math.round(Object.keys(quizScores).filter(k => k.startsWith(USER.turma)).reduce((s, k) => s + (quizScores[k].pct || 0), 0) / quizzesFeitos)
+      ? Math.round(Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).reduce((s, k) => s + (quizScores[k].pct || 0), 0) / quizzesFeitos)
       : 0;
     statsEl.innerHTML = `
       <div class="stats" style="gap:8px;flex-wrap:wrap">
@@ -4473,7 +4581,7 @@ async function renderAlunoProgresso() {
       licEl.innerHTML = '<div style="padding:12px 0;color:var(--ink-soft);font-size:13px">Nenhuma aula registrada ainda.</div>';
     } else {
       licEl.innerHTML = aulasAluno.slice(0, 10).map(au => {
-        const presente = (au.presencas||{})[USER.id] === 'presente';
+        const presente = (au.presencas||{})[idAluno] === 'presente'; // usa idAluno correto
         const dt = new Date(au.data + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
         return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
           <span style="font-size:18px">${presente ? '✅' : '❌'}</span>
@@ -4485,7 +4593,7 @@ async function renderAlunoProgresso() {
   }
 
   // Certificado
-  const totalLicoes = (LICOES[USER.turma]?.licoes || []).length;
+  const totalLicoes = (LICOES[turmaAluno]?.licoes || []).length;
   const feitas = quizzesFeitos;
   if (feitas >= totalLicoes && totalLicoes > 0 && !document.getElementById('btn-certificado')) {
     const certBtn = document.createElement('button');
@@ -4498,7 +4606,7 @@ async function renderAlunoProgresso() {
   }
 
   // Ranking do aluno + ranking da turma
-  await renderRankingAluno(aulasAluno);
+  await renderRankingAluno(aulasAluno, idAluno, turmaAluno);
 }
 
 // ══════════════════════════════════════════════
@@ -5150,15 +5258,24 @@ async function setRankTipo(tipo, el) {
 // ══════════════════════════════════════════════
 // FICHA COMPLETA DO ALUNO
 // ══════════════════════════════════════════════
-function verFichaAluno(id) {
+async function verFichaAluno(id) {
   const aluno = cacheAlunos.find(a => a.id === id);
   if (!aluno) return;
-  const aulasT = [...cacheAulas].filter(a => a.turma === aluno.turma).sort((a,b) => b.data.localeCompare(a.data));
+
+  // Buscar aulas frescas do banco filtrado pela turma do aluno
+  let aulasT = [];
+  try {
+    const { data } = await sbClient.from('aulas').select('*').eq('turma', aluno.turma).order('data', { ascending: false });
+    aulasT = data || [];
+  } catch(e) {
+    aulasT = [...cacheAulas].filter(a => a.turma === aluno.turma).sort((a,b) => b.data.localeCompare(a.data));
+  }
+
   const total = aulasT.length;
   const presentes = aulasT.filter(a => (a.presencas||{})[id] === 'presente').length;
   const pct = total ? Math.round((presentes/total)*100) : 0;
   const idade = aluno.nasc ? calcIdade(aluno.nasc) : null;
-  const seq = calcularSemanasSeguidas(id, aluno.turma, cacheAulas);
+  const seq = calcularSemanasSeguidas(id, aluno.turma, aulasT);
 
   document.getElementById('mo-aluno-hist-titulo').textContent = aluno.nome;
   document.getElementById('mo-aluno-hist-conteudo').innerHTML = `
@@ -5929,75 +6046,114 @@ async function confirmarTrocaSenha() {
 // ══════════════════════════════════════════════
 // RANKING DO ALUNO (posição na turma + ranking geral da turma)
 // ══════════════════════════════════════════════
-async function renderRankingAluno(aulasJaBuscadas) {
+async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam) {
   const card = document.getElementById('aluno-ranking-card');
   const box = document.getElementById('aluno-ranking-pos');
   if (!card || !box || !USER) return;
-  try {
-    // Buscar dados da turma
-    const alunos = await sbGet('alunos', { turma: USER.turma });
-    const aulas = aulasJaBuscadas || await sbGet('aulas', { turma: USER.turma }, 'data', false);
-    if (!alunos.length) return;
 
-    // Carregar quizzes de todos da turma para pontuação correta
+  const turmaUsar = turmaAlunoParam || ((_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma);
+  const idUsar = idAlunoParam || USER.id;
+
+  card.style.display = 'block';
+  box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">Carregando ranking...</div>';
+
+  try {
+    // Buscar dados frescos do banco — incluir nasc para desempate por idade
+    const { data: alunosData } = await sbClient.from('alunos')
+      .select('id,nome,status,nasc').eq('turma', turmaUsar);
+    const alunos = (alunosData || []).filter(a => (a.status||'ativo') === 'ativo');
+
+    const { data: aulasData } = await sbClient.from('aulas')
+      .select('*').eq('turma', turmaUsar);
+    const aulas = aulasData || [];
+
+    // Carregar quizzes E provas do banco
     await carregarQuizScoresTodos();
     await carregarProvas();
 
-    const ativos = alunos.filter(a => (a.status||'ativo') === 'ativo');
+    if (!alunos.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
 
-    // Ranking de PRESENÇA
-    const rankingPres = ativos.map(a => {
+    // Ranking PRESENÇA: presença → % → pts → idade (mais velho sobe)
+    const rankingPres = alunos.map(a => {
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
-      return { id: a.id, nome: a.nome, pres, pct };
-    }).sort((a, b) => b.pres - a.pres || b.pct - a.pct);
-
-    // Ranking GERAL de pontos
-    const rankingGeral = ativos.map(a => {
       const sc = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, USER.turma, aulas, sc, PROVAS || []);
-      return { id: a.id, nome: a.nome, pts: pts.total };
-    }).sort((a, b) => b.pts - a.pts);
+      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || []);
+      const idade = _idadeParaDesempate(a.nasc);
+      return { id: a.id, nome: a.nome, pres, pct, pts: pts.total, idade };
+    }).sort((a, b) => {
+      if (b.pres !== a.pres) return b.pres - a.pres;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      return a.idade - b.idade; // timestamp menor = mais velho = frente
+    });
 
-    const minhaPosP = rankingPres.findIndex(r => r.id === USER.id) + 1;
-    const minhaPosG = rankingGeral.findIndex(r => r.id === USER.id) + 1;
-    const euPres = rankingPres.find(r => r.id === USER.id);
-    const euGeral = rankingGeral.find(r => r.id === USER.id);
+    // Ranking PONTOS: pts → presenças → % → idade (mais velho sobe)
+    const rankingGeral = alunos.map(a => {
+      const sc = _quizScoresParaAluno(a.id);
+      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || []);
+      const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
+      const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
+      const idade = _idadeParaDesempate(a.nasc);
+      return { id: a.id, nome: a.nome, pts: pts.total, pres, pct, quizzes: pts.quizzes, provas: pts.provas, idade };
+    }).sort((a, b) => {
+      if (b.pts !== a.pts) return b.pts - a.pts;
+      if (b.pres !== a.pres) return b.pres - a.pres;
+      if (b.pct !== a.pct) return b.pct - a.pct;
+      return a.idade - b.idade; // timestamp menor = mais velho = frente
+    });
+
+    const minhaPosP = rankingPres.findIndex(r => r.id === idUsar) + 1;
+    const minhaPosG = rankingGeral.findIndex(r => r.id === idUsar) + 1;
+    const euPres = rankingPres.find(r => r.id === idUsar);
+    const euGeral = rankingGeral.find(r => r.id === idUsar);
 
     const MEDALHAS_POS = ['🥇', '🥈', '🥉'];
 
-    card.style.display = 'block';
     box.innerHTML = `
-      <!-- Posições do aluno -->
+      <!-- Cards de posição -->
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
         <div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:var(--r);padding:12px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);font-weight:700;margin-bottom:4px">Presença</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-deep);line-height:1">${minhaPosP > 0 ? minhaPosP + 'º' : '—'}</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">${euPres ? euPres.pct + '% freq.' : ''}</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">${euPres ? euPres.pres + ' presença(s) · ' + euPres.pct + '%' : 'sem presenças'}</div>
         </div>
         <div style="background:linear-gradient(135deg,#1a2744,#2c3e6b);border-radius:var(--r);padding:12px;text-align:center">
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-l);font-weight:700;margin-bottom:4px">Pontuação</div>
           <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-l);line-height:1">${minhaPosG > 0 ? minhaPosG + 'º' : '—'}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">${euGeral ? euGeral.pts + ' pts' : ''}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">${euGeral ? euGeral.pts + ' pts' : '0 pts'}</div>
         </div>
       </div>
 
-      <!-- Ranking geral da turma -->
+      <!-- Detalhamento dos meus pontos -->
+      ${euGeral ? `<div style="background:var(--cream);border:1px solid var(--cb);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;font-size:12px;color:var(--ink-mid);display:flex;gap:14px;flex-wrap:wrap">
+        <span>🏫 <strong>${euPres ? euPres.pres : 0}</strong> presença(s) = <strong>${(euPres ? euPres.pres : 0) * 10} pts</strong></span>
+        ${euGeral.quizzes > 0 ? `<span>⚡ quizzes = <strong>${euGeral.quizzes} pts</strong></span>` : ''}
+        ${euGeral.provas > 0 ? `<span>📝 provas = <strong>${euGeral.provas} pts</strong></span>` : ''}
+        <span style="margin-left:auto;font-weight:700;color:var(--gold-deep)">Total: ${euGeral.pts} pts</span>
+      </div>` : ''}
+
+      <!-- Ranking da turma -->
       <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--ink-soft);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--cb)">
-        🏆 Ranking — ${TN[USER.turma]}
+        🏆 Ranking — ${TN[turmaUsar] || turmaUsar}
       </div>
       ${rankingGeral.map((r, i) => {
-        const isEu = r.id === USER.id;
+        const isEu = r.id === idUsar;
         const isTop = i < 3;
         const medal = isTop ? MEDALHAS_POS[i] : '';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:9px ${isEu?'10px':'4px'};margin-bottom:4px;border-radius:8px;background:${isEu?'var(--gold-pale)':'transparent'};border:${isEu?'1px solid var(--gold)':'1px solid transparent'};transition:all .2s">
+        return `<div style="display:flex;align-items:center;gap:10px;padding:9px ${isEu?'10px':'4px'};margin-bottom:4px;border-radius:8px;background:${isEu?'var(--gold-pale)':'transparent'};border:${isEu?'1px solid var(--gold)':'1px solid transparent'}">
           <div style="font-size:${isTop?'20px':'13px'};min-width:28px;text-align:center;font-family:'Cormorant Garamond',serif;font-weight:600;color:${isTop?'var(--gold)':'var(--ink-soft)'}">${medal || (i+1)}</div>
-          <div style="flex:1;font-size:13px;font-weight:${isEu?'700':'500'};color:${isEu?'var(--gold-deep)':'var(--ink)'}">${isEu ? '✦ Você' : r.nome}</div>
-          <div style="font-size:11px;font-weight:700;color:${isTop?'var(--gold-deep)':'var(--ink-soft)'};background:${isTop?'var(--gold-pale)':'transparent'};padding:2px 8px;border-radius:10px">${r.pts} pts</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:${isEu?'700':'500'};color:${isEu?'var(--gold-deep)':'var(--ink)'}">${isEu ? '✦ Você' : r.nome}</div>
+            <div style="font-size:10px;color:var(--ink-soft);margin-top:1px">${r.pres} presença(s)${r.quizzes > 0 ? ' · ' + r.quizzes + ' pts quiz' : ''}</div>
+          </div>
+          <div style="font-size:12px;font-weight:700;color:${isTop?'var(--gold-deep)':'var(--ink-soft)'};background:${isTop?'var(--gold-pale)':'transparent'};padding:3px 10px;border-radius:10px;white-space:nowrap">${r.pts} pts</div>
         </div>`;
       }).join('')}`;
+
   } catch(e) {
-    console.error('Erro ao carregar ranking:', e);
+    console.error('Erro ao carregar ranking do aluno:', e);
+    box.innerHTML = '<div style="color:var(--red);font-size:13px;padding:10px">Erro ao carregar ranking. Tente novamente.</div>';
   }
 }
 
@@ -6033,15 +6189,24 @@ function compartilharResultadoWA() {
 // ══════════════════════════════════════════════
 // GRÁFICO EVOLUÇÃO NA FICHA DO ALUNO
 // ══════════════════════════════════════════════
-function verFichaAluno(id) {
+async function verFichaAluno(id) {
   const aluno = cacheAlunos.find(a => a.id === id);
   if (!aluno) return;
-  const aulasT = [...cacheAulas].filter(a => a.turma === aluno.turma).sort((a,b) => b.data.localeCompare(a.data));
+
+  // Buscar aulas frescas do banco filtradas pela turma do aluno
+  let aulasT = [];
+  try {
+    const { data } = await sbClient.from('aulas').select('*').eq('turma', aluno.turma).order('data', { ascending: false });
+    aulasT = data || [];
+  } catch(e) {
+    aulasT = [...cacheAulas].filter(a => a.turma === aluno.turma).sort((a,b) => b.data.localeCompare(a.data));
+  }
+
   const total = aulasT.length;
   const presentes = aulasT.filter(a => (a.presencas||{})[id] === 'presente').length;
   const pct = total ? Math.round((presentes/total)*100) : 0;
   const idade = aluno.nasc ? calcIdade(aluno.nasc) : null;
-  const seq = calcularSemanasSeguidas(id, aluno.turma, cacheAulas);
+  const seq = calcularSemanasSeguidas(id, aluno.turma, aulasT);
 
   document.getElementById('mo-aluno-hist-titulo').textContent = aluno.nome;
   document.getElementById('mo-aluno-hist-conteudo').innerHTML = `
