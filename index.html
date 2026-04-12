@@ -897,6 +897,50 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       </div>
     </div>
 
+    <!-- BANCO DE QUESTÕES -->
+    <div id="pg-banco" class="page">
+      <div class="ph"><h2>Banco de <em>Questões</em></h2><p>Edite as lições e perguntas pré-programadas</p></div>
+      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+        <button class="btn btn-sm" id="banco-tab-c" onclick="selBancoTurma('criancas',this)" style="background:var(--tc);color:white;border:none">🟢 Crianças</button>
+        <button class="btn btn-sm btn-ou" id="banco-tab-j" onclick="selBancoTurma('jovens',this)">🔵 Jovens</button>
+        <button class="btn btn-sm btn-ou" id="banco-tab-a" onclick="selBancoTurma('adultos',this)">🟡 Adultos</button>
+      </div>
+      <div id="banco-lista"></div>
+    </div>
+
+    <!-- MODAL EDITAR LIÇÃO DO BANCO -->
+    <div id="mo-banco-licao" style="display:none;position:fixed;inset:0;z-index:400;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.65);backdrop-filter:blur(3px)">
+      <div onclick="event.stopPropagation()" style="background:white;border-radius:20px;width:100%;max-width:620px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+        <!-- HEADER ESCURO -->
+        <div style="background:var(--ink);padding:18px 22px;display:flex;align-items:flex-start;justify-content:space-between;gap:12px;flex-shrink:0">
+          <div>
+            <div id="mo-banco-subtitulo" style="font-size:11px;color:var(--gold-l);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:4px"></div>
+            <div id="mo-banco-titulo" style="font-family:'Cormorant Garamond',serif;font-size:20px;color:white;font-weight:600;line-height:1.2">Editar Lição</div>
+          </div>
+          <button onclick="fecharModal('mo-banco-licao')" style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:16px;cursor:pointer;flex-shrink:0;display:flex;align-items:center;justify-content:center">✕</button>
+        </div>
+        <!-- CAMPOS DE INFO DA LIÇÃO -->
+        <div style="padding:16px 20px 0;flex-shrink:0;border-bottom:1px solid var(--cb)">
+          <input type="hidden" id="banco-licao-id">
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+            <div><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Título</label><input class="fc" id="banco-titulo" style="width:100%;font-size:13px"></div>
+            <div><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Bíblico</label><input class="fc" id="banco-texto" placeholder="Ex: Êx 2.1-10" style="width:100%;font-size:13px"></div>
+          </div>
+          <div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Áureo</label><textarea class="fc" id="banco-texto-aureo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
+          <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Resumo</label><textarea class="fc" id="banco-resumo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
+        </div>
+        <!-- PERGUNTAS -->
+        <div style="flex:1;overflow-y:auto;padding:16px 20px" id="banco-perguntas-lista"></div>
+        <!-- FOOTER -->
+        <div style="padding:14px 20px;border-top:1px solid var(--cb);display:flex;gap:8px;flex-shrink:0;background:white">
+          <button onclick="addPerguntaBanco()" style="padding:10px 16px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:8px;color:var(--gold-deep);font-size:13px;font-weight:700;cursor:pointer">+ Nova questão</button>
+          <div style="flex:1"></div>
+          <button onclick="fecharModal('mo-banco-licao')" style="padding:10px 18px;background:white;border:1px solid var(--cb);border-radius:8px;color:var(--ink-soft);font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+          <button onclick="salvarLicaoBanco()" style="padding:10px 20px;background:var(--gold);border:none;border-radius:8px;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">✓ Salvar alterações</button>
+        </div>
+      </div>
+    </div>
+
     <!-- MURAL -->
     <div id="pg-mural" class="page">
       <div class="ph"><h2>Mural de <em>Avisos</em></h2><p>Comunicados para toda a equipe</p></div>
@@ -1912,9 +1956,26 @@ async function sbInsert(t, d) {
   return data;
 }
 async function sbUpdate(t, id, d) {
-  const { data, error } = await sbClient.from(t).update(d).eq('id', id).select().single();
-  if (error) { toast('Erro: ' + error.message, 'er'); return null; }
-  return data;
+  console.log(`sbUpdate(${t}) id="${id}" tipo=${typeof id}`, Object.keys(d));
+  try {
+    const { data, error } = await sbClient.from(t).update(d).eq('id', id).select();
+    if (error) {
+      console.error(`sbUpdate(${t}) ERRO:`, error);
+      toast('Erro ao salvar: ' + error.message, 'er');
+      return null;
+    }
+    if (!data || !data.length) {
+      console.warn(`sbUpdate(${t}) — nenhuma linha atualizada para id:`, id, typeof id);
+      toast('⚠️ Nenhuma linha atualizada — id: ' + id, 'er');
+      return null;
+    }
+    console.log(`sbUpdate(${t}) OK — ${data.length} linha(s)`);
+    return data[0];
+  } catch(e) {
+    console.error(`sbUpdate(${t}) exceção:`, e);
+    toast('Erro de conexão ao salvar', 'er');
+    return null;
+  }
 }
 async function sbDelete(t, id) {
   const { error } = await sbClient.from(t).delete().eq('id', id);
@@ -2183,7 +2244,7 @@ function construirNav() {
   } else {
     items.push({id:'dash',label:'Início'},{id:'mural',label:'Avisos'});
     if (isAdmin()) {
-      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
+      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'banco',label:'Banco'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
     } else {
       items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'});
       if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
@@ -2440,6 +2501,9 @@ async function iniciarApp() {
   await carregarConfigs();
   document.getElementById('dash-igreja-nome').textContent = cfgNomeEBD;
 
+  // Sincronizar banco de questões com memória (sem bloquear)
+  sincronizarBancoComMemoria();
+
   renderDash(); renderAlunos(); renderHist(); carregarAulaExistente(); renderFreq();
   popularDropdownLicao(curTurmaFreq);
   registrarAcesso();
@@ -2485,7 +2549,8 @@ async function _navTo(id) {
     'fazer-prova': 'pg-fazer-prova',
     'resultado-prova': 'pg-resultado-prova',
     'provas': (USER && USER.perfil === 'aluno') || _modo('aluno') ? 'pg-pg-provas-aluno' : 'pg-provas',
-    'responsavel': 'pg-responsavel'
+    'responsavel': 'pg-responsavel',
+    'banco': 'pg-banco'
   };
   const elId = idMap[id] || 'pg-' + id;
   const pg = document.getElementById(elId); if (pg) pg.classList.add('on');
@@ -2547,6 +2612,7 @@ async function _navTo(id) {
     document.getElementById('cal-detalhe-area').innerHTML = '';
     await renderCalendario();
   }
+  else if (id === 'banco') renderBancoQuestoes();
   else if (id === 'provas') {
     if (USER && (USER.perfil === 'aluno' || _modo('aluno'))) await renderProvasAluno();
     else await renderProvasProf();
@@ -5006,7 +5072,7 @@ async function renderProvasProf() {
 }
 
 // ── Modal criar/editar prova ──
-function abrirModalProva(id, tipoPresel) {
+async function abrirModalProva(id, tipoPresel) {
   const tipoLabels = { prova:'Nova Prova', simulado:'Novo Simulado', quiz:'Novo Quiz', desafio:'Novo Desafio' };
   document.getElementById('mo-prova-titulo').textContent = id ? 'Editar avaliação' : (tipoLabels[tipoPresel] || 'Nova Avaliação');
   document.getElementById('pv-id').value = id || '';
@@ -5014,19 +5080,27 @@ function abrirModalProva(id, tipoPresel) {
   document.getElementById('pv-extras-list').innerHTML = '';
 
   if (id) {
-    const p = PROVAS.find(x => x.id === id);
+    // Buscar dados frescos do banco — não depender do cache PROVAS
+    let p = PROVAS.find(x => x.id === id);
+    if (!p) {
+      try {
+        const { data } = await sbClient.from('provas').select('*').eq('id', id).single();
+        p = data;
+      } catch(e) {}
+    }
     if (p) {
-      document.getElementById('pv-nome').value = p.nome;
-      document.getElementById('pv-tipo').value = p.tipo;
-      document.getElementById('pv-turma').value = p.turma;
+      document.getElementById('pv-nome').value = p.nome || '';
+      document.getElementById('pv-tipo').value = p.tipo || 'prova';
+      document.getElementById('pv-turma').value = p.turma || 'adultos';
       document.getElementById('pv-tempo').value = p.tempo_minutos || 0;
       document.getElementById('pv-data-limite').value = p.data_limite || '';
-      // Ao editar: carregar APENAS as questões extras (origem='extra')
-      // As questões das lições são reconstruídas automaticamente pelas lições selecionadas
       setTimeout(() => {
         const extrasApenas = (p.questoes || []).filter(q => q.origem === 'extra');
         extrasApenas.forEach(q => adicionarQuestaoExtra(q));
       }, 100);
+    } else {
+      toast('Não foi possível carregar a prova', 'er');
+      return;
     }
   } else {
     document.getElementById('pv-nome').value = '';
@@ -5131,11 +5205,9 @@ async function salvarProva() {
   const editId = document.getElementById('pv-id').value;
 
   // Simulado não precisa de aprovação (não conta no ranking)
-  // Prova e Quiz precisam de aprovação se for professor simples
   const precisaAprovacao = tipo !== 'simulado';
   const aprovadaAuto = !precisaAprovacao || isAdmin() || ['pastor','super'].includes(USER.perfil);
   const statusInicial = aprovadaAuto ? 'aprovada' : 'pendente';
-
   const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado' }[tipo] || 'Avaliação';
 
   const dado = {
@@ -5148,22 +5220,46 @@ async function salvarProva() {
     obs_aprovacao: null,
     historico_aprovacao: []
   };
+
   try {
     if (editId) {
-      await sbUpdate('provas', editId, { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes });
+      // Diagnóstico: mostrar o id que será salvo
+      console.log('Editando prova id:', editId, 'tipo:', typeof editId);
+      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes };
+
+      // Tentar update direto sem passar por sbUpdate para ver erro bruto
+      const { data: dataUp, error: errUp } = await sbClient.from('provas').update(dadoEdicao).eq('id', editId).select();
+      console.log('Update resultado:', dataUp, 'erro:', errUp);
+
+      if (errUp) {
+        toast('Erro RLS/banco: ' + errUp.message, 'er');
+        return;
+      }
+      if (!dataUp || !dataUp.length) {
+        toast('⚠️ ID não encontrado no banco: ' + editId, 'er');
+        return;
+      }
+      // Atualizar cache local imediatamente
+      const idx = PROVAS.findIndex(x => x.id === editId);
+      if (idx >= 0) PROVAS[idx] = { ...PROVAS[idx], ...dadoEdicao };
       toast(`${tipoLabel} atualizada! ✦`, 'ok');
     } else {
-      await sbInsert('provas', dado);
+      const resultado = await sbInsert('provas', dado);
+      if (!resultado) {
+        toast('Erro ao criar — verifique sua conexão', 'er');
+        return;
+      }
       if (aprovadaAuto) {
         toast(`${tipoLabel} criada! ✦`, 'ok');
       } else {
-        toast(`✦ ${tipoLabel} enviada para aprovação! O responsável será notificado.`, 'ok');
+        toast(`✦ ${tipoLabel} enviada para aprovação!`, 'ok');
       }
     }
     fecharModal('mo-prova');
     await renderProvasProf();
   } catch(e) {
     toast('Erro ao salvar: ' + e.message, 'er');
+    console.error('salvarProva erro:', e);
   }
 }
 
@@ -5571,6 +5667,302 @@ function verMeuResultado(id) {
 
 
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// BANCO DE QUESTÕES
+// ══════════════════════════════════════════════
+let _bancoTurmaAtual = 'criancas';
+let _bancoLicoes = []; // cache das lições do banco
+
+async function carregarBancoQuestoes(turma) {
+  try {
+    const { data, error } = await sbClient.from('banco_questoes')
+      .select('*').eq('turma', turma).order('num', { ascending: true });
+    if (error) throw error;
+    return data || [];
+  } catch(e) {
+    console.error('Erro ao carregar banco:', e);
+    return [];
+  }
+}
+
+async function renderBancoQuestoes() {
+  const box = document.getElementById('banco-lista');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div>';
+  _bancoLicoes = await carregarBancoQuestoes(_bancoTurmaAtual);
+
+  if (!_bancoLicoes.length) {
+    box.innerHTML = `<div class="empty">
+      <div class="empty-icon">📚</div>
+      <div class="empty-txt">Nenhuma lição encontrada</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Rode o SQL de migração no Supabase primeiro</div>
+    </div>`;
+    return;
+  }
+
+  const turmaLabel = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' }[_bancoTurmaAtual];
+  box.innerHTML = _bancoLicoes.map(l => {
+    const pergs = l.perguntas || [];
+    return `<div class="card" style="margin-bottom:10px">
+      <div style="display:flex;align-items:flex-start;gap:8px">
+        <div style="flex:1;min-width:0">
+          <div style="font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Lição ${l.num} · ${l.data_licao || ''}</div>
+          <div style="font-weight:700;font-size:15px;color:var(--ink);margin:2px 0">${l.titulo}</div>
+          <div style="font-size:12px;color:var(--ink-soft)">${l.texto || ''}</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;font-style:italic;line-height:1.4">${(l.texto_aureo||'').substring(0,80)}${(l.texto_aureo||'').length>80?'...':''}</div>
+          <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
+            <span style="background:var(--tc-bg);color:var(--tc);font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${pergs.length} pergunta(s)</span>
+          </div>
+        </div>
+        <button class="btn btn-ou btn-sm" onclick="abrirEditarLicao('${l.id}')" style="flex-shrink:0">✎ Editar</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selBancoTurma(turma, el) {
+  _bancoTurmaAtual = turma;
+  document.querySelectorAll('#pg-banco .btn').forEach(b => {
+    b.className = 'btn btn-sm btn-ou';
+  });
+  if (el) {
+    const cores = { criancas:'var(--tc)', jovens:'var(--tj)', adultos:'var(--gold-deep)' };
+    el.style.background = cores[turma] || 'var(--ink)';
+    el.style.color = 'white';
+    el.style.border = 'none';
+  }
+  renderBancoQuestoes();
+}
+
+function abrirEditarLicao(id) {
+  const l = _bancoLicoes.find(x => x.id === id);
+  if (!l) return;
+  document.getElementById('banco-licao-id').value = id;
+  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[l.turma] || l.turma.toUpperCase();
+  document.getElementById('mo-banco-subtitulo').textContent = `L${l.num} · ${turmaLabel} · ${l.data_licao || ''}`;
+  document.getElementById('mo-banco-titulo').textContent = l.titulo;
+  document.getElementById('banco-titulo').value = l.titulo || '';
+  document.getElementById('banco-texto').value = l.texto || '';
+  document.getElementById('banco-texto-aureo').value = l.texto_aureo || '';
+  document.getElementById('banco-resumo').value = l.resumo || '';
+
+  // Renderizar perguntas diretamente no DOM (evita problemas de escape HTML)
+  const box = document.getElementById('banco-perguntas-lista');
+  box.innerHTML = '';
+  const pergs = l.perguntas || [];
+  pergs.forEach((p, i) => box.appendChild(criarCardPerguntaBanco(p, i)));
+
+  document.getElementById('mo-banco-licao').style.display = 'flex';
+}
+
+function criarCardPerguntaBanco(p, i) {
+  const ops = [0,1,2,3].map(j => (p.op && p.op[j] != null ? String(p.op[j]) : ''));
+  const correta = typeof p.correta === 'number' ? p.correta : 0;
+
+  const wrap = document.createElement('div');
+  wrap.id = 'banco-perg-' + i;
+  wrap.style.cssText = 'border:1px solid var(--cb);border-radius:14px;overflow:hidden;margin-bottom:12px';
+
+  // Header
+  const head = document.createElement('div');
+  head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--cream);border-bottom:1px solid var(--cb)';
+  head.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--ink-mid);display:flex;align-items:center;gap:6px">
+    <span style="width:22px;height:22px;background:var(--ink);color:var(--gold-l);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">Q${i+1}</span>
+    Pergunta ${i+1}
+  </div>`;
+  const btnRem = document.createElement('button');
+  btnRem.style.cssText = 'padding:4px 10px;background:var(--red-bg);border:1px solid #f0c0c0;border-radius:6px;color:var(--red);font-size:11px;font-weight:600;cursor:pointer';
+  btnRem.textContent = '✕ Remover';
+  btnRem.onclick = () => removerPerguntaBanco(i);
+  head.appendChild(btnRem);
+  wrap.appendChild(head);
+
+  // Corpo
+  const body = document.createElement('div');
+  body.style.cssText = 'padding:14px';
+
+  // Campo pergunta
+  const labelQ = document.createElement('label');
+  labelQ.style.cssText = 'font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px';
+  labelQ.textContent = 'Pergunta';
+  const ta = document.createElement('textarea');
+  ta.className = 'fc';
+  ta.id = 'bpq-' + i;
+  ta.rows = 2;
+  ta.style.cssText = 'width:100%;font-size:13px;resize:none;margin-bottom:10px';
+  ta.value = p.q || '';
+  body.appendChild(labelQ);
+  body.appendChild(ta);
+
+  // Label alternativas
+  const labelA = document.createElement('label');
+  labelA.style.cssText = 'font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px';
+  labelA.innerHTML = 'Alternativas <span style="color:var(--tc)">· clique no ✓ para marcar a correta</span>';
+  body.appendChild(labelA);
+
+  // Alternativas via DOM — .value nunca passa por innerHTML, aspas nunca quebram
+  ops.forEach((op, j) => {
+    const isC = j === correta;
+    const row = document.createElement('div');
+    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
+
+    const lbl = document.createElement('label');
+    lbl.title = 'Marcar como correta';
+    lbl.style.cssText = `width:28px;height:28px;border-radius:8px;border:2px solid ${isC?'var(--tc)':'var(--cb)'};background:${isC?'var(--tc-bg)':'white'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:13px;transition:all .15s`;
+
+    const radio = document.createElement('input');
+    radio.type = 'radio';
+    radio.name = 'bpcorreta-' + i;
+    radio.value = j;
+    radio.checked = isC;
+    radio.style.display = 'none';
+    radio.onchange = () => atualizarRadioBanco(i);
+
+    const icone = document.createElement('span');
+    if (isC) { icone.style.cssText = 'color:var(--tc);font-weight:700'; icone.textContent = '✓'; }
+    else { icone.style.cssText = 'color:var(--cb);font-size:10px'; icone.textContent = String(j+1); }
+
+    lbl.appendChild(radio);
+    lbl.appendChild(icone);
+
+    const inp = document.createElement('input');
+    inp.className = 'fc';
+    inp.id = 'bpop-' + i + '-' + j;
+    inp.placeholder = 'Alternativa ' + (j+1);
+    inp.style.cssText = 'flex:1;margin:0;font-size:13px;' + (isC ? 'border-color:var(--tc);background:var(--tc-bg)' : '');
+    inp.value = op; // .value direto — sem HTML, sem problema de aspas
+
+    row.appendChild(lbl);
+    row.appendChild(inp);
+    body.appendChild(row);
+  });
+
+  wrap.appendChild(body);
+  return wrap;
+}
+
+function renderPerguntaBanco(p, i) {
+  return criarCardPerguntaBanco(p, i).outerHTML;
+}
+
+function atualizarRadioBanco(i) {
+  const card = document.getElementById('banco-perg-' + i);
+  if (!card) return;
+  const checked = card.querySelector('input[name="bpcorreta-'+i+'"]:checked');
+  const correta = checked ? parseInt(checked.value) : 0;
+  const labels = card.querySelectorAll('label[title="Marcar como correta"]');
+  const inputs = [0,1,2,3].map(j => document.getElementById('bpop-'+i+'-'+j));
+  labels.forEach((lbl, j) => {
+    const isCorreta = j === correta;
+    lbl.style.borderColor = isCorreta ? 'var(--tc)' : 'var(--cb)';
+    lbl.style.background = isCorreta ? 'var(--tc-bg)' : 'white';
+    lbl.innerHTML = '<input type="radio" name="bpcorreta-'+i+'" value="'+j+'" '+(isCorreta?'checked':'')+' style="display:none" onchange="atualizarRadioBanco('+i+')">'
+      + (isCorreta ? '<span style="color:var(--tc);font-weight:700">✓</span>' : '<span style="color:var(--cb);font-size:10px">'+(j+1)+'</span>');
+    if (inputs[j]) {
+      inputs[j].style.borderColor = isCorreta ? 'var(--tc)' : '';
+      inputs[j].style.background = isCorreta ? 'var(--tc-bg)' : '';
+    }
+  });
+}
+
+function addPerguntaBanco() {
+  const box = document.getElementById('banco-perguntas-lista');
+  const idx = box.querySelectorAll('[id^="banco-perg-"]').length;
+  box.appendChild(criarCardPerguntaBanco({ q:'', op:['','','',''], correta:0 }, idx));
+}
+
+function removerPerguntaBanco(i) {
+  const el = document.getElementById(`banco-perg-${i}`);
+  if (el) el.remove();
+  // Renumerar
+  const box = document.getElementById('banco-perguntas-lista');
+  box.querySelectorAll('[id^="banco-perg-"]').forEach((card, newI) => {
+    card.id = `banco-perg-${newI}`;
+    const titulo = card.querySelector('div[style*="font-size:12px"]');
+    if (titulo) titulo.textContent = `Pergunta ${newI+1}`;
+  });
+}
+
+async function salvarLicaoBanco() {
+  const id = document.getElementById('banco-licao-id').value;
+  const titulo = document.getElementById('banco-titulo').value.trim();
+  if (!titulo) { toast('Digite o título da lição', 'er'); return; }
+
+  // Coletar perguntas
+  const box = document.getElementById('banco-perguntas-lista');
+  const cards = box.querySelectorAll('[id^="banco-perg-"]');
+  const perguntas = [];
+  let idx = 0;
+  cards.forEach((card, i) => {
+    const q = document.getElementById(`bpq-${i}`)?.value?.trim();
+    if (!q) return;
+    const ops = [0,1,2,3].map(j => (document.getElementById(`bpop-${i}-${j}`)?.value?.trim() || ''));
+    const radio = card.querySelector(`input[name="bpcorreta-${i}"]:checked`);
+    const correta = radio ? parseInt(radio.value) : 0;
+    const a = ops[correta] || ops[0];
+    if (a) perguntas.push({ q, a, correta, op: ops });
+  });
+
+  const dado = {
+    titulo,
+    texto: document.getElementById('banco-texto').value.trim(),
+    texto_aureo: document.getElementById('banco-texto-aureo').value.trim(),
+    resumo: document.getElementById('banco-resumo').value.trim(),
+    perguntas,
+    updated_at: new Date().toISOString()
+  };
+
+  const { error } = await sbClient.from('banco_questoes').update(dado).eq('id', id);
+  if (error) { toast('Erro ao salvar: ' + error.message, 'er'); return; }
+
+  // Atualizar LICOES em memória para uso imediato
+  const licaoLocal = _bancoLicoes.find(x => x.id === id);
+  if (licaoLocal) {
+    Object.assign(licaoLocal, dado);
+    // Sincronizar com LICOES em memória
+    sincronizarLicaoEmMemoria(licaoLocal);
+  }
+
+  toast('Lição salva! ✦', 'ok');
+  fecharModal('mo-banco-licao');
+  renderBancoQuestoes();
+}
+
+function sincronizarLicaoEmMemoria(l) {
+  // Atualizar LICOES[turma].licoes para que provas criadas usem dados atualizados
+  const turmaData = LICOES[l.turma];
+  if (!turmaData) return;
+  const idx = turmaData.licoes.findIndex(x => x.num === l.num);
+  if (idx >= 0) {
+    turmaData.licoes[idx] = {
+      ...turmaData.licoes[idx],
+      titulo: l.titulo,
+      texto: l.texto,
+      textoAureo: l.texto_aureo,
+      resumo: l.resumo,
+      leituraBiblica: l.leitura_biblica,
+      perguntas: (l.perguntas || []).map(p => ({
+        q: p.q, a: p.a, correta: p.correta || 0,
+        op: p.op || [p.a, '', '', '']
+      }))
+    };
+  }
+}
+
+// Carregar lições do banco e sincronizar com LICOES em memória ao iniciar
+async function sincronizarBancoComMemoria() {
+  try {
+    const { data } = await sbClient.from('banco_questoes').select('*');
+    if (!data || !data.length) return; // banco vazio — usar LICOES hardcoded
+    for (const l of data) {
+      sincronizarLicaoEmMemoria(l);
+    }
+    console.log(`Banco sincronizado: ${data.length} lições`);
+  } catch(e) {
+    console.warn('Banco de questões não disponível, usando dados locais:', e.message);
+  }
+}
+
 // PWA + SPLASH + OFFLINE
 // ══════════════════════════════════════════════
 function mostrarSplash() {
@@ -6890,13 +7282,20 @@ async function carregarDesafios() {
   } catch(e) { DESAFIOS = []; }
 }
 
-function abrirModalDesafio(id) {
+async function abrirModalDesafio(id) {
   const tipoEl = document.getElementById('mo-desafio-titulo');
   if (tipoEl) tipoEl.textContent = id ? '🏆 Editar Desafio' : '🏆 Novo Desafio';
   document.getElementById('ds-id').value = id || '';
   const hoje = new Date().toISOString().split('T')[0];
   if (id) {
-    const d = DESAFIOS.find(x => x.id === id);
+    // Buscar dados frescos do banco
+    let d = DESAFIOS.find(x => x.id === id);
+    if (!d) {
+      try {
+        const { data } = await sbClient.from('desafios').select('*').eq('id', id).single();
+        d = data;
+      } catch(e) {}
+    }
     if (d) {
       document.getElementById('ds-nome').value = d.nome || '';
       document.getElementById('ds-descricao').value = d.descricao || '';
@@ -6906,6 +7305,9 @@ function abrirModalDesafio(id) {
       document.getElementById('ds-inicio').value = d.data_inicio || '';
       document.getElementById('ds-limite').value = d.data_limite || '';
       document.getElementById('ds-limite-part').value = d.limite_participantes || 0;
+    } else {
+      toast('Não foi possível carregar o desafio', 'er');
+      return;
     }
   } else {
     document.getElementById('ds-nome').value = '';
@@ -6929,7 +7331,8 @@ async function salvarDesafio() {
   // Professor simples precisa de aprovação; admin/pastor/super aprovam automaticamente
   const aprovadaAuto = isAdmin() || ['pastor','super'].includes(USER.perfil);
 
-  const dado = {
+  // Campos editáveis — ao editar não sobrescrever cumprimentos, aprovação e histórico
+  const dadoEditavel = {
     nome,
     descricao: document.getElementById('ds-descricao').value.trim(),
     categoria: document.getElementById('ds-categoria').value,
@@ -6938,6 +7341,10 @@ async function salvarDesafio() {
     data_inicio: document.getElementById('ds-inicio').value || null,
     data_limite: document.getElementById('ds-limite').value || null,
     limite_participantes: parseInt(document.getElementById('ds-limite-part').value) || 0,
+  };
+
+  const dadoNovo = {
+    ...dadoEditavel,
     liberado: false,
     cumprimentos: {},
     criado_por: USER.nome,
@@ -6945,17 +7352,28 @@ async function salvarDesafio() {
     status_aprovacao: aprovadaAuto ? 'aprovado' : 'pendente',
     historico_aprovacao: []
   };
+
   try {
-    if (editId) await sbUpdate('desafios', editId, dado);
-    else await sbInsert('desafios', dado);
-    if (!editId && !aprovadaAuto) {
-      toast('✦ Desafio enviado para aprovação! O responsável será notificado.', 'ok');
+    if (editId) {
+      // Ao editar: só campos editáveis
+      const resultado = await sbUpdate('desafios', editId, dadoEditavel);
+      if (!resultado) { toast('Erro ao atualizar desafio', 'er'); return; }
+      // Atualizar cache local
+      const idx = DESAFIOS.findIndex(x => x.id === editId);
+      if (idx >= 0) DESAFIOS[idx] = { ...DESAFIOS[idx], ...dadoEditavel };
+      toast('Desafio atualizado! ✦', 'ok');
     } else {
-      toast(editId ? 'Desafio atualizado! ✦' : 'Desafio criado! ✦', 'ok');
+      const resultado = await sbInsert('desafios', dadoNovo);
+      if (!resultado) { toast('Erro ao criar desafio', 'er'); return; }
+      if (!aprovadaAuto) {
+        toast('✦ Desafio enviado para aprovação!', 'ok');
+      } else {
+        toast('Desafio criado! ✦', 'ok');
+      }
     }
     fecharModal('mo-desafio');
     await renderDesafiosProf();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + e.message, 'er'); console.error('salvarDesafio:', e); }
 }
 
 async function renderDesafiosProf() {
