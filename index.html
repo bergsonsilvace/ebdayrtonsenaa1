@@ -73,6 +73,13 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 @media(min-width:768px){.tb-info{display:block}.tb-uname{color:white;font-size:12px;font-weight:500}.tb-urole{color:rgba(255,255,255,.35);font-size:10px}}
 .logout-btn{padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:transparent;color:rgba(255,255,255,.4);font-size:12px;transition:all .2s;cursor:pointer}
 .logout-btn:hover{border-color:rgba(255,255,255,.4);color:white}
+/* Seletor de modo de visualização */
+.modo-seletor{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px;flex-shrink:0}
+.modo-btn{padding:4px 9px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.45);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.02em}
+.modo-btn.on{background:var(--gold);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.modo-btn:hover:not(.on){background:rgba(255,255,255,.1);color:white}
+.modo-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--gold-l);border:1px solid var(--gold);border-radius:10px;padding:8px 18px;font-size:12px;font-weight:600;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:none;animation:fadeIn .3s}
+.modo-banner.show{display:block}
 /* HAMBURGUER */
 .hbg-btn{display:none;width:36px;height:36px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:8px;flex-direction:column;align-items:center;justify-content:center;gap:5px;cursor:pointer;padding:0}
 .hbg-btn span{display:block;width:18px;height:2px;background:rgba(255,255,255,.75);border-radius:2px}
@@ -464,6 +471,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .prova-badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
 .badge-prova{background:#e8eaf6;color:#3949ab}
 .badge-simulado{background:#e8f5e9;color:#2e7d32}
+.badge-quiz{background:#fff3e0;color:#e65100}
+.badge-desafio{background:#fce4ec;color:#c62828}
 .badge-liberada{background:var(--tc-bg);color:var(--tc)}
 .badge-fechada{background:#f0f0f0;color:#888}
 .badge-encerrada{background:var(--red-bg);color:var(--red)}
@@ -797,6 +806,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     </div>
     <div class="tb-nav" id="tb-nav"></div>
     <div class="tb-user">
+      <!-- Seletor de modo — aparece apenas para usuários com múltiplos papéis -->
+      <div class="modo-seletor" id="modo-seletor" style="display:none"></div>
       <div class="tb-info"><div class="tb-uname" id="tb-uname"></div><div class="tb-urole" id="tb-urole"></div></div>
       <div class="tb-av" id="tb-av" onclick="navTo('perfil')" title="Meu perfil"></div>
       <button class="logout-btn" onclick="tentarLogout()">Sair</button>
@@ -805,6 +816,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       </button>
     </div>
   </nav>
+  <!-- Banner de modo ativo -->
+  <div class="modo-banner" id="modo-banner"></div>
 
   <!-- DRAWER MOBILE -->
   <div class="drawer-overlay" id="drawer-overlay" onclick="fecharDrawer()"></div>
@@ -1015,16 +1028,19 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="ct">Minhas medalhas</div>
         <div id="aluno-medalhas" style="display:flex;flex-wrap:wrap;gap:6px"></div>
       </div>
+      <!-- Estatísticas detalhadas -->
       <div class="card" style="margin-bottom:12px">
-        <div class="ct">Estatísticas</div>
+        <div class="ct">📊 Meu Desempenho</div>
         <div id="aluno-quiz-stats"></div>
       </div>
-      <div class="card" id="aluno-ranking-card" style="margin-bottom:12px;display:none">
-        <div class="ct">Minha posição na turma</div>
+      <!-- Ranking e posições -->
+      <div class="card" id="aluno-ranking-card" style="margin-bottom:12px">
+        <div class="ct">🏆 Ranking & Posições</div>
         <div id="aluno-ranking-pos"></div>
       </div>
-      <div class="card">
-        <div class="chdr"><div class="ct">Minhas lições</div></div>
+      <!-- Histórico de presenças -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="chdr"><div class="ct">📋 Minhas Presenças</div></div>
         <div id="aluno-licoes-prog"></div>
       </div>
     </div>
@@ -1258,6 +1274,27 @@ CREATE POLICY "allow_all_resp_aluno" ON responsavel_aluno FOR ALL USING (true) W
 ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false;</pre>
         <div id="sql-resp-status" style="margin-top:8px;font-size:12px;color:var(--tc);display:none">✓ SQL copiado!</div>
       </div>
+      <!-- SQL para tabela de resultados de quiz (ranking) -->
+      <div class="card" style="margin-bottom:12px;border-color:#b8f5c8;background:#f0fff5">
+        <div class="chdr"><div class="ct" style="color:#1a6b4a">📊 Tabela de Resultados de Quiz (Ranking)</div><button class="btn btn-ou btn-sm" onclick="copiarSQLQuiz()">📋 Copiar SQL</button></div>
+        <div style="font-size:12px;color:var(--ink-mid);line-height:1.6;margin-bottom:10px">Execute este SQL para o Ranking de Pontos contabilizar os quizzes corretamente:</div>
+        <pre id="sql-quiz" style="font-size:11px;background:#1e1e2e;color:#cdd6f4;padding:12px;border-radius:8px;overflow-x:auto;white-space:pre-wrap;line-height:1.5">-- Tabela para persistir resultados de quiz dos alunos
+CREATE TABLE IF NOT EXISTS quiz_resultados (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  aluno_id UUID REFERENCES alunos(id) ON DELETE CASCADE,
+  turma TEXT NOT NULL,
+  licao_num INTEGER NOT NULL,
+  acertos INTEGER NOT NULL,
+  total INTEGER NOT NULL,
+  pct INTEGER NOT NULL,
+  data_resposta TIMESTAMPTZ DEFAULT now(),
+  UNIQUE(aluno_id, turma, licao_num)
+);
+
+ALTER TABLE quiz_resultados ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "allow_all_quiz" ON quiz_resultados FOR ALL USING (true) WITH CHECK (true);</pre>
+        <div id="sql-quiz-status" style="margin-top:8px;font-size:12px;color:var(--tc);display:none">✓ SQL copiado!</div>
+      </div>
       <div class="card" style="margin-bottom:20px">
         <div class="chdr"><div class="ct">Log de acessos</div><button class="btn btn-ou btn-sm" onclick="carregarLogAcessos()">↺ Atualizar</button></div>
         <div id="lista-log-acessos"><div class="empty-txt" style="padding:10px 0;color:var(--ink-soft)">Clique em Atualizar para carregar</div></div>
@@ -1390,9 +1427,14 @@ ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false
 
     <!-- PROVAS & SIMULADOS (professor/super) -->
     <div id="pg-provas" class="page">
-      <div class="ph"><h2>Provas & <em>Simulados</em></h2><p>Crie, libere e acompanhe os resultados</p></div>
+      <div class="ph"><h2>Provas & <em>Avaliações</em></h2><p>Crie, libere e acompanhe os resultados</p></div>
       <div id="provas-prof-area">
-        <button class="btn btn-dk btn-sm" onclick="abrirModalProva()" style="margin-bottom:14px">+ Nova prova / Simulado</button>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn-dk btn-sm" onclick="abrirModalProva('','prova')" style="display:flex;align-items:center;gap:5px">📝 Nova Prova</button>
+          <button class="btn btn-ou btn-sm" onclick="abrirModalProva('','simulado')" style="display:flex;align-items:center;gap:5px">🔄 Simulado</button>
+          <button class="btn btn-ou btn-sm" onclick="abrirModalProva('','quiz')" style="display:flex;align-items:center;gap:5px">⚡ Novo Quiz</button>
+          <button class="btn btn-ou btn-sm" onclick="abrirModalProva('','desafio')" style="display:flex;align-items:center;gap:5px">🏆 Desafio</button>
+        </div>
         <div id="lista-provas-prof"></div>
       </div>
       <!-- Resultados de uma prova -->
@@ -1473,7 +1515,7 @@ ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false
       <input type="hidden" id="pv-id">
       <div class="fg"><label class="fl">Nome</label><input class="fc" id="pv-nome" placeholder="Ex: Prova Bimestral, Simulado Lições 1-5"></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo"><option value="prova">Prova</option><option value="simulado">Simulado</option></select></div>
+        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo"><option value="prova">📝 Prova</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
         <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal()"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       </div>
       <div class="frow">
@@ -1530,16 +1572,17 @@ ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false
         <div class="fg"><label class="fl">Nome do responsável</label><input class="fc" id="ae-responsavel" placeholder="Nome do pai/mãe/responsável"></div>
         <div class="fg" style="margin:0"><label class="fl">Telefone do responsável</label><input class="fc" id="ae-tel-resp" placeholder="(00) 00000-0000" type="tel"></div>
       </div>
-      <!-- VÍNCULO COM RESPONSÁVEL CADASTRADO -->
-      <div style="background:#e8f0ff;border:1px solid #b8d0f5;border-radius:var(--r);padding:13px;margin-bottom:10px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#1c3f6e;font-weight:700;margin-bottom:10px">👨‍👩‍👧 Vincular Responsável(is)</div>
-        <div class="fg" style="margin-bottom:8px">
-          <label class="fl">Buscar responsável cadastrado</label>
-          <input class="fc" id="ae-resp-busca" placeholder="Digite o nome para buscar..." oninput="buscarResponsaveis(this.value)">
-        </div>
-        <div id="ae-resp-sugestoes" style="margin-bottom:8px"></div>
-        <div id="ae-resp-vinculados" style="display:flex;flex-direction:column;gap:5px"></div>
+      <!-- VÍNCULO COM RESPONSÁVEL -->
+      <div style="background:#e8f0ff;border:1.5px solid #b8d0f5;border-radius:var(--r);padding:13px;margin-bottom:10px">
+        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#1c3f6e;font-weight:700;margin-bottom:10px">👨‍👩‍👧 Responsáveis vinculados</div>
+        <div id="ae-resp-vinculados" style="display:flex;flex-direction:column;gap:5px;margin-bottom:8px"></div>
+        <input class="fc" id="ae-resp-busca" placeholder="🔍 Buscar aluno cadastrado para vincular como pai/mãe..." oninput="buscarResponsaveis(this.value)" style="margin-bottom:6px">
+        <div id="ae-resp-sugestoes"></div>
         <input type="hidden" id="ae-resp-ids" value="[]">
+        <div style="font-size:11px;color:#1c3f6e;margin-top:6px;line-height:1.5">
+          O pai ou mãe precisa estar <strong>cadastrado como aluno adulto</strong> com login.<br>
+          Após vincular, ele acessa o app com o login dele e vê a aba "Meus Filhos".
+        </div>
       </div>
       <div style="background:var(--cream);border:1px solid var(--cb);border-radius:var(--r);padding:13px;margin-bottom:10px">
         <div class="ficha-secao" style="margin-top:0">Endereço</div>
@@ -1552,15 +1595,6 @@ ALTER TABLE alunos ADD COLUMN IF NOT EXISTS eh_responsavel BOOLEAN DEFAULT false
           <div class="fg"><label class="fl">Senha</label><input class="fc" type="password" id="ae-senha" placeholder="&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;&#x2022;"></div>
         </div>
         <div style="font-size:11px;color:var(--ink-soft);margin-top:6px">Deixe em branco para n&atilde;o criar acesso agora</div>
-        <!-- Vincular por login existente -->
-        <div style="margin-top:12px;padding-top:10px;border-top:1px dashed var(--cb)">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:#1c3f6e;font-weight:700;margin-bottom:8px">👨‍👩‍👧 Vincular pelo login do responsável</div>
-          <div class="fg" style="margin-bottom:4px">
-            <label class="fl">Login do pai/mãe (já cadastrado)</label>
-            <input class="fc" id="ae-resp-login" placeholder="Ex: joao.silva (login existente)">
-          </div>
-          <div style="font-size:11px;color:var(--ink-soft)">Se o pai/mãe já tem login no app, cole aqui. Ele será vinculado automaticamente como responsável deste aluno.</div>
-        </div>
       </div>
       <div class="mfoot">
         <button class="btn btn-ou btn-full" onclick="fecharModal('mo-aluno')">Cancelar</button>
@@ -1763,6 +1797,102 @@ async function sbSetConfig(chave, valor) {
 
 // ── STATE ──
 let USER = null, PERFIL = null;
+
+// ══════════════════════════════════════════════
+// SISTEMA DE MÚLTIPLOS PAPÉIS E MODO DE VISUALIZAÇÃO
+// ══════════════════════════════════════════════
+
+// Modo atual de visualização: 'admin' | 'professor' | 'aluno'
+// Não altera permissões reais — apenas o que é exibido
+let _modoAtual = null;
+
+// Retorna os papéis reais do usuário logado
+function _getPapeisUsuario() {
+  if (!USER) return [];
+  const papeis = [];
+  if (['adm','pastor','super'].includes(USER.perfil)) papeis.push('admin');
+  if (['professor','professor_convidado'].includes(USER.perfil) ||
+      (isAdmin() && USER._turmas_prof && USER._turmas_prof.length)) papeis.push('professor');
+  if (USER.tambem_aluno && USER.turma_aluno) papeis.push('aluno');
+  if (USER.perfil === 'aluno') papeis.push('aluno');
+  return papeis;
+}
+
+// Retorna true se o modo atual é o informado
+function _modo(m) { return _modoAtual === m; }
+
+// Altera o modo de visualização e reconstrói a interface
+async function alterarModo(modo) {
+  const papeisReais = _getPapeisUsuario();
+  if (!papeisReais.includes(modo)) return;
+  _modoAtual = modo;
+
+  // Salvar preferência na sessão
+  try { sessionStorage.setItem('_modoEBD', modo); } catch(e) {}
+
+  // Atualizar botões do seletor
+  document.querySelectorAll('.modo-btn').forEach(function(b) {
+    b.classList.toggle('on', b.dataset.modo === modo);
+  });
+
+  // Mostrar banner temporário
+  const banner = document.getElementById('modo-banner');
+  const labels = { admin:'👑 Modo Administrador', professor:'🎓 Modo Professor', aluno:'📚 Modo Aluno' };
+  if (banner) {
+    banner.textContent = labels[modo] || modo;
+    banner.classList.add('show');
+    setTimeout(function(){ banner.classList.remove('show'); }, 2500);
+  }
+
+  // Reconstruir nav e recarregar app no novo modo
+  construirNav();
+  await iniciarApp();
+}
+
+// Inicializar modo padrão com base nos papéis
+function _inicializarModo() {
+  const papeis = _getPapeisUsuario();
+  // Tentar restaurar da sessão
+  try {
+    const salvo = sessionStorage.getItem('_modoEBD');
+    if (salvo && papeis.includes(salvo)) { _modoAtual = salvo; return; }
+  } catch(e) {}
+  // Padrão: papel mais alto
+  if (papeis.includes('admin')) _modoAtual = 'admin';
+  else if (papeis.includes('professor')) _modoAtual = 'professor';
+  else _modoAtual = 'aluno';
+}
+
+// Renderizar o seletor de modo na topbar
+function _renderSeletorModo() {
+  const sel = document.getElementById('modo-seletor');
+  if (!sel) return;
+  const papeis = _getPapeisUsuario();
+  // Só mostrar se tiver 2+ papéis
+  if (papeis.length < 2) { sel.style.display = 'none'; return; }
+
+  const labels = { admin:'👑 Admin', professor:'🎓 Prof', aluno:'📚 Aluno' };
+  sel.style.display = 'flex';
+  sel.innerHTML = papeis.map(function(p) {
+    const ativo = _modoAtual === p ? ' on' : '';
+    return '<button class="modo-btn' + ativo + '" data-modo="' + p + '" onclick="alterarModo(\'' + p + '\')" title="Visualizar como ' + labels[p] + '">' + labels[p] + '</button>';
+  }).join('');
+}
+
+// Helpers de perfil baseados no MODO ATUAL (não no perfil real)
+function isAdmin() {
+  // Permissão real — não muda com o modo
+  return USER && ['adm','pastor','super'].includes(USER.perfil);
+}
+function isProfessor() {
+  // No modo aluno ou responsável, se comporta como não-professor
+  if (_modo('aluno')) return false;
+  return USER && ['professor','professor_convidado'].includes(USER.perfil);
+}
+function podeGerenciar() {
+  if (_modo('aluno')) return false;
+  return USER && ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil);
+}
 let curTurmaAlunos = 'criancas', curTurmaFreq = 'criancas', curTurmaRank = 'criancas';
 let curTurmaLicoes = 'criancas';
 let quizAtual = null;
@@ -1774,10 +1904,6 @@ const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos', todas:'To
 const AVC = { criancas:'av-c', jovens:'av-j', adultos:'av-a' };
 const ini = n => n.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
 
-
-function isAdmin() { return USER && ['adm','pastor','super'].includes(USER.perfil); }
-function isProfessor() { return USER && ['professor','professor_convidado'].includes(USER.perfil); }
-function podeGerenciar() { return USER && ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil); }
 
 function mostrarTela(id) {
   // Esconde todas as telas
@@ -1812,31 +1938,75 @@ async function doLogin() {
   const btn = document.getElementById('lbtn');
   btn.disabled = true; btn.textContent = 'Verificando...';
   try {
+    // Função auxiliar: checar se um id tem filhos vinculados
+    async function _verificarResponsavel(uid) {
+      try {
+        const { data: vl } = await sbClient.from('responsavel_aluno')
+          .select('id').eq('responsavel_id', uid).limit(1);
+        return !!(vl && vl.length > 0);
+      } catch(e) { return false; }
+    }
+
     const { data: adms } = await sbClient.from('adm').select('*').eq('login', lu).eq('senha', lp);
-    if (adms && adms.length > 0) { USER = { ...adms[0], perfil: 'adm' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
+    if (adms && adms.length > 0) {
+      USER = { ...adms[0], perfil: 'adm' };
+      btn.disabled=false; btn.textContent='Entrar';
+      await finalizarLogin(); return;
+    }
+
     const { data: pasts } = await sbClient.from('pastores').select('*').eq('login', lu).eq('senha', lp);
-    if (pasts && pasts.length > 0) { USER = { ...pasts[0], perfil: 'pastor' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
+    if (pasts && pasts.length > 0) {
+      USER = { ...pasts[0], perfil: 'pastor' };
+      btn.disabled=false; btn.textContent='Entrar';
+      await finalizarLogin(); return;
+    }
+
     const { data: supers } = await sbClient.from('superintendente').select('*').eq('login', lu).eq('senha', lp);
-    if (supers && supers.length > 0) { USER = { ...supers[0], perfil: 'super' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return; }
+    if (supers && supers.length > 0) {
+      USER = { ...supers[0], perfil: 'super' };
+      btn.disabled=false; btn.textContent='Entrar';
+      await finalizarLogin(); return;
+    }
+
     const { data: profs } = await sbClient.from('professores').select('*').eq('login', lu).eq('senha', lp);
     if (profs && profs.length > 0) {
       const pd = profs[0];
       if (!pd.turmas) pd.turmas = pd.turma==='todas'?['criancas','jovens','adultos']:[pd.turma||'adultos'];
-      USER = { ...pd, perfil: pd.perfil_tipo||'professor' }; btn.disabled=false; btn.textContent='Entrar'; await finalizarLogin(); return;
+      // Verificar se este professor também é responsável
+      // O vínculo usa o id da tabela alunos, então buscamos pelo login
+      let ehResp = false;
+      let respAlunoId = null;
+      try {
+        const { data: alunoProf } = await sbClient.from('alunos').select('id,eh_responsavel').eq('login', lu).limit(1);
+        if (alunoProf && alunoProf.length > 0) {
+          respAlunoId = alunoProf[0].id;
+          ehResp = !!alunoProf[0].eh_responsavel || await _verificarResponsavel(respAlunoId);
+        }
+      } catch(e) {}
+      USER = { ...pd, perfil: pd.perfil_tipo||'professor', eh_responsavel_tb: ehResp, _resp_aluno_id: respAlunoId };
+      btn.disabled=false; btn.textContent='Entrar';
+      await finalizarLogin(); return;
     }
+
     const { data: alunos } = await sbClient.from('alunos').select('*').eq('login', lu).eq('senha', lp);
     if (alunos && alunos.length > 0) {
       const a = alunos[0];
-      // Verificar se é responsável (tem filhos vinculados)
-      if (a.eh_responsavel) {
-        USER = { ...a, perfil: 'responsavel' };
-      } else {
-        USER = { ...a, perfil: 'aluno' };
+      // Verificar se é responsável: coluna eh_responsavel OU tem vínculos na tabela
+      let ehResp = !!a.eh_responsavel;
+      if (!ehResp) {
+        ehResp = await _verificarResponsavel(a.id);
+        if (ehResp) {
+          // Atualizar coluna para futuras sessões (sem bloquear o login)
+          sbClient.from('alunos').update({ eh_responsavel: true }).eq('id', a.id).then(()=>{}).catch(()=>{});
+        }
       }
+      USER = ehResp
+        ? { ...a, perfil: 'responsavel' }
+        : { ...a, perfil: 'aluno' };
       btn.disabled=false; btn.textContent='Entrar';
-      await finalizarLogin();
-      return;
+      await finalizarLogin(); return;
     }
+
     document.getElementById('lerr').style.display = 'block';
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
   btn.disabled = false; btn.textContent = 'Entrar';
@@ -1850,42 +2020,78 @@ function construirNav() {
   if (!USER) return;
   const items = [];
   const p = USER.perfil;
-  if (p === 'aluno') {
-    items.push({id:'pg-aluno',label:'Meu Progresso'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'});
+  const modo = _modoAtual;
+
+  // MODO ALUNO: apenas itens do aluno, independente do perfil real
+  if (p === 'aluno' || modo === 'aluno') {
+    const turmaAluno = USER.turma_aluno || USER.turma || 'adultos';
+    items.push({id:'pg-aluno',label:'Meu Progresso'});
+    items.push({id:'licoes',label:'Lições'});
+    items.push({id:'provas',label:'Provas'});
+    items.push({id:'calendario',label:'Calendário'});
+    items.push({id:'pix',label:'Pix'});
+  // RESPONSÁVEL
   } else if (p === 'responsavel') {
     items.push({id:'responsavel',label:'Meus Filhos'},{id:'licoes',label:'Lições'},{id:'calendario',label:'Calendário'},{id:'pix',label:'Pix'});
-  } else if (p === 'professor_convidado') {
-    items.push({id:'dash',label:'Inicio'},{id:'freq',label:'Aula'},{id:'licoes',label:'Licoes'},{id:'calendario',label:'Calendario'});
+  // PROFESSOR CONVIDADO
+  } else if (p === 'professor_convidado' && modo !== 'admin') {
+    items.push({id:'dash',label:'Início'},{id:'freq',label:'Aula'},{id:'licoes',label:'Lições'},{id:'calendario',label:'Calendário'});
+  // MODO PROFESSOR (para admin que quer ver como professor)
+  } else if (modo === 'professor' && !['professor','professor_convidado'].includes(p)) {
+    items.push({id:'dash',label:'Início'},{id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'historico',label:'Histórico'});
+  // MODO ADMIN / PROFESSOR PADRÃO
   } else {
-    items.push({id:'dash',label:'Inicio'},{id:'mural',label:'Avisos'});
+    items.push({id:'dash',label:'Início'},{id:'mural',label:'Avisos'});
     if (isAdmin()) {
-      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
+      items.push({id:'alunos',label:'Alunos'},{id:'professores',label:'Professores'},{id:'freq',label:'Aula'},{id:'mensal',label:'Mensal'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'pix',label:'Pix'},{id:'config',label:'Config.'});
     } else {
-      items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Licoes'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendario'},{id:'escalas',label:'Escalas'});
+      items.push({id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'});
       if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
+      if (USER.eh_responsavel_tb) items.push({id:'responsavel',label:'Meus Filhos'});
     }
-    items.push({id:'historico',label:'Historico'});
+    items.push({id:'historico',label:'Histórico'});
   }
+
   const nav = document.getElementById('tb-nav');
   if (nav) {
     nav.innerHTML = items.map(function(i) {
-      return '<button class="tb-btn' + (i.id==='dash'||i.id==='pg-aluno'?' on':'') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
+      const isFirst = i === items[0];
+      return '<button class="tb-btn' + (isFirst ? ' on' : '') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
     }).join('');
   }
-  syncDrawerNav(items, p==='aluno'?'pg-aluno':p==='responsavel'?'responsavel':'dash');
+  const activeId = (p === 'aluno' || modo === 'aluno') ? 'pg-aluno' : p === 'responsavel' ? 'responsavel' : 'dash';
+  syncDrawerNav(items, activeId);
 }
 async function finalizarLogin() {
   const uid = USER.id;
   const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
   PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
-  // ADM tem acesso total - simula super para ter todas as funcionalidades
-  if (USER.perfil === 'adm') {
-    USER.turma = USER.turma || 'todas';
+
+  // Admin/Pastor/Super: acesso TOTAL — nunca filtrar por turma
+  if (isAdmin()) {
+    USER.turma = 'todas';
+    USER.turmas = ['criancas', 'jovens', 'adultos'];
     USER.tambem_aluno = true;
     USER.turma_aluno = USER.turma_aluno || 'adultos';
+    // Buscar turmas do professor vinculado ao mesmo login
+    try {
+      const { data: profData } = await sbClient.from('professores')
+        .select('turma,turmas').eq('login', USER.login).limit(1);
+      if (profData && profData.length > 0) {
+        const pd = profData[0];
+        USER._turmas_prof = Array.isArray(pd.turmas) && pd.turmas.length
+          ? pd.turmas
+          : (pd.turma && pd.turma !== 'todas' ? [pd.turma] : []);
+      }
+    } catch(e) { USER._turmas_prof = []; }
   }
+
+  // Inicializar modo de visualização
+  _inicializarModo();
+
   mostrarTela('app');
   construirNav();
+  _renderSeletorModo();
   definirSaudacaoImediata();
   sbClient.from('perfis').upsert({ ...PERFIL, ultimo_acesso: new Date().toISOString() }, { onConflict: 'usuario_id' }).then(function(){}).catch(function(){});
   await iniciarApp();
@@ -1919,6 +2125,8 @@ function tentarLogout() {
 function doLogout() {
   USER = null; PERFIL = null; freqPresencas = {}; freqVisitantes = []; isDirty = false;
   cacheAlunos = []; cacheAulas = []; _respFilhoAtual = null;
+  _modoAtual = null;
+  try { sessionStorage.removeItem('_modoEBD'); } catch(e) {}
   if (chartFreq) { chartFreq.destroy(); chartFreq = null; }
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
   if (cronoInterval) { clearInterval(cronoInterval); cronoInterval = null; }
@@ -1933,59 +2141,38 @@ async function iniciarApp() {
   // Topbar
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('tb-uname').textContent = nomeExib;
-  const roleLabel = USER.perfil === 'super' ? 'Superintendente'
-    : USER.perfil === 'aluno' ? `Aluno — ${TN[USER.turma]||''}`
-    : USER.perfil === 'responsavel' ? 'Responsável'
-    : 'Professor';
+
+  // Montar label combinado para admin/pastor/super que também são professores
+  let roleLabel;
+  if (USER.perfil === 'aluno') {
+    roleLabel = `Aluno — ${TN[USER.turma]||''}`;
+  } else if (USER.perfil === 'responsavel') {
+    roleLabel = 'Responsável';
+  } else if (isAdmin()) {
+    // Verificar se também é professor (tem turmas na tabela professores com mesmo login)
+    const papelPrincipal = USER.perfil === 'adm' ? 'Administrador'
+      : USER.perfil === 'pastor' ? ((USER.sexo==='F'?'Pastora':'Pastor'))
+      : 'Superintendente';
+    if (USER._turmas_prof && USER._turmas_prof.length) {
+      const sexo = USER.sexo || 'M';
+      const profLabel = sexo === 'F' ? 'Professora' : 'Professor';
+      const tsLabel = USER._turmas_prof.length >= 3 ? 'Todas as turmas'
+        : USER._turmas_prof.map(t => TN[t]||t).join(' e ');
+      roleLabel = `${papelPrincipal} | ${profLabel} (${tsLabel})`;
+    } else {
+      roleLabel = papelPrincipal;
+    }
+  } else {
+    // Professor
+    const sexo = USER.sexo || 'M';
+    const profLabel = sexo === 'F' ? 'Professora' : 'Professor';
+    const ts = Array.isArray(USER.turmas) && USER.turmas.length ? USER.turmas : [USER.turma||'adultos'];
+    const tsLabel = ts.length >= 3 ? 'Todas as turmas' : ts.map(t => TN[t]||t).join(' e ');
+    roleLabel = `${profLabel} — ${tsLabel}`;
+  }
   document.getElementById('tb-urole').textContent = roleLabel;
   atualizarAvatarTopbar();
-
-  // Nav — aluno vê só Lições e Perfil
-  const items = [];
-  if (USER.perfil === 'aluno') {
-    items.push({ id:'pg-aluno', label:'Meu Progresso' });
-    items.push({ id:'licoes', label:'Lições' });
-    items.push({ id:'provas', label:'Provas' });
-    items.push({ id:'calendario', label:'Calendário' });
-    items.push({ id:'escalas', label:'Escalas' });
-    items.push({ id:'pix', label:'Pix' });
-  } else if (USER.perfil === 'responsavel') {
-    items.push({ id:'responsavel', label:'Meus Filhos' });
-    items.push({ id:'licoes', label:'Lições' });
-    items.push({ id:'calendario', label:'Calendário' });
-    items.push({ id:'pix', label:'Pix' });
-  } else {
-    items.push({ id:'dash', label:'Início' });
-    items.push({ id:'mural', label:'Avisos' });
-    if (isAdmin()) {
-      items.push({ id:'alunos', label:'Alunos' });
-      items.push({ id:'professores', label:'Professores' });
-      items.push({ id:'freq', label:'Aula' });
-      items.push({ id:'mensal', label:'Mensal' });
-      items.push({ id:'ranking', label:'Ranking' });
-      items.push({ id:'licoes', label:'Lições' });
-      items.push({ id:'provas', label:'Provas' });
-      items.push({ id:'calendario', label:'Calendário' });
-      items.push({ id:'pix', label:'Pix' });
-      items.push({ id:'config', label:'Config.' });
-    } else {
-      items.push({ id:'alunos', label:'Alunos' });
-      items.push({ id:'freq', label:'Aula' });
-      items.push({ id:'ranking', label:'Ranking' });
-      items.push({ id:'licoes', label:'Lições' });
-      items.push({ id:'provas', label:'Provas' });
-      items.push({ id:'calendario', label:'Calendário' });
-      items.push({ id:'escalas', label:'Escalas' });
-      if (USER.tambem_aluno && USER.turma_aluno) {
-        items.push({ id:'meu-progresso-prof', label:'Meu Progresso' });
-      }
-    }
-    items.push({ id:'historico', label:'Histórico' });
-  }
-  document.getElementById('tb-nav').innerHTML = items.map(i =>
-    `<button class="tb-btn${i.id==='dash'?' on':''}" data-pg="${i.id}" onclick="navTo('${i.id}')">${i.label}</button>`
-  ).join('');
-  syncDrawerNav(items, USER.perfil === 'aluno' ? 'pg-aluno' : USER.perfil === 'responsavel' ? 'responsavel' : 'dash');
+  // Nav é gerenciada por construirNav() + _renderSeletorModo() — chamados em finalizarLogin e alterarModo
 
   // Data
   const hoje = new Date();
@@ -2007,7 +2194,8 @@ async function iniciarApp() {
   document.getElementById('freq-data').value = hoje.toISOString().split('T')[0];
 
   // Configurar turma por perfil
-  if (isProfessor()) {
+  // Admin/Pastor/Super: NUNCA filtrar por turma — acesso total sempre
+  if (isProfessor() && !isAdmin()) {
     // Pegar turmas REAIS do professor (array do banco)
     const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
       ? USER.turmas
@@ -2029,20 +2217,22 @@ async function iniciarApp() {
         t.classList.remove('on');
         if (pertence && !primeiroVisivel) primeiroVisivel = m[1];
       });
-      // Marcar primeira turma como ativa
       if (primeiroVisivel) {
         const btnAtivo = document.querySelector(sel.replace('.ttab', '[onclick*="' + primeiroVisivel + '"]'));
         if (btnAtivo) btnAtivo.classList.add('on');
       }
     });
 
-    // Subtítulo mostrando as turmas reais
     const turmasLabel = profTurmas.length === 3
       ? 'Todas as turmas'
       : profTurmas.map(function(t){ return TN[t]||t; }).join(' e ');
     document.getElementById('alunos-sub').textContent = 'Turma: ' + turmasLabel;
     document.getElementById('dash-aula-btn').style.display = '';
   } else {
+    // Admin/Pastor/Super: mostrar TODAS as tabs, sem filtro
+    ['#freq-ttabs .ttab','#alunos-ttabs .ttab','#rank-ttabs .ttab'].forEach(function(sel) {
+      document.querySelectorAll(sel).forEach(function(t) { t.style.display = ''; });
+    });
     document.getElementById('alunos-sub').textContent = 'Gerencie os alunos matriculados por turma';
     if (isAdmin()) {
       document.getElementById('dash-aula-btn').style.display = 'none';
@@ -2055,12 +2245,17 @@ async function iniciarApp() {
   const menEl = document.getElementById('men-mes'); if (menEl) menEl.value = mesAtual;
 
   // Aluno: carregamento simplificado
-  if (USER.perfil === 'aluno') {
+  // Inclui admin/professor em modo aluno
+  if (USER.perfil === 'aluno' || _modo('aluno')) {
     preencherFormPerfil();
     await carregarConfigs();
-    // Definir turma do aluno
-    curTurmaLicoes = USER.turma || 'criancas';
+    // Turma correta: para admin em modo aluno, usa turma_aluno
+    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
+    // Temporariamente simular turma do aluno para renderAlunoProgresso
+    const _turmaOriginal = USER.turma;
+    if (_modo('aluno') && USER.turma_aluno) USER.turma = USER.turma_aluno;
     renderAlunoProgresso();
+    if (_modo('aluno') && USER.turma_aluno) USER.turma = _turmaOriginal;
     _navTo('pg-aluno');
     return;
   }
@@ -2075,11 +2270,16 @@ async function iniciarApp() {
   }
 
   // Carregar dados
-  if (isProfessor()) {
-    // Professor carrega APENAS alunos das suas turmas (backend filter)
+  // Admin/Pastor/Super: SEMPRE carregar todos os alunos, sem filtro de turma
+  // Modo professor de um admin: filtra pelas turmas do professor vinculado
+  if (_modo('professor') && isAdmin() && USER._turmas_prof && USER._turmas_prof.length) {
+    const arrays = await Promise.all(
+      USER._turmas_prof.map(function(t){ return sbGet('alunos', { turma: t }); })
+    );
+    cacheAlunos = arrays.reduce(function(acc, arr){ return acc.concat(arr); }, []);
+  } else if (isProfessor() && !isAdmin()) {
     const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
       ? USER.turmas : [USER.turma];
-    // Buscar alunos de cada turma do professor
     const alunosArrays = await Promise.all(
       profTurmas.map(function(t){ return sbGet('alunos', { turma: t }); })
     );
@@ -2159,7 +2359,7 @@ async function _navTo(id) {
   document.getElementById('main-content').scrollTop = 0;
 
   if (id === 'dash') {
-    if (isProfessor()) {
+    if (isProfessor() && !isAdmin()) {
       const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
       const arrays = await Promise.all(profTs.map(function(t){ return sbGet('alunos',{turma:t}); }));
       cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
@@ -2171,7 +2371,7 @@ async function _navTo(id) {
   }
   else if (id === 'mural') renderMural();
   else if (id === 'alunos') {
-    if (isProfessor()) {
+    if (isProfessor() && !isAdmin()) {
       const profTurmas = Array.isArray(USER.turmas)&&USER.turmas.length ? USER.turmas : [USER.turma];
       const arrays = await Promise.all(profTurmas.map(function(t){ return sbGet('alunos',{turma:t}); }));
       cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
@@ -2184,7 +2384,7 @@ async function _navTo(id) {
   else if (id === 'freq') { renderFreq(); popularDropdownLicao(curTurmaFreq); }
   else if (id === 'historico') { cacheAulas = await sbGet('aulas',{},'data',false); renderHist(); }
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
-  else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); renderRanking(); }
+  else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); await renderRanking(); }
   else if (id === 'config') carregarPaginaConfig();
   else if (id === 'pix') renderPix();
   else if (id === 'escalas') {
@@ -2224,7 +2424,7 @@ function marcarDirty() { isDirty = true; document.getElementById('unsaved-banner
 async function renderDash() {
   const alunos = cacheAlunos;
   let aulas = cacheAulas;
-  if (isProfessor()) {
+  if (isProfessor() && !isAdmin()) {
     const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
     aulas = aulas.filter(function(a){ return profTs.includes(a.turma); });
   }
@@ -2242,6 +2442,18 @@ async function renderDash() {
   document.getElementById('dash-role-badge').textContent = (function(){
     var sexo = USER.sexo || 'M';
     var profLabel = sexo==='F' ? 'Professora' : 'Professor';
+    if (isAdmin()) {
+      var papelPrincipal = USER.perfil === 'adm' ? '✦ Administrador'
+        : USER.perfil === 'pastor' ? (sexo==='F' ? 'Pastora' : 'Pastor')
+        : '✦ Superintendente';
+      // Saudação combinada se também for professor
+      if (USER._turmas_prof && USER._turmas_prof.length) {
+        var tsLabel = USER._turmas_prof.length >= 3 ? 'Todas as turmas'
+          : USER._turmas_prof.map(function(t){ return TN[t]||t; }).join(' e ');
+        return papelPrincipal + ' | ' + profLabel + ' (' + tsLabel + ')';
+      }
+      return papelPrincipal;
+    }
     var tsProf = Array.isArray(USER.turmas) && USER.turmas.length
       ? USER.turmas
       : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
@@ -2249,9 +2461,6 @@ async function renderDash() {
       ? 'Todas as turmas'
       : tsProf.map(function(t){return TN[t]||t;}).join(' e ');
     var map = {
-      adm: '✦ Administrador',
-      pastor: sexo==='F' ? 'Pastora' : 'Pastor',
-      super: '✦ Superintendente',
       professor: profLabel + ' — ' + tsLabel,
       professor_convidado: profLabel + ' Convidado(a)',
       aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||'')
@@ -2496,9 +2705,9 @@ function renderAlunos() {
       </div>
       <div class="ai-acts">
         <button class="btn-ic" onclick="verHistoricoAluno('${a.id}')" title="Histórico">📋</button>
-        ${podeEditar?`<button class="btn-ic" onclick="editAluno('${a.id}')" title="Editar">✎</button>
+        ${podeEditar?`<button class="btn-ic" title="Vincular responsável" onclick="abrirModalVincularResp('${a.id}','${a.nome.replace(/'/g,"\\'")}')">👨‍👩‍👧</button>
+        <button class="btn-ic" onclick="editAluno('${a.id}')" title="Editar">✎</button>
         <button class="btn-ic" onclick="toggleStatusAluno('${a.id}','${a.status||'ativo'}')" title="${(a.status||'ativo')==='ativo'?'Inativar':'Ativar'}">${(a.status||'ativo')==='ativo'?'⏸':'▶'}</button>
-        ${isAdmin()?`<button class="btn-ic" title="Vincular responsável" onclick="abrirModalVincularResp('${a.id}','${a.nome.replace(/'/g,"\\'")}')">👨‍👩‍👧</button>`:''}
         ${isAdmin()?`<button class="btn-ic" onclick="promoverUsuario('${a.id}','${a.nome.replace(/'/g,"\\'")}')">⬆</button>`:''}
         <button class="btn-ic danger" onclick="confirmarDel('aluno','${a.id}','${a.nome.replace(/'/g,"\\'")}')">✕</button>`:''}
       </div>
@@ -2526,7 +2735,6 @@ function abrirModalAluno(id) {
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value=a.responsavel||'';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value=a.tel_responsavel||'';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value=a.endereco||'';
-    if (document.getElementById('ae-resp-login')) document.getElementById('ae-resp-login').value='';
     // Carregar responsáveis vinculados
     carregarRespVinculadosModal(id);
     if (prev) {
@@ -2544,7 +2752,6 @@ function abrirModalAluno(id) {
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value='';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value='';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value='';
-    if (document.getElementById('ae-resp-login')) document.getElementById('ae-resp-login').value='';
     document.getElementById('ae-resp-ids').value='[]';
     document.getElementById('ae-resp-busca').value='';
     document.getElementById('ae-resp-sugestoes').innerHTML='';
@@ -2585,11 +2792,6 @@ async function salvarAluno() {
     const respIds = JSON.parse(document.getElementById('ae-resp-ids').value || '[]');
     if (respIds.length > 0) {
       await sincronizarVinculosResp(alunoId, respIds);
-    }
-    // Vincular pelo login se preenchido (busca aluno existente com esse login)
-    const respLogin = document.getElementById('ae-resp-login')?.value?.trim();
-    if (respLogin) {
-      await criarLoginResponsavel(respLogin, null, nome, alunoId);
     }
     // Capturar dados antes de fechar modal
     const _nome = document.getElementById('ae-nome').value.trim();
@@ -3033,7 +3235,7 @@ function editarAulaAtual() {
 // ── HISTÓRICO ──
 function renderHist() {
   let aulas=[...cacheAulas].sort((a,b)=>b.data.localeCompare(a.data));
-  if (isProfessor()) {
+  if (isProfessor() && !isAdmin()) {
     const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
       ? USER.turmas : [USER.turma];
     aulas = aulas.filter(function(a){ return profTurmas.includes(a.turma); });
@@ -3108,11 +3310,35 @@ function renderMensal() {
 }
 
 // ── RANKING ──
-function selTurmaRanking(turma, el) {
+// Cache de quiz scores de todos os alunos (carregado do banco)
+let _quizScoresTodos = {}; // { 'alunoId': { 'turma-num': { acertos, total, pct } } }
+
+async function carregarQuizScoresTodos() {
+  try {
+    const { data } = await sbClient.from('quiz_resultados').select('*');
+    _quizScoresTodos = {};
+    if (data) {
+      data.forEach(r => {
+        if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
+        _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
+          acertos: r.acertos, total: r.total, pct: r.pct
+        };
+      });
+    }
+  } catch(e) { _quizScoresTodos = {}; }
+}
+
+function _quizScoresParaAluno(alunoId) {
+  // Se for o aluno logado, usa quizScores em memória (mais atualizado)
+  if (USER && USER.id === alunoId) return quizScores;
+  return _quizScoresTodos[alunoId] || {};
+}
+
+async function selTurmaRanking(turma, el) {
   curTurmaRank = turma;
   document.querySelectorAll('#rank-ttabs .ttab').forEach(t=>t.classList.remove('on'));
   if (el) el.classList.add('on');
-  renderRanking();
+  await renderRanking();
 }
 
 // Calcula a idade em anos a partir de data de nascimento (YYYY-MM-DD)
@@ -3128,11 +3354,14 @@ function _idadeParaDesempate(nasc) {
   } catch(e) { return -1; }
 }
 
-function renderRanking() {
+async function renderRanking() {
   const alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status || 'ativo') === 'ativo');
   const aulasT = cacheAulas.filter(a => a.turma === curTurmaRank);
   const box = document.getElementById('lista-ranking');
   if (!alunos.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>'; return; }
+
+  // Carregar quizzes de todos os alunos do banco para pontuar corretamente
+  await carregarQuizScoresTodos();
 
   let ranking;
 
@@ -3140,7 +3369,8 @@ function renderRanking() {
     // Ordena por: 1) pontuação total  2) nº presenças  3) idade
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
-      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, quizScores, PROVAS);
+      const scoresAluno = _quizScoresParaAluno(a.id);
+      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, scoresAluno, PROVAS);
       const presTotal = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
       const pctBar = Math.min(Math.round((pts.total / maxPts) * 100), 100);
       return { aluno: a, valor: pts.total, presencas: presTotal, label: pts.total + ' pts', pct: pctBar, idade: _idadeParaDesempate(a.nasc) };
@@ -3155,7 +3385,8 @@ function renderRanking() {
     ranking = alunos.map(a => {
       const presencas = aulasT.filter(au => (au.presencas || {})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
-      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, quizScores, PROVAS);
+      const scoresAluno = _quizScoresParaAluno(a.id);
+      const pts = calcularPontosAluno(a.id, curTurmaRank, cacheAulas, scoresAluno, PROVAS);
       return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: pts.total, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
@@ -3270,6 +3501,21 @@ function copiarSQLResponsaveis() {
     document.body.appendChild(ta); ta.select(); document.execCommand('copy');
     document.body.removeChild(ta);
     var st = document.getElementById('sql-resp-status');
+    if (st) { st.style.display='block'; setTimeout(function(){ st.style.display='none'; },2500); }
+  });
+}
+
+function copiarSQLQuiz() {
+  var el = document.getElementById('sql-quiz');
+  if (!el) return;
+  navigator.clipboard.writeText(el.textContent).then(function(){
+    var st = document.getElementById('sql-quiz-status');
+    if (st) { st.style.display='block'; setTimeout(function(){ st.style.display='none'; },2500); }
+  }).catch(function(){
+    var ta=document.createElement('textarea'); ta.value=el.textContent;
+    document.body.appendChild(ta); ta.select(); document.execCommand('copy');
+    document.body.removeChild(ta);
+    var st = document.getElementById('sql-quiz-status');
     if (st) { st.style.display='block'; setTimeout(function(){ st.style.display='none'; },2500); }
   });
 }
@@ -4007,7 +4253,7 @@ function proximaPergunta() {
   renderPergunta();
 }
 
-function mostrarResultado() {
+async function mostrarResultado() {
   const q = quizAtual;
   const acertos = q.respostas.filter(Boolean).length;
   const total = q.perguntas.length;
@@ -4016,6 +4262,18 @@ function mostrarResultado() {
   // Salvar pontuação do aluno
   if (USER && USER.perfil === 'aluno') {
     quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, data: new Date().toISOString() };
+    // Persistir no Supabase para o ranking funcionar
+    try {
+      await sbClient.from('quiz_resultados').upsert({
+        aluno_id: USER.id,
+        turma: q.turma,
+        licao_num: q.licaoNum,
+        acertos: acertos,
+        total: total,
+        pct: pct,
+        data_resposta: new Date().toISOString()
+      }, { onConflict: 'aluno_id,turma,licao_num' });
+    } catch(e) { console.warn('Quiz não salvo no banco:', e.message); }
   }
   const emojis = ['😢','😕','🙂','😊','🌟'];
   const msgs = ['Continue estudando!','Quase lá, revise a lição!','Bom trabalho!','Muito bem!','Perfeito! Parabéns!'];
@@ -4091,92 +4349,140 @@ async function salvarAlunoLogin() {
 // ── ÁREA DO ALUNO ──
 let quizScores = {}; // { 'jovens-1': { acertos:4, total:5, data:'...' } }
 
+// Carrega resultados de quiz do banco para o aluno logado
+async function carregarQuizScoresDoAluno(alunoId, turma) {
+  try {
+    const { data } = await sbClient.from('quiz_resultados')
+      .select('*').eq('aluno_id', alunoId);
+    if (data && data.length) {
+      data.forEach(r => {
+        quizScores[`${r.turma}-${r.licao_num}`] = {
+          acertos: r.acertos, total: r.total, pct: r.pct, data: r.data_resposta
+        };
+      });
+    }
+  } catch(e) { /* tabela ainda não existe — silencioso */ }
+}
+
 async function renderAlunoProgresso() {
+  // Buscar dados frescos do banco sempre
+  await carregarQuizScoresDoAluno(USER.id, USER.turma);
+  await carregarProvas();
+
+  // Buscar aulas do banco (não usar cache que pode estar vazio)
+  let aulasAluno = [];
+  try {
+    const { data } = await sbClient.from('aulas').select('*').eq('turma', USER.turma).order('data', { ascending: false });
+    aulasAluno = data || [];
+  } catch(e) {}
+
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
-  // Mostrar chave pix se configurada
   carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[USER.turma] || USER.turma}`;
 
-  const dados = LICOES[USER.turma] || LICOES['jovens'];
-  const realizados = Object.keys(quizScores).filter(k => k.startsWith(USER.turma));
-  const total = dados ? dados.licoes.length : 0;
+  // Calcular pontos e presenças reais
+  const pts = calcularPontosAluno(USER.id, USER.turma, aulasAluno, quizScores, PROVAS || []);
+  const presencasReais = aulasAluno.filter(a => (a.presencas||{})[USER.id] === 'presente').length;
+  const quizzesFeitos = Object.keys(quizScores).filter(k => k.startsWith(USER.turma)).length;
+  const provasFeitas = (PROVAS || []).filter(p => p.turma === USER.turma && p.tipo === 'prova' && p.resultados && p.resultados[USER.id]).length;
+  const desafiosFeitos = (PROVAS || []).filter(p => p.turma === USER.turma && p.tipo === 'desafio' && p.resultados && p.resultados[USER.id]).length;
+  const seq = calcularSemanasSeguidas(USER.id, USER.turma, aulasAluno);
 
-  // Pontos e medalhas
+  // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
-  const medalhasCard = document.getElementById('aluno-medalhas-card');
   if (ptsHero) {
-    const pts = calcularPontosAluno(USER.id, USER.turma, cacheAulas||[], quizScores, PROVAS||[]);
-    const seq = calcularSemanasSeguidas(USER.id, USER.turma, cacheAulas||[]);
     ptsHero.style.display = 'block';
     document.getElementById('aluno-pts-total').textContent = pts.total;
-    document.getElementById('pts-presencas').textContent = pts.presencas;
-    document.getElementById('pts-quizzes').textContent = pts.quizzes;
-    document.getElementById('pts-provas').textContent = pts.provas;
-    const medalhas = calcularMedalhas(pts.total, pts.presencas, seq);
-    if (medalhas.length && medalhasCard) {
-      medalhasCard.style.display = 'block';
-      document.getElementById('aluno-medalhas').innerHTML = medalhas.map(m =>
-        `<span class="medalha ${m.classe}">${m.icon} ${m.label}</span>`
-      ).join('');
-    }
-    // Certificado
-    const totalLicoes = (LICOES[USER.turma]?.licoes||[]).length;
-    const feitas = Object.keys(quizScores).filter(k => k.startsWith(USER.turma)).length;
-    if (feitas >= totalLicoes && totalLicoes > 0 && !document.getElementById('btn-certificado')) {
-      const statsEl2 = document.getElementById('aluno-quiz-stats');
-      if (statsEl2) {
-        const certBtn = document.createElement('button');
-        certBtn.id = 'btn-certificado';
-        certBtn.className = 'btn btn-gold btn-full';
-        certBtn.style.marginTop = '10px';
-        certBtn.textContent = '🏆 Gerar Certificado de Conclusão';
-        certBtn.onclick = gerarCertificado;
-        statsEl2.after(certBtn);
-      }
-    }
-  }
-  // Ranking do aluno na turma
-  renderRankingAluno();
-  // Stats
-  const statsEl = document.getElementById('aluno-quiz-stats');
-  if (!realizados.length) {
-    statsEl.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhum quiz feito ainda. Vá em Lições e tente!</div></div>';
-  } else {
-    const mediaAcertos = realizados.reduce((s, k) => s + (quizScores[k].pct || 0), 0) / realizados.length;
-    statsEl.innerHTML = `<div class="stats">
-      <div class="stat"><div class="stat-n">${realizados.length}</div><div class="stat-l">Quizzes feitos</div></div>
-      <div class="stat"><div class="stat-n">${total}</div><div class="stat-l">Total de lições</div></div>
-      <div class="stat"><div class="stat-n">${Math.round(mediaAcertos)}%</div><div class="stat-l">Média de acerto</div></div>
-    </div>`;
+    document.getElementById('pts-presencas').textContent = presencasReais;
+    document.getElementById('pts-quizzes').textContent = quizzesFeitos;
+    document.getElementById('pts-provas').textContent = provasFeitas;
   }
 
-  // Lições progress list
+  // Medalhas
+  const medalhasCard = document.getElementById('aluno-medalhas-card');
+  const medalhas = calcularMedalhas(pts.total, presencasReais, seq);
+  if (medalhas.length && medalhasCard) {
+    medalhasCard.style.display = 'block';
+    document.getElementById('aluno-medalhas').innerHTML = medalhas.map(m =>
+      `<span class="medalha ${m.classe}">${m.icon} ${m.label}</span>`
+    ).join('');
+  }
+
+  // Estatísticas detalhadas
+  const statsEl = document.getElementById('aluno-quiz-stats');
+  if (statsEl) {
+    const totalAulas = aulasAluno.length;
+    const pctFreq = totalAulas ? Math.round((presencasReais / totalAulas) * 100) : 0;
+    const mediaAcertos = quizzesFeitos > 0
+      ? Math.round(Object.keys(quizScores).filter(k => k.startsWith(USER.turma)).reduce((s, k) => s + (quizScores[k].pct || 0), 0) / quizzesFeitos)
+      : 0;
+    statsEl.innerHTML = `
+      <div class="stats" style="gap:8px;flex-wrap:wrap">
+        <div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n" style="color:var(--tc)">${presencasReais}<span style="font-size:14px;color:var(--ink-soft)">/${totalAulas}</span></div>
+          <div class="stat-l">Presenças</div>
+        </div>
+        <div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n" style="color:${pctFreq>=75?'var(--tc)':pctFreq>=50?'var(--warn)':'var(--red)'}">${pctFreq}%</div>
+          <div class="stat-l">Frequência</div>
+        </div>
+        <div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n">${quizzesFeitos}</div>
+          <div class="stat-l">Quizzes</div>
+        </div>
+        <div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n">${provasFeitas}</div>
+          <div class="stat-l">Provas</div>
+        </div>
+        <div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n">${desafiosFeitos}</div>
+          <div class="stat-l">Desafios</div>
+        </div>
+        ${mediaAcertos > 0 ? `<div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n">${mediaAcertos}%</div>
+          <div class="stat-l">Média quizzes</div>
+        </div>` : ''}
+        ${seq >= 2 ? `<div class="stat" style="flex:1;min-width:80px">
+          <div class="stat-n">🔥${seq}</div>
+          <div class="stat-l">Seguidas</div>
+        </div>` : ''}
+      </div>`;
+  }
+
+  // Histórico de presenças
   const licEl = document.getElementById('aluno-licoes-prog');
-  if (!dados) { licEl.innerHTML = '<div class="empty-txt" style="padding:12px 0;color:var(--ink-soft)">Turma sem lições cadastradas.</div>'; return; }
-  const hoje = new Date();
-  licEl.innerHTML = dados.licoes.map(lic => {
-    const key = `${USER.turma}-${lic.num}`;
-    const score = quizScores[key];
-    const [d, m] = lic.data.split('/');
-    const dataLic = new Date(2026, parseInt(m)-1, parseInt(d));
-    const passou = dataLic <= hoje;
-    let statusHtml = '';
-    if (score) {
-      const cor = score.pct >= 80 ? 'var(--tc)' : score.pct >= 60 ? 'var(--warn)' : 'var(--red)';
-      statusHtml = `<span style="font-size:11px;font-weight:700;color:${cor}">${score.acertos}/${score.total} (${score.pct}%)</span>`;
-    } else if (passou) {
-      statusHtml = `<span style="font-size:11px;color:var(--ink-soft)">Pendente</span>`;
+  if (licEl) {
+    if (!aulasAluno.length) {
+      licEl.innerHTML = '<div style="padding:12px 0;color:var(--ink-soft);font-size:13px">Nenhuma aula registrada ainda.</div>';
     } else {
-      statusHtml = `<span style="font-size:11px;color:var(--cb)">Em breve</span>`;
+      licEl.innerHTML = aulasAluno.slice(0, 10).map(au => {
+        const presente = (au.presencas||{})[USER.id] === 'presente';
+        const dt = new Date(au.data + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
+          <span style="font-size:18px">${presente ? '✅' : '❌'}</span>
+          <span style="font-size:13px;flex:1;color:var(--ink-mid)">${dt}${au.licao ? ' — ' + au.licao : ''}</span>
+          <span style="font-size:11px;font-weight:700;color:${presente ? 'var(--tc)' : 'var(--red)'}">${presente ? 'Presente' : 'Ausente'}</span>
+        </div>`;
+      }).join('');
     }
-    return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb)">
-      <div style="background:${score?'var(--tc)':passou?'var(--cb)':'var(--cb)'};color:${score?'white':'var(--ink-soft)'};width:28px;height:28px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${lic.num}</div>
-      <div style="flex:1;font-size:13px;font-weight:${passou?'500':'400'};color:${passou?'var(--ink)':'var(--ink-soft)'};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lic.titulo}</div>
-      ${statusHtml}
-      ${passou ? `<button class="btn-ic" onclick="navTo('licoes')" title="Fazer quiz" style="flex-shrink:0">📖</button>` : ''}
-    </div>`;
-  }).join('');
+  }
+
+  // Certificado
+  const totalLicoes = (LICOES[USER.turma]?.licoes || []).length;
+  const feitas = quizzesFeitos;
+  if (feitas >= totalLicoes && totalLicoes > 0 && !document.getElementById('btn-certificado')) {
+    const certBtn = document.createElement('button');
+    certBtn.id = 'btn-certificado';
+    certBtn.className = 'btn btn-gold btn-full';
+    certBtn.style.marginTop = '10px';
+    certBtn.textContent = '🏆 Gerar Certificado de Conclusão';
+    certBtn.onclick = gerarCertificado;
+    if (statsEl) statsEl.after(certBtn);
+  }
+
+  // Ranking do aluno + ranking da turma
+  await renderRankingAluno(aulasAluno);
 }
 
 // ══════════════════════════════════════════════
@@ -4203,7 +4509,7 @@ async function renderProvasProf() {
   document.getElementById('provas-prof-area').style.display = 'block';
   document.getElementById('provas-resultado-area').style.display = 'none';
   const box = document.getElementById('lista-provas-prof');
-  const minhas = USER.perfil === 'super' ? PROVAS : PROVAS.filter(p => p.turma === USER.turma || USER.turma === 'todas');
+  const minhas = isAdmin() ? PROVAS : PROVAS.filter(p => p.turma === USER.turma || USER.turma === 'todas');
   if (!minhas.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova criada ainda</div></div>';
     return;
@@ -4214,7 +4520,7 @@ async function renderProvasProf() {
     const status = encerrada ? 'encerrada' : p.liberada ? 'liberada' : 'fechada';
     const statusLabel = { encerrada:'Encerrada', liberada:'Liberada ✓', fechada:'Não liberada' };
     const statusClass = { encerrada:'badge-encerrada', liberada:'badge-liberada', fechada:'badge-fechada' };
-    const tipoClass = p.tipo === 'prova' ? 'badge-prova' : 'badge-simulado';
+    const tipoClass = _tipoBadgeClass(p.tipo);
     const nQuestoes = (p.questoes || []).length;
     const nRespostas = Object.keys(p.resultados || {}).length;
     const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
@@ -4224,7 +4530,7 @@ async function renderProvasProf() {
         <div>
           <div class="prova-titulo">${p.nome}</div>
           <div class="prova-meta">
-            <span class="prova-badge ${tipoClass}">${p.tipo === 'prova' ? 'PROVA' : 'SIMULADO'}</span>
+            <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
             <span class="prova-badge ${statusClass[status]}">${statusLabel[status]}</span>
             <span>${TN[p.turma]}</span>
             ${tempo ? `<span>${tempo}</span>` : ''}
@@ -4248,13 +4554,13 @@ async function renderProvasProf() {
 }
 
 // ── Modal criar/editar prova ──
-function abrirModalProva(id) {
-  document.getElementById('mo-prova-titulo').textContent = id ? 'Editar prova' : 'Nova Prova / Simulado';
+function abrirModalProva(id, tipoPresel) {
+  const tipoLabels = { prova:'Nova Prova', simulado:'Novo Simulado', quiz:'Novo Quiz', desafio:'Novo Desafio' };
+  document.getElementById('mo-prova-titulo').textContent = id ? 'Editar avaliação' : (tipoLabels[tipoPresel] || 'Nova Avaliação');
   document.getElementById('pv-id').value = id || '';
   extrasCount = 0;
   document.getElementById('pv-extras-list').innerHTML = '';
   const editId = id || '';
-  // Ao editar prova, carregar questões existentes no formulário
   if (editId) {
     setTimeout(() => {
       const prova = PROVAS.find(p => p.id === editId);
@@ -4274,7 +4580,7 @@ function abrirModalProva(id) {
     }
   } else {
     document.getElementById('pv-nome').value = '';
-    document.getElementById('pv-tipo').value = 'prova';
+    document.getElementById('pv-tipo').value = tipoPresel || 'prova';
     document.getElementById('pv-turma').value = USER.turma && USER.turma !== 'todas' ? USER.turma : 'criancas';
     document.getElementById('pv-tempo').value = 0;
     document.getElementById('pv-data-limite').value = '';
@@ -4415,7 +4721,7 @@ async function verResultados(id) {
   if (!p) return;
   document.getElementById('provas-prof-area').style.display = 'none';
   document.getElementById('provas-resultado-area').style.display = 'block';
-  document.getElementById('res-tipo-badge').textContent = `${p.tipo === 'prova' ? 'PROVA' : 'SIMULADO'} · ${TN[p.turma]}`;
+  document.getElementById('res-tipo-badge').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
   document.getElementById('res-prova-titulo').textContent = p.nome;
   const nQ = (p.questoes || []).length;
   document.getElementById('res-prova-meta').textContent = `${nQ} questões · ${Object.keys(p.resultados||{}).length} responderam`;
@@ -4466,14 +4772,14 @@ async function renderProvasAluno() {
     html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);font-weight:600;margin-bottom:10px">Disponíveis para você</div>`;
     html += disponiveis.map(p => {
       const jaFez = p.resultados && p.resultados[USER.id];
-      const tipoClass = p.tipo === 'prova' ? 'badge-prova' : 'badge-simulado';
+      const tipoClass = _tipoBadgeClass(p.tipo);
       const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : 'Sem limite de tempo';
       const dataLim = p.data_limite ? `📅 Até ${new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}` : '';
       const nQ = (p.questoes || []).length;
       return `<div class="prova-card" style="border-color:${jaFez?'#9ecfb7':'var(--gold)'}">
         <div class="prova-titulo">${p.nome} ${jaFez?'✓':''}</div>
         <div class="prova-meta" style="margin-bottom:8px">
-          <span class="prova-badge ${tipoClass}">${p.tipo === 'prova'?'PROVA':'SIMULADO'}</span>
+          <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
           <span>${nQ} questões</span>
           <span>${tempo}</span>
           ${dataLim ? `<span>${dataLim}</span>` : ''}
@@ -4481,7 +4787,7 @@ async function renderProvasAluno() {
         ${jaFez
           ? `<div style="font-size:12px;color:var(--tc);font-weight:600">✓ Já respondida — ${Math.round((p.resultados[USER.id].acertos/nQ)*100)}% de acerto</div>
              <button class="btn btn-ou btn-sm" style="margin-top:8px" onclick="verMeuResultado('${p.id}')">Ver meu resultado</button>`
-          : `<button class="btn btn-gold btn-full" onclick="iniciarProvaAluno('${p.id}')">▶ Fazer ${p.tipo === 'prova'?'prova':'simulado'}</button>`
+          : `<button class="btn btn-gold btn-full" onclick="iniciarProvaAluno('${p.id}')">▶ Fazer ${_tipoBtnLabel(p.tipo)}</button>`
         }
       </div>`;
     }).join('');
@@ -4496,7 +4802,7 @@ function iniciarProvaAluno(id) {
   if (!p) return;
   provaAtiva = p;
   provaRespostas = {};
-  document.getElementById('fp-tipo').textContent = `${p.tipo === 'prova' ? 'PROVA' : 'SIMULADO'} · ${TN[p.turma]}`;
+  document.getElementById('fp-tipo').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
   document.getElementById('fp-titulo').textContent = p.nome;
   const nQ = (p.questoes || []).length;
   const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} minutos` : 'Sem limite de tempo';
@@ -4692,7 +4998,7 @@ async function renderProvasNotifDash() {
         <div class="prova-notif-icon">📝</div>
         <div class="prova-notif-txt">
           <div class="prova-notif-titulo">${p.nome}</div>
-          <div class="prova-notif-sub">${TN[p.turma]} · ${p.tipo === 'prova' ? 'Prova' : 'Simulado'} liberada${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+          <div class="prova-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} liberada${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
         </div>
         <div class="prova-notif-arrow">›</div>
       </div>`).join('');
@@ -4705,22 +5011,41 @@ async function renderProvasNotifDash() {
 // Pontos: presença=10, quiz(acerto)=2pts por acerto, prova=pct*0.5
 function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas) {
   let pts = 0;
-  let ptsPres = 0, ptsQ = 0, ptsProv = 0;
-  // Presenças
+  let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
+  // Presenças (+10 por presença)
   aulas.filter(a => a.turma === turma).forEach(a => {
     if ((a.presencas||{})[alunoId] === 'presente') { pts += 10; ptsPres++; }
   });
-  // Quizzes
+  // Quizzes (+2 por acerto) — quiz conta, simulado NÃO conta
   Object.entries(quizScores).forEach(([key, val]) => {
     if (key.startsWith(turma)) { const bonus = val.acertos * 2; pts += bonus; ptsQ += bonus; }
   });
-  // Provas
+  // Provas e Desafios da tabela provas — simulado excluído
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId]).forEach(p => {
+    if (p.tipo === 'simulado') return; // simulado NÃO conta para o ranking
     const res = p.resultados[alunoId];
-    const bonus = Math.round(res.pct * 0.5);
-    pts += bonus; ptsProv += bonus;
+    if (p.tipo === 'desafio') {
+      // Desafio: pontua pelo valor fixo definido ou pelo pct
+      const bonus = res.pontos || Math.round((res.pct || 0) * 0.5);
+      pts += bonus; ptsDesafio += bonus;
+    } else {
+      // Prova e Quiz da tabela de provas
+      const bonus = Math.round((res.pct || 0) * 0.5);
+      pts += bonus; ptsProv += bonus;
+    }
   });
-  return { total: pts, presencas: ptsPres, quizzes: ptsQ, provas: ptsProv };
+  return { total: pts, presencas: ptsPres, quizzes: ptsQ, provas: ptsProv, desafios: ptsDesafio };
+}
+
+// Helper: label e badge por tipo de avaliação
+function _tipoLabel(tipo) {
+  return { prova:'PROVA', simulado:'SIMULADO', quiz:'QUIZ', desafio:'DESAFIO' }[tipo] || tipo.toUpperCase();
+}
+function _tipoBadgeClass(tipo) {
+  return { prova:'badge-prova', simulado:'badge-simulado', quiz:'badge-quiz', desafio:'badge-desafio' }[tipo] || 'badge-prova';
+}
+function _tipoBtnLabel(tipo) {
+  return { prova:'prova', simulado:'simulado', quiz:'quiz', desafio:'desafio' }[tipo] || tipo;
 }
 
 function calcularMedalhas(pts, presencas, semanasSeguidas) {
@@ -4781,7 +5106,7 @@ _Sistema EBD — ADTC Ayrton Senna 1_`;
 // RANKING TIPO (presença ou pontos)
 // ══════════════════════════════════════════════
 let rankTipo = 'freq';
-function setRankTipo(tipo, el) {
+async function setRankTipo(tipo, el) {
   rankTipo = tipo;
   const btnFreq = document.getElementById('rank-tipo-freq');
   const btnPts = document.getElementById('rank-tipo-pts');
@@ -4791,7 +5116,7 @@ function setRankTipo(tipo, el) {
   btnPts.style.background = tipo === 'pts' ? 'var(--ink)' : '';
   btnPts.style.color = tipo === 'pts' ? 'white' : '';
   if (subtitulo) subtitulo.textContent = tipo === 'freq' ? 'Frequência' : 'Pontuação Geral';
-  renderRanking();
+  await renderRanking();
 }
 
 // ══════════════════════════════════════════════
@@ -5574,52 +5899,78 @@ async function confirmarTrocaSenha() {
 }
 
 // ══════════════════════════════════════════════
-// RANKING DO ALUNO (posição na turma)
+// RANKING DO ALUNO (posição na turma + ranking geral da turma)
 // ══════════════════════════════════════════════
-async function renderRankingAluno() {
+async function renderRankingAluno(aulasJaBuscadas) {
   const card = document.getElementById('aluno-ranking-card');
   const box = document.getElementById('aluno-ranking-pos');
   if (!card || !box || !USER) return;
   try {
+    // Buscar dados da turma
     const alunos = await sbGet('alunos', { turma: USER.turma });
-    const aulas = await sbGet('aulas', { turma: USER.turma }, 'data', false);
-    if (!aulas.length) return;
-    const ranking = alunos
-      .filter(a => (a.status||'ativo') === 'ativo')
-      .map(a => {
-        const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
-        const pct = Math.round((pres / aulas.length) * 100);
-        return { id: a.id, nome: a.nome, pct };
-      })
-      .sort((a,b) => b.pct - a.pct);
-    const minha = ranking.findIndex(r => r.id === USER.id);
-    if (minha < 0) return;
+    const aulas = aulasJaBuscadas || await sbGet('aulas', { turma: USER.turma }, 'data', false);
+    if (!alunos.length) return;
+
+    // Carregar quizzes de todos da turma para pontuação correta
+    await carregarQuizScoresTodos();
+    await carregarProvas();
+
+    const ativos = alunos.filter(a => (a.status||'ativo') === 'ativo');
+
+    // Ranking de PRESENÇA
+    const rankingPres = ativos.map(a => {
+      const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
+      const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
+      return { id: a.id, nome: a.nome, pres, pct };
+    }).sort((a, b) => b.pres - a.pres || b.pct - a.pct);
+
+    // Ranking GERAL de pontos
+    const rankingGeral = ativos.map(a => {
+      const sc = _quizScoresParaAluno(a.id);
+      const pts = calcularPontosAluno(a.id, USER.turma, aulas, sc, PROVAS || []);
+      return { id: a.id, nome: a.nome, pts: pts.total };
+    }).sort((a, b) => b.pts - a.pts);
+
+    const minhaPosP = rankingPres.findIndex(r => r.id === USER.id) + 1;
+    const minhaPosG = rankingGeral.findIndex(r => r.id === USER.id) + 1;
+    const euPres = rankingPres.find(r => r.id === USER.id);
+    const euGeral = rankingGeral.find(r => r.id === USER.id);
+
+    const MEDALHAS_POS = ['🥇', '🥈', '🥉'];
+
     card.style.display = 'block';
-    const minhaPos = minha + 1;
-    const total = ranking.length;
-    const seq = calcularSemanasSeguidas(USER.id, USER.turma, aulas);
     box.innerHTML = `
-      <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;padding:12px;background:var(--gold-pale);border-radius:var(--rsm);border:1px solid var(--gold)">
-        <div style="font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:var(--gold-deep);min-width:48px;text-align:center">${minhaPos}º</div>
-        <div>
-          <div style="font-size:14px;font-weight:600;margin-bottom:2px">Sua posição na turma de ${TN[USER.turma]}</div>
-          <div style="font-size:12px;color:var(--ink-soft)">${ranking[minha].pct}% de frequência · ${total} alunos</div>
-          ${seq >= 2 ? `<div class="seq-badge" style="margin-top:6px;display:inline-flex">🔥 ${seq} segundas seguidas</div>` : ''}
+      <!-- Posições do aluno -->
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+        <div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:var(--r);padding:12px;text-align:center">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);font-weight:700;margin-bottom:4px">Presença</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-deep);line-height:1">${minhaPosP > 0 ? minhaPosP + 'º' : '—'}</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">${euPres ? euPres.pct + '% freq.' : ''}</div>
+        </div>
+        <div style="background:linear-gradient(135deg,#1a2744,#2c3e6b);border-radius:var(--r);padding:12px;text-align:center">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-l);font-weight:700;margin-bottom:4px">Pontuação</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-l);line-height:1">${minhaPosG > 0 ? minhaPosG + 'º' : '—'}</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">${euGeral ? euGeral.pts + ' pts' : ''}</div>
         </div>
       </div>
-      ${ranking.slice(0,3).map((r,i) => `
-        <div class="rank-aluno-item ${r.id === USER.id ? 'eu' : 'outro'}">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:${i<3?'var(--gold)':'var(--ink-soft)'};min-width:28px;text-align:center">${i+1}</div>
-          <div style="flex:1;font-size:13px;font-weight:${r.id===USER.id?'700':'500'}">${r.id===USER.id?'Você':r.nome}</div>
-          <div style="font-size:12px;font-weight:700;color:${r.pct>=70?'var(--tc)':r.pct>=50?'var(--warn)':'var(--red)'}">${r.pct}%</div>
-        </div>`).join('')}
-      ${minha >= 3 ? `<div style="text-align:center;font-size:12px;color:var(--ink-soft);padding:6px">...</div>
-        <div class="rank-aluno-item eu">
-          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:var(--ink-soft);min-width:28px;text-align:center">${minhaPos}</div>
-          <div style="flex:1;font-size:13px;font-weight:700">Você</div>
-          <div style="font-size:12px;font-weight:700;color:var(--tc)">${ranking[minha].pct}%</div>
-        </div>` : ''}`;
-  } catch(e) {}
+
+      <!-- Ranking geral da turma -->
+      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--ink-soft);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--cb)">
+        🏆 Ranking — ${TN[USER.turma]}
+      </div>
+      ${rankingGeral.map((r, i) => {
+        const isEu = r.id === USER.id;
+        const isTop = i < 3;
+        const medal = isTop ? MEDALHAS_POS[i] : '';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:9px ${isEu?'10px':'4px'};margin-bottom:4px;border-radius:8px;background:${isEu?'var(--gold-pale)':'transparent'};border:${isEu?'1px solid var(--gold)':'1px solid transparent'};transition:all .2s">
+          <div style="font-size:${isTop?'20px':'13px'};min-width:28px;text-align:center;font-family:'Cormorant Garamond',serif;font-weight:600;color:${isTop?'var(--gold)':'var(--ink-soft)'}">${medal || (i+1)}</div>
+          <div style="flex:1;font-size:13px;font-weight:${isEu?'700':'500'};color:${isEu?'var(--gold-deep)':'var(--ink)'}">${isEu ? '✦ Você' : r.nome}</div>
+          <div style="font-size:11px;font-weight:700;color:${isTop?'var(--gold-deep)':'var(--ink-soft)'};background:${isTop?'var(--gold-pale)':'transparent'};padding:2px 8px;border-radius:10px">${r.pts} pts</div>
+        </div>`;
+      }).join('')}`;
+  } catch(e) {
+    console.error('Erro ao carregar ranking:', e);
+  }
 }
 
 // ══════════════════════════════════════════════
@@ -6985,30 +7336,40 @@ async function carregarRespVinculadosModal(alunoId) {
   } catch(e) {}
 }
 
-// ── Modal de vínculo rápido (pelo ícone na lista de alunos) ──
+// ── Modal de vínculo de responsável ──
 async function abrirModalVincularResp(alunoId, nomeAluno) {
   var prev = document.getElementById('modal-vincular-resp');
   if (prev) prev.remove();
   var modal = document.createElement('div');
   modal.id = 'modal-vincular-resp';
-  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);backdrop-filter:blur(2px);animation:fadeIn .2s';
-  modal.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;max-height:85vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">'
-    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;padding-bottom:13px;border-bottom:1px solid var(--cb)">'
-    + '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:20px">👨‍👩‍👧 Responsáveis de <em style="color:var(--gold-deep)">' + escHtml(nomeAluno) + '</em></h3>'
-    + '<button onclick="fecharModalVincularResp()" style="width:30px;height:30px;border:1px solid var(--cb);border-radius:7px;background:white;color:var(--ink-soft);font-size:15px;display:flex;align-items:center;justify-content:center;cursor:pointer">✕</button>'
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);animation:fadeIn .2s';
+  modal.innerHTML = '<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">'
+    // Header
+    + '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">'
+    + '<h3 style="font-family:\'Cormorant Garamond\',serif;font-size:20px;color:var(--ink)">👨‍👩‍👧 Responsáveis</h3>'
+    + '<button onclick="fecharModalVincularResp()" style="width:32px;height:32px;border:1px solid var(--cb);border-radius:8px;background:white;color:var(--ink-soft);font-size:16px;cursor:pointer">✕</button>'
     + '</div>'
-    // Vinculados
-    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin-bottom:8px">Responsáveis vinculados</div>'
-    + '<div id="mvr-lista" style="margin-bottom:16px"><div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:10px">Carregando...</div></div>'
-    // Busca nos alunos cadastrados
-    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:600;margin-bottom:6px">Buscar pai/mãe já cadastrado(a)</div>'
-    + '<div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px;line-height:1.5">O responsável precisa já estar cadastrado como aluno. Digite o nome para encontrá-lo.</div>'
-    + '<input class="fc" id="mvr-busca" placeholder="Ex: Maria Santos, João Silva..." oninput="buscarRespModal(this.value,\'' + alunoId + '\')" style="margin-bottom:8px">'
-    + '<div id="mvr-sugestoes" style="margin-bottom:12px"></div>'
+    + '<div style="font-size:13px;color:var(--ink-soft);margin-bottom:16px;padding-bottom:14px;border-bottom:1px solid var(--cb)">Aluno: <strong style="color:var(--ink)">' + escHtml(nomeAluno) + '</strong></div>'
+
+    // Instruções rápidas
+    + '<div style="background:#e8f5ef;border:1px solid #9ecfb7;border-radius:var(--r);padding:10px 13px;margin-bottom:16px;font-size:12px;color:var(--tc);line-height:1.6">'
+    + '📌 <strong>Como funciona:</strong> O pai ou mãe precisa ter um <strong>login cadastrado</strong> no sistema (como aluno adulto). '
+    + 'Após o vínculo, quando ele entrar com o login dele, verá a aba <strong>"Meus Filhos"</strong> com o progresso de ' + escHtml(nomeAluno) + '.'
+    + '</div>'
+
+    // Lista de vinculados
+    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:8px">Responsáveis vinculados</div>'
+    + '<div id="mvr-lista" style="margin-bottom:16px"><div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Carregando...</div></div>'
+
+    // Busca
+    + '<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:8px">Vincular pai / mãe / responsável</div>'
+    + '<input class="fc" id="mvr-busca" placeholder="🔍 Digite o nome do pai, mãe ou responsável..." oninput="buscarRespModal(this.value,\'' + alunoId + '\')" autocomplete="off" style="margin-bottom:8px">'
+    + '<div id="mvr-sugestoes" style="margin-bottom:16px"></div>'
     + '<button class="btn btn-ou btn-full" onclick="fecharModalVincularResp()">Fechar</button>'
     + '</div>';
   modal.addEventListener('click', function(e){ if(e.target===modal) fecharModalVincularResp(); });
   document.body.appendChild(modal);
+  setTimeout(function(){ var b=document.getElementById('mvr-busca'); if(b) b.focus(); }, 200);
   carregarListaVinculosModal(alunoId);
 }
 function fecharModalVincularResp() {
@@ -7080,16 +7441,31 @@ async function renderFilhosResponsavel() {
   var box = document.getElementById('resp-lista-filhos');
   var sub = document.getElementById('resp-subtitulo');
   if (!box) return;
-  // Garante visualização da lista
   var listView = document.getElementById('resp-lista-view');
   var filhoView = document.getElementById('resp-filho-view');
   if (listView) listView.style.display = '';
   if (filhoView) filhoView.style.display = 'none';
   box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">Carregando...</div>';
   try {
-    var vinculos = await sbGetFilhosDoResp(USER.id);
+    // Determinar o ID correto para buscar vínculos
+    // Se for professor, o id em USER é da tabela professores — precisamos do id na tabela alunos
+    var respId = USER.id;
+    if (isProfessor()) {
+      // Buscar aluno com mesmo login para obter o id correto
+      try {
+        var { data: alunoProf } = await sbClient.from('alunos')
+          .select('id').eq('login', USER.login).limit(1);
+        if (alunoProf && alunoProf.length > 0) {
+          respId = alunoProf[0].id;
+          USER._resp_aluno_id = respId; // cachear
+        }
+      } catch(e) {}
+    }
+    if (USER._resp_aluno_id) respId = USER._resp_aluno_id;
+
+    var vinculos = await sbGetFilhosDoResp(respId);
     if (!vinculos.length) {
-      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum filho vinculado ainda.<br>Fale com o professor ou superintendente.</div></div>';
+      box.innerHTML = '<div class="empty"><div class="empty-icon">👶</div><div class="empty-txt">Nenhum filho vinculado ainda.<br>Peça ao administrador para vincular sua conta.</div></div>';
       return;
     }
     var alunoIds = vinculos.map(function(v){ return v.aluno_id; });
