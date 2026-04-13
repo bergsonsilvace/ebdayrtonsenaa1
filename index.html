@@ -3789,7 +3789,8 @@ async function carregarQuizScoresTodos() {
       data.forEach(r => {
         if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
         _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
-          acertos: r.acertos, total: r.total, pct: r.pct
+          acertos: r.acertos, total: r.total, pct: r.pct,
+          pontos: r.pontos != null ? parseFloat(r.pontos) : null
         };
       });
     }
@@ -5337,7 +5338,9 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
     if (data && data.length) {
       data.forEach(r => {
         quizScores[`${r.turma}-${r.licao_num}`] = {
-          acertos: r.acertos, total: r.total, pct: r.pct, data: r.data_resposta
+          acertos: r.acertos, total: r.total, pct: r.pct,
+          pontos: r.pontos != null ? parseFloat(r.pontos) : null,
+          data: r.data_resposta
         };
       });
     }
