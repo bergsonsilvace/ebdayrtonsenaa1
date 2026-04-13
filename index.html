@@ -4334,9 +4334,46 @@ function renderLicoes() {
   }).join('');
 }
 
-function abrirLicao(turma, num) {
+async function abrirLicao(turma, num) {
   const dados = LICOES[turma];
-  const lic = dados.licoes.find(l => l.num === num);
+  const licHard = dados ? dados.licoes.find(l => l.num === num) : null;
+
+  // Buscar versão mais atualizada do Supabase
+  let lic = licHard ? { ...licHard } : null;
+  try {
+    const { data } = await sbClient.from('banco_questoes')
+      .select('*')
+      .eq('turma', turma)
+      .eq('num', num)
+      .or('tipo.eq.licao,tipo.is.null')
+      .single();
+    if (data && data.perguntas && data.perguntas.length) {
+      // Usar dados do banco — mais atualizados
+      lic = {
+        ...(licHard || {}),
+        num: data.num,
+        titulo: data.titulo || (licHard && licHard.titulo) || '',
+        texto: data.texto || (licHard && licHard.texto) || '',
+        data: data.data_licao || (licHard && licHard.data) || '',
+        resumo: data.resumo || (licHard && licHard.resumo) || '',
+        textoAureo: data.texto_aureo || (licHard && licHard.textoAureo) || '',
+        leituraBiblica: data.leitura_biblica || (licHard && licHard.leituraBiblica) || '',
+        leituraDiaria: data.leitura_diaria || (licHard && licHard.leituraDiaria) || [],
+        perguntas: data.perguntas.map(p => ({
+          q: p.q, a: p.a, correta: p.correta || 0,
+          op: p.op || [p.a, '', '', '']
+        }))
+      };
+      // Atualizar também o LICOES em memória para consistência
+      if (dados) {
+        const idx = dados.licoes.findIndex(l => l.num === num);
+        if (idx >= 0) dados.licoes[idx] = { ...dados.licoes[idx], ...lic };
+      }
+    }
+  } catch(e) {
+    // fallback: usar LICOES hardcoded
+  }
+
   if (!lic) return;
 
   // Prepara quiz state
@@ -5638,26 +5675,55 @@ async function renderProvasAluno() {
   box.innerHTML = html;
 }
 
-function iniciarProvaAluno(id) {
+async function iniciarProvaAluno(id) {
   const p = PROVAS.find(x => x.id === id);
   if (!p) return;
-  provaAtiva = p;
+
+  // Buscar questões atualizadas do banco para lições desta prova
+  let questoesAtualizadas = [...(p.questoes || [])];
+  try {
+    const licoesSel = p.licoes_selecionadas || [];
+    if (licoesSel.length) {
+      const { data } = await sbClient.from('banco_questoes')
+        .select('num,perguntas')
+        .eq('turma', p.turma)
+        .or('tipo.eq.licao,tipo.is.null')
+        .in('num', licoesSel);
+      if (data && data.length) {
+        // Substituir questões de lição pelas versões atuais do banco
+        const mapaDB = {};
+        data.forEach(l => { mapaDB[l.num] = l.perguntas || []; });
+        questoesAtualizadas = questoesAtualizadas.map(q => {
+          // Identificar a lição de origem (ex: "L3" → num 3)
+          if (q.origem && q.origem.startsWith('L')) {
+            const numLic = parseInt(q.origem.substring(1));
+            if (mapaDB[numLic]) {
+              // Encontrar a questão correspondente no banco pela pergunta
+              const match = mapaDB[numLic].find(p => p.q === q.q || p.a === q.a);
+              if (match) return { ...q, q: match.q, a: match.a, op: match.op, correta: match.correta };
+            }
+          }
+          return q;
+        });
+      }
+    }
+  } catch(e) { /* fallback: usar questões da prova */ }
+
+  provaAtiva = { ...p, questoes: questoesAtualizadas };
   provaRespostas = {};
   document.getElementById('fp-tipo').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
   document.getElementById('fp-titulo').textContent = p.nome;
-  const nQ = (p.questoes || []).length;
+  const nQ = questoesAtualizadas.length;
   const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} minutos` : 'Sem limite de tempo';
   document.getElementById('fp-meta').textContent = `${nQ} questões · ${tempo}`;
-  // Renderizar questões — usar data-attributes para evitar bug com aspas no texto
   const box = document.getElementById('fp-questoes');
-  box.innerHTML = p.questoes.map((q, i) => `
+  box.innerHTML = questoesAtualizadas.map((q, i) => `
     <div class="card" style="margin-bottom:12px" id="q-card-${i}">
       <div class="q-num">Questão ${i+1} de ${nQ}${q.origem && q.origem !== 'extra' ? ` · ${q.origem}` : ''}</div>
       <div class="q-texto">${q.q}</div>
       ${q.op.map((op, j) => `<button class="q-opt" id="q-${i}-${j}" data-qidx="${i}" data-oidx="${j}" onclick="marcarRespostaBtn(this)">${op}</button>`).join('')}
     </div>
   `).join('');
-  // Cronômetro
   const cronoEl = document.getElementById('fp-crono');
   if (p.tempo_minutos > 0) {
     cronoSegundos = p.tempo_minutos * 60;
