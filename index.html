@@ -899,12 +899,27 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- BANCO DE QUESTÕES -->
     <div id="pg-banco" class="page">
-      <div class="ph"><h2>Banco de <em>Questões</em></h2><p>Edite as lições e perguntas pré-programadas</p></div>
-      <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+      <div class="ph"><h2>Banco de <em>Questões</em></h2><p>Gerencie lições, agrupamentos e questões avulsas</p></div>
+
+      <!-- FILTRO DE TURMA -->
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
         <button class="btn btn-sm" id="banco-tab-c" onclick="selBancoTurma('criancas',this)" style="background:var(--tc);color:white;border:none">🟢 Crianças</button>
         <button class="btn btn-sm btn-ou" id="banco-tab-j" onclick="selBancoTurma('jovens',this)">🔵 Jovens</button>
         <button class="btn btn-sm btn-ou" id="banco-tab-a" onclick="selBancoTurma('adultos',this)">🟡 Adultos</button>
       </div>
+
+      <!-- FILTRO DE TIPO -->
+      <div style="display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap">
+        <button id="banco-tipo-licao" onclick="selBancoTipo('licao',this)" style="padding:6px 12px;border:1.5px solid var(--gold);background:var(--gold-pale);border-radius:20px;font-size:12px;font-weight:700;color:var(--gold-deep);cursor:pointer">📚 Lições</button>
+        <button id="banco-tipo-quiz" onclick="selBancoTipo('quiz',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">⚡ Quizzes</button>
+        <button id="banco-tipo-simulado" onclick="selBancoTipo('simulado',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">🔄 Simulados</button>
+        <button id="banco-tipo-avulsa" onclick="selBancoTipo('avulsa',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">📌 Avulsas</button>
+      </div>
+
+      <!-- BOTÃO DE CRIAR (muda conforme o tipo selecionado) -->
+      <div id="banco-btn-criar" style="margin-bottom:14px"></div>
+
+      <!-- LISTA -->
       <div id="banco-lista"></div>
     </div>
 
@@ -922,12 +937,26 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <!-- CAMPOS DE INFO DA LIÇÃO -->
         <div style="padding:16px 20px 0;flex-shrink:0;border-bottom:1px solid var(--cb)">
           <input type="hidden" id="banco-licao-id">
-          <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
-            <div><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Título</label><input class="fc" id="banco-titulo" style="width:100%;font-size:13px"></div>
-            <div><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Bíblico</label><input class="fc" id="banco-texto" placeholder="Ex: Êx 2.1-10" style="width:100%;font-size:13px"></div>
+          <input type="hidden" id="banco-nova-turma">
+          <input type="hidden" id="banco-nova-num">
+          <input type="hidden" id="banco-nova-tipo" value="licao">
+          <!-- Título sempre visível -->
+          <div style="margin-bottom:10px">
+            <label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px" id="banco-titulo-label">Título</label>
+            <input class="fc" id="banco-titulo" style="width:100%;font-size:13px">
           </div>
-          <div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Áureo</label><textarea class="fc" id="banco-texto-aureo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
-          <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Resumo</label><textarea class="fc" id="banco-resumo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
+          <!-- Campos exclusivos de lição -->
+          <div id="banco-campos-licao">
+            <div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Bíblico</label><input class="fc" id="banco-texto" placeholder="Ex: Êx 2.1-10" style="width:100%;font-size:13px"></div>
+            <div style="margin-bottom:10px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Texto Áureo</label><textarea class="fc" id="banco-texto-aureo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
+            <div style="margin-bottom:14px"><label style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px">Resumo</label><textarea class="fc" id="banco-resumo" rows="2" style="width:100%;font-size:13px;resize:none"></textarea></div>
+          </div>
+          <!-- Espaço extra para quiz/simulado/avulsa -->
+          <div id="banco-campos-grupo" style="display:none;margin-bottom:14px">
+            <div style="font-size:12px;color:var(--ink-soft);padding:8px 12px;background:var(--cream);border-radius:8px;line-height:1.5">
+              💡 Dê um nome ao agrupamento e adicione as questões abaixo
+            </div>
+          </div>
         </div>
         <!-- PERGUNTAS -->
         <div style="flex:1;overflow-y:auto;padding:16px 20px" id="banco-perguntas-lista"></div>
@@ -1665,12 +1694,22 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <input type="hidden" id="pv-id">
       <div class="fg"><label class="fl">Nome</label><input class="fc" id="pv-nome" placeholder="Ex: Prova Bimestral, Simulado Lições 1-5"></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo"><option value="prova">📝 Prova</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
-        <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal()"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
+        <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal();onTurmaProvaChange()"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       </div>
       <div class="frow">
         <div class="fg"><label class="fl">Cronômetro (minutos)</label><input class="fc" type="number" id="pv-tempo" placeholder="Ex: 30 (0 = sem limite)" min="0" value="0"></div>
         <div class="fg"><label class="fl">Data limite</label><input class="fc" type="date" id="pv-data-limite"></div>
+      </div>
+      <!-- Banco de Questões (Quiz/Simulado) -->
+      <div class="fg" id="pv-banco-wrap" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <label class="fl" style="margin:0">Do Banco de Questões <span style="font-size:10px;color:var(--ink-soft);font-weight:400">(agrupamentos criados no Banco)</span></label>
+          <button type="button" class="btn btn-ou btn-sm" onclick="toggleSecaoBanco()" id="btn-toggle-banco" style="font-size:11px;padding:3px 8px">▼ Mostrar banco</button>
+        </div>
+        <div id="pv-banco-wrap-inner" style="display:none">
+          <div id="pv-banco-check" style="max-height:240px;overflow-y:auto;padding:4px 0"></div>
+        </div>
       </div>
       <!-- Lições — OPCIONAL -->
       <div class="fg">
@@ -2612,7 +2651,7 @@ async function _navTo(id) {
     document.getElementById('cal-detalhe-area').innerHTML = '';
     await renderCalendario();
   }
-  else if (id === 'banco') renderBancoQuestoes();
+  else if (id === 'banco') { selBancoTipo(_bancoTipoAtual || 'licao', null); }
   else if (id === 'provas') {
     if (USER && (USER.perfil === 'aluno' || _modo('aluno'))) await renderProvasAluno();
     else await renderProvasProf();
@@ -5110,8 +5149,88 @@ async function abrirModalProva(id, tipoPresel) {
     document.getElementById('pv-data-limite').value = '';
   }
   atualizarLicoesModal(id);
+  onTipoProvaChange();
   document.getElementById('mo-prova').style.display = 'block';
   setTimeout(() => document.getElementById('pv-nome').focus(), 100);
+}
+
+function onTurmaProvaChange() {
+  var tipo = document.getElementById('pv-tipo')?.value;
+  if (tipo === 'quiz' || tipo === 'simulado') {
+    carregarBancoNoModal(tipo);
+  }
+}
+
+function onTipoProvaChange() {
+  var tipo = document.getElementById('pv-tipo')?.value;
+  var bancoWrap = document.getElementById('pv-banco-wrap');
+  if (bancoWrap) {
+    var mostrar = tipo === 'quiz' || tipo === 'simulado';
+    bancoWrap.style.display = mostrar ? 'block' : 'none';
+    if (mostrar) {
+      // Abrir automaticamente
+      var inner = document.getElementById('pv-banco-wrap-inner');
+      var btn = document.getElementById('btn-toggle-banco');
+      if (inner) inner.style.display = 'block';
+      if (btn) btn.textContent = '▲ Ocultar banco';
+      carregarBancoNoModal(tipo);
+    }
+  }
+}
+
+function toggleSecaoBanco() {
+  var inner = document.getElementById('pv-banco-wrap-inner');
+  var btn = document.getElementById('btn-toggle-banco');
+  if (!inner) return;
+  var aberto = inner.style.display !== 'none';
+  inner.style.display = aberto ? 'none' : 'block';
+  if (btn) btn.textContent = aberto ? '▼ Mostrar banco' : '▲ Ocultar banco';
+}
+
+async function carregarBancoNoModal(tipo) {
+  var turma = document.getElementById('pv-turma')?.value || 'adultos';
+  var box = document.getElementById('pv-banco-check');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:10px;color:var(--ink-soft);font-size:12px">⏳ Carregando...</div>';
+
+  try {
+    var { data } = await sbClient.from('banco_questoes')
+      .select('id,num,titulo,perguntas,turma')
+      .eq('tipo', tipo)
+      .eq('turma', turma)
+      .order('num', { ascending: true });
+
+    if (!data || !data.length) {
+      const TN2 = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+      box.innerHTML = `<div style="text-align:center;padding:12px;color:var(--ink-soft);font-size:12px">Nenhum agrupamento de ${tipo} encontrado para ${TN2[turma]}.<br><span style="font-size:11px">Crie um na aba Banco de Questões primeiro.</span></div>`;
+      return;
+    }
+
+    const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+    box.innerHTML = data.map(function(g) {
+      var nQ = (g.perguntas || []).length;
+      var tipoNome = tipo === 'quiz' ? 'Quiz' : 'Simulado';
+      return `<div class="lic-check-card" id="banco-grp-card-${g.id}" style="margin-bottom:6px">
+        <div class="lic-check-card-head">
+          <input type="checkbox" class="lic-check-box" value="${g.id}"
+            onchange="onBancoGrupoCheck(this,'${g.id}')"
+            onclick="event.stopPropagation()">
+          <div class="lic-check-info">
+            <div class="lic-check-nome"><strong>${tipoNome} ${g.num}</strong> — ${escHtml(g.titulo)}</div>
+            <div class="lic-check-meta"><span class="lic-check-badge">${nQ} questão(ões)</span></div>
+          </div>
+          <button class="lic-check-ver" onclick="verQuestoesBancoGrupo('${g.id}','${tipoNome} ${g.num} — ${escHtml(g.titulo)}')" type="button">👁 Ver</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    box.innerHTML = '<div style="color:var(--red);font-size:12px;padding:8px">Erro ao carregar banco: ' + e.message + '</div>';
+  }
+}
+
+function onBancoGrupoCheck(chk, id) {
+  var card = document.getElementById('banco-grp-card-' + id);
+  if (card) card.className = 'lic-check-card' + (chk.checked ? ' selecionada' : '');
 }
 
 function toggleSecaoLicoes() {
@@ -5158,10 +5277,11 @@ function adicionarQuestaoExtra(dadosEdit) {
   box.appendChild(div);
 }
 
-function coletarQuestoes(turma, licoesSel) {
-  // Questões das lições selecionadas
-  const dadosLicoes = LICOES[turma];
+async function coletarQuestoes(turma, licoesSel) {
   let questoes = [];
+
+  // 1. Questões das lições hardcoded
+  const dadosLicoes = LICOES[turma];
   if (dadosLicoes) {
     licoesSel.forEach(numLicao => {
       const lic = dadosLicoes.licoes.find(l => l.num === numLicao);
@@ -5172,7 +5292,39 @@ function coletarQuestoes(turma, licoesSel) {
       }
     });
   }
-  // Questões extras
+
+  // 2. Questões das lições do Supabase (que não estão no hardcoded)
+  const numsHard = dadosLicoes ? dadosLicoes.licoes.map(l => l.num) : [];
+  const numsExclusivosDB = licoesSel.filter(n => !numsHard.includes(n));
+  if (numsExclusivosDB.length) {
+    try {
+      const { data } = await sbClient.from('banco_questoes')
+        .select('num,perguntas').eq('turma', turma)
+        .or('tipo.eq.licao,tipo.is.null')
+        .in('num', numsExclusivosDB);
+      (data || []).forEach(l => {
+        (l.perguntas || []).forEach(p => {
+          questoes.push({ q: p.q, a: p.a, op: [...p.op].sort(() => Math.random() - 0.5), origem: `L${l.num}` });
+        });
+      });
+    } catch(e) {}
+  }
+
+  // 3. Questões dos grupos do Banco (quiz/simulado) selecionados
+  const gruposSel = Array.from(document.querySelectorAll('#pv-banco-check input:checked')).map(c => c.value);
+  if (gruposSel.length) {
+    try {
+      const { data } = await sbClient.from('banco_questoes')
+        .select('num,titulo,perguntas,tipo').in('id', gruposSel);
+      (data || []).forEach(g => {
+        (g.perguntas || []).forEach(p => {
+          questoes.push({ q: p.q, a: p.a, op: [...p.op].sort(() => Math.random() - 0.5), origem: `${g.tipo} ${g.num}` });
+        });
+      });
+    } catch(e) {}
+  }
+
+  // 4. Questões extras manuais
   let i = 1;
   while (document.getElementById(`extra-${i}`)) {
     const div = document.getElementById(`extra-${i}`);
@@ -5201,7 +5353,7 @@ async function salvarProva() {
   const tempo = parseInt(document.getElementById('pv-tempo').value) || 0;
   const dataLimite = document.getElementById('pv-data-limite').value || null;
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
-  const questoes = coletarQuestoes(turma, licoesSel);
+  const questoes = await coletarQuestoes(turma, licoesSel);
   const editId = document.getElementById('pv-id').value;
 
   // Simulado não precisa de aprovação (não conta no ranking)
@@ -5666,17 +5818,106 @@ function verMeuResultado(id) {
 }
 
 
-// ══════════════════════════════════════════════
-// ══════════════════════════════════════════════
-// BANCO DE QUESTÕES
-// ══════════════════════════════════════════════
+// ── ABAS DO BANCO ──
+let _bancoTipoAtual = 'licao';
 let _bancoTurmaAtual = 'criancas';
-let _bancoLicoes = []; // cache das lições do banco
+let _bancoLicoes = [];
+
+function selBancoTipo(tipo, el) {
+  _bancoTipoAtual = tipo;
+  // Atualizar visual dos botões de tipo
+  ['licao','quiz','simulado','avulsa'].forEach(t => {
+    const btn = document.getElementById('banco-tipo-' + t);
+    if (!btn) return;
+    const ativo = t === tipo;
+    btn.style.borderColor = ativo ? 'var(--gold)' : 'var(--cb)';
+    btn.style.background = ativo ? 'var(--gold-pale)' : 'white';
+    btn.style.color = ativo ? 'var(--gold-deep)' : 'var(--ink-soft)';
+    btn.style.fontWeight = ativo ? '700' : '600';
+  });
+  // Atualizar botão de criar
+  const btnCriar = document.getElementById('banco-btn-criar');
+  if (btnCriar) {
+    const cfg = {
+      licao:   { label:'＋ Nova Lição',              fn:"novaLicaoBanco()",              bg:'var(--gold)', color:'var(--ink)' },
+      quiz:    { label:'＋ Novo Agrupamento Quiz',    fn:"novoGrupoBanco('quiz')",         bg:'var(--tj)',   color:'white' },
+      simulado:{ label:'＋ Novo Agrupamento Simulado',fn:"novoGrupoBanco('simulado')",     bg:'var(--ink)',  color:'white' },
+      avulsa:  { label:'＋ Nova Questão Avulsa',      fn:"novaQuestaoAvulsa()",            bg:'var(--tc)',   color:'white' },
+    }[tipo];
+    btnCriar.innerHTML = `<button onclick="${cfg.fn}" style="padding:8px 16px;background:${cfg.bg};border:none;border-radius:8px;color:${cfg.color};font-size:12px;font-weight:700;cursor:pointer">${cfg.label}</button>`;
+  }
+  renderBancoQuestoes();
+}
+
+function novoGrupoBanco(tipo) {
+  const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
+  const tipoLabel = { quiz:'QUIZ', simulado:'SIMULADO' }[tipo];
+  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+  const tipoNome = { quiz:'Quiz', simulado:'Simulado' }[tipo];
+
+  document.getElementById('banco-licao-id').value = '';
+  document.getElementById('mo-banco-subtitulo').textContent = `NOVO ${tipoLabel} · ${turmaLabel}`;
+  document.getElementById('mo-banco-titulo').textContent = `${tipoNome} ${proxNum}`;
+  document.getElementById('banco-titulo').value = `${tipoNome} ${proxNum}`;
+  document.getElementById('banco-texto').value = '';
+  document.getElementById('banco-texto-aureo').value = '';
+  document.getElementById('banco-resumo').value = '';
+  document.getElementById('banco-nova-turma').value = _bancoTurmaAtual;
+  document.getElementById('banco-nova-num').value = proxNum;
+  document.getElementById('banco-nova-tipo').value = tipo;
+
+  // Mostrar só o campo de título, esconder campos de lição
+  document.getElementById('banco-campos-licao').style.display = 'none';
+  document.getElementById('banco-campos-grupo').style.display = 'block';
+  document.getElementById('banco-titulo-label').textContent = `Nome do ${tipoNome}`;
+
+  const box = document.getElementById('banco-perguntas-lista');
+  box.innerHTML = '';
+  document.getElementById('mo-banco-licao').style.display = 'flex';
+}
+
+function novaQuestaoAvulsa() {
+  // Abre o modal de nova lição com tipo 'avulsa' e título sugestivo
+  const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
+  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+
+  document.getElementById('banco-licao-id').value = '';
+  document.getElementById('mo-banco-subtitulo').textContent = `QUESTÃO AVULSA · ${turmaLabel}`;
+  document.getElementById('mo-banco-titulo').textContent = 'Nova Questão Avulsa';
+  document.getElementById('banco-titulo').value = '';
+  document.getElementById('banco-texto').value = '';
+  document.getElementById('banco-texto-aureo').value = '';
+  document.getElementById('banco-resumo').value = '';
+  document.getElementById('banco-nova-turma').value = _bancoTurmaAtual;
+  document.getElementById('banco-nova-num').value = proxNum;
+  document.getElementById('banco-nova-tipo') && (document.getElementById('banco-nova-tipo').value = 'avulsa');
+
+  // Esconder campos de lição
+  document.getElementById('banco-campos-licao').style.display = 'none';
+  document.getElementById('banco-campos-grupo').style.display = 'block';
+  document.getElementById('banco-titulo-label').textContent = 'Tema / Assunto';
+
+  const box = document.getElementById('banco-perguntas-lista');
+  box.innerHTML = '';
+  box.appendChild(criarCardPerguntaBanco({ q:'', op:['','','',''], correta:0 }, 0));
+  bancoPergEditarInline(0);
+  document.getElementById('mo-banco-licao').style.display = 'flex';
+}
 
 async function carregarBancoQuestoes(turma) {
   try {
-    const { data, error } = await sbClient.from('banco_questoes')
-      .select('*').eq('turma', turma).order('num', { ascending: true });
+    var query = sbClient.from('banco_questoes')
+      .select('*')
+      .eq('turma', turma)
+      .order('num', { ascending: true });
+
+    if (_bancoTipoAtual === 'licao') {
+      query = query.or('tipo.eq.licao,tipo.is.null');
+    } else {
+      query = query.eq('tipo', _bancoTipoAtual);
+    }
+
+    const { data, error } = await query;
     if (error) throw error;
     return data || [];
   } catch(e) {
@@ -5685,6 +5926,8 @@ async function carregarBancoQuestoes(turma) {
   }
 }
 
+
+
 async function renderBancoQuestoes() {
   const box = document.getElementById('banco-lista');
   if (!box) return;
@@ -5692,29 +5935,42 @@ async function renderBancoQuestoes() {
   _bancoLicoes = await carregarBancoQuestoes(_bancoTurmaAtual);
 
   if (!_bancoLicoes.length) {
+    const tipoVazio = { licao:'lição', quiz:'quiz', simulado:'simulado', avulsa:'questão avulsa' }[_bancoTipoAtual] || 'item';
+    const iconeVazio = { licao:'📚', quiz:'⚡', simulado:'🔄', avulsa:'📌' }[_bancoTipoAtual] || '📚';
     box.innerHTML = `<div class="empty">
-      <div class="empty-icon">📚</div>
-      <div class="empty-txt">Nenhuma lição encontrada</div>
-      <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Rode o SQL de migração no Supabase primeiro</div>
+      <div class="empty-icon">${iconeVazio}</div>
+      <div class="empty-txt">Nenhum${_bancoTipoAtual==='licao'?'a':''} ${tipoVazio} encontrado${_bancoTipoAtual==='licao'?'a':''}</div>
+      <div style="font-size:12px;color:var(--ink-soft);margin-top:8px">Clique no botão acima para criar</div>
     </div>`;
     return;
   }
 
-  const turmaLabel = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' }[_bancoTurmaAtual];
+  const tipoPrefix = { licao:'Lição', quiz:'Quiz', simulado:'Simulado', avulsa:'Avulsa' }[_bancoTipoAtual] || 'Item';
+  const corBadge = { criancas:'var(--tc-bg);color:var(--tc)', jovens:'var(--tj-bg);color:var(--tj)', adultos:'var(--ta-bg);color:var(--ta)' }[_bancoTurmaAtual] || 'var(--tc-bg);color:var(--tc)';
+
   box.innerHTML = _bancoLicoes.map(l => {
     const pergs = l.perguntas || [];
+    const subtitulo = _bancoTipoAtual === 'licao'
+      ? `${tipoPrefix} ${l.num} · ${l.data_licao || ''}`
+      : `${tipoPrefix} ${l.num}`;
+    const detalhes = _bancoTipoAtual === 'licao'
+      ? `<div style="font-size:12px;color:var(--ink-soft)">${l.texto || ''}</div>
+         <div style="font-size:11px;color:var(--ink-soft);margin-top:2px;font-style:italic">${(l.texto_aureo||'').substring(0,80)}${(l.texto_aureo||'').length>80?'...':''}</div>`
+      : '';
     return `<div class="card" style="margin-bottom:10px">
       <div style="display:flex;align-items:flex-start;gap:8px">
         <div style="flex:1;min-width:0">
-          <div style="font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.06em">Lição ${l.num} · ${l.data_licao || ''}</div>
+          <div style="font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.06em">${subtitulo}</div>
           <div style="font-weight:700;font-size:15px;color:var(--ink);margin:2px 0">${l.titulo}</div>
-          <div style="font-size:12px;color:var(--ink-soft)">${l.texto || ''}</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px;font-style:italic;line-height:1.4">${(l.texto_aureo||'').substring(0,80)}${(l.texto_aureo||'').length>80?'...':''}</div>
-          <div style="margin-top:6px;display:flex;align-items:center;gap:6px">
-            <span style="background:var(--tc-bg);color:var(--tc);font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${pergs.length} pergunta(s)</span>
+          ${detalhes}
+          <div style="margin-top:8px;display:flex;align-items:center;gap:6px">
+            <span style="background:${corBadge};font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${pergs.length} pergunta(s)</span>
           </div>
         </div>
-        <button class="btn btn-ou btn-sm" onclick="abrirEditarLicao('${l.id}')" style="flex-shrink:0">✎ Editar</button>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button onclick="abrirEditarLicao('${l.id}')" style="display:flex;align-items:center;gap:5px;padding:7px 12px;background:white;border:1px solid var(--cb);border-radius:8px;color:var(--ink);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">✎ Editar</button>
+          <button onclick="excluirLicaoBanco('${l.id}','${l.titulo.replace(/'/g,"\\'")}',${l.num})" style="display:flex;align-items:center;gap:5px;padding:7px 12px;background:var(--red-bg);border:1px solid #f0c0c0;border-radius:8px;color:var(--red);font-size:12px;font-weight:600;cursor:pointer;white-space:nowrap">🗑 Excluir</button>
+        </div>
       </div>
     </div>`;
   }).join('');
@@ -5734,10 +5990,61 @@ function selBancoTurma(turma, el) {
   renderBancoQuestoes();
 }
 
+function novaLicaoBanco() {
+  // Calcular próximo número de lição
+  const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
+  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+
+  document.getElementById('banco-licao-id').value = ''; // vazio = nova lição
+  document.getElementById('mo-banco-subtitulo').textContent = `NOVA LIÇÃO · ${turmaLabel}`;
+  document.getElementById('mo-banco-titulo').textContent = 'Nova Lição';
+  document.getElementById('banco-titulo').value = '';
+  document.getElementById('banco-texto').value = '';
+  document.getElementById('banco-texto-aureo').value = '';
+  document.getElementById('banco-resumo').value = '';
+  // Campo oculto para turma e num
+  document.getElementById('banco-nova-turma').value = _bancoTurmaAtual;
+  document.getElementById('banco-nova-num').value = proxNum;
+  document.getElementById('banco-nova-tipo') && (document.getElementById('banco-nova-tipo').value = 'licao');
+
+  // Mostrar campos de lição
+  document.getElementById('banco-campos-licao').style.display = 'block';
+  document.getElementById('banco-campos-grupo').style.display = 'none';
+  document.getElementById('banco-titulo-label').textContent = 'Título';
+
+  const box = document.getElementById('banco-perguntas-lista');
+  box.innerHTML = '';
+  // Começa sem questões — usuário adiciona clicando em + Nova questão
+
+  document.getElementById('mo-banco-licao').style.display = 'flex';
+}
+
+async function excluirLicaoBanco(id, titulo, num) {
+  showConfirm('Excluir lição?', `Lição ${num}: "${titulo}" será excluída permanentemente.`, async () => {
+    try {
+      const { error } = await sbClient.from('banco_questoes').delete().eq('id', id);
+      if (error) throw error;
+      toast(`Lição ${num} excluída! ✦`, 'ok');
+      renderBancoQuestoes();
+    } catch(e) { toast('Erro ao excluir: ' + e.message, 'er'); }
+  }, 'red');
+}
+
+
 function abrirEditarLicao(id) {
   const l = _bancoLicoes.find(x => x.id === id);
   if (!l) return;
   document.getElementById('banco-licao-id').value = id;
+  document.getElementById('banco-nova-turma').value = l.turma;
+  document.getElementById('banco-nova-num').value = l.num;
+  document.getElementById('banco-nova-tipo').value = l.tipo || 'licao';
+
+  // Mostrar/esconder campos conforme tipo
+  const ehLicao = !l.tipo || l.tipo === 'licao';
+  document.getElementById('banco-campos-licao').style.display = ehLicao ? 'block' : 'none';
+  document.getElementById('banco-campos-grupo').style.display = ehLicao ? 'none' : 'block';
+  const tituloLabel = { licao:'Título', quiz:'Nome do Quiz', simulado:'Nome do Simulado', avulsa:'Tema / Assunto' };
+  document.getElementById('banco-titulo-label').textContent = tituloLabel[l.tipo || 'licao'] || 'Título';
   const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[l.turma] || l.turma.toUpperCase();
   document.getElementById('mo-banco-subtitulo').textContent = `L${l.num} · ${turmaLabel} · ${l.data_licao || ''}`;
   document.getElementById('mo-banco-titulo').textContent = l.titulo;
@@ -5761,114 +6068,161 @@ function criarCardPerguntaBanco(p, i) {
 
   const wrap = document.createElement('div');
   wrap.id = 'banco-perg-' + i;
-  wrap.style.cssText = 'border:1px solid var(--cb);border-radius:14px;overflow:hidden;margin-bottom:12px';
+  wrap.className = 'questao-card';
 
-  // Header
-  const head = document.createElement('div');
-  head.style.cssText = 'display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--cream);border-bottom:1px solid var(--cb)';
-  head.innerHTML = `<div style="font-size:12px;font-weight:700;color:var(--ink-mid);display:flex;align-items:center;gap:6px">
-    <span style="width:22px;height:22px;background:var(--ink);color:var(--gold-l);border-radius:6px;display:inline-flex;align-items:center;justify-content:center;font-size:11px;font-weight:700">Q${i+1}</span>
-    Pergunta ${i+1}
-  </div>`;
-  const btnRem = document.createElement('button');
-  btnRem.style.cssText = 'padding:4px 10px;background:var(--red-bg);border:1px solid #f0c0c0;border-radius:6px;color:var(--red);font-size:11px;font-weight:600;cursor:pointer';
-  btnRem.textContent = '✕ Remover';
-  btnRem.onclick = () => removerPerguntaBanco(i);
-  head.appendChild(btnRem);
-  wrap.appendChild(head);
+  // Ops exibidas (modo visualização)
+  const opsHtml = ops.map((op, j) =>
+    `<div class="questao-card-op${j === correta ? ' correta' : ''}">${j === correta ? '✓ ' : ''}${escHtml(op)}</div>`
+  ).join('');
 
-  // Corpo
-  const body = document.createElement('div');
-  body.style.cssText = 'padding:14px';
+  wrap.innerHTML = `
+    <div class="questao-card-head">
+      <div class="questao-card-num">Q${i+1}</div>
+      <div class="questao-card-txt">${p.q ? escHtml(p.q) : '<span style="color:var(--ink-soft);font-style:italic;font-size:13px">Nova questão...</span>'}</div>
+      <div class="questao-card-acts">
+        <button class="btn-ic" onclick="bancoPergEditarInline(${i})" title="Editar">✎</button>
+        <button class="btn-ic danger" onclick="removerPerguntaBanco(${i})" title="Remover">✕</button>
+      </div>
+    </div>
+    ${p.q ? `<div class="questao-card-ops">${opsHtml}</div>` : ''}
+  `;
 
-  // Campo pergunta
-  const labelQ = document.createElement('label');
-  labelQ.style.cssText = 'font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:4px';
-  labelQ.textContent = 'Pergunta';
-  const ta = document.createElement('textarea');
-  ta.className = 'fc';
-  ta.id = 'bpq-' + i;
-  ta.rows = 2;
-  ta.style.cssText = 'width:100%;font-size:13px;resize:none;margin-bottom:10px';
-  ta.value = p.q || '';
-  body.appendChild(labelQ);
-  body.appendChild(ta);
-
-  // Label alternativas
-  const labelA = document.createElement('label');
-  labelA.style.cssText = 'font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px';
-  labelA.innerHTML = 'Alternativas <span style="color:var(--tc)">· clique no ✓ para marcar a correta</span>';
-  body.appendChild(labelA);
-
-  // Alternativas via DOM — .value nunca passa por innerHTML, aspas nunca quebram
-  ops.forEach((op, j) => {
-    const isC = j === correta;
-    const row = document.createElement('div');
-    row.style.cssText = 'display:flex;align-items:center;gap:8px;margin-bottom:6px';
-
-    const lbl = document.createElement('label');
-    lbl.title = 'Marcar como correta';
-    lbl.style.cssText = `width:28px;height:28px;border-radius:8px;border:2px solid ${isC?'var(--tc)':'var(--cb)'};background:${isC?'var(--tc-bg)':'white'};display:flex;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;font-size:13px;transition:all .15s`;
-
-    const radio = document.createElement('input');
-    radio.type = 'radio';
-    radio.name = 'bpcorreta-' + i;
-    radio.value = j;
-    radio.checked = isC;
-    radio.style.display = 'none';
-    radio.onchange = () => atualizarRadioBanco(i);
-
-    const icone = document.createElement('span');
-    if (isC) { icone.style.cssText = 'color:var(--tc);font-weight:700'; icone.textContent = '✓'; }
-    else { icone.style.cssText = 'color:var(--cb);font-size:10px'; icone.textContent = String(j+1); }
-
-    lbl.appendChild(radio);
-    lbl.appendChild(icone);
-
-    const inp = document.createElement('input');
-    inp.className = 'fc';
-    inp.id = 'bpop-' + i + '-' + j;
-    inp.placeholder = 'Alternativa ' + (j+1);
-    inp.style.cssText = 'flex:1;margin:0;font-size:13px;' + (isC ? 'border-color:var(--tc);background:var(--tc-bg)' : '');
-    inp.value = op; // .value direto — sem HTML, sem problema de aspas
-
-    row.appendChild(lbl);
-    row.appendChild(inp);
-    body.appendChild(row);
-  });
-
-  wrap.appendChild(body);
+  // Guardar dados no elemento para uso na edição
+  wrap._dadosP = { q: p.q || '', op: ops, correta };
   return wrap;
 }
 
-function renderPerguntaBanco(p, i) {
-  return criarCardPerguntaBanco(p, i).outerHTML;
-}
+function bancoPergEditarInline(i) {
+  // Fechar qualquer form aberto
+  document.querySelectorAll('.questao-form').forEach(f => f.remove());
+  document.querySelectorAll('.questao-card').forEach(c => c.classList.remove('editando'));
 
-function atualizarRadioBanco(i) {
   const card = document.getElementById('banco-perg-' + i);
   if (!card) return;
-  const checked = card.querySelector('input[name="bpcorreta-'+i+'"]:checked');
-  const correta = checked ? parseInt(checked.value) : 0;
-  const labels = card.querySelectorAll('label[title="Marcar como correta"]');
-  const inputs = [0,1,2,3].map(j => document.getElementById('bpop-'+i+'-'+j));
-  labels.forEach((lbl, j) => {
-    const isCorreta = j === correta;
-    lbl.style.borderColor = isCorreta ? 'var(--tc)' : 'var(--cb)';
-    lbl.style.background = isCorreta ? 'var(--tc-bg)' : 'white';
-    lbl.innerHTML = '<input type="radio" name="bpcorreta-'+i+'" value="'+j+'" '+(isCorreta?'checked':'')+' style="display:none" onchange="atualizarRadioBanco('+i+')">'
-      + (isCorreta ? '<span style="color:var(--tc);font-weight:700">✓</span>' : '<span style="color:var(--cb);font-size:10px">'+(j+1)+'</span>');
-    if (inputs[j]) {
-      inputs[j].style.borderColor = isCorreta ? 'var(--tc)' : '';
-      inputs[j].style.background = isCorreta ? 'var(--tc-bg)' : '';
+  card.classList.add('editando');
+
+  // Pegar dados do card
+  const qTxt = card.querySelector('.questao-card-txt')?.textContent || '';
+  const ops = [0,1,2,3].map(j => {
+    const inp = document.getElementById(`bpop-${i}-${j}`);
+    if (inp) return inp.value;
+    // Fallback: pegar das ops exibidas
+    const opEls = card.querySelectorAll('.questao-card-op');
+    return opEls[j] ? opEls[j].textContent.replace(/^✓ /, '') : '';
+  });
+  const corretaEl = card.querySelector('.questao-card-op.correta');
+  const opsList = Array.from(card.querySelectorAll('.questao-card-op'));
+  const correta = opsList.indexOf(corretaEl);
+
+  const form = document.createElement('div');
+  form.className = 'questao-form';
+  form.id = 'qform-banco-' + i;
+  form.innerHTML = `
+    <div class="questao-form-titulo">Editando Questão ${i+1}</div>
+    <label class="questao-form-label">Enunciado</label>
+    <textarea id="bqf-enunciado-${i}" rows="3" style="display:block;width:100%;padding:8px 10px;border:1.5px solid var(--cb);border-radius:var(--rsm);font-size:13px;box-sizing:border-box;margin-bottom:8px;font-family:Outfit,sans-serif;resize:vertical">${escHtml(qTxt)}</textarea>
+    ${_buildOpInputs('bqf-ed-' + i, ops, correta >= 0 ? correta : 0)}
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-gold btn-sm" onclick="bancoPergSalvarInline(${i})">✓ Salvar</button>
+      <button class="btn btn-ou btn-sm" onclick="bancoPergCancelarInline(${i})">Cancelar</button>
+    </div>
+  `;
+  card.after(form);
+  const ta = document.getElementById(`bqf-enunciado-${i}`);
+  if (ta) ta.focus();
+}
+
+async function bancoPergSalvarInline(i) {
+  const ta = document.getElementById(`bqf-enunciado-${i}`);
+  const enunciado = ta ? ta.value.trim() : '';
+  if (!enunciado) { toast('Digite o enunciado', 'er'); return; }
+
+  const ops = [0,1,2,3].map(j => {
+    const el = document.getElementById(`bqf-ed-${i}-op-${j}`);
+    return el ? el.value.trim() : '';
+  });
+  if (ops.some(o => !o)) { toast('Preencha todas as 4 alternativas', 'er'); return; }
+
+  const hid = document.getElementById(`bqf-ed-${i}-correta`);
+  const correta = hid ? parseInt(hid.value) : 0;
+  const a = ops[correta] || ops[0];
+
+  // Atualizar dados no array de perguntas coletando tudo do DOM
+  const licaoId = document.getElementById('banco-licao-id').value;
+  const box = document.getElementById('banco-perguntas-lista');
+  const cards = box.querySelectorAll('.questao-card');
+
+  // Coletar todas as perguntas atuais — esta questão usa os dados novos
+  const todasPerguntas = [];
+  cards.forEach((card, idx) => {
+    if (idx === i) {
+      todasPerguntas.push({ q: enunciado, a, correta, op: ops });
+    } else {
+      const qT = card.querySelector('.questao-card-txt')?.textContent || '';
+      const opEls = card.querySelectorAll('.questao-card-op');
+      const corretaEl = card.querySelector('.questao-card-op.correta');
+      const opArr = Array.from(opEls).map(el => el.textContent.replace(/^✓ /, ''));
+      const crt = Array.from(opEls).indexOf(corretaEl);
+      todasPerguntas.push({ q: qT, a: opArr[crt >= 0 ? crt : 0] || opArr[0], correta: crt >= 0 ? crt : 0, op: opArr });
     }
   });
+
+  if (licaoId) {
+    try {
+      const { error } = await sbClient.from('banco_questoes')
+        .update({ perguntas: todasPerguntas, updated_at: new Date().toISOString() })
+        .eq('id', licaoId);
+      if (error) throw error;
+      const licaoLocal = _bancoLicoes.find(x => x.id === licaoId);
+      if (licaoLocal) licaoLocal.perguntas = todasPerguntas;
+      toast('Questão salva! ✦', 'ok');
+    } catch(e) { toast('Erro: ' + e.message, 'er'); return; }
+  }
+
+  bancoPergCancelarInline(i);
+
+  // Atualizar o card visualmente
+  const card = document.getElementById('banco-perg-' + i);
+  if (card) {
+    card.querySelector('.questao-card-txt').textContent = enunciado;
+    const opsHtml = ops.map((op, j) =>
+      `<div class="questao-card-op${j === correta ? ' correta' : ''}">${j === correta ? '✓ ' : ''}${escHtml(op)}</div>`
+    ).join('');
+    card.querySelector('.questao-card-ops').innerHTML = opsHtml;
+  }
 }
+
+function bancoPergCancelarInline(i) {
+  const form = document.getElementById('qform-banco-' + i);
+  if (form) form.remove();
+  const card = document.getElementById('banco-perg-' + i);
+  if (card) card.classList.remove('editando');
+}
+
+// Manter compatibilidade com atualizarRadioBanco
+function atualizarRadioBanco_legacy(i) {}
+
+// Helper escHtml se não existir
+function escHtml(s) {
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// Stub para compatibilidade (não mais usado)
+function renderPerguntaBanco(p, i) { return criarCardPerguntaBanco(p, i).outerHTML; }
 
 function addPerguntaBanco() {
   const box = document.getElementById('banco-perguntas-lista');
-  const idx = box.querySelectorAll('[id^="banco-perg-"]').length;
-  box.appendChild(criarCardPerguntaBanco({ q:'', op:['','','',''], correta:0 }, idx));
+  const idx = box.querySelectorAll('.questao-card').length;
+
+  // Criar card visual mínimo (vazio) e já abrir edição inline
+  const card = criarCardPerguntaBanco({ q:'', op:['','','',''], correta:0 }, idx);
+  box.appendChild(card);
+
+  // Abrir o formulário de edição imediatamente
+  bancoPergEditarInline(idx);
+
+  // Scroll até o novo card
+  setTimeout(() => card.scrollIntoView({ behavior:'smooth', block:'center' }), 100);
 }
 
 function removerPerguntaBanco(i) {
@@ -5888,19 +6242,31 @@ async function salvarLicaoBanco() {
   const titulo = document.getElementById('banco-titulo').value.trim();
   if (!titulo) { toast('Digite o título da lição', 'er'); return; }
 
-  // Coletar perguntas
+  // Coletar perguntas dos cards (novo formato visual)
   const box = document.getElementById('banco-perguntas-lista');
-  const cards = box.querySelectorAll('[id^="banco-perg-"]');
+  const cards = box.querySelectorAll('.questao-card');
   const perguntas = [];
-  let idx = 0;
   cards.forEach((card, i) => {
-    const q = document.getElementById(`bpq-${i}`)?.value?.trim();
-    if (!q) return;
-    const ops = [0,1,2,3].map(j => (document.getElementById(`bpop-${i}-${j}`)?.value?.trim() || ''));
-    const radio = card.querySelector(`input[name="bpcorreta-${i}"]:checked`);
-    const correta = radio ? parseInt(radio.value) : 0;
-    const a = ops[correta] || ops[0];
-    if (a) perguntas.push({ q, a, correta, op: ops });
+    // Se o card está em edição, pegar do formulário aberto
+    const form = document.getElementById('qform-banco-' + i);
+    if (form) {
+      const ta = document.getElementById(`bqf-enunciado-${i}`);
+      const q = ta ? ta.value.trim() : '';
+      if (!q) return;
+      const ops = [0,1,2,3].map(j => { const el = document.getElementById(`bqf-ed-${i}-op-${j}`); return el ? el.value.trim() : ''; });
+      const hid = document.getElementById(`bqf-ed-${i}-correta`);
+      const correta = hid ? parseInt(hid.value) : 0;
+      perguntas.push({ q, a: ops[correta] || ops[0], correta, op: ops });
+    } else {
+      // Pegar do card visual
+      const qTxt = card.querySelector('.questao-card-txt')?.textContent?.trim();
+      if (!qTxt) return;
+      const opEls = Array.from(card.querySelectorAll('.questao-card-op'));
+      const corretaEl = card.querySelector('.questao-card-op.correta');
+      const opArr = opEls.map(el => el.textContent.replace(/^✓ /, '').trim());
+      const correta = opEls.indexOf(corretaEl);
+      perguntas.push({ q: qTxt, a: opArr[correta >= 0 ? correta : 0] || opArr[0], correta: correta >= 0 ? correta : 0, op: opArr });
+    }
   });
 
   const dado = {
@@ -5912,23 +6278,35 @@ async function salvarLicaoBanco() {
     updated_at: new Date().toISOString()
   };
 
-  const { error } = await sbClient.from('banco_questoes').update(dado).eq('id', id);
-  if (error) { toast('Erro ao salvar: ' + error.message, 'er'); return; }
-
-  // Atualizar LICOES em memória para uso imediato
-  const licaoLocal = _bancoLicoes.find(x => x.id === id);
-  if (licaoLocal) {
-    Object.assign(licaoLocal, dado);
-    // Sincronizar com LICOES em memória
-    sincronizarLicaoEmMemoria(licaoLocal);
-  }
-
-  toast('Lição salva! ✦', 'ok');
-  fecharModal('mo-banco-licao');
-  renderBancoQuestoes();
+  try {
+    if (id) {
+      // EDITAR lição existente
+      const { error } = await sbClient.from('banco_questoes').update(dado).eq('id', id);
+      if (error) throw error;
+      const licaoLocal = _bancoLicoes.find(x => x.id === id);
+      if (licaoLocal) { Object.assign(licaoLocal, dado); sincronizarLicaoEmMemoria(licaoLocal); }
+      toast('Lição salva! ✦', 'ok');
+    } else {
+      // NOVA lição
+      const turma = document.getElementById('banco-nova-turma').value || _bancoTurmaAtual;
+      const num = parseInt(document.getElementById('banco-nova-num').value) || (_bancoLicoes.length + 1);
+      const tipo = document.getElementById('banco-nova-tipo')?.value || 'licao';
+      dado.turma = turma;
+      dado.num = num;
+      dado.tipo = tipo;
+      dado.created_at = new Date().toISOString();
+      const { error } = await sbClient.from('banco_questoes').insert(dado);
+      if (error) throw error;
+      toast(`Lição ${num} criada! ✦`, 'ok');
+    }
+    fecharModal('mo-banco-licao');
+    renderBancoQuestoes();
+  } catch(e) { toast('Erro ao salvar: ' + e.message, 'er'); }
 }
 
 function sincronizarLicaoEmMemoria(l) {
+  // Só sincronizar lições — ignorar quizzes, simulados e avulsas
+  if (l.tipo && l.tipo !== 'licao') return;
   // Atualizar LICOES[turma].licoes para que provas criadas usem dados atualizados
   const turmaData = LICOES[l.turma];
   if (!turmaData) return;
@@ -5952,8 +6330,10 @@ function sincronizarLicaoEmMemoria(l) {
 // Carregar lições do banco e sincronizar com LICOES em memória ao iniciar
 async function sincronizarBancoComMemoria() {
   try {
-    const { data } = await sbClient.from('banco_questoes').select('*');
-    if (!data || !data.length) return; // banco vazio — usar LICOES hardcoded
+    const { data } = await sbClient.from('banco_questoes')
+      .select('*')
+      .or('tipo.eq.licao,tipo.is.null'); // só lições — não quizzes/simulados/avulsas
+    if (!data || !data.length) return;
     for (const l of data) {
       sincronizarLicaoEmMemoria(l);
     }
@@ -8501,15 +8881,62 @@ function initSessionTimeout() {
 // ═══════════════════════════════════════════════════════════
 // LIÇÕES — CARDS VISUAIS
 // ═══════════════════════════════════════════════════════════
-function atualizarLicoesModal(editId) {
+async function atualizarLicoesModal(editId) {
   var turmaEl = document.getElementById('pv-turma');
   if (!turmaEl) return;
   var turma = turmaEl.value;
-  var dados = LICOES[turma];
   var box = document.getElementById('pv-licoes-check');
-  if (!dados || !box) return;
+  if (!box) return;
+
+  box.innerHTML = '<div style="text-align:center;padding:12px;color:var(--ink-soft);font-size:13px">⏳ Carregando lições...</div>';
+
+  // Buscar lições do Supabase (banco_questoes tipo licao ou null)
+  var licoesDB = [];
+  try {
+    var { data } = await sbClient.from('banco_questoes')
+      .select('num,titulo,data_licao,perguntas,tipo')
+      .eq('turma', turma)
+      .or('tipo.eq.licao,tipo.is.null')
+      .order('num', { ascending: true });
+    licoesDB = data || [];
+  } catch(e) {}
+
+  // Mesclar com LICOES hardcoded — DB tem prioridade se existir
+  var dadosHard = LICOES[turma];
+  var licoesHard = (dadosHard && dadosHard.licoes) ? dadosHard.licoes : [];
+
+  // Unir: começar com hardcoded, sobrescrever/adicionar com as do banco
+  var mapaDB = {};
+  licoesDB.forEach(function(l){ mapaDB[l.num] = l; });
+
+  // Todos os nums existentes (hardcoded + banco)
+  var todosNums = new Set([
+    ...licoesHard.map(function(l){ return l.num; }),
+    ...licoesDB.map(function(l){ return l.num; })
+  ]);
+  var licoesFinais = Array.from(todosNums).sort(function(a,b){ return a-b; }).map(function(num) {
+    var hard = licoesHard.find(function(l){ return l.num===num; });
+    var db = mapaDB[num];
+    if (db) {
+      return {
+        num: db.num,
+        titulo: db.titulo,
+        data: db.data_licao || (hard && hard.data) || '',
+        perguntas: db.perguntas || (hard && hard.perguntas) || []
+      };
+    }
+    return { num: hard.num, titulo: hard.titulo, data: hard.data||'', perguntas: hard.perguntas||[] };
+  });
+
+  if (!licoesFinais.length) {
+    box.innerHTML = '<div style="text-align:center;padding:12px;color:var(--ink-soft);font-size:13px">Nenhuma lição encontrada para esta turma</div>';
+    atualizarResumoProva();
+    return;
+  }
+
   var pSelecionadas = editId ? (PROVAS.find(function(x){ return x.id===editId; }) && PROVAS.find(function(x){ return x.id===editId; }).licoes_selecionadas || []) : [];
-  box.innerHTML = dados.licoes.map(function(l) {
+
+  box.innerHTML = licoesFinais.map(function(l) {
     var checked = pSelecionadas.indexOf(l.num) >= 0;
     var nQ = (l.perguntas||[]).length;
     return '<div class="lic-check-card' + (checked?' selecionada':'') + '" id="lic-card-'+l.num+'">'
@@ -8517,13 +8944,13 @@ function atualizarLicoesModal(editId) {
       + '<input type="checkbox" class="lic-check-box" value="'+l.num+'" '+(checked?'checked':'')
       + ' onchange="onLicaoCheck(this,'+l.num+')" onclick="event.stopPropagation()">'
       + '<div class="lic-check-info">'
-      + '<div class="lic-check-nome"><strong>L'+l.num+'</strong> \u2014 '+l.titulo+'</div>'
+      + '<div class="lic-check-nome"><strong>L'+l.num+'</strong> — '+l.titulo+'</div>'
       + '<div class="lic-check-meta"><span class="lic-check-badge">'+nQ+' quest'+(nQ!==1?'ões':'ão')+'</span><span>'+l.data+'</span></div>'
       + '</div>'
-      + '<button class="lic-check-ver" onclick="verQuestoesLicao(\''+turma+'\','+l.num+')" type="button">\uD83D\uDC41 Ver</button>'
+      + '<button class="lic-check-ver" onclick="verQuestoesLicao(\''+turma+'\','+l.num+')" type="button">👁 Ver</button>'
       + '</div></div>';
   }).join('');
-  // Abrir seção de lições automaticamente se estiver editando prova com lições
+
   if (pSelecionadas.length) {
     var wrap = document.getElementById('pv-licoes-wrap');
     var btn = document.getElementById('btn-toggle-licoes');
@@ -8593,6 +9020,53 @@ function verQuestoesLicao(turma, numLicao) {
   document.body.appendChild(modal);
   gestorRenderQuestoes();
 }
+
+async function verQuestoesBancoGrupo(id, titulo) {
+  // Buscar do Supabase
+  var prev = document.getElementById('modal-questoes-licao');
+  if (prev) prev.remove();
+
+  var modal = document.createElement('div');
+  modal.id = 'modal-questoes-licao';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+  modal.innerHTML = '<div style="background:white;border-radius:var(--rlg);width:100%;max-width:520px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">'
+    + '<div style="background:var(--ink);padding:16px 18px;flex-shrink:0;border-bottom:2px solid var(--gold)">'
+    + '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px">'
+    + '<div style="font-family:\'Cormorant Garamond\',serif;font-size:18px;color:white;font-weight:600">' + escHtml(titulo) + '</div>'
+    + '<button onclick="document.getElementById(\'modal-questoes-licao\').remove()" style="width:30px;height:30px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:white;font-size:16px;cursor:pointer">✕</button>'
+    + '</div></div>'
+    + '<div style="flex:1;overflow-y:auto;padding:14px 16px" id="gest-body-banco"><div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div></div>'
+    + '</div>';
+  modal.addEventListener('click', function(e){ if (e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+
+  try {
+    var { data } = await sbClient.from('banco_questoes').select('perguntas,titulo').eq('id', id).single();
+    var body = document.getElementById('gest-body-banco');
+    if (!body) return;
+    var pergs = (data && data.perguntas) || [];
+    if (!pergs.length) {
+      body.innerHTML = '<div style="text-align:center;padding:28px 0;color:var(--ink-soft)">Nenhuma questão neste agrupamento</div>';
+      return;
+    }
+    body.innerHTML = pergs.map(function(p, i) {
+      var opsHtml = (p.op||[]).map(function(op) {
+        return '<div class="questao-card-op' + (op===p.a?' correta':'') + '">' + (op===p.a?'✓ ':'') + escHtml(op) + '</div>';
+      }).join('');
+      return '<div class="questao-card" style="margin-bottom:10px">'
+        + '<div class="questao-card-head">'
+        + '<div class="questao-card-num">Q' + (i+1) + '</div>'
+        + '<div class="questao-card-txt">' + escHtml(p.q) + '</div>'
+        + '</div>'
+        + '<div class="questao-card-ops">' + opsHtml + '</div>'
+        + '</div>';
+    }).join('');
+  } catch(e) {
+    var body = document.getElementById('gest-body-banco');
+    if (body) body.innerHTML = '<div style="color:var(--red);padding:12px">Erro ao carregar questões.</div>';
+  }
+}
+
 
 function gestorRenderQuestoes() {
   var body = document.getElementById('gest-body');
@@ -8773,14 +9247,35 @@ function gestorConfirmarNova() {
   toast('Questão adicionada! ✦','ok');
 }
 
-function gestorSalvarAlteracoes() {
+async function gestorSalvarAlteracoes() {
   var formAberto = document.querySelector('.questao-form');
   if (formAberto) { toast('Salve ou cancele a edição em andamento','er'); formAberto.scrollIntoView({behavior:'smooth',block:'center'}); return; }
+
+  // Atualizar memória local
   var dados = LICOES[_gestorTurma];
   if (dados) {
     var licIdx = dados.licoes.findIndex(function(l){ return l.num===_gestorLicao; });
     if (licIdx >= 0) dados.licoes[licIdx].perguntas = JSON.parse(JSON.stringify(_gestorPergs));
   }
+
+  // Salvar no Supabase (banco_questoes)
+  try {
+    var { data: licRow, error: errBusca } = await sbClient
+      .from('banco_questoes')
+      .select('id')
+      .eq('turma', _gestorTurma)
+      .eq('num', _gestorLicao)
+      .single();
+    if (!errBusca && licRow) {
+      await sbClient.from('banco_questoes')
+        .update({ perguntas: _gestorPergs, updated_at: new Date().toISOString() })
+        .eq('id', licRow.id);
+      // Atualizar cache do banco
+      var licaoLocal = _bancoLicoes.find(function(l){ return l.id === licRow.id; });
+      if (licaoLocal) licaoLocal.perguntas = JSON.parse(JSON.stringify(_gestorPergs));
+    }
+  } catch(e) { console.warn('Aviso: não foi possível salvar no banco_questoes:', e.message); }
+
   _gestorAlterado = false;
   // Atualizar badge
   var card = document.getElementById('lic-card-'+_gestorLicao);
@@ -8789,7 +9284,7 @@ function gestorSalvarAlteracoes() {
     if (badge) badge.textContent = _gestorPergs.length + ' quest' + (_gestorPergs.length!==1?'ões':'ão');
   }
   atualizarResumoProva();
-  toast('Questões salvas! ' + _gestorPergs.length + ' questão(ões) na Lição '+_gestorLicao,'ok');
+  toast('Questões salvas! ✦ ' + _gestorPergs.length + ' questão(ões) na Lição '+_gestorLicao,'ok');
   var modal = document.getElementById('modal-questoes-licao');
   if (modal) modal.remove();
 }
