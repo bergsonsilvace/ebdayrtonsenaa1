@@ -380,9 +380,11 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 /* QUIZ */
 .quiz-opt{display:block;width:100%;text-align:left;padding:11px 14px;border:1.5px solid var(--cb);border-radius:var(--rsm);background:white;font-size:13px;margin-bottom:7px;cursor:pointer;transition:all .2s;line-height:1.4}
 .quiz-opt:hover{border-color:var(--gold);background:var(--gold-pale)}
+.quiz-opt.marcada{border-color:var(--tj);background:var(--tj-bg);color:var(--tj);font-weight:600}
 .quiz-opt.certo{border-color:var(--tc);background:var(--tc-bg);color:var(--tc);font-weight:600}
 .quiz-opt.errado{border-color:var(--red);background:var(--red-bg);color:var(--red)}
-.quiz-opt.neutro{opacity:.5}
+.quiz-opt.neutro{opacity:.45;cursor:pointer}
+.quiz-opt.neutro:hover{opacity:1;border-color:var(--gold);background:var(--gold-pale)}
 .quiz-dot{width:10px;height:10px;border-radius:50%;background:var(--cb)}
 .quiz-dot.c{background:var(--tc)}.quiz-dot.e{background:var(--red)}.quiz-dot.p{background:var(--gold)}
 .qr-item{padding:10px 0;border-bottom:1px solid var(--cb)}
@@ -874,6 +876,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
       </div>
       <div id="dash-aprovacao-notif"></div>
+      <div id="dash-contestacoes-notif"></div>
       <div id="dash-provas-notif"></div>
       <div id="dash-mural"></div>
       <div id="dash-aniversariantes"></div>
@@ -1069,6 +1072,17 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <button class="share-btn" onclick="compartilharRelatorio(aulaAtualId)" style="padding:9px 14px;font-size:12px;border-radius:var(--rsm);width:auto">📲 WhatsApp</button>
         <button class="btn btn-red btn-sm" onclick="excluirAulaAtual()" style="margin-left:auto">🗑 Excluir aula</button>
       </div>
+    </div>
+
+    <!-- CONTESTAÇÕES -->
+    <div id="pg-contestacoes" class="page">
+      <div class="ph"><h2>Contestações de <em>Quiz</em></h2><p>Revisão de solicitações dos alunos</p></div>
+      <div style="display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap">
+        <button id="cont-tab-pendente" onclick="selContestacaoTab('pendente',this)" style="padding:6px 14px;border:1.5px solid var(--gold);background:var(--gold-pale);border-radius:20px;font-size:12px;font-weight:700;color:var(--gold-deep);cursor:pointer">⏳ Pendentes</button>
+        <button id="cont-tab-aprovada" onclick="selContestacaoTab('aprovada',this)" style="padding:6px 14px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">✓ Aprovadas</button>
+        <button id="cont-tab-rejeitada" onclick="selContestacaoTab('rejeitada',this)" style="padding:6px 14px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">✕ Rejeitadas</button>
+      </div>
+      <div id="lista-contestacoes"></div>
     </div>
 
     <!-- HISTÓRICO -->
@@ -1360,6 +1374,78 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="fg" style="margin:0"><label class="fl">Meta — Adultos</label><input class="fc" type="number" id="cfg-meta-a" placeholder="Ex: 30" min="0"></div>
       </div>
       <button class="btn btn-gold btn-full" onclick="salvarConfig()" style="margin-bottom:12px">✓ Salvar configurações</button>
+
+      <!-- REGRAS DO RANKING -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="chdr">
+          <div class="ct">🏆 Regras do Ranking</div>
+          <button class="btn btn-ou btn-sm" onclick="carregarRegraRanking()">↺ Recarregar</button>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
+          Configure a pontuação de cada atividade. As alterações valem para respostas futuras.<br>
+          Use o botão <strong>Recalcular</strong> para aplicar às respostas já registradas.
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">📅 Presença</div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Pontos por presença na aula</label>
+          <input class="fc" type="number" id="rk-pts-presenca" value="10" min="0" placeholder="10">
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">⚡ Quiz da Lição</div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Pontos no dia da aula</label><input class="fc" type="number" id="rk-pts-quiz-dia0" value="10" min="0"></div>
+          <div class="fg"><label class="fl">Decréscimo por dia</label><input class="fc" type="number" id="rk-pts-quiz-dec" value="1" min="0"></div>
+        </div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Quiz disponível por quantos dias após a aula</label>
+          <input class="fc" type="number" id="rk-quiz-dias" value="6" min="1" max="13">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: 6 dias → fica disponível segunda a sábado (antes da próxima aula)</div>
+        </div>
+
+        <div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">📝 Prova / Quiz (Avaliações)</div>
+        <div class="fg" style="margin-bottom:14px">
+          <label class="fl">Fórmula: nota × fator</label>
+          <input class="fc" type="number" id="rk-pts-prova-fator" value="10" min="1" step="0.5">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: nota 8.5 × 10 = <strong>85 pts</strong> &nbsp;|&nbsp; nota 10 × 10 = <strong>100 pts</strong></div>
+        </div>
+
+        <button onclick="salvarRegraRanking()" style="width:100%;padding:10px;background:var(--gold);border:none;border-radius:8px;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">✓ Salvar Regras</button>
+      </div>
+
+      <!-- LIBERAÇÕES ESPECIAIS -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="chdr">
+          <div class="ct">🔓 Liberações Especiais de Quiz</div>
+          <button class="btn btn-ou btn-sm" onclick="carregarLiberacoes()">↺ Atualizar</button>
+        </div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
+          Libere uma lição específica por N dias extras com pontuação fixa. Útil quando alunos não sabiam do prazo.
+        </div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Turma</label>
+            <select class="fc" id="lib-turma">
+              <option value="criancas">Crianças</option>
+              <option value="jovens">Jovens</option>
+              <option value="adultos">Adultos</option>
+            </select>
+          </div>
+          <div class="fg"><label class="fl">Lição nº</label>
+            <input class="fc" type="number" id="lib-licao" min="1" max="13" placeholder="Ex: 1">
+          </div>
+        </div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Liberar por quantos dias</label>
+            <input class="fc" type="number" id="lib-dias" min="1" max="30" placeholder="Ex: 2" value="2">
+          </div>
+          <div class="fg"><label class="fl">Pontuação fixa (pts)</label>
+            <input class="fc" type="number" id="lib-pts" min="0" placeholder="Ex: 10" value="10">
+          </div>
+        </div>
+        <button onclick="salvarLiberacao()" style="width:100%;padding:10px;background:var(--ink);border:none;border-radius:8px;color:white;font-size:13px;font-weight:700;cursor:pointer;margin-bottom:10px">🔓 Liberar Quiz</button>
+        <div id="lista-liberacoes"></div>
+      </div>
+
       <div class="card" style="margin-bottom:20px">
         <div class="chdr"><div class="ct">Log de acessos</div><button class="btn btn-ou btn-sm" onclick="carregarLogAcessos()">↺ Atualizar</button></div>
         <div id="lista-log-acessos"><div class="empty-txt" style="padding:10px 0;color:var(--ink-soft)">Clique em Atualizar para carregar</div></div>
@@ -1407,7 +1493,14 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div style="font-size:15px;font-weight:500;line-height:1.5;margin-bottom:16px" id="quiz-pergunta"></div>
           <div id="quiz-opcoes"></div>
         </div>
-        <button class="btn btn-gold btn-full" id="quiz-next-btn" onclick="proximaPergunta()" style="display:none;margin-bottom:14px">Próxima →</button>
+        <div style="display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap">
+          <button class="btn btn-ou" id="quiz-prev-btn" onclick="perguntaAnterior()" style="display:none">← Anterior</button>
+          <button class="btn btn-gold btn-full" id="quiz-next-btn" onclick="proximaPergunta()" style="display:none">Próxima →</button>
+          <button class="btn btn-ou btn-full" id="quiz-rev-btn" onclick="quizRevisarRespostas()" style="display:none">📋 Revisar</button>
+          <button class="btn btn-gold btn-full" id="quiz-fin-btn" onclick="mostrarResultado()" style="display:none">✓ Finalizar Quiz</button>
+        </div>
+        <!-- Painel de revisão do quiz -->
+        <div id="quiz-revisao-painel" style="display:none;margin-bottom:14px"></div>
       </div>
       <div id="quiz-resultado" style="display:none">
         <div class="card" style="background:var(--ink);border-color:var(--ink);text-align:center;padding:28px;margin-bottom:14px">
@@ -1553,16 +1646,34 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- FAZER PROVA (aluno) -->
     <div id="pg-fazer-prova" class="page">
+      <!-- CRONÔMETRO -->
       <div id="fp-crono" style="display:none">
         <div class="cronometro" id="fp-crono-display">00:00</div>
       </div>
+      <!-- HEADER DA PROVA -->
       <div class="card" style="background:var(--ink);border-color:var(--ink);margin-bottom:14px">
         <div style="font-size:10px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-l);font-weight:600;margin-bottom:4px" id="fp-tipo"></div>
         <div style="font-family:'Cormorant Garamond',serif;font-size:20px;color:white;margin-bottom:3px" id="fp-titulo"></div>
         <div style="font-size:12px;color:rgba(255,255,255,.4)" id="fp-meta"></div>
       </div>
-      <div id="fp-questoes"></div>
-      <button class="btn btn-gold btn-full" onclick="entregarProva()" id="fp-entregar-btn" style="margin-bottom:20px">✓ Entregar prova</button>
+      <!-- PROGRESSO DAS QUESTÕES -->
+      <div id="fp-progresso" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px"></div>
+      <!-- QUESTÃO ATUAL (modo uma por vez) -->
+      <div id="fp-questao-atual"></div>
+      <!-- NAVEGAÇÃO -->
+      <div style="display:flex;gap:8px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
+        <button id="fp-btn-anterior" onclick="fpNavegar(-1)" style="display:none;padding:10px 18px;background:white;border:1px solid var(--cb);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)">← Anterior</button>
+        <div style="flex:1;text-align:center;font-size:12px;color:var(--ink-soft)" id="fp-nav-label"></div>
+        <button id="fp-btn-proxima" onclick="fpNavegar(1)" style="padding:10px 18px;background:var(--ink);border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:white">Próxima →</button>
+      </div>
+      <!-- BOTÕES FINAIS (só aparecem na última questão) -->
+      <div id="fp-botoes-finais" style="display:none;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button onclick="fpNavegar(-1)" style="padding:11px 16px;background:white;border:1px solid var(--cb);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)">← Anterior</button>
+        <button onclick="fpRevisarRespostas()" style="flex:1;padding:11px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--gold-deep)">📋 Revisar</button>
+        <button onclick="entregarProva()" style="flex:1;padding:11px;background:var(--gold);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)">✓ Finalizar</button>
+      </div>
+      <!-- PAINEL DE REVISÃO (oculto por padrão) -->
+      <div id="fp-revisao-painel" style="display:none;margin-bottom:20px"></div>
     </div>
 
     <!-- RESULTADO PROVA ALUNO -->
@@ -2168,6 +2279,9 @@ async function carregarConfigs() {
     const el = document.getElementById('l-nome-igreja');
     if (el) el.textContent = cfgNomeIgreja;
   } catch(e) {}
+  // Carregar regras do ranking em background
+  carregarRegraRanking().catch(() => {});
+  carregarLiberacoes().catch(() => {});
 }
 
 // ── LOGIN ──
@@ -2278,7 +2392,7 @@ function construirNav() {
     items.push({id:'dash',label:'Início'},{id:'freq',label:'Aula'},{id:'licoes',label:'Lições'},{id:'calendario',label:'Calendário'});
   // MODO PROFESSOR (para admin que quer ver como professor)
   } else if (modo === 'professor' && !['professor','professor_convidado'].includes(p)) {
-    items.push({id:'dash',label:'Início'},{id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'historico',label:'Histórico'});
+    items.push({id:'dash',label:'Início'},{id:'alunos',label:'Alunos'},{id:'freq',label:'Aula'},{id:'ranking',label:'Ranking'},{id:'licoes',label:'Lições'},{id:'provas',label:'Provas'},{id:'calendario',label:'Calendário'},{id:'escalas',label:'Escalas'},{id:'contestacoes',label:'Contestações'},{id:'historico',label:'Histórico'});
   // MODO ADMIN / PROFESSOR PADRÃO
   } else {
     items.push({id:'dash',label:'Início'},{id:'mural',label:'Avisos'});
@@ -2289,7 +2403,7 @@ function construirNav() {
       if (USER.tambem_aluno && USER.turma_aluno) items.push({id:'meu-progresso-prof',label:'Meu Progresso'});
       if (USER.eh_responsavel_tb) items.push({id:'responsavel',label:'Meus Filhos'});
     }
-    items.push({id:'historico',label:'Histórico'});
+    items.push({id:'contestacoes',label:'Contestações'},{id:'historico',label:'Histórico'});
   }
 
   const nav = document.getElementById('tb-nav');
@@ -2621,6 +2735,7 @@ async function _navTo(id) {
   }
   else if (id === 'professores') { await renderProfessores(); }
   else if (id === 'freq') { renderFreq(); popularDropdownLicao(curTurmaFreq); }
+  else if (id === 'contestacoes') renderContestacoes('pendente');
   else if (id === 'historico') { cacheAulas = await sbGet('aulas',{},'data',false); renderHist(); }
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
   else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); await renderRanking(); }
@@ -2745,6 +2860,7 @@ async function renderDash() {
   renderMuralDash();
   iniciarCountdown();
   renderProvasNotifDash();
+  renderContestacoesDashNotif();
   renderAprovacaoNotifDash();
   renderAvisoProvasVencendo();
 }
@@ -3925,12 +4041,13 @@ function copiarSQLQuiz() {
 async function carregarPaginaConfig() {
   document.getElementById('cfg-nome-igreja').value = cfgNomeIgreja;
   document.getElementById('cfg-nome-ebd').value = cfgNomeEBD;
-  // Metas
   const metas = await sbGet('metas');
   ['criancas','jovens','adultos'].forEach(t => {
     const m = metas.find(x=>x.turma===t);
     document.getElementById('cfg-meta-'+t[0]).value = m ? m.meta_assistencia : '';
   });
+  await carregarRegraRanking();
+  await carregarLiberacoes();
 }
 
 async function salvarConfig() {
@@ -4316,18 +4433,42 @@ function renderLicoes() {
   const hoje = new Date();
   const box = document.getElementById('lista-licoes');
   box.innerHTML = dados.licoes.map(lic => {
+    const maxDias = RANKING_CONFIG.quiz_dias ?? 6;
     const [d, m] = lic.data.split('/');
-    const dataLic = new Date(2026, parseInt(m)-1, parseInt(d));
-    const passou = dataLic <= hoje;
-    const ehHoje = dataLic.toDateString() === hoje.toDateString();
+    const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0, 0);
+    const hojeZero = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0, 0);
+    const passou = dataLic <= hojeZero;
+    const ehHoje = dataLic.getTime() === hojeZero.getTime();
+    const diasApos = Math.floor((hojeZero - dataLic) / 86400000);
+    const liberacao = getLiberacaoAtiva(curTurmaLicoes, lic.num);
+    const quizAtivo = liberacao ? true : diasApos >= 0 && diasApos <= maxDias;
+    const quizExpirado = !liberacao && passou && diasApos > maxDias;
+    const diasRestantes = maxDias - diasApos;
     const borderColor = passou ? '#9ecfb7' : 'var(--cb)';
+
+    let quizBadge = '';
+    if (liberacao) {
+      const expira = new Date(liberacao.expira_em);
+      const expiraFmt = expira.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
+      quizBadge = `<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:#e8d5ff;color:#6a0dad;margin-top:6px">🔓 Liberado especial · ${liberacao.pts_fixo} pts · até ${expiraFmt}</div>`;
+    } else if (ehHoje || diasApos === 0) {
+      quizBadge = `<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--gold);color:var(--ink);margin-top:6px">⚡ Quiz disponível hoje! +${RANKING_CONFIG.pts_quiz_dia0 ?? 10} pts</div>`;
+    } else if (quizAtivo) {
+      const pts = Math.max(0, (RANKING_CONFIG.pts_quiz_dia0 ?? 10) - diasApos * (RANKING_CONFIG.pts_quiz_dec ?? 1));
+      quizBadge = `<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--tc-bg);color:var(--tc);margin-top:6px">✦ Quiz disponível · +${pts} pts · expira em ${diasRestantes} dia(s)</div>`;
+    } else if (quizExpirado) {
+      quizBadge = `<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:600;background:#f0f0f0;color:#888;margin-top:6px">Quiz encerrado</div>`;
+    } else {
+      quizBadge = `<div style="font-size:10px;color:var(--ink-soft);margin-top:5px">📅 ${lic.data}</div>`;
+    }
+
     return `<div onclick="abrirLicao('${curTurmaLicoes}',${lic.num})" style="background:white;border:1px solid ${borderColor};border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='${borderColor}';this.style.transform=''">
       <div style="background:var(--ink);color:var(--gold-l);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${lic.num}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:600;margin-bottom:3px;color:var(--ink);word-break:break-word;white-space:normal">${lic.titulo}${ehHoje?' 📖':''}</div>
         <div style="font-size:11px;color:var(--ink-soft);margin-bottom:5px">${lic.data} · <span style="color:var(--gold-deep);font-weight:600">${lic.texto}</span></div>
         <div style="font-size:12px;color:var(--ink-mid);line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${lic.resumo}</div>
-        ${passou?`<div style="display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;font-size:10px;font-weight:700;background:var(--tc-bg);color:var(--tc);margin-top:6px">✦ Quiz disponível</div>`:`<div style="font-size:10px;color:var(--ink-soft);margin-top:5px">📅 ${lic.data}</div>`}
+        ${quizBadge}
       </div>
       <div style="color:var(--ink-soft);font-size:17px;flex-shrink:0;margin-top:2px">›</div>
     </div>`;
@@ -4386,8 +4527,17 @@ async function abrirLicao(turma, num) {
   document.getElementById('lp-data').textContent = lic.data + ' · ' + lic.texto;
 
   const [d, m] = lic.data.split('/');
-  const dataLic = new Date(2026, parseInt(m)-1, parseInt(d));
-  const quizDisp = dataLic <= new Date();
+  const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0, 0);
+  const hoje = new Date();
+  const hojeZ = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0, 0);
+  const diasAposAula = Math.floor((hojeZ - dataLic) / 86400000);
+  const liberacao = getLiberacaoAtiva(turma, num);
+  const quizDisp = liberacao
+    ? true
+    : diasAposAula >= 0 && diasAposAula <= (RANKING_CONFIG.quiz_dias ?? 6);
+  const ptsPossiveis = liberacao
+    ? liberacao.pts_fixo
+    : quizDisp ? Math.max(0, (RANKING_CONFIG.pts_quiz_dia0 ?? 14) - diasAposAula * (RANKING_CONFIG.pts_quiz_dec ?? 2)) : 0;
 
   // Montar leitura semanal
   const dias = ['Segunda','Terça','Quarta','Quinta','Sexta','Sábado'];
@@ -4447,7 +4597,12 @@ async function abrirLicao(turma, num) {
 
     <!-- botão quiz -->
     <div class="lp-nav" style="margin-top:16px">
-      ${quizDisp ? `<button class="btn btn-gold" style="flex:1;justify-content:center;min-height:44px;touch-action:manipulation" onclick="fecharLicao();iniciarQuizDireto()">✦ Fazer Quiz desta Lição</button>` : `<div style="font-size:12px;color:var(--ink-soft);padding:10px;background:var(--gold-pale);border-radius:var(--rsm);width:100%;text-align:center">📅 Quiz disponível a partir de ${lic.data}</div>`}
+      ${quizDisp
+        ? `<button class="btn btn-gold" style="flex:1;justify-content:center;min-height:44px;touch-action:manipulation" onclick="fecharLicao();iniciarQuizDireto()">✦ Fazer Quiz · +${ptsPossiveis} pts</button>`
+        : diasAposAula < 0
+          ? `<div style="font-size:12px;color:var(--ink-soft);padding:10px;background:var(--gold-pale);border-radius:var(--rsm);width:100%;text-align:center">📅 Quiz disponível a partir de ${lic.data}</div>`
+          : `<div style="font-size:12px;color:#888;padding:10px;background:#f0f0f0;border-radius:var(--rsm);width:100%;text-align:center">⏰ Prazo do quiz encerrado</div>`
+      }
       ${num > 1 ? `<button class="btn btn-ou" style="min-height:44px;touch-action:manipulation" onclick="abrirLicao('${turma}',${num-1})">← Anterior</button>` : ''}
       ${num < dados.licoes.length ? `<button class="btn btn-ou" style="min-height:44px;touch-action:manipulation" onclick="abrirLicao('${turma}',${num+1})">Próxima →</button>` : ''}
     </div>
@@ -4639,6 +4794,14 @@ function iniciarQuiz() {
   document.getElementById('quiz-intro').style.display = 'none';
   document.getElementById('quiz-area').style.display = 'block';
   document.getElementById('quiz-resultado').style.display = 'none';
+  document.getElementById('quiz-prev-btn').style.display = 'none';
+  document.getElementById('quiz-next-btn').style.display = 'none';
+  document.getElementById('quiz-fin-btn').style.display = 'none';
+  document.getElementById('quiz-rev-btn').style.display = 'none';
+  document.getElementById('quiz-revisao-painel').style.display = 'none';
+  document.getElementById('quiz-rev-btn').style.display = 'none';
+  const painel = document.getElementById('quiz-revisao-painel');
+  if (painel) painel.style.display = 'none';
   renderPergunta();
 }
 
@@ -4646,20 +4809,40 @@ function renderPergunta() {
   const q = quizAtual;
   const perg = q.embaralhadas[q.atual];
   const total = q.perguntas.length;
+  const respAtual = q.respostas[q.atual]; // resposta já dada nesta questão
+
   document.getElementById('quiz-prog').textContent = `Pergunta ${q.atual + 1} de ${total}`;
   // dots
   document.getElementById('quiz-dots').innerHTML = Array.from({length: total}, (_,i) => {
     let cls = 'quiz-dot';
-    if (i < q.respostas.length) cls += q.respostas[i] ? ' c' : ' e';
-    else if (i === q.atual) cls += ' p';
+    if (i < q.respostas.length) cls += ' p';
+    else if (i === q.atual) cls += ' atual';
     return `<div class="${cls}"></div>`;
   }).join('');
+
   document.getElementById('quiz-pergunta').textContent = perg.q;
   document.getElementById('quiz-opcoes').innerHTML = perg.opEmbaralhadas.map((op, i) => {
     const letra = ['A','B','C','D'][i] || (i+1);
-    return `<button class="quiz-opt" onclick="responder(${i})"><strong style="margin-right:8px;opacity:.6">${letra})</strong>${op}</button>`;
+    const jaMarcada = respAtual && respAtual.idx === i;
+    const cls = jaMarcada ? 'quiz-opt marcada' : (respAtual ? 'quiz-opt neutro' : 'quiz-opt');
+    return `<button class="${cls}" onclick="responder(${i})"><strong style="margin-right:8px;opacity:.6">${letra})</strong>${op}</button>`;
   }).join('');
-  document.getElementById('quiz-next-btn').style.display = 'none';
+
+  // Se já respondida, mostrar botões corretos
+  if (respAtual) {
+    const ehUltima = q.atual === total - 1;
+    document.getElementById('quiz-next-btn').style.display = ehUltima ? 'none' : 'block';
+    document.getElementById('quiz-fin-btn').style.display = ehUltima ? 'block' : 'none';
+    document.getElementById('quiz-rev-btn').style.display = ehUltima ? 'block' : 'none';
+  } else {
+    document.getElementById('quiz-next-btn').style.display = 'none';
+    document.getElementById('quiz-fin-btn').style.display = 'none';
+    document.getElementById('quiz-rev-btn').style.display = 'none';
+  }
+
+  // Botão anterior
+  const btnPrev = document.getElementById('quiz-prev-btn');
+  if (btnPrev) btnPrev.style.display = q.atual > 0 ? 'block' : 'none';
 }
 
 function responder(idx) {
@@ -4669,55 +4852,143 @@ function responder(idx) {
   const escolhida = perg.opEmbaralhadas[idx];
   const certa = (perg.op && perg.correta != null) ? perg.op[perg.correta] : perg.a;
   const acertou = escolhida === certa;
-  q.respostas.push(acertou);
 
+  // Salvar/atualizar resposta nesta posição
+  q.respostas[q.atual] = { acertou, idx, texto: escolhida };
+
+  // Marcar visualmente — marcada em azul, outras acinzentadas mas clicáveis
   opcoes.forEach((btn, i) => {
-    btn.disabled = true;
-    const op = perg.opEmbaralhadas[i];
-    if (op === certa) btn.classList.add('certo');
-    else if (i === idx && !acertou) btn.classList.add('errado');
-    else btn.classList.add('neutro');
+    btn.disabled = false;
+    if (i === idx) btn.className = 'quiz-opt marcada';
+    else btn.className = 'quiz-opt neutro';
   });
 
-  // Update dots
+  // Dots
   document.getElementById('quiz-dots').innerHTML = Array.from({length: q.perguntas.length}, (_,i) => {
     let cls = 'quiz-dot';
-    if (i < q.respostas.length) cls += q.respostas[i] ? ' c' : ' e';
-    else if (i === q.atual + 1) cls += ' p';
+    if (q.respostas[i]) cls += ' p';
+    else if (i === q.atual) cls += ' atual';
     return `<div class="${cls}"></div>`;
   }).join('');
 
-  if (q.atual < q.perguntas.length - 1) {
+  const ehUltima = q.atual === q.perguntas.length - 1;
+  // Verificar se todas foram respondidas
+  const todasRespondidas = q.respostas.filter(Boolean).length === q.perguntas.length;
+
+  if (!ehUltima) {
     document.getElementById('quiz-next-btn').style.display = 'block';
+    document.getElementById('quiz-fin-btn').style.display = 'none';
+    document.getElementById('quiz-rev-btn').style.display = 'none';
   } else {
-    setTimeout(mostrarResultado, 800);
+    document.getElementById('quiz-next-btn').style.display = 'none';
+    document.getElementById('quiz-rev-btn').style.display = 'block';
+    document.getElementById('quiz-fin-btn').style.display = 'block';
   }
 }
+
+function quizRevisarRespostas() {
+  if (!quizAtual) return;
+  const q = quizAtual;
+  const total = q.perguntas.length;
+  const painel = document.getElementById('quiz-revisao-painel');
+  if (!painel) return;
+
+  if (painel.style.display === 'block') {
+    painel.style.display = 'none';
+    document.getElementById('quiz-rev-btn').textContent = '📋 Revisar';
+    return;
+  }
+
+  painel.style.display = 'block';
+  document.getElementById('quiz-rev-btn').textContent = '✕ Fechar revisão';
+
+  const respondidas = q.respostas.length;
+  const faltam = total - respondidas;
+
+  painel.innerHTML = `<div class="card" style="border-color:var(--gold)">
+    <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;margin-bottom:10px">📋 Resumo das Respostas</div>
+    ${faltam > 0
+      ? `<div style="background:var(--warn-bg);border:1px solid #f0d080;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--warn);font-weight:600">⚠️ ${faltam} questão(ões) sem resposta</div>`
+      : `<div style="background:var(--tc-bg);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;color:var(--tc);font-weight:600">✓ Todas as questões respondidas!</div>`}
+    ${q.embaralhadas.map((p, i) => {
+      const resp = i < q.respostas.length ? q.respostas[i] : null;
+      const letra = resp ? ['A','B','C','D'][resp.idx] || (resp.idx+1) : null;
+      const marcou = resp ? `${letra}) ${resp.texto.substring(0,50)}${resp.texto.length>50?'...':''}` : null;
+      const cor = resp ? 'var(--tj)' : 'var(--warn)';
+      const bg = resp ? 'var(--tj-bg)' : 'var(--warn-bg)';
+      const status = resp ? `Marcou: ${marcou}` : '— Sem resposta';
+      return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb);cursor:pointer" onclick="quizIrPara(${i})">
+        <div style="width:26px;height:26px;border-radius:50%;background:${bg};color:${cor};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;color:var(--ink);line-height:1.4;margin-bottom:2px">${p.q.substring(0,70)}${p.q.length>70?'...':''}</div>
+          <div style="font-size:11px;font-weight:600;color:${cor}">${status}</div>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);flex-shrink:0">ver →</div>
+      </div>`;
+    }).join('')}
+  </div>`;
+
+  painel.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function quizIrPara(i) {
+  if (!quizAtual) return;
+  quizAtual.atual = i;
+  // NÃO apaga a resposta — só navega, resposta fica marcada
+  renderPergunta();
+  document.getElementById('quiz-revisao-painel').style.display = 'none';
+  document.getElementById('quiz-rev-btn').textContent = '📋 Revisar';
+  document.getElementById('quiz-area').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 
 function proximaPergunta() {
   quizAtual.atual++;
   renderPergunta();
+  // Mostrar botão Anterior a partir da segunda questão
+  const btnPrev = document.getElementById('quiz-prev-btn');
+  if (btnPrev) btnPrev.style.display = quizAtual.atual > 0 ? 'block' : 'none';
+}
+
+function perguntaAnterior() {
+  if (!quizAtual || quizAtual.atual <= 0) return;
+  quizAtual.atual--;
+  renderPergunta();
+  const btnPrev = document.getElementById('quiz-prev-btn');
+  if (btnPrev) btnPrev.style.display = quizAtual.atual > 0 ? 'block' : 'none';
 }
 
 async function mostrarResultado() {
   const q = quizAtual;
-  const acertos = q.respostas.filter(Boolean).length;
+  const acertos = q.respostas.filter(r => r && r.acertou).length;
   const total = q.perguntas.length;
   const pct = Math.round((acertos / total) * 100);
-  const pontosGanhos = acertos * 2; // 2pts por acerto
+
+  // Calcular pontos — liberação especial tem prioridade
+  let diasApos = 0;
+  const liberacaoAtiva = getLiberacaoAtiva(q.turma, q.licaoNum);
+  if (!liberacaoAtiva) {
+    try {
+      const { data: aulas } = await sbClient.from('aulas')
+        .select('data').eq('turma', q.turma).order('data', { ascending: true });
+      if (aulas && aulas.length >= q.licaoNum) {
+        const dataAula = aulas[q.licaoNum - 1]?.data;
+        if (dataAula) diasApos = Math.max(0, Math.floor((new Date() - new Date(dataAula)) / 86400000));
+      }
+    } catch(e) {}
+  }
+  const pontosGanhos = liberacaoAtiva
+    ? liberacaoAtiva.pts_fixo
+    : calcularPtQuiz(diasApos);
 
   // Determinar id real do aluno
-  // Para aluno real: USER.id é o id da tabela alunos ✓
-  // Para admin/prof em modo aluno: buscar id na tabela alunos pelo login
   let alunoId = USER ? USER.id : null;
   const ehAluno = USER && USER.perfil === 'aluno';
   const ehModoAluno = USER && _modo('aluno');
 
   if (ehModoAluno && USER.perfil !== 'aluno') {
-    // Admin/prof em modo aluno — buscar id real na tabela alunos
     try {
-      const { data: al } = await sbClient.from('alunos')
-        .select('id').eq('login', USER.login).limit(1);
+      const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
       if (al && al.length) alunoId = al[0].id;
     } catch(e) {}
   }
@@ -4725,84 +4996,223 @@ async function mostrarResultado() {
   const deveSalvar = ehAluno || ehModoAluno;
 
   if (deveSalvar && alunoId) {
-    // 1. Salvar em memória imediatamente
-    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, data: new Date().toISOString() };
-
-    // 2. Persistir no Supabase
+    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos, data: new Date().toISOString() };
     try {
       const { error } = await sbClient.from('quiz_resultados').upsert({
         aluno_id: alunoId,
         turma: q.turma,
         licao_num: q.licaoNum,
-        acertos: acertos,
-        total: total,
-        pct: pct,
+        acertos,
+        total,
+        pct,
+        pontos: pontosGanhos,
         data_resposta: new Date().toISOString()
       }, { onConflict: 'aluno_id,turma,licao_num' });
 
       if (error) {
-        console.error('Erro ao salvar quiz:', error);
-        toast('⚠️ Erro ao salvar resultado: ' + error.message, 'er');
+        toast('⚠️ Erro ao salvar: ' + error.message, 'er');
       } else {
-        // Sucesso — atualizar cache global de scores para o ranking
         if (!_quizScoresTodos[alunoId]) _quizScoresTodos[alunoId] = {};
-        _quizScoresTodos[alunoId][`${q.turma}-${q.licaoNum}`] = { acertos, total, pct };
+        _quizScoresTodos[alunoId][`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos };
       }
-    } catch(e) {
-      console.error('Exceção ao salvar quiz:', e);
-      toast('⚠️ Não foi possível salvar: ' + e.message, 'er');
-    }
+    } catch(e) { toast('⚠️ Não foi possível salvar: ' + e.message, 'er'); }
   }
 
-  // Montar tela de resultado
+  // Tela de resultado
   const emojis = ['😢','😕','🙂','😊','🌟'];
   const msgs = ['Continue estudando!','Quase lá, revise a lição!','Bom trabalho!','Muito bem!','Perfeito! Parabéns!'];
   const nivel = Math.min(Math.floor(pct / 25), 4);
-  const corPct = pct >= 80 ? 'var(--tc)' : pct >= 60 ? 'var(--warn)' : 'var(--red)';
 
   document.getElementById('qr-emoji').textContent = emojis[nivel];
   document.getElementById('qr-score').textContent = `${acertos}/${total} corretas`;
   document.getElementById('qr-msg').textContent = msgs[nivel];
 
-  // Badge de pontos ganhos + status de salvo
+  // Badge de pontos
   const qrBadge = document.getElementById('qr-badge-pts');
   if (qrBadge) {
     if (deveSalvar && alunoId) {
-      qrBadge.innerHTML = `<span style="background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700">+${pontosGanhos} pts ✦</span>
-        <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px">✅ Salvo no ranking</span>`;
+      const descDia = liberacaoAtiva
+        ? `🔓 liberação especial`
+        : diasApos === 0 ? 'dia da aula' : `${diasApos} dia(s) após`;
+      qrBadge.innerHTML = `
+        <span style="background:var(--gold);color:var(--ink);padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700">+${pontosGanhos} pts ✦</span>
+        <span style="font-size:11px;color:rgba(255,255,255,.4);margin-left:6px">${descDia} · ✅ Salvo</span>`;
     } else {
       qrBadge.innerHTML = '';
     }
   }
 
-  const lic = LICOES[q.turma].licoes.find(l => l.num === q.licaoNum);
+  // Revisão das respostas — mostrar correto/errado AQUI (resultado final)
+  const lic = LICOES[q.turma]?.licoes?.find(l => l.num === q.licaoNum);
   document.getElementById('qr-revisao').innerHTML = `<div class="ct">Revisão das respostas</div>` +
     q.embaralhadas.map((p, i) => {
-      const certo = q.respostas[i];
+      const resp = q.respostas[i];
+      const acertou = resp && resp.acertou;
+      const marcou = resp ? resp.texto : '—';
+      const certa = (p.op && p.correta != null) ? p.op[p.correta] : p.a;
       return `<div class="qr-item">
         <div class="qr-q">${i+1}. ${p.q}</div>
-        <div class="qr-resp ${certo?'qr-certo':'qr-errado'}">${certo?'✓ Correto':'✗ Incorreto'}</div>
-        ${!certo?`<div style="font-size:12px;color:var(--tc);margin-top:4px;line-height:1.4">Resposta correta: ${(p.op && p.correta != null) ? p.op[p.correta] : p.a}</div>`:''}
+        <div class="qr-resp ${acertou?'qr-certo':'qr-errado'}">${acertou?'✓ Correto':'✗ Incorreto'}</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-top:3px">Sua resposta: ${marcou}</div>
+        ${!acertou?`<div style="font-size:12px;color:var(--tc);margin-top:2px;line-height:1.4">✓ Correta: ${certa}</div>`:''}
       </div>`;
     }).join('');
 
-  // Botões na tela de resultado
+  // Botões
   const qrBtns = document.getElementById('qr-btns');
   if (qrBtns) {
+    let podeRefazer = false;
+    if (deveSalvar && alunoId) {
+      try {
+        const { data: qr } = await sbClient.from('quiz_resultados')
+          .select('pode_refazer').eq('aluno_id', alunoId)
+          .eq('turma', q.turma).eq('licao_num', q.licaoNum).single();
+        podeRefazer = qr?.pode_refazer === true;
+      } catch(e) {}
+    }
     qrBtns.innerHTML = `
-      <button class="btn btn-gold" onclick="refazerQuiz()" style="flex:1">↺ Refazer</button>
+      ${podeRefazer ? `<button class="btn btn-gold" onclick="refazerQuiz()" style="flex:1">↺ Refazer Quiz</button>` : ''}
+      <button class="btn btn-ou" onclick="abrirContestacaoQuiz()" style="flex:1">⚠️ Contestar</button>
       <button class="btn btn-ou" onclick="navTo('licoes')" style="flex:1">← Lições</button>
-      ${deveSalvar ? `<button class="btn btn-dk" onclick="irParaProgresso()" style="flex:1">📊 Meu Progresso</button>` : ''}`;
+      ${deveSalvar ? `<button class="btn btn-dk" onclick="irParaProgresso()" style="flex:1">📊 Progresso</button>` : ''}`;
   }
 
   document.getElementById('quiz-area').style.display = 'none';
   document.getElementById('quiz-resultado').style.display = 'block';
 
-  // Atualizar progresso em background após salvar
   if (deveSalvar) {
-    setTimeout(async function() {
-      try { await renderAlunoProgresso(); } catch(e) {}
-    }, 800);
+    setTimeout(async () => { try { await renderAlunoProgresso(); } catch(e) {} }, 800);
+  }
+}
+
+// ══════════════════════════════════════════════
+// CONTESTAÇÕES DE QUIZ
+// ══════════════════════════════════════════════
+let _contStatusAtual = 'pendente';
+
+function selContestacaoTab(status, el) {
+  _contStatusAtual = status;
+  ['pendente','aprovada','rejeitada'].forEach(s => {
+    const btn = document.getElementById('cont-tab-' + s);
+    if (!btn) return;
+    const ativo = s === status;
+    btn.style.borderColor = ativo ? 'var(--gold)' : 'var(--cb)';
+    btn.style.background = ativo ? 'var(--gold-pale)' : 'white';
+    btn.style.color = ativo ? 'var(--gold-deep)' : 'var(--ink-soft)';
+    btn.style.fontWeight = ativo ? '700' : '600';
+  });
+  renderContestacoes(status);
+}
+
+async function renderContestacoes(status) {
+  _contStatusAtual = status || _contStatusAtual;
+  const box = document.getElementById('lista-contestacoes');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div>';
+
+  try {
+    const { data, error } = await sbClient.from('quiz_contestacoes')
+      .select('*')
+      .eq('status', _contStatusAtual)
+      .order('created_at', { ascending: false });
+    if (error) throw error;
+
+    if (!data || !data.length) {
+      const label = { pendente:'pendente', aprovada:'aprovada', rejeitada:'rejeitada' }[_contStatusAtual];
+      box.innerHTML = `<div class="empty"><div class="empty-icon">📋</div><div class="empty-txt">Nenhuma contestação ${label}</div></div>`;
+      return;
+    }
+
+    const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+    box.innerHTML = data.map(c => {
+      const data_fmt = new Date(c.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+      const statusBadge = c.status === 'pendente'
+        ? `<span style="background:#fff3cd;color:#856404;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">⏳ Pendente</span>`
+        : c.status === 'aprovada'
+        ? `<span style="background:var(--tc-bg);color:var(--tc);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">✓ Aprovada</span>`
+        : `<span style="background:var(--red-bg);color:var(--red);font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">✕ Rejeitada</span>`;
+
+      return `<div class="card" style="margin-bottom:10px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:10px">
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px">L${c.licao_num} · ${TN[c.turma]||c.turma} · ${data_fmt}</div>
+            <div style="font-weight:700;font-size:15px;color:var(--ink)">${c.aluno_nome || 'Aluno'}</div>
+          </div>
+          ${statusBadge}
+        </div>
+        <div style="background:var(--cream);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:var(--ink);line-height:1.5">
+          <div style="font-size:10px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Motivo</div>
+          ${c.motivo}
+        </div>
+        ${c.resposta_prof ? `<div style="background:var(--tj-bg);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:13px;color:var(--ink);line-height:1.5">
+          <div style="font-size:10px;font-weight:700;color:var(--tj);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px">Resposta do professor</div>
+          ${c.resposta_prof}
+        </div>` : ''}
+        ${c.status === 'pendente' ? `
+        <div style="display:flex;gap:6px;flex-wrap:wrap">
+          <button onclick="abrirRespostaContestacao('${c.id}','${c.aluno_id}','${c.turma}',${c.licao_num},'aprovar')"
+            style="flex:1;padding:8px;background:var(--tc);border:none;border-radius:8px;color:white;font-size:12px;font-weight:700;cursor:pointer">✓ Aprovar e Liberar Refazer</button>
+          <button onclick="abrirRespostaContestacao('${c.id}','${c.aluno_id}','${c.turma}',${c.licao_num},'rejeitar')"
+            style="flex:1;padding:8px;background:var(--red-bg);border:1px solid #f0c0c0;border-radius:8px;color:var(--red);font-size:12px;font-weight:700;cursor:pointer">✕ Rejeitar</button>
+        </div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+function abrirRespostaContestacao(contId, alunoId, turma, licaoNum, acao) {
+  const titulo = acao === 'aprovar' ? '✓ Aprovar e Liberar' : '✕ Rejeitar Contestação';
+  const corBtn = acao === 'aprovar' ? 'var(--tc)' : 'var(--red)';
+  const modal = document.createElement('div');
+  modal.id = 'mo-resposta-cont';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:16px;width:100%;max-width:460px;overflow:hidden">
+      <div style="background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:white;font-weight:600">${titulo}</div>
+        <button onclick="document.getElementById('mo-resposta-cont').remove()" style="width:30px;height:30px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:6px;color:white;font-size:15px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:16px 20px">
+        <label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Resposta ao aluno (opcional)</label>
+        <textarea id="resposta-cont-texto" rows="3" placeholder="Ex: Quiz liberado. / Contestação não aceita porque..." style="width:100%;padding:10px;border:1.5px solid var(--cb);border-radius:8px;font-size:13px;font-family:Outfit,sans-serif;resize:none;box-sizing:border-box;margin-bottom:12px"></textarea>
+        <div style="display:flex;gap:8px">
+          <button onclick="document.getElementById('mo-resposta-cont').remove()" style="flex:1;padding:10px;background:white;border:1px solid var(--cb);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+          <button onclick="confirmarRespostaContestacao('${contId}','${alunoId}','${turma}',${licaoNum},'${acao}')"
+            style="flex:1;padding:10px;background:${corBtn};border:none;border-radius:8px;color:white;font-size:13px;font-weight:700;cursor:pointer">Confirmar</button>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('resposta-cont-texto')?.focus(), 100);
+}
+
+async function confirmarRespostaContestacao(contId, alunoId, turma, licaoNum, acao) {
+  const resposta = document.getElementById('resposta-cont-texto')?.value?.trim() || '';
+  const novoStatus = acao === 'aprovar' ? 'aprovada' : 'rejeitada';
+
+  try {
+    // Atualizar contestação
+    await sbClient.from('quiz_contestacoes').update({
+      status: novoStatus,
+      resposta_prof: resposta || null,
+      updated_at: new Date().toISOString()
+    }).eq('id', contId);
+
+    // Se aprovado: liberar refazer para o aluno
+    if (acao === 'aprovar') {
+      await sbClient.from('quiz_resultados').update({
+        pode_refazer: true
+      }).eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum);
+    }
+
+    document.getElementById('mo-resposta-cont')?.remove();
+    toast(acao === 'aprovar' ? 'Aprovado! Aluno pode refazer o quiz ✦' : 'Contestação rejeitada', 'ok');
+    renderContestacoes(_contStatusAtual);
+  } catch(e) {
+    toast('Erro: ' + e.message, 'er');
   }
 }
 
@@ -4815,13 +5225,68 @@ function irParaProgresso() {
 
 function refazerQuiz() {
   if (!quizAtual) return;
-  // Re-embaralhar opções
-  const lic = LICOES[quizAtual.turma].licoes.find(l => l.num === quizAtual.licaoNum);
-  quizAtual.embaralhadas = lic.perguntas.map(p => {
-    return { ...p, opEmbaralhadas: [...(p.op||[p.a])] };
-  });
+  const lic = LICOES[quizAtual.turma]?.licoes?.find(l => l.num === quizAtual.licaoNum);
+  if (lic) {
+    quizAtual.embaralhadas = lic.perguntas.map(p => ({ ...p, opEmbaralhadas: [...(p.op||[p.a])] }));
+  }
+  // Limpar liberação após refazer
+  const key = `${quizAtual.turma}-${quizAtual.licaoNum}`;
+  if (quizScores[key]) quizScores[key].podeRefazer = false;
   iniciarQuiz();
 }
+
+function abrirContestacaoQuiz() {
+  if (!quizAtual) return;
+  const modal = document.createElement('div');
+  modal.id = 'mo-contestacao';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6)';
+  modal.innerHTML = `
+    <div style="background:white;border-radius:16px;width:100%;max-width:460px;overflow:hidden;box-shadow:0 20px 60px rgba(0,0,0,.4)">
+      <div style="background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;color:var(--gold-l);font-weight:700;letter-spacing:.1em;text-transform:uppercase;margin-bottom:3px">QUIZ · L${quizAtual.licaoNum}</div>
+          <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:white;font-weight:600">Contestar Quiz</div>
+        </div>
+        <button onclick="document.getElementById('mo-contestacao').remove()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div style="padding:16px 20px">
+        <p style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">Descreva o motivo da contestação. Seu professor irá revisar e poderá liberar o quiz para refazer se necessário.</p>
+        <label style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;display:block;margin-bottom:6px">Motivo</label>
+        <textarea id="contestacao-texto" rows="4" placeholder="Ex: Acredito que a questão 3 está errada porque..." style="width:100%;padding:10px;border:1.5px solid var(--cb);border-radius:8px;font-size:13px;font-family:Outfit,sans-serif;resize:none;box-sizing:border-box"></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button onclick="document.getElementById('mo-contestacao').remove()" style="flex:1;padding:11px;background:white;border:1px solid var(--cb);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">Cancelar</button>
+          <button onclick="enviarContestacaoQuiz()" style="flex:1;padding:11px;background:var(--gold);border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;color:var(--ink)">📤 Enviar</button>
+        </div>
+      </div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('contestacao-texto')?.focus(), 100);
+}
+
+async function enviarContestacaoQuiz() {
+  const texto = document.getElementById('contestacao-texto')?.value?.trim();
+  if (!texto) { toast('Digite o motivo da contestação', 'er'); return; }
+  if (!quizAtual) return;
+
+  try {
+    await sbClient.from('quiz_contestacoes').insert({
+      aluno_id: USER.id,
+      aluno_nome: USER.nome || USER.login,
+      turma: quizAtual.turma,
+      licao_num: quizAtual.licaoNum,
+      motivo: texto,
+      status: 'pendente',
+      created_at: new Date().toISOString()
+    });
+    document.getElementById('mo-contestacao')?.remove();
+    toast('Contestação enviada! Seu professor irá revisar. ✦', 'ok');
+  } catch(e) {
+    toast('Erro ao enviar: ' + e.message, 'er');
+  }
+}
+
+
 
 // ── CADASTRO ALUNO COM LOGIN (super/prof) ──
 async function abrirModalAlunoLogin(id) {
@@ -5711,19 +6176,18 @@ async function iniciarProvaAluno(id) {
 
   provaAtiva = { ...p, questoes: questoesAtualizadas };
   provaRespostas = {};
+  fpQuestaoAtual = 0;
   document.getElementById('fp-tipo').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
   document.getElementById('fp-titulo').textContent = p.nome;
   const nQ = questoesAtualizadas.length;
   const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} minutos` : 'Sem limite de tempo';
   document.getElementById('fp-meta').textContent = `${nQ} questões · ${tempo}`;
-  const box = document.getElementById('fp-questoes');
-  box.innerHTML = questoesAtualizadas.map((q, i) => `
-    <div class="card" style="margin-bottom:12px" id="q-card-${i}">
-      <div class="q-num">Questão ${i+1} de ${nQ}${q.origem && q.origem !== 'extra' ? ` · ${q.origem}` : ''}</div>
-      <div class="q-texto">${q.q}</div>
-      ${q.op.map((op, j) => `<button class="q-opt" id="q-${i}-${j}" data-qidx="${i}" data-oidx="${j}" onclick="marcarRespostaBtn(this)">${op}</button>`).join('')}
-    </div>
-  `).join('');
+  // Esconder painel de revisão
+  const rev = document.getElementById('fp-revisao-painel');
+  if (rev) rev.style.display = 'none';
+  // Renderizar primeira questão
+  fpRenderQuestaoAtual();
+  fpAtualizarProgresso();
   const cronoEl = document.getElementById('fp-crono');
   if (p.tempo_minutos > 0) {
     cronoSegundos = p.tempo_minutos * 60;
@@ -5761,16 +6225,163 @@ function marcarRespostaBtn(btn) {
 
 function marcarResposta(qIdx, opIdx, valor) {
   provaRespostas[qIdx] = { idx: opIdx, valor };
-  // Atualizar visual — limpar todas e marcar a selecionada
-  const q = provaAtiva.questoes[qIdx];
-  q.op.forEach((_, j) => {
-    const b = document.getElementById(`q-${qIdx}-${j}`);
-    if (b) b.className = 'q-opt' + (j === opIdx ? ' marcada' : '');
-  });
-  // Destacar card como respondido
-  const card = document.getElementById(`q-card-${qIdx}`);
-  if (card) card.style.borderColor = 'var(--tc)';
+  // Atualizar visual
+  if (provaAtiva && provaAtiva.questoes[qIdx]) {
+    provaAtiva.questoes[qIdx].op.forEach((_, j) => {
+      const b = document.getElementById(`q-${qIdx}-${j}`);
+      if (b) b.className = 'q-opt' + (j === opIdx ? ' marcada' : '');
+    });
+    const card = document.getElementById(`q-card-${qIdx}`);
+    if (card) card.style.borderColor = 'var(--gold)';
+  }
+  // Atualizar progresso e label de navegação
+  fpAtualizarProgresso();
+  const label = document.getElementById('fp-nav-label');
+  if (label) {
+    const nQ = provaAtiva?.questoes?.length || 0;
+    const respondidas = Object.keys(provaRespostas).length;
+    label.textContent = `${respondidas} de ${nQ} respondidas`;
+  }
+  // Atualizar borda do card atual
+  const cardAtual = document.querySelector('#fp-questao-atual .card');
+  if (cardAtual) cardAtual.style.borderColor = 'var(--gold)';
 }
+
+let fpQuestaoAtual = 0;
+
+function fpRenderQuestaoAtual() {
+  if (!provaAtiva) return;
+  const questoes = provaAtiva.questoes;
+  const nQ = questoes.length;
+  const i = fpQuestaoAtual;
+  const q = questoes[i];
+  const resp = provaRespostas[i];
+  const ehPrimeira = i === 0;
+  const ehUltima = i === nQ - 1;
+
+  const box = document.getElementById('fp-questao-atual');
+  if (!box) return;
+
+  box.innerHTML = `
+    <div class="card" style="margin-bottom:12px;border-color:${resp ? 'var(--tc)' : 'var(--cb)'}">
+      <div class="q-num">Questão ${i+1} de ${nQ}${q.origem && q.origem !== 'extra' ? ` · ${q.origem}` : ''}</div>
+      <div class="q-texto">${q.q}</div>
+      ${q.op.map((op, j) => `
+        <button class="q-opt${resp && resp.idx === j ? ' marcada' : ''}"
+          id="q-${i}-${j}" data-qidx="${i}" data-oidx="${j}"
+          onclick="marcarRespostaBtn(this)">${op}</button>
+      `).join('')}
+    </div>`;
+
+  // Botão Anterior
+  const btnAnt = document.getElementById('fp-btn-anterior');
+  if (btnAnt) {
+    btnAnt.style.display = ehPrimeira ? 'none' : 'block';
+    btnAnt.disabled = ehPrimeira;
+  }
+
+  // Botão Próxima / Finalizar
+  const btnProx = document.getElementById('fp-btn-proxima');
+  if (btnProx) {
+    if (ehUltima) {
+      btnProx.style.display = 'none';
+    } else {
+      btnProx.style.display = 'block';
+      btnProx.textContent = 'Próxima →';
+    }
+  }
+
+  // Botões finais (só aparecem na última questão)
+  const btnsFinal = document.getElementById('fp-botoes-finais');
+  if (btnsFinal) {
+    btnsFinal.style.display = ehUltima ? 'flex' : 'none';
+  }
+
+  // Label de progresso
+  const label = document.getElementById('fp-nav-label');
+  if (label) {
+    const respondidas = Object.keys(provaRespostas).length;
+    label.textContent = `${respondidas} de ${nQ} respondidas`;
+  }
+}
+
+function fpNavegar(dir) {
+  if (!provaAtiva) return;
+  const nQ = provaAtiva.questoes.length;
+  const nova = fpQuestaoAtual + dir;
+  if (nova < 0) return;
+  if (nova >= nQ) {
+    // Última questão → ir para revisão
+    fpRevisarRespostas();
+    return;
+  }
+  fpQuestaoAtual = nova;
+  fpRenderQuestaoAtual();
+  fpAtualizarProgresso();
+  // Scroll para o topo da questão
+  document.getElementById('fp-questao-atual')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fpAtualizarProgresso() {
+  if (!provaAtiva) return;
+  const nQ = provaAtiva.questoes.length;
+  const box = document.getElementById('fp-progresso');
+  if (!box) return;
+  box.innerHTML = Array.from({ length: nQ }, (_, i) => {
+    const resp = provaRespostas[i];
+    const atual = i === fpQuestaoAtual;
+    const bg = atual ? 'var(--gold)' : resp ? 'var(--tc)' : 'var(--cb)';
+    const color = atual ? 'var(--ink)' : resp ? 'white' : 'var(--ink-soft)';
+    return `<button onclick="fpIrPara(${i})"
+      style="width:32px;height:32px;border-radius:50%;border:none;background:${bg};color:${color};font-size:11px;font-weight:700;cursor:pointer;transition:all .2s">${i+1}</button>`;
+  }).join('');
+}
+
+function fpIrPara(i) {
+  fpQuestaoAtual = i;
+  fpRenderQuestaoAtual();
+  fpAtualizarProgresso();
+  // Fechar revisão se aberta
+  const rev = document.getElementById('fp-revisao-painel');
+  if (rev) rev.style.display = 'none';
+  document.getElementById('fp-questao-atual')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function fpRevisarRespostas() {
+  if (!provaAtiva) return;
+  const questoes = provaAtiva.questoes;
+  const nQ = questoes.length;
+  const respondidas = Object.keys(provaRespostas).length;
+  const faltam = nQ - respondidas;
+
+  const rev = document.getElementById('fp-revisao-painel');
+  if (!rev) return;
+
+  rev.style.display = 'block';
+  rev.innerHTML = `
+    <div class="card" style="border-color:var(--gold)">
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;margin-bottom:10px">📋 Revisão das Respostas</div>
+      ${faltam > 0 ? `<div style="background:var(--warn-bg);border:1px solid #f0d080;border-radius:8px;padding:10px 12px;margin-bottom:12px;font-size:13px;color:var(--warn);font-weight:600">⚠️ ${faltam} questão(ões) sem resposta</div>` : `<div style="background:var(--tc-bg);border-radius:8px;padding:8px 12px;margin-bottom:12px;font-size:13px;color:var(--tc);font-weight:600">✓ Todas as questões respondidas!</div>`}
+      ${questoes.map((q, i) => {
+        const resp = provaRespostas[i];
+        const cor = resp ? 'var(--tj)' : 'var(--warn)';
+        const bg = resp ? 'var(--tj-bg)' : 'var(--warn-bg)';
+        const marcou = resp ? resp.valor.substring(0,55) + (resp.valor.length>55?'...':'') : null;
+        return `<div style="display:flex;align-items:flex-start;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb);cursor:pointer" onclick="fpIrPara(${i})">
+          <div style="width:26px;height:26px;border-radius:50%;background:${bg};color:${cor};font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${i+1}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;color:var(--ink);line-height:1.4;margin-bottom:2px">${q.q.substring(0,70)}${q.q.length>70?'...':''}</div>
+            <div style="font-size:11px;font-weight:600;color:${cor}">${resp ? 'Marcou: ' + marcou : '— Sem resposta'}</div>
+          </div>
+          <div style="font-size:11px;color:var(--ink-soft);flex-shrink:0">editar →</div>
+        </div>`;
+      }).join('')}
+      <button class="btn btn-gold btn-full" onclick="entregarProva()" style="margin-top:14px">✓ Finalizar e Entregar</button>
+    </div>`;
+
+  rev.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 
 async function entregarProva(automatico = false) {
   if (cronoInterval) clearInterval(cronoInterval);
@@ -5841,22 +6452,16 @@ function mostrarResultadoAluno(p, acertos, pct) {
     notaEl.innerHTML = `Nota: <strong>${nota}</strong> <span style="font-size:12px;opacity:.7">/ 10</span>`;
   }
 
-  // Mostrar pontos ganhos com nova fórmula
+  // Mostrar pontos ganhos — nota × fator configurado
   const pontosWrap = document.getElementById('rp-pontos-wrap');
   if (pontosWrap) {
-    const nota = pct / 10;
-    const ptPart = 5;
-    let ptDesemp = 0;
-    if (nota >= 9.0)      ptDesemp = 20;
-    else if (nota >= 7.0) ptDesemp = 15;
-    else if (nota >= 5.0) ptDesemp = 10;
-    else if (nota >= 3.0) ptDesemp = 5;
-    const totalPts = ptPart + ptDesemp;
+    const notaVal = pct / 10;
+    const fator = RANKING_CONFIG.pts_prova_fator ?? 10;
+    const totalPts = Math.round(notaVal * fator);
     pontosWrap.innerHTML = `
       <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">
-        <span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">+${ptPart} pts participação</span>
-        ${ptDesemp > 0 ? `<span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">+${ptDesemp} pts desempenho</span>` : ''}
-        <span style="background:var(--gold);color:var(--ink);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:700">+${totalPts} pts total ✦</span>
+        <span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">nota ${notaVal.toFixed(1)} × ${fator}</span>
+        <span style="background:var(--gold);color:var(--ink);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:700">+${totalPts} pts ✦</span>
       </div>`;
   }
 
@@ -6479,6 +7084,25 @@ function iniciarCountdown() {
 // ══════════════════════════════════════════════
 // NOTIFICAÇÃO DE PROVAS NO DASHBOARD
 // ══════════════════════════════════════════════
+async function renderContestacoesDashNotif() {
+  const box = document.getElementById('dash-contestacoes-notif');
+  if (!box || (!isAdmin() && !isProfessor())) return;
+  try {
+    const { data } = await sbClient.from('quiz_contestacoes')
+      .select('id').eq('status', 'pendente');
+    const total = data ? data.length : 0;
+    if (total === 0) { box.innerHTML = ''; return; }
+    box.innerHTML = `<div class="prova-notif" onclick="navTo('contestacoes')" style="background:linear-gradient(135deg,#7a4a00,#b87a00)">
+      <div class="prova-notif-icon">⚠️</div>
+      <div class="prova-notif-txt">
+        <div class="prova-notif-titulo">${total} contestação(ões) pendente(s)</div>
+        <div class="prova-notif-sub">Clique para revisar e liberar refazer</div>
+      </div>
+      <div class="prova-notif-arrow">›</div>
+    </div>`;
+  } catch(e) {}
+}
+
 async function renderProvasNotifDash() {
   const box = document.getElementById('dash-provas-notif');
   if (!box) return;
@@ -6530,46 +7154,204 @@ async function renderProvasNotifAluno(turmaAluno) {
       </div>`).join('');
   } catch(e) { box.innerHTML = ''; }
 }
+// ══════════════════════════════════════════════
+// LIBERAÇÕES ESPECIAIS DE QUIZ
+// ══════════════════════════════════════════════
+let _liberacoes = [];
+
+async function carregarLiberacoes() {
+  try {
+    const { data } = await sbClient.from('quiz_liberacoes').select('*').order('created_at', { ascending: false });
+    _liberacoes = data || [];
+    renderLiberacoes();
+  } catch(e) { _liberacoes = []; }
+}
+
+function renderLiberacoes() {
+  const box = document.getElementById('lista-liberacoes');
+  if (!box) return;
+  if (!_liberacoes.length) {
+    box.innerHTML = '<div style="text-align:center;padding:10px;color:var(--ink-soft);font-size:12px">Nenhuma liberação cadastrada</div>';
+    return;
+  }
+  const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+  const hoje = new Date();
+  box.innerHTML = _liberacoes.map(l => {
+    const expira = new Date(l.expira_em);
+    const ativa = expira >= hoje;
+    const expiraFmt = expira.toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
+    return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:600">L${l.licao_num} · ${TN[l.turma]||l.turma}</div>
+        <div style="font-size:11px;color:var(--ink-soft)">${l.pts_fixo} pts fixo · expira ${expiraFmt}</div>
+      </div>
+      <span style="padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700;background:${ativa?'var(--tc-bg)':'#f0f0f0'};color:${ativa?'var(--tc)':'#888'}">${ativa?'✓ Ativa':'Expirada'}</span>
+      <button onclick="removerLiberacao('${l.id}')" style="padding:4px 8px;background:var(--red-bg);border:1px solid #f0c0c0;border-radius:6px;color:var(--red);font-size:11px;font-weight:700;cursor:pointer">✕</button>
+    </div>`;
+  }).join('');
+}
+
+async function salvarLiberacao() {
+  const turma = document.getElementById('lib-turma').value;
+  const licao = parseInt(document.getElementById('lib-licao').value);
+  const dias  = parseInt(document.getElementById('lib-dias').value) || 2;
+  const pts   = parseFloat(document.getElementById('lib-pts').value) || 10;
+  if (!licao || licao < 1 || licao > 13) { toast('Digite o número da lição (1-13)', 'er'); return; }
+  const expiraEm = new Date();
+  expiraEm.setDate(expiraEm.getDate() + dias);
+  expiraEm.setHours(23, 59, 59, 0);
+  try {
+    await sbClient.from('quiz_liberacoes').upsert({
+      turma, licao_num: licao, pts_fixo: pts,
+      expira_em: expiraEm.toISOString(),
+      created_at: new Date().toISOString()
+    }, { onConflict: 'turma,licao_num' });
+    toast(`Lição ${licao} liberada por ${dias} dia(s) com ${pts} pts ✦`, 'ok');
+    await carregarLiberacoes();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+async function removerLiberacao(id) {
+  try {
+    await sbClient.from('quiz_liberacoes').delete().eq('id', id);
+    toast('Liberação removida', 'ok');
+    await carregarLiberacoes();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+// Retorna liberação ativa para uma lição, ou null
+function getLiberacaoAtiva(turma, licaoNum) {
+  const hoje = new Date();
+  return _liberacoes.find(l =>
+    l.turma === turma &&
+    l.licao_num === licaoNum &&
+    new Date(l.expira_em) >= hoje
+  ) || null;
+}
+
+
+// ══════════════════════════════════════════════
+let RANKING_CONFIG = {
+  pts_presenca: 10,
+  pts_quiz_dia0: 10,
+  pts_quiz_dec: 1,
+  quiz_dias: 6,
+  pts_prova_fator: 10
+};
+
+async function carregarRegraRanking() {
+  try {
+    const { data } = await sbClient.from('ranking_config').select('*').limit(1).single();
+    if (data) {
+      RANKING_CONFIG = { ...RANKING_CONFIG, ...data };
+      document.getElementById('rk-pts-presenca').value = data.pts_presenca ?? 10;
+      document.getElementById('rk-pts-quiz-dia0').value = data.pts_quiz_dia0 ?? 10;
+      document.getElementById('rk-pts-quiz-dec').value = data.pts_quiz_dec ?? 1;
+      document.getElementById('rk-quiz-dias').value = data.quiz_dias ?? 6;
+      document.getElementById('rk-pts-prova-fator').value = data.pts_prova_fator ?? 10;
+    }
+  } catch(e) { /* tabela não existe ainda, usar defaults */ }
+}
+
+async function salvarRegraRanking() {
+  const cfg = {
+    pts_presenca:    parseFloat(document.getElementById('rk-pts-presenca').value) || 10,
+    pts_quiz_dia0:   parseFloat(document.getElementById('rk-pts-quiz-dia0').value) || 10,
+    pts_quiz_dec:    parseFloat(document.getElementById('rk-pts-quiz-dec').value) || 1,
+    quiz_dias:       parseInt(document.getElementById('rk-quiz-dias').value) || 6,
+    pts_prova_fator: parseFloat(document.getElementById('rk-pts-prova-fator').value) || 10,
+    updated_at:      new Date().toISOString()
+  };
+  try {
+    // Upsert — sempre mantém só 1 linha com id fixo
+    await sbClient.from('ranking_config').upsert({ id: 1, ...cfg }, { onConflict: 'id' });
+    RANKING_CONFIG = cfg;
+    toast('Regras salvas! ✦', 'ok');
+  } catch(e) { toast('Erro ao salvar: ' + e.message, 'er'); }
+}
+
+async function recalcularRanking() {
+  showConfirm(
+    'Recalcular Ranking?',
+    'As pontuações de quizzes já registrados serão recalculadas com as regras atuais. Isso pode demorar alguns segundos.',
+    async () => {
+      try {
+        toast('Recalculando...', '');
+        const { data: resultados } = await sbClient.from('quiz_resultados').select('*');
+        if (!resultados || !resultados.length) { toast('Nenhum resultado para recalcular', ''); return; }
+
+        const { data: aulas } = await sbClient.from('aulas').select('data,turma');
+        const aulasPorTurma = {};
+        (aulas || []).forEach(a => {
+          if (!aulasPorTurma[a.turma]) aulasPorTurma[a.turma] = [];
+          aulasPorTurma[a.turma].push(a.data);
+        });
+
+        let atualizados = 0;
+        for (const r of resultados) {
+          const aulasTurma = (aulasPorTurma[r.turma] || []).sort();
+          // Encontrar data da aula correspondente à lição
+          const dataAula = aulasTurma[r.licao_num - 1] || aulasTurma[aulasTurma.length - 1];
+          const diasApos = dataAula
+            ? Math.max(0, Math.floor((new Date(r.data_resposta) - new Date(dataAula)) / 86400000))
+            : 0;
+          const novosPontos = calcularPtQuiz(diasApos);
+          await sbClient.from('quiz_resultados').update({ pontos: novosPontos }).eq('id', r.id);
+          atualizados++;
+        }
+        toast(`${atualizados} resultados recalculados! ✦`, 'ok');
+      } catch(e) { toast('Erro: ' + e.message, 'er'); }
+    }, ''
+  );
+}
+
+function calcularPtQuiz(diasAposAula) {
+  const pts = RANKING_CONFIG.pts_quiz_dia0 - (diasAposAula * RANKING_CONFIG.pts_quiz_dec);
+  return Math.max(0, pts);
+}
+
+// Verificar se quiz ainda está disponível
+function quizEstaDisponivel(dataAula) {
+  const dias = Math.floor((new Date() - new Date(dataAula)) / 86400000);
+  return dias <= RANKING_CONFIG.quiz_dias;
+}
+
+// ══════════════════════════════════════════════
 // Pontos: presença=10, quiz(acerto)=2pts por acerto, prova=pct*0.5
 function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas) {
   let pts = 0;
   let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
 
-  // Presenças: +10 por presença
+  const ptsPorPresenca = RANKING_CONFIG.pts_presenca ?? 10;
+  const fatorProva = RANKING_CONFIG.pts_prova_fator ?? 10;
+
+  // Presenças
   aulas.filter(a => a.turma === turma).forEach(a => {
-    if ((a.presencas||{})[alunoId] === 'presente') { pts += 10; ptsPres++; }
+    if ((a.presencas||{})[alunoId] === 'presente') { pts += ptsPorPresenca; ptsPres += ptsPorPresenca; }
   });
 
-  // Quizzes: +2 por acerto — simulado NÃO conta
+  // Quizzes — usar pontos salvos se existirem, senão calcular pelo acerto
   Object.entries(quizScores).forEach(([key, val]) => {
-    if (key.startsWith(turma)) { const bonus = val.acertos * 2; pts += bonus; ptsQ += bonus; }
+    if (!key.startsWith(turma)) return;
+    // Se tem pontos salvos (calculados com regras do dia), usar eles
+    // Senão usar acertos × 2 como fallback
+    const bonus = val.pontos != null ? val.pontos : (val.acertos * 2);
+    pts += bonus; ptsQ += bonus;
   });
 
-  // Provas e Desafios — simulado excluído
+  // Provas e Desafios
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId]).forEach(p => {
-    if (p.tipo === 'simulado') return; // simulado NÃO conta
+    if (p.tipo === 'simulado') return;
     const res = p.resultados[alunoId];
-
     if (p.tipo === 'desafio') {
       const bonus = res.pontos || Math.round((res.pct || 0) * 0.5);
       pts += bonus; ptsDesafio += bonus;
     } else {
-      // PROVA e QUIZ da tabela provas:
-      // 1) +5 pts por ter realizado (participação)
-      // 2) +pts por desempenho baseado na nota
+      // Prova/Quiz: nota × fator (ex: 8.5 × 10 = 85 pts)
       const nQ = (p.questoes || []).length;
       const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
       const nota = pct / 10;
-
-      const ptParticipacao = 5;
-      let ptDesempenho = 0;
-      if (nota >= 9.0)      ptDesempenho = 20;
-      else if (nota >= 7.0) ptDesempenho = 15;
-      else if (nota >= 5.0) ptDesempenho = 10;
-      else if (nota >= 3.0) ptDesempenho = 5;
-      else                  ptDesempenho = 0;
-
-      const bonus = ptParticipacao + ptDesempenho;
+      const bonus = Math.round(nota * fatorProva);
       pts += bonus; ptsProv += bonus;
     }
   });
