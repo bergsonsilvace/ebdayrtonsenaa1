@@ -904,26 +904,74 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     <div id="pg-banco" class="page">
       <div class="ph"><h2>Banco de <em>Questões</em></h2><p>Gerencie lições, agrupamentos e questões avulsas</p></div>
 
-      <!-- FILTRO DE TURMA -->
-      <div style="display:flex;align-items:center;gap:8px;margin-bottom:10px;flex-wrap:wrap">
-        <button class="btn btn-sm" id="banco-tab-c" onclick="selBancoTurma('criancas',this)" style="background:var(--tc);color:white;border:none">🟢 Crianças</button>
-        <button class="btn btn-sm btn-ou" id="banco-tab-j" onclick="selBancoTurma('jovens',this)">🔵 Jovens</button>
-        <button class="btn btn-sm btn-ou" id="banco-tab-a" onclick="selBancoTurma('adultos',this)">🟡 Adultos</button>
+      <!-- ── MENU PRINCIPAL: cards de turma ── -->
+      <div id="banco-menu-turmas">
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px">
+
+          <!-- Crianças -->
+          <div onclick="abrirBancoTurma('criancas')" style="background:var(--tc);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div style="font-size:26px;margin-bottom:6px">🧒</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:white;font-weight:600">Crianças</div>
+          </div>
+
+          <!-- Jovens -->
+          <div onclick="abrirBancoTurma('jovens')" style="background:var(--tj);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div style="font-size:26px;margin-bottom:6px">🧑</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:white;font-weight:600">Jovens</div>
+          </div>
+
+          <!-- Adultos -->
+          <div onclick="abrirBancoTurma('adultos')" style="background:var(--ink);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center;border:2px solid var(--gold)" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div style="font-size:26px;margin-bottom:6px">👨</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:var(--gold-l);font-weight:600">Adultos</div>
+          </div>
+        </div>
       </div>
 
-      <!-- FILTRO DE TIPO -->
-      <div style="display:flex;gap:4px;margin-bottom:14px;flex-wrap:wrap">
-        <button id="banco-tipo-licao" onclick="selBancoTipo('licao',this)" style="padding:6px 12px;border:1.5px solid var(--gold);background:var(--gold-pale);border-radius:20px;font-size:12px;font-weight:700;color:var(--gold-deep);cursor:pointer">📚 Lições</button>
-        <button id="banco-tipo-quiz" onclick="selBancoTipo('quiz',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">⚡ Quizzes</button>
-        <button id="banco-tipo-simulado" onclick="selBancoTipo('simulado',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">🔄 Simulados</button>
-        <button id="banco-tipo-avulsa" onclick="selBancoTipo('avulsa',this)" style="padding:6px 12px;border:1.5px solid var(--cb);background:white;border-radius:20px;font-size:12px;font-weight:600;color:var(--ink-soft);cursor:pointer">📌 Avulsas</button>
+      <!-- ── CONTEÚDO DA TURMA (oculto por padrão) ── -->
+      <div id="banco-conteudo" style="display:none">
+
+        <!-- Cabeçalho com turma + botão voltar -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <button onclick="voltarMenuBanco()" style="background:none;border:none;color:var(--gold-deep);font-size:13px;font-weight:700;cursor:pointer;padding:0">← Voltar</button>
+          <div id="banco-turma-titulo" style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:var(--ink)"></div>
+        </div>
+
+        <!-- TIPO: 4 sub-cards -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px" id="banco-tipo-cards">
+          <div onclick="selBancoTipo('licao',null)" id="banco-card-licao" style="border:2px solid var(--gold);background:var(--gold-pale);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">📚</div>
+            <div style="font-size:13px;font-weight:700;color:var(--gold-deep)">Lições</div>
+          </div>
+          <div onclick="selBancoTipo('quiz',null)" id="banco-card-quiz" style="border:2px solid var(--cb);background:white;border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">⚡</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink-soft)">Quizzes</div>
+          </div>
+          <div onclick="selBancoTipo('simulado',null)" id="banco-card-simulado" style="border:2px solid var(--cb);background:white;border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">🔄</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink-soft)">Simulados</div>
+          </div>
+          <div onclick="selBancoTipo('avulsa',null)" id="banco-card-avulsa" style="border:2px solid var(--cb);background:white;border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;text-align:center">
+            <div style="font-size:22px;margin-bottom:4px">📌</div>
+            <div style="font-size:13px;font-weight:700;color:var(--ink-soft)">Avulsas</div>
+          </div>
+        </div>
+
+        <!-- BOTÃO CRIAR -->
+        <div id="banco-btn-criar" style="margin-bottom:14px"></div>
+
+        <!-- LISTA -->
+        <div id="banco-lista"></div>
       </div>
 
-      <!-- BOTÃO DE CRIAR (muda conforme o tipo selecionado) -->
-      <div id="banco-btn-criar" style="margin-bottom:14px"></div>
-
-      <!-- LISTA -->
-      <div id="banco-lista"></div>
+      <!-- IDs ocultos para compatibilidade -->
+      <input type="hidden" id="banco-tab-c">
+      <input type="hidden" id="banco-tab-j">
+      <input type="hidden" id="banco-tab-a">
+      <input type="hidden" id="banco-tipo-licao">
+      <input type="hidden" id="banco-tipo-quiz">
+      <input type="hidden" id="banco-tipo-simulado">
+      <input type="hidden" id="banco-tipo-avulsa">
     </div>
 
     <!-- MODAL EDITAR LIÇÃO DO BANCO -->
@@ -1422,6 +1470,15 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="fg"><label class="fl">Decréscimo por dia</label><input class="fc" type="number" id="rk-pts-quiz-dec" value="1" min="0"></div>
         </div>
         <div class="fg" style="margin-bottom:14px">
+          <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:var(--cream);border-radius:var(--rsm);border:1px solid var(--cb)">
+            <input type="checkbox" id="rk-quiz-proporcional" style="width:18px;height:18px;cursor:pointer;accent-color:var(--tj)">
+            <div>
+              <div style="font-size:13px;font-weight:700;color:var(--ink)">Descontar pontos por questão errada</div>
+              <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Pontos = (acertos ÷ total) × pts do dia. Ex: 4/5 × 14 = 11.2 pts</div>
+            </div>
+          </label>
+        </div>
+        <div class="fg" style="margin-bottom:14px">
           <label class="fl">Quiz disponível por quantos dias após a aula</label>
           <input class="fc" type="number" id="rk-quiz-dias" value="6" min="1" max="13">
           <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: 6 dias → fica disponível segunda a sábado (antes da próxima aula)</div>
@@ -1830,8 +1887,16 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         </div>
       </div>
       <div class="frow">
-        <div class="fg"><label class="fl">Data início</label><input class="fc" type="date" id="ds-inicio"></div>
-        <div class="fg"><label class="fl">Data limite</label><input class="fc" type="date" id="ds-limite"></div>
+        <div class="fg">
+          <label class="fl">📅 Data/Hora de início</label>
+          <input class="fc" type="datetime-local" id="ds-inicio">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Quando abre para os alunos</div>
+        </div>
+        <div class="fg">
+          <label class="fl">⏰ Data/Hora limite</label>
+          <input class="fc" type="datetime-local" id="ds-limite">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Quando fecha definitivamente</div>
+        </div>
       </div>
       <div class="fg" style="margin:0">
         <label class="fl">Limite de participantes <span style="font-size:10px;color:var(--ink-soft)">(0 = sem limite)</span></label>
@@ -1881,7 +1946,18 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       </div>
       <div class="frow">
         <div class="fg"><label class="fl">Cronômetro (minutos)</label><input class="fc" type="number" id="pv-tempo" placeholder="Ex: 30 (0 = sem limite)" min="0" value="0"></div>
-        <div class="fg"><label class="fl">Data limite</label><input class="fc" type="date" id="pv-data-limite"></div>
+      </div>
+      <div class="frow">
+        <div class="fg">
+          <label class="fl">📅 Data/Hora de início</label>
+          <input class="fc" type="datetime-local" id="pv-data-inicio">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Quando abre para os alunos</div>
+        </div>
+        <div class="fg">
+          <label class="fl">⏰ Data/Hora limite</label>
+          <input class="fc" type="datetime-local" id="pv-data-limite">
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Quando fecha definitivamente</div>
+        </div>
       </div>
       <!-- Banco de Questões (Quiz/Simulado) -->
       <div class="fg" id="pv-banco-wrap" style="display:none">
@@ -2854,7 +2930,7 @@ async function _navTo(id) {
     }
     renderLicoes();
   }
-  else if (id === 'pg-aluno') renderAlunoProgresso();
+  else if (id === 'pg-aluno') renderAlunoProgresso().catch(()=>{});
   else if (id === 'responsavel') renderFilhosResponsavel();
   else if (id === 'meu-progresso-prof') {
     // Professor visualiza próprio progresso como aluno
@@ -2871,7 +2947,7 @@ async function _navTo(id) {
     document.getElementById('cal-detalhe-area').innerHTML = '';
     await renderCalendario();
   }
-  else if (id === 'banco') { selBancoTipo(_bancoTipoAtual || 'licao', null); }
+  else if (id === 'banco') { voltarMenuBanco(); }
   else if (id === 'provas') {
     if (USER && (USER.perfil === 'aluno' || _modo('aluno'))) await renderProvasAluno();
     else await renderProvasProf();
@@ -5142,7 +5218,7 @@ async function mostrarResultado() {
   }
   const pontosGanhos = liberacaoAtiva
     ? liberacaoAtiva.pts_fixo
-    : calcularPtQuiz(diasApos);
+    : calcularPtQuiz(diasApos, acertos, total);
 
   // Determinar id real do aluno
   let alunoId = USER ? USER.id : null;
@@ -5550,8 +5626,8 @@ async function renderAlunoProgresso() {
   carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
 
-  // Mostrar notificação de provas disponíveis
-  renderProvasNotifAluno(turmaAluno);
+  // Mostrar notificação de provas disponíveis (sem await para não bloquear o render)
+  renderProvasNotifAluno(turmaAluno).catch(()=>{});
 
   // Calcular pontos e presenças reais usando ids corretos
   const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
@@ -5807,7 +5883,8 @@ async function abrirModalProva(id, tipoPresel) {
       document.getElementById('pv-tipo').value = p.tipo || 'prova';
       document.getElementById('pv-turma').value = p.turma || 'adultos';
       document.getElementById('pv-tempo').value = p.tempo_minutos || 0;
-      document.getElementById('pv-data-limite').value = p.data_limite || '';
+      document.getElementById('pv-data-limite').value = p.data_limite ? p.data_limite.slice(0,16) : '';
+    document.getElementById('pv-data-inicio').value = p.data_inicio ? p.data_inicio.slice(0,16) : '';
       setTimeout(() => {
         const extrasApenas = (p.questoes || []).filter(q => q.origem === 'extra');
         extrasApenas.forEach(q => adicionarQuestaoExtra(q));
@@ -5822,6 +5899,7 @@ async function abrirModalProva(id, tipoPresel) {
     document.getElementById('pv-turma').value = USER.turma && USER.turma !== 'todas' ? USER.turma : 'adultos';
     document.getElementById('pv-tempo').value = 0;
     document.getElementById('pv-data-limite').value = '';
+    document.getElementById('pv-data-inicio').value = '';
   }
   atualizarLicoesModal(id);
   onTipoProvaChange();
@@ -6027,6 +6105,7 @@ async function salvarProva() {
   const tipo = document.getElementById('pv-tipo').value;
   const tempo = parseInt(document.getElementById('pv-tempo').value) || 0;
   const dataLimite = document.getElementById('pv-data-limite').value || null;
+  const dataInicio = document.getElementById('pv-data-inicio').value || null;
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
   const questoes = await coletarQuestoes(turma, licoesSel);
   const editId = document.getElementById('pv-id').value;
@@ -6039,7 +6118,7 @@ async function salvarProva() {
 
   const dado = {
     nome, tipo, turma, tempo_minutos: tempo,
-    data_limite: dataLimite, licoes_selecionadas: licoesSel,
+    data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel,
     questoes, resultados: {}, liberada: false,
     aprovada: aprovadaAuto,
     status_aprovacao: statusInicial,
@@ -6052,7 +6131,7 @@ async function salvarProva() {
     if (editId) {
       // Diagnóstico: mostrar o id que será salvo
       console.log('Editando prova id:', editId, 'tipo:', typeof editId);
-      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes };
+      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes };
 
       // Tentar update direto sem passar por sbUpdate para ver erro bruto
       const { data: dataUp, error: errUp } = await sbClient.from('provas').update(dadoEdicao).eq('id', editId).select();
@@ -6411,6 +6490,31 @@ function voltarListaProvas() {
   document.getElementById('provas-menu-cards').style.display = 'none';
 }
 
+
+// ── Verificar se item está dentro da janela de tempo (início/limite) ──
+function _dentroJanela(item) {
+  const agora = _agora();
+  if (item.data_inicio && new Date(item.data_inicio) > agora) return false;
+  if (item.data_limite && new Date(item.data_limite) < agora) return false;
+  return true;
+}
+// Retorna label de status da janela de tempo para exibição
+function _labelJanela(item) {
+  const agora = _agora();
+  if (item.data_inicio) {
+    const ini = new Date(item.data_inicio);
+    if (ini > agora) {
+      return `📅 Abre ${ini.toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})} às ${ini.toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})}`;
+    }
+  }
+  if (item.data_limite) {
+    const lim = new Date(item.data_limite);
+    if (lim > agora) {
+      return `⏰ Até ${lim.toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})} às ${lim.toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})}`;
+    }
+  }
+  return '';
+}
 // ── VISÃO DO ALUNO ──
 async function renderProvasAluno() {
   await carregarProvas();
@@ -6424,8 +6528,7 @@ async function renderProvasAluno() {
     if (p.turma !== turmaAluno) return false;
     if (p.tipo === 'desafio') return false;
     if (!p.liberada) return false;
-    if (p.data_limite && p.data_limite < hoje) return false;
-    return true;
+    return _dentroJanela(p);
   });
   const box = document.getElementById('lista-provas-aluno');
   let html = '';
@@ -6434,16 +6537,16 @@ async function renderProvasAluno() {
     html += disponiveis.map(p => {
       const jaFez = p.resultados && p.resultados[idAluno];
       const tipoClass = _tipoBadgeClass(p.tipo);
-      const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : 'Sem limite de tempo';
-      const dataLim = p.data_limite ? `📅 Até ${new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}` : '';
+      const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
+      const labelJanela = _labelJanela(p);
       const nQ = (p.questoes || []).length;
       return `<div class="prova-card" style="border-color:${jaFez?'#9ecfb7':'var(--gold)'}">
         <div class="prova-titulo">${p.nome} ${jaFez?'✓':''}</div>
         <div class="prova-meta" style="margin-bottom:8px">
           <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
           <span>${nQ} questões</span>
-          <span>${tempo}</span>
-          ${dataLim ? `<span>${dataLim}</span>` : ''}
+          ${tempo ? `<span>${tempo}</span>` : ''}
+          ${labelJanela ? `<span style="font-weight:600;color:var(--gold-deep)">${labelJanela}</span>` : ''}
         </div>
         ${jaFez
           ? `<div style="font-size:12px;color:var(--tc);font-weight:600">✓ Já respondida — ${Math.round((p.resultados[idAluno].acertos/nQ)*100)}% de acerto</div>
@@ -6812,17 +6915,45 @@ let _bancoTipoAtual = 'licao';
 let _bancoTurmaAtual = 'criancas';
 let _bancoLicoes = [];
 
+// ── BANCO DE QUESTÕES — navegação por cards ──
+function abrirBancoTurma(turma) {
+  _bancoTurmaAtual = turma;
+  // Ocultar menu de turmas, mostrar conteúdo
+  document.getElementById('banco-menu-turmas').style.display = 'none';
+  document.getElementById('banco-conteudo').style.display = 'block';
+  // Atualizar título
+  const labels = { criancas:'🧒 Crianças', jovens:'🧑 Jovens', adultos:'👨 Adultos' };
+  const titulo = document.getElementById('banco-turma-titulo');
+  if (titulo) titulo.textContent = labels[turma] || turma;
+  // Selecionar tipo padrão (lição)
+  selBancoTipo(_bancoTipoAtual || 'licao', null);
+}
+
+function voltarMenuBanco() {
+  document.getElementById('banco-menu-turmas').style.display = '';
+  document.getElementById('banco-conteudo').style.display = 'none';
+}
+
 function selBancoTipo(tipo, el) {
   _bancoTipoAtual = tipo;
-  // Atualizar visual dos botões de tipo
+  // Atualizar visual dos cards de tipo
+  const tipoConfig = {
+    licao:    { bg:'var(--gold-pale)', border:'var(--gold)', color:'var(--gold-deep)' },
+    quiz:     { bg:'#e8f0ff',          border:'var(--tj)',   color:'var(--tj)' },
+    simulado: { bg:'#f0f0f5',          border:'var(--ink)',  color:'var(--ink)' },
+    avulsa:   { bg:'var(--tc-bg)',     border:'var(--tc)',   color:'var(--tc)' },
+  };
   ['licao','quiz','simulado','avulsa'].forEach(t => {
-    const btn = document.getElementById('banco-tipo-' + t);
-    if (!btn) return;
+    const card = document.getElementById('banco-card-' + t);
+    if (!card) return;
     const ativo = t === tipo;
-    btn.style.borderColor = ativo ? 'var(--gold)' : 'var(--cb)';
-    btn.style.background = ativo ? 'var(--gold-pale)' : 'white';
-    btn.style.color = ativo ? 'var(--gold-deep)' : 'var(--ink-soft)';
-    btn.style.fontWeight = ativo ? '700' : '600';
+    const cfg = tipoConfig[t];
+    card.style.borderColor = ativo ? cfg.border : 'var(--cb)';
+    card.style.background = ativo ? cfg.bg : 'white';
+    const label = card.querySelector('div:last-child');
+    if (label) label.style.color = ativo ? cfg.color : 'var(--ink-soft)';
+    card.style.transform = ativo ? 'translateY(-2px)' : '';
+    card.style.boxShadow = ativo ? '0 4px 12px rgba(0,0,0,.1)' : '';
   });
   // Atualizar botão de criar
   const btnCriar = document.getElementById('banco-btn-criar');
@@ -6966,17 +7097,8 @@ async function renderBancoQuestoes() {
 }
 
 function selBancoTurma(turma, el) {
-  _bancoTurmaAtual = turma;
-  document.querySelectorAll('#pg-banco .btn').forEach(b => {
-    b.className = 'btn btn-sm btn-ou';
-  });
-  if (el) {
-    const cores = { criancas:'var(--tc)', jovens:'var(--tj)', adultos:'var(--gold-deep)' };
-    el.style.background = cores[turma] || 'var(--ink)';
-    el.style.color = 'white';
-    el.style.border = 'none';
-  }
-  renderBancoQuestoes();
+  // Compatibilidade — redireciona para novo sistema de cards
+  abrirBancoTurma(turma);
 }
 
 function novaLicaoBanco() {
@@ -7456,7 +7578,7 @@ async function renderProvasNotifAluno(turmaAluno) {
   if (!box) return;
   let html = '';
   try {
-    // ── Notificação de desafios com participação confirmada ──
+    // ── Sempre recarregar desafios frescos do banco ──
     await carregarDesafios();
     const hoje = _hojeStr();
 
@@ -7469,9 +7591,36 @@ async function renderProvasNotifAluno(turmaAluno) {
       } catch(e) {}
     }
 
+    // ── 1. Desafios novos disponíveis (ainda não inscritos) ──
+    const desafiosNovos = DESAFIOS.filter(d => {
+      if (d.turma !== turmaAluno || !d.liberado) return false;
+      if (!_dentroJanela(d)) return false;
+      const s = (d.cumprimentos || {})[alunoId];
+      // Não inscrito ainda
+      return !s;
+    });
+
+    if (desafiosNovos.length) {
+      html += desafiosNovos.map(d => {
+        const catIcons = { visitante:'👥', versiculo:'📖', presenca:'✅', leitura:'📚', servico:'🤝', oracao:'🙏', compartilhar:'📲', outro:'⭐' };
+        const icon = catIcons[d.categoria] || '🏆';
+        return `
+        <div onclick="selProvasTab('desafios',null);navTo('provas')" style="background:linear-gradient(135deg,#7a5c00,#b8972a);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:26px">${icon}</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">🏆 Novo desafio disponível!</div>
+            <div style="font-size:14px;font-weight:700;color:white">${d.nome}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">Ganhe <strong style="color:var(--gold-l)">${d.pontos} pts</strong> — toque para aceitar!</div>
+          </div>
+          <div style="color:rgba(255,255,255,.4);font-size:20px">›</div>
+        </div>`;
+      }).join('');
+    }
+
+    // ── 2. Desafios com participação confirmada (aguardando cumprir) ──
     const desafiosConfirmados = DESAFIOS.filter(d => {
       if (d.turma !== turmaAluno || !d.liberado) return false;
-      if (d.data_limite && d.data_limite < hoje) return false;
+      if (!_dentroJanela(d)) return false;
       const s = (d.cumprimentos || {})[alunoId];
       return s && s.participacao_confirmada && !s.cumprido && !s.nao_cumprido;
     });
@@ -7481,17 +7630,39 @@ async function renderProvasNotifAluno(turmaAluno) {
         <div onclick="selProvasTab('desafios',null);navTo('provas')" style="background:linear-gradient(135deg,#1a3a6b,#1c5090);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px">
           <div style="font-size:26px">💪</div>
           <div style="flex:1">
-            <div style="font-size:13px;font-weight:700;color:white">Participação confirmada!</div>
-            <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;line-height:1.4">Desafio <strong style="color:var(--gold-l)">${d.nome}</strong> — agora é com você! Cumpra e ganhe ${d.pontos} pts ✦</div>
+            <div style="font-size:11px;font-weight:700;color:rgba(255,255,255,.6);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Participação confirmada!</div>
+            <div style="font-size:14px;font-weight:700;color:white">${d.nome}</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">Agora é com você! Cumpra e ganhe <strong style="color:var(--gold-l)">${d.pontos} pts</strong> ✦</div>
           </div>
           <div style="color:rgba(255,255,255,.4);font-size:20px">›</div>
+        </div>`).join('');
+    }
+
+    // ── 3. Desafios aguardando confirmação (inscrito mas pendente) ──
+    const desafiosPendentes = DESAFIOS.filter(d => {
+      if (d.turma !== turmaAluno || !d.liberado) return false;
+      if (!_dentroJanela(d)) return false;
+      const s = (d.cumprimentos || {})[alunoId];
+      return s && !s.participacao_confirmada && !s.rejeitado && !s.cumprido && !s.nao_cumprido;
+    });
+
+    if (desafiosPendentes.length) {
+      html += desafiosPendentes.map(d => `
+        <div onclick="selProvasTab('desafios',null);navTo('provas')" style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:26px">⏳</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--gold-deep);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Aguardando confirmação</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink)">${d.nome}</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-top:2px">Sua inscrição foi enviada ao professor</div>
+          </div>
+          <div style="color:var(--ink-soft);font-size:20px">›</div>
         </div>`).join('');
     }
 
     // ── Provas/quizzes disponíveis ──
     const { data } = await sbClient.from('provas').select('*').eq('liberada', true).eq('turma', turmaAluno);
     const ativas = (data||[]).filter(p =>
-      (!p.data_limite || p.data_limite >= hoje) && p.tipo !== 'desafio'
+      p.tipo !== 'desafio' && _dentroJanela(p)
     );
     if (ativas.length) {
       html += ativas.map(p => `
@@ -7588,6 +7759,7 @@ let RANKING_CONFIG = {
   pts_presenca: 10,
   pts_quiz_dia0: 10,
   pts_quiz_dec: 1,
+  pts_quiz_proporcional: false,
   quiz_dias: 6,
   pts_prova_fator: 10
 };
@@ -7609,6 +7781,7 @@ async function carregarRegraRanking() {
       document.getElementById('rk-pts-presenca').value = data.pts_presenca ?? 10;
       document.getElementById('rk-pts-quiz-dia0').value = data.pts_quiz_dia0 ?? 10;
       document.getElementById('rk-pts-quiz-dec').value = data.pts_quiz_dec ?? 1;
+      document.getElementById('rk-quiz-proporcional').checked = data.pts_quiz_proporcional ?? false;
       document.getElementById('rk-quiz-dias').value = data.quiz_dias ?? 6;
       document.getElementById('rk-pts-prova-fator').value = data.pts_prova_fator ?? 10;
     }
@@ -7620,6 +7793,7 @@ async function salvarRegraRanking() {
     pts_presenca:    parseFloat(document.getElementById('rk-pts-presenca').value) || 10,
     pts_quiz_dia0:   parseFloat(document.getElementById('rk-pts-quiz-dia0').value) || 10,
     pts_quiz_dec:    parseFloat(document.getElementById('rk-pts-quiz-dec').value) || 1,
+    pts_quiz_proporcional: document.getElementById('rk-quiz-proporcional').checked,
     quiz_dias:       parseInt(document.getElementById('rk-quiz-dias').value) || 6,
     pts_prova_fator: parseFloat(document.getElementById('rk-pts-prova-fator').value) || 10,
     updated_at:      new Date().toISOString()
@@ -7657,7 +7831,7 @@ async function recalcularRanking() {
           const diasApos = dataAula
             ? Math.max(0, Math.floor((new Date(r.data_resposta) - new Date(dataAula)) / 86400000))
             : 0;
-          const novosPontos = calcularPtQuiz(diasApos);
+          const novosPontos = calcularPtQuiz(diasApos, r.acertos, r.total);
           await sbClient.from('quiz_resultados').update({ pontos: novosPontos }).eq('id', r.id);
           atualizados++;
         }
@@ -7667,9 +7841,13 @@ async function recalcularRanking() {
   );
 }
 
-function calcularPtQuiz(diasAposAula) {
-  const pts = RANKING_CONFIG.pts_quiz_dia0 - (diasAposAula * RANKING_CONFIG.pts_quiz_dec);
-  return Math.max(0, pts);
+function calcularPtQuiz(diasAposAula, acertos, total) {
+  const ptsDia = Math.max(0, RANKING_CONFIG.pts_quiz_dia0 - (diasAposAula * RANKING_CONFIG.pts_quiz_dec));
+  // Se proporcional ativado E temos dados de acertos, aplicar desconto por erros
+  if (RANKING_CONFIG.pts_quiz_proporcional && acertos != null && total > 0) {
+    return (acertos / total) * ptsDia;
+  }
+  return ptsDia;
 }
 
 // Verificar se quiz ainda está disponível
@@ -8865,11 +9043,12 @@ async function permitirRefazer(id) {
 // ══════════════════════════════════════════════
 let DESAFIOS = [];
 
-async function carregarDesafios() {
+async function carregarDesafios(forcarReload) {
+  // Sempre busca do banco — sem cache para garantir dados frescos
   try {
     const { data } = await sbClient.from('desafios').select('*').order('created_at', { ascending: false });
     DESAFIOS = data || [];
-  } catch(e) { DESAFIOS = []; }
+  } catch(e) { DESAFIOS = DESAFIOS.length ? DESAFIOS : []; }
 }
 
 async function abrirModalDesafio(id) {
@@ -8892,8 +9071,8 @@ async function abrirModalDesafio(id) {
       document.getElementById('ds-categoria').value = d.categoria || 'outro';
       document.getElementById('ds-turma').value = d.turma || 'adultos';
       document.getElementById('ds-pontos').value = d.pontos || 20;
-      document.getElementById('ds-inicio').value = d.data_inicio || '';
-      document.getElementById('ds-limite').value = d.data_limite || '';
+      document.getElementById('ds-inicio').value = d.data_inicio ? d.data_inicio.slice(0,16) : '';
+      document.getElementById('ds-limite').value = d.data_limite ? d.data_limite.slice(0,16) : '';
       document.getElementById('ds-limite-part').value = d.limite_participantes || 0;
     } else {
       toast('Não foi possível carregar o desafio', 'er');
@@ -8905,7 +9084,7 @@ async function abrirModalDesafio(id) {
     document.getElementById('ds-categoria').value = 'outro';
     document.getElementById('ds-turma').value = USER.turma && USER.turma !== 'todas' ? USER.turma : 'adultos';
     document.getElementById('ds-pontos').value = 20;
-    document.getElementById('ds-inicio').value = hoje;
+    document.getElementById('ds-inicio').value = '';
     document.getElementById('ds-limite').value = '';
     document.getElementById('ds-limite-part').value = 0;
   }
@@ -9035,7 +9214,7 @@ async function renderDesafiosProf() {
             ${statusBadge}
             <span>${TN[d.turma]}</span>
             <span>🏅 ${d.pontos} pts</span>
-            ${d.data_limite ? `<span>📅 Até ${new Date(d.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}</span>` : ''}
+            ${_labelJanela(d) ? `<span style="font-weight:600">${_labelJanela(d)}</span>` : (d.data_inicio ? '' : '')}
           </div>
           ${d.descricao ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.5">${d.descricao}</div>` : ''}
           <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">⏳ ${nPendente} aguardando · ✓ ${nConfirmado} confirmado(s) · 🏆 ${nCumpriu} cumprido(s)${nNaoCumpriu > 0 ? ` · ✗ ${nNaoCumpriu} não cumprido(s)` : ''}${d.limite_participantes > 0 ? ` · Limite: ${d.limite_participantes}` : ''}</div>
@@ -9393,8 +9572,7 @@ async function renderDesafiosAluno() {
   const disponiveis = DESAFIOS.filter(d => {
     if (d.turma !== turmaAluno) return false;
     if (!d.liberado) return false;
-    if (d.data_limite && d.data_limite < hoje) return false;
-    return true;
+    return _dentroJanela(d);
   });
 
   if (!disponiveis.length) {
@@ -9464,7 +9642,7 @@ async function renderDesafiosAluno() {
       <div class="prova-meta" style="margin-bottom:8px">
         <span class="prova-badge badge-desafio">DESAFIO</span>
         <span>🏅 ${d.pontos} pts</span>
-        ${d.data_limite ? `<span>📅 Até ${new Date(d.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}</span>` : ''}
+        ${_labelJanela(d) ? `<span style="font-weight:600;color:var(--gold-deep)">${_labelJanela(d)}</span>` : ''}
       </div>
       ${d.descricao ? `<div style="font-size:13px;color:var(--ink-mid);line-height:1.6;margin-bottom:8px">${d.descricao}</div>` : ''}
       ${statusHtml}
@@ -11812,29 +11990,26 @@ async function excluirEscala(id) {
 
 async function carregarChavePix() {
   try {
-    // Determinar turma do usuário para pegar o Pix correto
+    // Determinar turma do usuário — SEM fallback para outra turma
     const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
     const turma = ehAluno
-      ? (USER.turma_aluno || USER.turma || 'adultos')
-      : (USER && USER.turma && USER.turma !== 'todas' ? USER.turma : 'adultos');
+      ? (USER.turma_aluno || USER.turma || null)
+      : (USER && USER.turma && USER.turma !== 'todas' ? USER.turma : null);
 
-    // Pegar chave específica da turma (fallback para chave geral)
-    var chave = (await sbGetConfig('pix_chave_' + turma)) || (await sbGetConfig('pix_chave')) || '';
+    // Pegar chave SOMENTE da turma específica — sem fallback
+    var chave = turma ? ((await sbGetConfig('pix_chave_' + turma)) || '') : '';
 
     // Card do dashboard (admin/prof)
     var card = document.getElementById('dash-pix-card');
     var el = document.getElementById('dash-pix-chave');
-    if (chave && card && el) {
-      el.textContent = chave;
-      card.style.display = 'block';
-    }
+    if (card) card.style.display = chave ? 'block' : 'none';
+    if (el && chave) el.textContent = chave;
+
     // Card do aluno — tela inicial
     var cardAluno = document.getElementById('aluno-pix-card');
     var elAluno = document.getElementById('aluno-pix-chave');
-    if (chave && cardAluno && elAluno) {
-      elAluno.textContent = chave;
-      cardAluno.style.display = 'block';
-    }
+    if (cardAluno) cardAluno.style.display = chave ? 'block' : 'none';
+    if (elAluno && chave) elAluno.textContent = chave;
   } catch(e) {}
 }
 function copiarChavePixDash() {
