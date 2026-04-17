@@ -1339,23 +1339,54 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     <!-- PIX -->
     <div id="pg-pix" class="page">
       <div class="ph"><h2>Ofertas <em>via Pix</em></h2><p>Contribua com a obra de Deus</p></div>
-      <div style="background:linear-gradient(135deg,#00a859,#00cc6a);border-radius:var(--r);padding:20px;color:white;text-align:center;margin-bottom:16px" id="pix-card-display">
-        <div style="font-size:36px;margin-bottom:8px">&#128154;</div>
-        <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="pix-nome-display">EBD Frequencia</div>
-        <div style="font-size:12px;opacity:.8" id="pix-banco-display"></div>
-        <div style="font-size:13px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:20px;margin:10px auto;display:inline-block;word-break:break-all" id="pix-chave-display">Chave nao configurada</div>
-        <div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="copiarChavePix()">&#128203; Copiar chave</button></div>
+
+      <!-- Card de exibição do Pix (para alunos — mostra só o da turma) -->
+      <div id="pix-display-area">
+        <div style="background:linear-gradient(135deg,#00a859,#00cc6a);border-radius:var(--r);padding:20px;color:white;text-align:center;margin-bottom:16px" id="pix-card-display">
+          <div style="font-size:36px;margin-bottom:8px">💚</div>
+          <div style="font-size:13px;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px" id="pix-turma-label"></div>
+          <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="pix-nome-display">EBD Frequencia</div>
+          <div style="font-size:12px;opacity:.8" id="pix-banco-display"></div>
+          <div style="font-size:13px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:20px;margin:10px auto;display:inline-block;word-break:break-all" id="pix-chave-display">Chave nao configurada</div>
+          <div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="copiarChavePix()">📋 Copiar chave</button></div>
+        </div>
+        <div id="pix-qrcode-wrap" style="text-align:center;margin:16px 0;display:none">
+          <img id="pix-qrcode-img" style="max-width:220px;border-radius:12px;border:4px solid white">
+        </div>
       </div>
-      <div id="pix-qrcode-wrap" style="text-align:center;margin:16px 0;display:none">
-        <img id="pix-qrcode-img" style="max-width:220px;border-radius:12px;border:4px solid white">
-      </div>
-      <div class="card" id="pix-config-card" style="display:none">
-        <div class="ct">Configurar Pix</div>
-        <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome" placeholder="Nome completo"></div>
-        <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco" placeholder="Ex: Nubank, Caixa..."></div>
-        <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave" placeholder="CPF, e-mail, telefone ou aleatoria"></div>
-        <div class="fg" style="margin-bottom:0"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr" placeholder="https://..."></div>
-        <button class="btn btn-gold btn-full" style="margin-top:12px" onclick="salvarPix()">&#10003; Salvar</button>
+
+      <!-- Config de Pix (só admin/pastor/super) — 3 turmas -->
+      <div id="pix-config-card" style="display:none">
+
+        <!-- Crianças -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid var(--tc)">
+          <div class="ct" style="color:var(--tc)">🧒 Pix — Crianças</div>
+          <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome-criancas" placeholder="Nome completo"></div>
+          <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-criancas" placeholder="Ex: Nubank, Caixa..."></div>
+          <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-criancas" placeholder="CPF, e-mail, telefone ou aleatória"></div>
+          <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-criancas" placeholder="https://..."></div>
+          <button class="btn btn-sm" style="background:var(--tc);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('criancas')">✓ Salvar Pix Crianças</button>
+        </div>
+
+        <!-- Jovens -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid var(--tj)">
+          <div class="ct" style="color:var(--tj)">🧑 Pix — Jovens</div>
+          <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome-jovens" placeholder="Nome completo"></div>
+          <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-jovens" placeholder="Ex: Nubank, Caixa..."></div>
+          <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-jovens" placeholder="CPF, e-mail, telefone ou aleatória"></div>
+          <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-jovens" placeholder="https://..."></div>
+          <button class="btn btn-sm" style="background:var(--tj);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('jovens')">✓ Salvar Pix Jovens</button>
+        </div>
+
+        <!-- Adultos -->
+        <div class="card" style="margin-bottom:12px;border-left:4px solid var(--gold-deep)">
+          <div class="ct" style="color:var(--gold-deep)">👨 Pix — Adultos</div>
+          <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome-adultos" placeholder="Nome completo"></div>
+          <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-adultos" placeholder="Ex: Nubank, Caixa..."></div>
+          <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-adultos" placeholder="CPF, e-mail, telefone ou aleatória"></div>
+          <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-adultos" placeholder="https://..."></div>
+          <button class="btn btn-sm" style="background:var(--gold);color:var(--ink);border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('adultos')">✓ Salvar Pix Adultos</button>
+        </div>
       </div>
     </div>
 
@@ -1510,10 +1541,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div id="qr-badge-pts" style="margin-top:8px;display:flex;align-items:center;justify-content:center;gap:8px;flex-wrap:wrap"></div>
         </div>
         <div class="card" id="qr-revisao" style="margin-bottom:14px"></div>
-        <div id="qr-btns" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
-          <button class="btn btn-gold" onclick="refazerQuiz()">↺ Refazer</button>
-          <button class="btn btn-ou" onclick="navTo('licoes')">← Lições</button>
-        </div>
+        <div id="qr-btns" style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap"></div>
       </div>
     </div>
 
@@ -1592,6 +1620,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="ttabs" id="provas-prof-tabs" style="margin-bottom:14px">
           <button class="ttab on" onclick="selProvasProfTab('avaliacoes',this)">📝 Provas & Quizzes</button>
           <button class="ttab" onclick="selProvasProfTab('desafios',this)">🏆 Desafios</button>
+          <button class="ttab" onclick="selProvasProfTab('quizzes-licao',this)">⚡ Quizzes de Lição</button>
         </div>
 
         <!-- Conteúdo: Avaliações -->
@@ -1618,6 +1647,16 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             </button>
           </div>
           <div id="lista-desafios-prof"></div>
+        </div>
+
+        <!-- Conteúdo: Quizzes de Lição -->
+        <div id="tab-quizzes-licao-prof" style="display:none">
+          <div class="ttabs" id="ql-turma-tabs" style="margin-bottom:14px">
+            <button class="ttab tc on" onclick="selQuizLicaoTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+            <button class="ttab tj" onclick="selQuizLicaoTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
+            <button class="ttab ta" onclick="selQuizLicaoTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
+          </div>
+          <div id="lista-quizzes-licao"></div>
         </div>
       </div>
       <!-- Resultados de uma prova -->
@@ -2426,7 +2465,17 @@ async function finalizarLogin() {
     USER.turma = 'todas';
     USER.turmas = ['criancas', 'jovens', 'adultos'];
     USER.tambem_aluno = true;
-    USER.turma_aluno = USER.turma_aluno || 'adultos';
+    // Buscar turma real na tabela alunos pelo login — para modo aluno correto
+    try {
+      const { data: alunoData } = await sbClient.from('alunos')
+        .select('turma,id').eq('login', USER.login).limit(1);
+      if (alunoData && alunoData.length > 0) {
+        USER.turma_aluno = alunoData[0].turma || 'adultos';
+        USER._aluno_id = alunoData[0].id;
+      } else {
+        USER.turma_aluno = USER.turma_aluno || 'adultos';
+      }
+    } catch(e) { USER.turma_aluno = USER.turma_aluno || 'adultos'; }
     // Buscar turmas do professor vinculado ao mesmo login
     try {
       const { data: profData } = await sbClient.from('professores')
@@ -2438,6 +2487,18 @@ async function finalizarLogin() {
           : (pd.turma && pd.turma !== 'todas' ? [pd.turma] : []);
       }
     } catch(e) { USER._turmas_prof = []; }
+  }
+
+  // Para professores/super com tambem_aluno: sempre buscar turma real na tabela alunos
+  if (!isAdmin() && USER.tambem_aluno) {
+    try {
+      const { data: alunoReal } = await sbClient.from('alunos')
+        .select('turma,id').eq('login', USER.login).limit(1);
+      if (alunoReal && alunoReal.length > 0) {
+        USER.turma_aluno = alunoReal[0].turma || USER.turma_aluno || 'adultos';
+        USER._aluno_id = alunoReal[0].id;
+      }
+    } catch(e) {}
   }
 
   // Inicializar modo de visualização
@@ -2748,7 +2809,19 @@ async function _navTo(id) {
     renderEscalas();
   }
   else if (id === 'perfil') preencherFormPerfil();
-  else if (id === 'licoes') renderLicoes();
+  else if (id === 'licoes') {
+    // Aluno vê só sua turma — ocultar abas das outras
+    const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
+    const turmaAluno = USER ? (USER.turma_aluno || USER.turma) : 'adultos';
+    const licoesTabs = document.getElementById('licoes-ttabs');
+    if (licoesTabs) {
+      licoesTabs.style.display = ehAluno ? 'none' : '';
+    }
+    if (ehAluno && turmaAluno) {
+      curTurmaLicoes = turmaAluno;
+    }
+    renderLicoes();
+  }
   else if (id === 'pg-aluno') renderAlunoProgresso();
   else if (id === 'responsavel') renderFilhosResponsavel();
   else if (id === 'meu-progresso-prof') {
@@ -3820,7 +3893,7 @@ function _brasilia(date) {
   const d = date ? new Date(date) : new Date();
   // Usar Intl para obter o offset correto de Brasília
   const formatter = new Intl.DateTimeFormat('sv-SE', {
-    timeZone: 'America/Sao_Paulo',
+    timeZone: 'America/Fortaleza',
     year: 'numeric', month: '2-digit', day: '2-digit',
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
@@ -3828,15 +3901,47 @@ function _brasilia(date) {
 }
 function _formatBrasilia(date, opts) {
   const d = date ? new Date(date) : new Date();
-  return d.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo', ...opts });
+  return d.toLocaleString('pt-BR', { timeZone: 'America/Fortaleza', ...opts });
 }
 function _dataBrasilia(date) {
   const d = date ? new Date(date) : new Date();
-  return d.toLocaleDateString('pt-BR', { timeZone: 'America/Sao_Paulo', day:'2-digit', month:'2-digit' });
+  return d.toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza', day:'2-digit', month:'2-digit' });
 }
 function _horaBrasilia(date) {
   const d = date ? new Date(date) : new Date();
-  return d.toLocaleTimeString('pt-BR', { timeZone: 'America/Sao_Paulo', hour:'2-digit', minute:'2-digit' });
+  return d.toLocaleTimeString('pt-BR', { timeZone: 'America/Fortaleza', hour:'2-digit', minute:'2-digit' });
+}
+
+// ── TIMEZONE BRASÍLIA (UTC-3) — funções centrais ──
+// Retorna objeto Date representando "agora" em Brasília
+function _agora() {
+  // Pegar string no formato de Brasília e recriar como data local
+  const str = new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Fortaleza',
+    year:'numeric', month:'2-digit', day:'2-digit',
+    hour:'2-digit', minute:'2-digit', second:'2-digit'
+  }).format(new Date()).replace(' ','T');
+  return new Date(str);
+}
+
+// Retorna string ISO de "agora" em Brasília (para salvar no banco)
+function _agoraISO() {
+  const d = _agora();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}-03:00`;
+}
+
+// Retorna Date com horas zeradas para hoje em Brasília
+function _hojeFortaleza() {
+  const agora = _agora();
+  return new Date(agora.getFullYear(), agora.getMonth(), agora.getDate(), 0, 0, 0, 0);
+}
+
+// Retorna string YYYY-MM-DD de hoje em Brasília
+function _hojeStr() {
+  const d = _agora();
+  const pad = n => String(n).padStart(2,'0');
+  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
 }
 
 function _nascParaDesempate(nasc) {
@@ -3878,6 +3983,7 @@ async function renderRanking() {
   // Carregar quizzes de todos os alunos do banco
   await carregarQuizScoresTodos();
   await carregarProvas();
+  await carregarDesafioPontos();
 
   let ranking;
 
@@ -3885,7 +3991,7 @@ async function renderRanking() {
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS);
+      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
       const presTotal = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pctBar = Math.min(Math.round((pts.total / maxPts) * 100), 100);
       const pctFreq = aulasT.length ? Math.round((presTotal / aulasT.length) * 100) : 0;
@@ -3905,7 +4011,7 @@ async function renderRanking() {
       const presencas = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS);
+      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
       return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: pts.total, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
@@ -4437,7 +4543,7 @@ function renderLicoes() {
     const maxDias = RANKING_CONFIG.quiz_dias ?? 6;
     const [d, m] = lic.data.split('/');
     const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0, 0);
-    const hojeZero = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0, 0);
+    const hojeZero = _hojeFortaleza();
     const passou = dataLic <= hojeZero;
     const ehHoje = dataLic.getTime() === hojeZero.getTime();
     const diasApos = Math.floor((hojeZero - dataLic) / 86400000);
@@ -4530,7 +4636,7 @@ async function abrirLicao(turma, num) {
   const [d, m] = lic.data.split('/');
   const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0, 0);
   const hoje = new Date();
-  const hojeZ = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 0, 0, 0, 0);
+  const hojeZ = _hojeFortaleza();
   const diasAposAula = Math.floor((hojeZ - dataLic) / 86400000);
   const liberacao = getLiberacaoAtiva(turma, num);
   const quizDisp = liberacao
@@ -4974,7 +5080,7 @@ async function mostrarResultado() {
         .select('data').eq('turma', q.turma).order('data', { ascending: true });
       if (aulas && aulas.length >= q.licaoNum) {
         const dataAula = aulas[q.licaoNum - 1]?.data;
-        if (dataAula) diasApos = Math.max(0, Math.floor((new Date() - new Date(dataAula)) / 86400000));
+        if (dataAula) diasApos = Math.max(0, Math.floor((_hojeFortaleza() - new Date(dataAula)) / 86400000));
       }
     } catch(e) {}
   }
@@ -4997,8 +5103,19 @@ async function mostrarResultado() {
   const deveSalvar = ehAluno || ehModoAluno;
 
   if (deveSalvar && alunoId) {
-    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos, data: new Date().toISOString() };
+    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos, data: _agoraISO() };
     try {
+      // Montar respostas detalhadas para salvar
+      const respostasDetalhadas = q.embaralhadas.map((perg, i) => {
+        const resp = q.respostas[i];
+        return {
+          pergunta: perg.q,
+          marcou: resp ? resp.texto : null,
+          acertou: resp ? resp.acertou : false,
+          correta: (perg.op && perg.correta != null) ? perg.op[perg.correta] : perg.a
+        };
+      });
+
       const { error } = await sbClient.from('quiz_resultados').upsert({
         aluno_id: alunoId,
         turma: q.turma,
@@ -5007,7 +5124,8 @@ async function mostrarResultado() {
         total,
         pct,
         pontos: pontosGanhos,
-        data_resposta: new Date().toISOString()
+        data_resposta: _agoraISO(),
+        respostas: respostasDetalhadas
       }, { onConflict: 'aluno_id,turma,licao_num' });
 
       if (error) {
@@ -5072,7 +5190,6 @@ async function mostrarResultado() {
       } catch(e) {}
     }
     qrBtns.innerHTML = `
-      ${podeRefazer ? `<button class="btn btn-gold" onclick="refazerQuiz()" style="flex:1">↺ Refazer Quiz</button>` : ''}
       <button class="btn btn-ou" onclick="abrirContestacaoQuiz()" style="flex:1">⚠️ Contestar</button>
       <button class="btn btn-ou" onclick="navTo('licoes')" style="flex:1">← Lições</button>
       ${deveSalvar ? `<button class="btn btn-dk" onclick="irParaProgresso()" style="flex:1">📊 Progresso</button>` : ''}`;
@@ -5199,7 +5316,7 @@ async function confirmarRespostaContestacao(contId, alunoId, turma, licaoNum, ac
     await sbClient.from('quiz_contestacoes').update({
       status: novoStatus,
       resposta_prof: resposta || null,
-      updated_at: new Date().toISOString()
+      updated_at: _agoraISO()
     }).eq('id', contId);
 
     // Se aprovado: liberar refazer para o aluno
@@ -5278,7 +5395,7 @@ async function enviarContestacaoQuiz() {
       licao_num: quizAtual.licaoNum,
       motivo: texto,
       status: 'pendente',
-      created_at: new Date().toISOString()
+      created_at: _agoraISO()
     });
     document.getElementById('mo-contestacao')?.remove();
     toast('Contestação enviada! Seu professor irá revisar. ✦', 'ok');
@@ -5381,7 +5498,7 @@ async function renderAlunoProgresso() {
   renderProvasNotifAluno(turmaAluno);
 
   // Calcular pontos e presenças reais usando ids corretos
-  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || []);
+  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
   const quizzesFeitos = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
   const provasFeitas = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
@@ -5526,7 +5643,7 @@ async function renderProvasProf() {
     box.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova criada ainda</div></div>';
     return;
   }
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _hojeStr();
   const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
   const ehProfSimples = isProfessor() && !isAdmin();
 
@@ -5932,7 +6049,7 @@ async function aprovarProva(id) {
     const hist = [...(p?.historico_aprovacao || []), {
       tipo: 'aprovacao', autor: USER.nome,
       msg: 'Prova aprovada. Você já pode liberá-la para os alunos.',
-      data: new Date().toISOString()
+      data: _agoraISO()
     }];
     await sbUpdate('provas', id, { aprovada: true, status_aprovacao: 'aprovada', obs_aprovacao: null, historico_aprovacao: hist });
     toast('Prova aprovada! O professor já pode liberá-la.', 'ok');
@@ -5957,7 +6074,7 @@ async function confirmarRejeicao(id) {
   const obs = document.getElementById('rej-obs') && document.getElementById('rej-obs').value.trim();
   if (!obs) { toast('Digite o motivo da rejeicao', 'er'); return; }
   const p = PROVAS.find(x => x.id === id);
-  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'rejeicao', autor: USER.nome, msg: obs, data: new Date().toISOString() }];
+  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'rejeicao', autor: USER.nome, msg: obs, data: _agoraISO() }];
   await sbUpdate('provas', id, { aprovada: false, status_aprovacao: 'rejeitada', obs_aprovacao: obs, historico_aprovacao: hist });
   document.getElementById('mo-rejeitar-prova') && document.getElementById('mo-rejeitar-prova').remove();
   toast('Prova rejeitada.', '');
@@ -5980,7 +6097,7 @@ async function solicitarRevisao(id) {
 async function confirmarRevisao(id) {
   const obs = (document.getElementById('rev-obs') && document.getElementById('rev-obs').value.trim()) || 'Prova revisada e reenviada para aprovacao.';
   const p = PROVAS.find(x => x.id === id);
-  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'revisao', autor: USER.nome, msg: obs, data: new Date().toISOString() }];
+  const hist = [...(p && p.historico_aprovacao || []), { tipo: 'revisao', autor: USER.nome, msg: obs, data: _agoraISO() }];
   await sbUpdate('provas', id, { status_aprovacao: 'revisao', obs_aprovacao: null, historico_aprovacao: hist });
   document.getElementById('mo-solicitar-revisao') && document.getElementById('mo-solicitar-revisao').remove();
   toast('Revisao enviada! O responsavel sera notificado.', 'ok');
@@ -6081,15 +6198,158 @@ async function verResultados(id) {
           <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:${r.cor}">${r.nota}</div>
         </div>
         <div class="res-track"><div class="res-fill" style="width:${r.pct}%;background:${r.cor}"></div></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px">
-          <div style="font-size:10px;color:var(--ink-soft)">${r.acertos}/${nQ} questões · ${r.pct}% · ${r.data ? new Date(r.data).toLocaleDateString('pt-BR') : ''}</div>
-          <button onclick="abrirObsProf('${p.id}','${r.alunoId}','${r.nome.replace(/'/g,"\\'")}'')" style="font-size:10px;padding:2px 8px;border:1px solid var(--gold);border-radius:6px;background:var(--gold-pale);color:var(--gold-deep);cursor:pointer">💬 ${r.obs ? 'Editar obs.' : 'Obs.'}</button>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px;flex-wrap:wrap">
+          <div style="font-size:10px;color:var(--ink-soft)">${r.acertos}/${nQ} questões · ${r.pct}% · ${r.data ? new Date(r.data).toLocaleDateString("pt-BR") : ""}</div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap">
+            <button data-pid="${p.id}" data-aid="${r.alunoId}" data-nome="${r.nome.replace(/"/g,'&quot;')}" onclick="verRespostasAluno(this.dataset.pid,this.dataset.aid,this.dataset.nome)" style="font-size:10px;padding:2px 8px;border:1px solid var(--tj);border-radius:6px;background:#e8f0ff;color:var(--tj);cursor:pointer">👁 Respostas</button>
+            <button data-aid="${r.alunoId}" data-turma="${p.turma}" data-nome="${r.nome.replace(/"/g,'&quot;')}" data-pid="${p.id}" onclick="abrirCorrecaoPontos(this.dataset.aid,this.dataset.turma,0,this.dataset.nome,this.dataset.pid)" style="font-size:10px;padding:2px 8px;border:1px solid var(--warn);border-radius:6px;background:#fff8e0;color:#7a5000;cursor:pointer">✏️ Pts</button>
+            <button data-pid="${p.id}" data-aid="${r.alunoId}" data-nome="${r.nome.replace(/"/g,'&quot;')}" onclick="abrirObsProf(this.dataset.pid,this.dataset.aid,this.dataset.nome)" style="font-size:10px;padding:2px 8px;border:1px solid var(--gold);border-radius:6px;background:var(--gold-pale);color:var(--gold-deep);cursor:pointer">💬 ${r.obs ? "Editar obs." : "Obs."}</button>
+          </div>
         </div>
       </div>
     </div>
-    ${r.obs ? `<div style="margin-top:8px;margin-left:38px;background:var(--gold-pale);border-left:3px solid var(--gold);padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;color:var(--ink);line-height:1.5">${r.obs}</div>` : ''}
-  </div>`).join('');
+    ${r.obs ? `<div style="margin-top:8px;margin-left:38px;background:var(--gold-pale);border-left:3px solid var(--gold);padding:6px 10px;border-radius:0 6px 6px 0;font-size:12px;color:var(--ink);line-height:1.5">${r.obs}</div>` : ""}
+  </div>`).join("");
 }
+// ── VER RESPOSTAS DO ALUNO ──
+async function verRespostasAluno(provaId, alunoId, nomeAluno) {
+  const p = PROVAS.find(x => x.id === provaId);
+  if (!p) return;
+  const res = (p.resultados || {})[alunoId];
+  const prev = document.getElementById('modal-respostas-aluno');
+  if (prev) prev.remove();
+  const modal = document.createElement('div');
+  modal.id = 'modal-respostas-aluno';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+  const nQ = (p.questoes || []).length;
+  const pct = res ? (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0)) : 0;
+  const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+  const questoesHtml = res ? p.questoes.map((q, i) => {
+    const respAluno = res.respostas ? res.respostas[i] : null;
+    const acertou = respAluno ? (respAluno.acertou || respAluno.valor === q.a) : false;
+    const marcou = respAluno ? (respAluno.valor || respAluno.texto || '—') : '— Sem resposta';
+    return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
+      <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4">${i+1}. ${q.q}</div>
+      <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+        <span style="padding:3px 9px;border-radius:6px;font-size:12px;background:${acertou?'var(--tc-bg)':'var(--red-bg)'};color:${acertou?'var(--tc)':'var(--red)'};font-weight:700">${acertou?'✓ Correto':'✗ Incorreto'}</span>
+        <span style="font-size:12px;color:var(--ink-mid)">Marcou: <strong>${marcou}</strong></span>
+      </div>
+      ${!acertou ? `<div style="font-size:12px;color:var(--tc);margin-top:4px">✓ Correta: ${q.a}</div>` : ''}
+    </div>`;
+  }).join('') : '';
+  modal.innerHTML = `<div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:var(--ink);padding:16px 18px;border-bottom:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;color:var(--gold-l);font-weight:700;margin-bottom:3px">${_tipoLabel(p.tipo)} · ${TN[p.turma]}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:white;font-weight:600">${nomeAluno}</div>
+        ${res ? `<div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${res.acertos}/${nQ} corretas · <span style="color:${cor}">${pct}%</span></div>` : ''}
+      </div>
+      <button onclick="document.getElementById('modal-respostas-aluno').remove()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px 16px">
+      ${questoesHtml || '<div style="color:var(--ink-soft);text-align:center;padding:20px;line-height:1.7">Detalhes não disponíveis para esta prova.<br><small style=\"font-size:11px\">As respostas detalhadas são salvas a partir desta versão.</small></div>'}
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--cb)">
+      <button class="btn btn-ou btn-full" onclick="document.getElementById('modal-respostas-aluno').remove()">Fechar</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+// ── CORREÇÃO DE PONTOS ──
+function abrirCorrecaoPontos(alunoId, turma, licaoNum, nomeAluno, provaId) {
+  const prev = document.getElementById('modal-correcao-pts');
+  if (prev) prev.remove();
+  const modal = document.createElement('div');
+  modal.id = 'modal-correcao-pts';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+  modal.innerHTML = `<div style="background:white;border-radius:16px;width:100%;max-width:400px;overflow:hidden">
+    <div style="background:var(--ink);padding:16px 18px;border-bottom:2px solid var(--gold)">
+      <div style="font-size:10px;text-transform:uppercase;color:var(--gold-l);font-weight:700;margin-bottom:3px">✏️ Correção de Pontuação</div>
+      <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:white;font-weight:600">${nomeAluno}</div>
+    </div>
+    <div style="padding:16px">
+      <div style="font-size:13px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
+        Informe os novos pontos corretos para esta avaliação. Use 0 para zerar a pontuação.
+      </div>
+      <div class="fg" style="margin-bottom:6px">
+        <label class="fl">Tipo de ajuste</label>
+        <select class="fc" id="cp-tipo" onchange="onCpTipoChange()">
+          <option value="prova">Prova/Simulado/Quiz (resultado)</option>
+          <option value="quiz_licao">Quiz de Lição (quiz_resultados)</option>
+          <option value="desafio">Pontos de Desafio</option>
+        </select>
+      </div>
+      <div class="fg" id="cp-licao-wrap" style="display:none;margin-bottom:6px">
+        <label class="fl">Número da lição</label>
+        <input class="fc" type="number" id="cp-licao" min="1" max="13" placeholder="Ex: 1" value="${licaoNum || ''}">
+      </div>
+      <div class="fg" id="cp-desafio-wrap" style="display:none;margin-bottom:6px">
+        <label class="fl">ID do desafio (deixe em branco para zerar todos)</label>
+        <input class="fc" type="text" id="cp-desafio-id" placeholder="ID do desafio">
+      </div>
+      <div class="fg" style="margin-bottom:14px">
+        <label class="fl">Novos pontos</label>
+        <input class="fc" type="number" id="cp-novos-pts" min="0" step="0.5" placeholder="Ex: 14">
+      </div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ou btn-full" onclick="document.getElementById('modal-correcao-pts').remove()">Cancelar</button>
+        <button class="btn btn-gold btn-full" onclick="confirmarCorrecaoPontos('${alunoId}','${turma}','${provaId || ''}')">Salvar</button>
+      </div>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function onCpTipoChange() {
+  const tipo = document.getElementById('cp-tipo').value;
+  document.getElementById('cp-licao-wrap').style.display = tipo === 'quiz_licao' ? 'block' : 'none';
+  document.getElementById('cp-desafio-wrap').style.display = tipo === 'desafio' ? 'block' : 'none';
+}
+
+async function confirmarCorrecaoPontos(alunoId, turma, provaId) {
+  const tipo = document.getElementById('cp-tipo').value;
+  const novos = parseFloat(document.getElementById('cp-novos-pts').value);
+  if (isNaN(novos) || novos < 0) { toast('Informe um valor válido de pontos', 'er'); return; }
+
+  try {
+    if (tipo === 'prova' && provaId) {
+      // Atualizar resultado na prova
+      const p = PROVAS.find(x => x.id === provaId);
+      if (!p || !p.resultados || !p.resultados[alunoId]) { toast('Resultado não encontrado', 'er'); return; }
+      const resultados = { ...p.resultados };
+      resultados[alunoId] = { ...resultados[alunoId], pontos_corrigidos: novos };
+      await sbUpdate('provas', provaId, { resultados });
+      toast('Pontuação corrigida! ❖', 'ok');
+    } else if (tipo === 'quiz_licao') {
+      const licao = parseInt(document.getElementById('cp-licao').value);
+      if (!licao) { toast('Informe o número da lição', 'er'); return; }
+      const { error } = await sbClient.from('quiz_resultados')
+        .update({ pontos: novos })
+        .eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licao);
+      if (error) throw error;
+      toast(`Pontos da Lição ${licao} corrigidos para ${novos} pts! ❖`, 'ok');
+    } else if (tipo === 'desafio') {
+      const desafioId = document.getElementById('cp-desafio-id').value.trim();
+      if (desafioId) {
+        await sbClient.from('desafio_pontos').update({ pontos: novos })
+          .eq('aluno_id', alunoId).eq('desafio_id', desafioId);
+      } else {
+        await sbClient.from('desafio_pontos').delete()
+          .eq('aluno_id', alunoId).eq('turma', turma);
+        if (novos > 0) toast('Pontos de desafios zerados (valor positivo só funciona com ID específico)', '');
+        else toast('Pontos de desafios zerados!', 'ok');
+        document.getElementById('modal-correcao-pts')?.remove();
+        return;
+      }
+      toast(`Pontos do desafio corrigidos para ${novos} pts! ❖`, 'ok');
+    }
+    document.getElementById('modal-correcao-pts')?.remove();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
 
 function voltarListaProvas() {
   document.getElementById('provas-prof-area').style.display = 'block';
@@ -6099,7 +6359,7 @@ function voltarListaProvas() {
 // ── VISÃO DO ALUNO ──
 async function renderProvasAluno() {
   await carregarProvas();
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _hojeStr();
   // Usar turma e id corretos para modo aluno
   const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
   const idAluno = USER.id;
@@ -6416,7 +6676,7 @@ async function entregarProva(automatico = false) {
   const pct = Math.round((acertos / p.questoes.length) * 100);
 
   // Salvar no Supabase com id correto
-  const resultados = { ...(p.resultados || {}), [alunoId]: { acertos, total: p.questoes.length, pct, data: new Date().toISOString() } };
+  const resultados = { ...(p.resultados || {}), [alunoId]: { acertos, total: p.questoes.length, pct, data: _agoraISO() } };
   await sbUpdate('provas', p.id, { resultados });
 
   // Atualizar cache local
@@ -6844,7 +7104,7 @@ async function bancoPergSalvarInline(i) {
   if (licaoId) {
     try {
       const { error } = await sbClient.from('banco_questoes')
-        .update({ perguntas: todasPerguntas, updated_at: new Date().toISOString() })
+        .update({ perguntas: todasPerguntas, updated_at: _agoraISO() })
         .eq('id', licaoId);
       if (error) throw error;
       const licaoLocal = _bancoLicoes.find(x => x.id === licaoId);
@@ -6949,7 +7209,7 @@ async function salvarLicaoBanco() {
     texto_aureo: document.getElementById('banco-texto-aureo').value.trim(),
     resumo: document.getElementById('banco-resumo').value.trim(),
     perguntas,
-    updated_at: new Date().toISOString()
+    updated_at: _agoraISO()
   };
 
   try {
@@ -7111,7 +7371,7 @@ async function renderProvasNotifDash() {
   if (!box) return;
   try {
     const { data } = await sbClient.from('provas').select('*').eq('liberada', true);
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = _hojeStr();
     const turmaUsuario = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
     const ehAluno = USER.perfil === 'aluno' || _modo('aluno');
 
@@ -7141,7 +7401,7 @@ async function renderProvasNotifAluno(turmaAluno) {
   if (!box) return;
   try {
     const { data } = await sbClient.from('provas').select('*').eq('liberada', true).eq('turma', turmaAluno);
-    const hoje = new Date().toISOString().split('T')[0];
+    const hoje = _hojeStr();
     const ativas = (data||[]).filter(p =>
       (!p.data_limite || p.data_limite >= hoje) && p.tipo !== 'desafio'
     );
@@ -7207,7 +7467,7 @@ async function salvarLiberacao() {
     await sbClient.from('quiz_liberacoes').upsert({
       turma, licao_num: licao, pts_fixo: pts,
       expira_em: expiraEm.toISOString(),
-      created_at: new Date().toISOString()
+      created_at: _agoraISO()
     }, { onConflict: 'turma,licao_num' });
     toast(`Lição ${licao} liberada por ${dias} dia(s) com ${pts} pts ✦`, 'ok');
     await carregarLiberacoes();
@@ -7241,6 +7501,15 @@ let RANKING_CONFIG = {
   quiz_dias: 6,
   pts_prova_fator: 10
 };
+
+// Cache global de pontos de desafios
+let _desafioPontos = [];
+async function carregarDesafioPontos() {
+  try {
+    const { data } = await sbClient.from('desafio_pontos').select('*');
+    _desafioPontos = data || [];
+  } catch(e) { _desafioPontos = []; }
+}
 
 async function carregarRegraRanking() {
   try {
@@ -7321,7 +7590,7 @@ function quizEstaDisponivel(dataAula) {
 
 // ══════════════════════════════════════════════
 // Pontos: presença=10, quiz(acerto)=2pts por acerto, prova=pct*0.5
-function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas) {
+function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioPontos) {
   let pts = 0;
   let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
 
@@ -7336,28 +7605,27 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas) {
   // Quizzes — usar pontos salvos se existirem, senão calcular pelo acerto
   Object.entries(quizScores).forEach(([key, val]) => {
     if (!key.startsWith(turma)) return;
-    // Se tem pontos salvos (calculados com regras do dia), usar eles
-    // Senão usar acertos × 2 como fallback
     const bonus = val.pontos != null ? val.pontos : (val.acertos * 2);
     pts += bonus; ptsQ += bonus;
   });
 
-  // Provas e Desafios
-  provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId]).forEach(p => {
-    if (p.tipo === 'simulado') return;
+  // Provas (não desafios — desafios têm tabela própria)
+  provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio').forEach(p => {
     const res = p.resultados[alunoId];
-    if (p.tipo === 'desafio') {
-      const bonus = res.pontos || Math.round((res.pct || 0) * 0.5);
-      pts += bonus; ptsDesafio += bonus;
-    } else {
-      // Prova/Quiz: nota × fator (ex: 8.5 × 10 = 85 pts)
-      const nQ = (p.questoes || []).length;
-      const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
-      const nota = pct / 10;
-      const bonus = Math.round(nota * fatorProva);
-      pts += bonus; ptsProv += bonus;
-    }
+    const nQ = (p.questoes || []).length;
+    const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
+    const nota = pct / 10;
+    const bonus = Math.round(nota * fatorProva);
+    pts += bonus; ptsProv += bonus;
   });
+
+  // Desafios — ler da tabela desafio_pontos
+  if (desafioPontos && Array.isArray(desafioPontos)) {
+    desafioPontos.filter(d => d.aluno_id === alunoId && d.turma === turma).forEach(d => {
+      const bonus = parseFloat(d.pontos) || 0;
+      pts += bonus; ptsDesafio += bonus;
+    });
+  }
 
   return { total: pts, presencas: ptsPres, quizzes: ptsQ, provas: ptsProv, desafios: ptsDesafio };
 }
@@ -7455,7 +7723,7 @@ function gerarCertificado() {
   const feitasKeys = Object.keys(quizScores).filter(k => k.startsWith(USER.turma));
   const pct = Math.round((feitasKeys.length / totalLicoes) * 100);
   const nome = PERFIL?.nome_exibicao || USER.nome;
-  const hoje = new Date().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+  const hoje = _agora().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
   const win = window.open('', '_blank');
   win.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8">
     <title>Certificado EBD</title>
@@ -8106,7 +8374,7 @@ async function registrarAcesso() {
       usuario_nome: USER.nome,
       perfil: perfilReal,
       turma: turmaReal,
-      data_acesso: new Date().toISOString()
+      data_acesso: _agoraISO()
     });
   } catch(e) {}
 }
@@ -8220,6 +8488,7 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Carregar quizzes E provas do banco
     await carregarQuizScoresTodos();
     await carregarProvas();
+    await carregarDesafioPontos();
 
     if (!alunos.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
 
@@ -8228,7 +8497,7 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
       const sc = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || []);
+      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
       const idade = _idadeParaDesempate(a.nasc);
       return { id: a.id, nome: a.nome, pres, pct, pts: pts.total, idade };
     }).sort((a, b) => {
@@ -8241,7 +8510,7 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Ranking PONTOS: pts → presenças → % → idade (mais velho sobe)
     const rankingGeral = alunos.map(a => {
       const sc = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || []);
+      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
       const idade = _idadeParaDesempate(a.nasc);
@@ -8329,7 +8598,7 @@ function compartilharResultadoWA() {
 ` +
     `📊 Nota: *${res.pct}%* ${emojis[nivel]}
 ` +
-    `📅 Data: ${new Date(res.data).toLocaleDateString('pt-BR')}
+    `📅 Data: ${new Date(res.data).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza'})}
 
 ` +
     `_EBD — ADTC Ayrton Senna 1_`;
@@ -8517,7 +8786,7 @@ async function abrirModalDesafio(id) {
   const tipoEl = document.getElementById('mo-desafio-titulo');
   if (tipoEl) tipoEl.textContent = id ? '🏆 Editar Desafio' : '🏆 Novo Desafio';
   document.getElementById('ds-id').value = id || '';
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _hojeStr();
   if (id) {
     // Buscar dados frescos do banco
     let d = DESAFIOS.find(x => x.id === id);
@@ -8611,7 +8880,7 @@ async function renderDesafiosProf() {
   await carregarDesafios();
   const box = document.getElementById('lista-desafios-prof');
   if (!box) return;
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _hojeStr();
   const meus = isAdmin() ? DESAFIOS : DESAFIOS.filter(d => d.turma === USER.turma);
   const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
   if (!meus.length) {
@@ -8621,8 +8890,11 @@ async function renderDesafiosProf() {
   const catIcons = { visitante:'👥', versiculo:'📖', presenca:'✅', leitura:'📚', servico:'🤝', oracao:'🙏', compartilhar:'📲', outro:'⭐' };
   box.innerHTML = meus.map(d => {
     const encerrado = d.data_limite && d.data_limite < hoje;
-    const nCumpriu = Object.keys(d.cumprimentos || {}).filter(k => d.cumprimentos[k].confirmado).length;
-    const nPendente = Object.keys(d.cumprimentos || {}).filter(k => !d.cumprimentos[k].confirmado).length;
+    const cum_ = d.cumprimentos || {};
+    const nPendente    = Object.keys(cum_).filter(k => !cum_[k].participacao_confirmada && !cum_[k].rejeitado && !cum_[k].cumprido && !cum_[k].nao_cumprido).length;
+    const nConfirmado  = Object.keys(cum_).filter(k => cum_[k].participacao_confirmada && !cum_[k].cumprido && !cum_[k].nao_cumprido).length;
+    const nCumpriu     = Object.keys(cum_).filter(k => cum_[k].cumprido === true).length;
+    const nNaoCumpriu  = Object.keys(cum_).filter(k => cum_[k].nao_cumprido === true).length;
     const icon = catIcons[d.categoria] || '⭐';
     const statusAp = d.status_aprovacao || (d.aprovado === false ? 'pendente' : 'aprovado');
     const pendente = statusAp === 'pendente';
@@ -8676,7 +8948,7 @@ async function renderDesafiosProf() {
             ${d.data_limite ? `<span>📅 Até ${new Date(d.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}</span>` : ''}
           </div>
           ${d.descricao ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:4px;line-height:1.5">${d.descricao}</div>` : ''}
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">✅ ${nCumpriu} cumprido(s) · ⏳ ${nPendente} pendente(s)${d.limite_participantes > 0 ? ` · Limite: ${d.limite_participantes}` : ''}</div>
+          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">⏳ ${nPendente} aguardando · ✓ ${nConfirmado} confirmado(s) · 🏆 ${nCumpriu} cumprido(s)${nNaoCumpriu > 0 ? ` · ✗ ${nNaoCumpriu} não cumprido(s)` : ''}${d.limite_participantes > 0 ? ` · Limite: ${d.limite_participantes}` : ''}</div>
         </div>
         <div style="display:flex;gap:5px;flex-shrink:0">
           <button class="btn-ic" onclick="abrirModalDesafio('${d.id}')" title="Editar">✎</button>
@@ -8777,32 +9049,66 @@ async function verCumprimentosDesafio(desafioId) {
   const cum = d.cumprimentos || {};
   const alunos = await sbGet('alunos', { turma: d.turma });
   const inscritosIds = Object.keys(cum);
-  const pendentes = inscritosIds.filter(k => !cum[k].confirmado);
-  const confirmados = inscritosIds.filter(k => cum[k].confirmado);
+
+  // Separar por estado
+  const pendentes     = inscritosIds.filter(k => !cum[k].participacao_confirmada && !cum[k].rejeitado && !cum[k].cumprido && !cum[k].nao_cumprido);
+  const confirmados   = inscritosIds.filter(k => cum[k].participacao_confirmada && !cum[k].cumprido && !cum[k].nao_cumprido);
+  const cumpridos     = inscritosIds.filter(k => cum[k].cumprido);
+  const naoCumpridos  = inscritosIds.filter(k => cum[k].nao_cumprido);
+  const rejeitados    = inscritosIds.filter(k => cum[k].rejeitado);
+
+  const secao = (titulo, cor, lista) => !lista.length ? '' : `
+    <div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:${cor};font-weight:700;margin:14px 0 8px">${titulo} (${lista.length})</div>
+    ${lista.map(aid => {
+      const al = alunos.find(a => a.id === aid);
+      const nome = al ? al.nome : aid;
+      const estado = cum[aid];
+      let acoes = '';
+
+      if (!estado.participacao_confirmada && !estado.rejeitado) {
+        // Pendente — confirmar ou rejeitar participação
+        acoes = `
+          <button class="btn btn-gold btn-sm" onclick="confirmarParticipacao('${desafioId}','${aid}')">✓ Confirmar participação</button>
+          <button class="btn btn-ou btn-sm" style="color:var(--red)" onclick="rejeitarParticipacao('${desafioId}','${aid}')">✕ Rejeitar</button>`;
+      } else if (estado.participacao_confirmada && !estado.cumprido && !estado.nao_cumprido) {
+        // Participação confirmada — marcar cumprido ou não cumprido + desfazer confirmação
+        acoes = `
+          <button class="btn btn-gold btn-sm" onclick="marcarCumprido('${desafioId}','${aid}')">🏆 Cumprido</button>
+          <button class="btn btn-ou btn-sm" style="color:var(--red)" onclick="marcarNaoCumprido('${desafioId}','${aid}')">✗ Não cumprido</button>
+          <button class="btn btn-ou btn-sm" style="color:var(--ink-soft);font-size:10px" onclick="desfazerParticipacao('${desafioId}','${aid}')">↩ Desfazer</button>`;
+      } else if (estado.cumprido) {
+        // Cumprido — mostrar pts + opção de desfazer
+        acoes = `
+          <span style="font-size:11px;color:var(--tc);font-weight:700">🏆 +${d.pontos} pts ✦</span>
+          <button class="btn btn-ou btn-sm" style="color:var(--ink-soft);font-size:10px" onclick="desfazerCumprimento('${desafioId}','${aid}')">↩ Desfazer</button>`;
+      } else if (estado.nao_cumprido) {
+        // Não cumprido — opção de desfazer
+        acoes = `
+          <span style="font-size:11px;color:var(--red);font-weight:700">✗ Não cumprido</span>
+          <button class="btn btn-ou btn-sm" style="color:var(--ink-soft);font-size:10px" onclick="desfazerNaoCumprimento('${desafioId}','${aid}')">↩ Desfazer</button>`;
+      } else if (estado.rejeitado) {
+        acoes = `
+          <span style="font-size:11px;color:var(--ink-soft)">✕ Rejeitado</span>
+          <button class="btn btn-ou btn-sm" style="color:var(--ink-soft);font-size:10px" onclick="desfazerRejeicao('${desafioId}','${aid}')">↩ Desfazer</button>`;
+      }
+
+      return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--cb);flex-wrap:wrap">
+        <div style="flex:1;font-size:13px;font-weight:600;min-width:120px">${nome}</div>
+        ${estado.obs ? `<div style="font-size:11px;color:var(--ink-soft);width:100%;padding-bottom:4px">"${estado.obs}"</div>` : ''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap">${acoes}</div>
+      </div>`;
+    }).join('')}`;
 
   modal.innerHTML = `<div onclick="event.stopPropagation()" style="background:white;border-radius:22px 22px 0 0;padding:22px;width:100%;max-width:680px;max-height:88vh;overflow-y:auto;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
       <h3 style="font-family:'Cormorant Garamond',serif;font-size:20px">🏆 ${d.nome}</h3>
       <button onclick="document.getElementById('modal-desafio-partic').remove()" style="width:32px;height:32px;border:1px solid var(--cb);border-radius:8px;background:white;font-size:16px;cursor:pointer">✕</button>
     </div>
-    ${pendentes.length ? `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--warn);font-weight:700;margin-bottom:8px">⏳ Aguardando confirmação (${pendentes.length})</div>
-    ${pendentes.map(aid => {
-      const al = alunos.find(a => a.id === aid);
-      return `<div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--cb)">
-        <div style="flex:1;font-size:13px;font-weight:600">${al ? al.nome : aid}</div>
-        ${cum[aid].obs ? `<div style="font-size:11px;color:var(--ink-soft);flex:1">"${cum[aid].obs}"</div>` : ''}
-        <button class="btn btn-gold btn-sm" onclick="confirmarCumprimento('${desafioId}','${aid}')">✓ Confirmar</button>
-        <button class="btn btn-ou btn-sm" style="color:var(--red)" onclick="rejeitarCumprimento('${desafioId}','${aid}')">✕</button>
-      </div>`;
-    }).join('')}` : ''}
-    ${confirmados.length ? `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.08em;color:var(--tc);font-weight:700;margin:14px 0 8px">✅ Confirmados (${confirmados.length})</div>
-    ${confirmados.map(aid => {
-      const al = alunos.find(a => a.id === aid);
-      return `<div style="display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--cb)">
-        <div style="flex:1;font-size:13px">${al ? al.nome : aid}</div>
-        <span style="font-size:11px;color:var(--tc);font-weight:700">+${d.pontos} pts ✦</span>
-      </div>`;
-    }).join('')}` : ''}
+    ${secao('⏳ Aguardando confirmação', 'var(--warn)', pendentes)}
+    ${secao('✓ Participação confirmada', 'var(--tj)', confirmados)}
+    ${secao('🏆 Cumpridos', 'var(--tc)', cumpridos)}
+    ${secao('✗ Não cumpridos', 'var(--red)', naoCumpridos)}
+    ${secao('✕ Rejeitados', 'var(--ink-soft)', rejeitados)}
     ${!inscritosIds.length ? '<div style="text-align:center;padding:20px;color:var(--ink-soft)">Nenhum aluno inscrito ainda</div>' : ''}
     <button class="btn btn-ou btn-full" style="margin-top:14px" onclick="document.getElementById('modal-desafio-partic').remove()">Fechar</button>
   </div>`;
@@ -8810,40 +9116,150 @@ async function verCumprimentosDesafio(desafioId) {
   document.body.appendChild(modal);
 }
 
-async function confirmarCumprimento(desafioId, alunoId) {
+// ── FUNÇÕES DESFAZER DESAFIO ──
+async function desfazerParticipacao(desafioId, alunoId) {
+  // Volta para estado pendente (remove confirmação de participação)
   const d = DESAFIOS.find(x => x.id === desafioId);
   if (!d) return;
   const cum = { ...(d.cumprimentos || {}) };
-  cum[alunoId] = { ...cum[alunoId], confirmado: true, data_confirmacao: new Date().toISOString() };
+  cum[alunoId] = { ...cum[alunoId], participacao_confirmada: false };
+  delete cum[alunoId].data_confirmacao;
   await sbUpdate('desafios', desafioId, { cumprimentos: cum });
-  // Salvar pontos no quiz_resultados como desafio
-  try {
-    await sbClient.from('quiz_resultados').upsert({
-      aluno_id: alunoId, turma: d.turma,
-      licao_num: -parseInt(desafioId.replace(/\D/g,'').slice(0,4) || '9999'),
-      acertos: d.pontos, total: d.pontos, pct: 100,
-      data_resposta: new Date().toISOString()
-    }, { onConflict: 'aluno_id,turma,licao_num' });
-  } catch(e) {}
-  toast('Cumprimento confirmado! Pontos creditados. ✦', 'ok');
+  toast('Confirmação desfeita. Aluno voltou para Aguardando.', '');
   await carregarDesafios();
-  const prev = document.getElementById('modal-desafio-partic');
-  if (prev) prev.remove();
+  document.getElementById('modal-desafio-partic')?.remove();
   verCumprimentosDesafio(desafioId);
 }
 
-async function rejeitarCumprimento(desafioId, alunoId) {
+async function desfazerCumprimento(desafioId, alunoId) {
+  // Volta para participação confirmada (remove cumprido + remove pontos)
   const d = DESAFIOS.find(x => x.id === desafioId);
   if (!d) return;
   const cum = { ...(d.cumprimentos || {}) };
-  delete cum[alunoId];
+  cum[alunoId] = { ...cum[alunoId], cumprido: false };
+  delete cum[alunoId].data_cumprimento;
   await sbUpdate('desafios', desafioId, { cumprimentos: cum });
-  toast('Cumprimento rejeitado.', '');
+  // Remover pontos da tabela desafio_pontos
+  try {
+    await sbClient.from('desafio_pontos').delete()
+      .eq('aluno_id', alunoId).eq('desafio_id', desafioId);
+  } catch(e) {}
+  toast('Cumprimento desfeito. Pontos removidos. ↩', 'ok');
   await carregarDesafios();
-  const prev = document.getElementById('modal-desafio-partic');
-  if (prev) prev.remove();
+  document.getElementById('modal-desafio-partic')?.remove();
   verCumprimentosDesafio(desafioId);
 }
+
+async function desfazerNaoCumprimento(desafioId, alunoId) {
+  // Volta para participação confirmada
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], nao_cumprido: false };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  toast('Desfeito. Aluno voltou para Participação Confirmada. ↩', 'ok');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function desfazerRejeicao(desafioId, alunoId) {
+  // Volta para pendente
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], rejeitado: false };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  toast('Rejeição desfeita. Aluno voltou para Aguardando. ↩', 'ok');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function confirmarParticipacao(desafioId, alunoId) {
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], participacao_confirmada: true, data_confirmacao: _agoraISO() };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  // Notificação: salvar aviso na tabela avisos para o aluno
+  try {
+    await sbClient.from('avisos').insert({
+      titulo: '🏆 Participação confirmada!',
+      conteudo: `Sua participação no desafio "${d.nome}" foi confirmada! Agora é com você — conclua o desafio para ganhar ${d.pontos} pts.`,
+      tipo: 'info',
+      turma: d.turma,
+      created_at: _agoraISO()
+    });
+  } catch(e) {}
+  toast('Participação confirmada! Aluno notificado. ✦', 'ok');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function rejeitarParticipacao(desafioId, alunoId) {
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], rejeitado: true };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  toast('Participação rejeitada.', '');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function marcarCumprido(desafioId, alunoId) {
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], cumprido: true, confirmado: true, data_cumprimento: _agoraISO() };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  // Agora sim creditar pontos
+  try {
+    const { data: al } = await sbClient.from('alunos').select('id').eq('id', alunoId).single();
+    if (al) {
+      // Usar tabela desafio_pontos para não misturar com quiz_resultados
+      await sbClient.from('desafio_pontos').upsert({
+        aluno_id: alunoId,
+        desafio_id: desafioId,
+        turma: d.turma,
+        pontos: d.pontos,
+        data_cumprimento: _agoraISO()
+      }, { onConflict: 'aluno_id,desafio_id' });
+    }
+  } catch(e) {}
+  // Notificar aluno
+  try {
+    await sbClient.from('avisos').insert({
+      titulo: '🏆 Desafio cumprido!',
+      conteudo: `Parabéns! Você concluiu o desafio "${d.nome}" e ganhou ${d.pontos} pts! ✦`,
+      tipo: 'evento',
+      turma: d.turma,
+      created_at: _agoraISO()
+    });
+  } catch(e) {}
+  toast(`Desafio cumprido! +${d.pontos} pts creditados. ✦`, 'ok');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function marcarNaoCumprido(desafioId, alunoId) {
+  const d = DESAFIOS.find(x => x.id === desafioId);
+  if (!d) return;
+  const cum = { ...(d.cumprimentos || {}) };
+  cum[alunoId] = { ...cum[alunoId], nao_cumprido: true, cumprido: false };
+  await sbUpdate('desafios', desafioId, { cumprimentos: cum });
+  toast('Marcado como não cumprido.', '');
+  await carregarDesafios();
+  document.getElementById('modal-desafio-partic')?.remove();
+  verCumprimentosDesafio(desafioId);
+}
+
+async function confirmarCumprimento(desafioId, alunoId) { await marcarCumprido(desafioId, alunoId); }
+async function rejeitarCumprimento(desafioId, alunoId) { await rejeitarParticipacao(desafioId, alunoId); }
 
 // Aluno se inscreve no desafio
 async function inscreverDesafio(desafioId) {
@@ -8862,7 +9278,7 @@ async function inscreverDesafio(desafioId) {
   if (d.limite_participantes > 0 && Object.keys(cum).length >= d.limite_participantes) {
     toast('Limite de participantes atingido.', 'er'); return;
   }
-  cum[alunoId] = { inscrito_em: new Date().toISOString(), confirmado: false, obs: '' };
+  cum[alunoId] = { inscrito_em: _agoraISO(), confirmado: false, obs: '' };
   await sbUpdate('desafios', desafioId, { cumprimentos: cum });
   toast('Inscrito no desafio! Aguarde confirmação do professor. ✦', 'ok');
   await renderDesafiosAluno();
@@ -8872,7 +9288,7 @@ async function inscreverDesafio(desafioId) {
 async function renderDesafiosAluno() {
   await carregarDesafios();
   const box = document.getElementById('lista-provas-aluno');
-  const hoje = new Date().toISOString().split('T')[0];
+  const hoje = _hojeStr();
   const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
   const disponiveis = DESAFIOS.filter(d => {
     if (d.turma !== turmaAluno) return false;
@@ -8960,9 +9376,189 @@ async function selProvasProfTab(tab, el) {
   if (el) el.classList.add('on');
   document.getElementById('tab-avaliacoes-prof').style.display = tab === 'avaliacoes' ? '' : 'none';
   document.getElementById('tab-desafios-prof').style.display = tab === 'desafios' ? '' : 'none';
+  document.getElementById('tab-quizzes-licao-prof').style.display = tab === 'quizzes-licao' ? '' : 'none';
   if (tab === 'avaliacoes') await renderProvasProf();
-  else await renderDesafiosProf();
+  else if (tab === 'desafios') await renderDesafiosProf();
+  else if (tab === 'quizzes-licao') await renderQuizzesLicao();
 }
+
+// ══════════════════════════════════════════════════════
+// RELATÓRIO DE QUIZZES DE LIÇÃO
+// ══════════════════════════════════════════════════════
+let _qlTurmaAtual = 'criancas';
+
+function selQuizLicaoTurma(turma, el) {
+  _qlTurmaAtual = turma;
+  document.querySelectorAll('#ql-turma-tabs .ttab').forEach(t => t.classList.remove('on'));
+  if (el) el.classList.add('on');
+  renderQuizzesLicao();
+}
+
+async function renderQuizzesLicao() {
+  const box = document.getElementById('lista-quizzes-licao');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div>';
+
+  try {
+    // Buscar todos os resultados de quiz da turma
+    const { data: resultados } = await sbClient.from('quiz_resultados')
+      .select('*').eq('turma', _qlTurmaAtual).order('licao_num', { ascending: true });
+
+    // Buscar alunos da turma
+    const alunos = await sbGet('alunos', { turma: _qlTurmaAtual });
+
+    // Buscar lições da turma
+    const dados = LICOES[_qlTurmaAtual];
+    const licoes = dados ? dados.licoes : [];
+
+    if (!resultados || !resultados.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">⚡</div><div class="empty-txt">Nenhum quiz respondido ainda nesta turma</div></div>';
+      return;
+    }
+
+    // Agrupar por lição
+    const porLicao = {};
+    resultados.forEach(r => {
+      if (!porLicao[r.licao_num]) porLicao[r.licao_num] = [];
+      porLicao[r.licao_num].push(r);
+    });
+
+    const licoesComResultado = Object.keys(porLicao).map(n => parseInt(n)).sort((a,b) => a-b);
+
+    box.innerHTML = licoesComResultado.map(numLic => {
+      const lic = licoes.find(l => l.num === numLic);
+      const titulo = lic ? lic.titulo : `Lição ${numLic}`;
+      const data = lic ? lic.data : '';
+      const resps = porLicao[numLic];
+      const nResponderam = resps.length;
+      const mediaAcertos = nResponderam > 0
+        ? Math.round(resps.reduce((s, r) => s + (r.pct || 0), 0) / nResponderam)
+        : 0;
+      const corMedia = mediaAcertos >= 70 ? 'var(--tc)' : mediaAcertos >= 50 ? 'var(--warn)' : 'var(--red)';
+
+      const linhasAlunos = resps.map(r => {
+        const aluno = alunos.find(a => a.id === r.aluno_id);
+        const nome = aluno ? aluno.nome : 'Aluno ' + r.aluno_id.substring(0,6);
+        const pct = r.pct || 0;
+        const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+        const pts = r.pontos != null ? parseFloat(r.pontos) : null;
+        const dt = r.data_resposta ? new Date(r.data_resposta).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'}) : '';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--cb);flex-wrap:wrap">
+          <div style="flex:1;font-size:13px;font-weight:500;min-width:120px">${nome}</div>
+          <div style="font-size:11px;color:var(--ink-soft)">${dt}</div>
+          <div style="display:flex;gap:6px;align-items:center">
+            <span style="font-size:12px;font-weight:700;color:${cor}">${r.acertos}/${r.total} (${pct}%)</span>
+            ${pts != null ? `<span style="font-size:11px;background:var(--gold-pale);color:var(--gold-deep);padding:1px 7px;border-radius:10px;font-weight:700">+${pts} pts</span>` : ''}
+            <button onclick="verRespostasQuizLicao('${r.aluno_id}','${_qlTurmaAtual}',${numLic},'${nome.replace(/'/g,"&apos;")}')" style="font-size:10px;padding:2px 8px;border:1px solid var(--tj);border-radius:6px;background:#e8f0ff;color:var(--tj);cursor:pointer">👁 Ver</button>
+            <button onclick="abrirCorrecaoPtsQuiz('${r.aluno_id}','${_qlTurmaAtual}',${numLic},'${nome.replace(/'/g,"&apos;")}')" style="font-size:10px;padding:2px 8px;border:1px solid var(--warn);border-radius:6px;background:#fff8e0;color:#7a5000;cursor:pointer">✏️ Pts</button>
+          </div>
+        </div>`;
+      }).join('');
+
+      return `<div class="card" style="margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">
+          <div>
+            <div style="font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;letter-spacing:.06em;margin-bottom:3px">Lição ${numLic}${data ? ' · ' + data : ''}</div>
+            <div style="font-size:15px;font-weight:700;color:var(--ink)">${titulo}</div>
+          </div>
+          <div style="text-align:center;flex-shrink:0">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:${corMedia};line-height:1">${mediaAcertos}%</div>
+            <div style="font-size:10px;color:var(--ink-soft)">média</div>
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;font-weight:600">${nResponderam} aluno(s) responderam</div>
+        ${linhasAlunos}
+      </div>`;
+    }).join('');
+
+  } catch(e) {
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
+async function verRespostasQuizLicao(alunoId, turma, licaoNum, nomeAluno) {
+  // Buscar lição do banco ou memória
+  const dados = LICOES[turma];
+  const lic = dados ? dados.licoes.find(l => l.num === licaoNum) : null;
+  if (!lic) { toast('Lição não encontrada', 'er'); return; }
+
+  // Buscar resultado do quiz
+  const { data: res } = await sbClient.from('quiz_resultados')
+    .select('*').eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum).single();
+  if (!res) { toast('Resultado não encontrado', 'er'); return; }
+
+  const prev = document.getElementById('modal-respostas-quiz-lic');
+  if (prev) prev.remove();
+  const modal = document.createElement('div');
+  modal.id = 'modal-respostas-quiz-lic';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+
+  const pct = res.pct || 0;
+  const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
+  const perguntas = lic.perguntas || [];
+
+  // Respostas salvas (se existirem)
+  const respostas = res.respostas || null;
+
+  const questoesHtml = perguntas.map((q, i) => {
+    // Novo formato: respostas é array de objetos {pergunta, marcou, acertou, correta}
+    // Antigo formato: respostas é objeto {idx, texto, acertou}
+    const respAluno = respostas ? respostas[i] : null;
+    const temResposta = respAluno && (respAluno.marcou != null || respAluno.texto != null);
+
+    if (temResposta) {
+      const acertou = respAluno.acertou;
+      const marcou = respAluno.marcou || respAluno.texto || respAluno.valor || '—';
+      const correta = respAluno.correta || q.a;
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4">${i+1}. ${q.q}</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap;flex-direction:column">
+          <span style="padding:3px 9px;border-radius:6px;font-size:12px;background:${acertou?'var(--tc-bg)':'var(--red-bg)'};color:${acertou?'var(--tc)':'var(--red)'};font-weight:700">${acertou?'✓ Correto':'✗ Incorreto'}</span>
+          <div style="font-size:12px;color:var(--ink-mid)">Resposta do aluno: <strong>${marcou}</strong></div>
+          ${!acertou ? `<div style="font-size:12px;color:var(--tc)">✓ Correta: ${correta}</div>` : ''}
+        </div>
+      </div>`;
+    } else {
+      // Quiz antigo — sem resposta individual salva
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
+        <div style="font-size:13px;font-weight:500;margin-bottom:4px;line-height:1.4">${i+1}. ${q.q}</div>
+        <div style="font-size:12px;color:var(--tc)">✓ Correta: ${q.a}</div>
+        <div style="font-size:11px;color:var(--ink-soft);font-style:italic;margin-top:2px;background:#f5f5f5;padding:4px 8px;border-radius:6px">⚠️ Resposta do aluno não disponível — quiz feito antes desta atualização</div>
+      </div>`;
+    }
+  }).join('');
+
+  modal.innerHTML = `<div style="background:white;border-radius:16px;width:100%;max-width:480px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+    <div style="background:var(--ink);padding:16px 18px;border-bottom:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;color:var(--gold-l);font-weight:700;margin-bottom:3px">⚡ Quiz Lição ${licaoNum} · ${TN[turma]}</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:white;font-weight:600">${nomeAluno}</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.4);margin-top:2px">${res.acertos}/${res.total} corretas · <span style="color:${cor}">${pct}%</span>${res.pontos != null ? ` · +${res.pontos} pts` : ''}</div>
+      </div>
+      <button onclick="document.getElementById('modal-respostas-quiz-lic').remove()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <div style="flex:1;overflow-y:auto;padding:14px 16px">${questoesHtml}</div>
+    <div style="padding:12px 16px;border-top:1px solid var(--cb);display:flex;gap:8px">
+      <button class="btn btn-ou btn-sm" style="color:#7a5000;border-color:var(--warn);background:#fff8e0" onclick="document.getElementById('modal-respostas-quiz-lic').remove();abrirCorrecaoPtsQuiz('${alunoId}','${turma}',${licaoNum},'${nomeAluno.replace(/'/g,"&apos;")}')">✏️ Corrigir pts</button>
+      <button class="btn btn-ou btn-full" onclick="document.getElementById('modal-respostas-quiz-lic').remove()">Fechar</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function abrirCorrecaoPtsQuiz(alunoId, turma, licaoNum, nomeAluno) {
+  // Reutiliza abrirCorrecaoPontos com tipo quiz_licao pré-selecionado
+  abrirCorrecaoPontos(alunoId, turma, licaoNum, nomeAluno, '');
+  // Pré-selecionar quiz_licao e preencher lição
+  setTimeout(() => {
+    const sel = document.getElementById('cp-tipo');
+    if (sel) { sel.value = 'quiz_licao'; onCpTipoChange(); }
+    const lic = document.getElementById('cp-licao');
+    if (lic) lic.value = licaoNum;
+  }, 100);
+}
+
 async function selProvasTab(tab, el) {
   _provasTab = tab;
   document.querySelectorAll('#provas-aluno-tabs .ttab').forEach(t => t.classList.remove('on'));
@@ -8990,7 +9586,7 @@ async function renderHistoricoProvasAluno() {
     const nota = (pct / 10).toFixed(1);
     const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
     const obs = p.observacoes?.[idAluno] || '';
-    const dt = res.data ? new Date(res.data).toLocaleDateString('pt-BR') : '';
+    const dt = res.data ? new Date(res.data).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza'}) : '';
     return `<div class="prova-card" style="border-color:${cor}">
       <div style="display:flex;align-items:flex-start;gap:12px">
         <div style="flex:1">
@@ -9052,7 +9648,7 @@ async function renderProgressoProf() {
   const seq = calcularSemanasSeguidas(USER.id, turma, aulas);
 
   // Pontos
-  const pts = calcularPontosAluno(USER.id, turma, aulas, quizScores, PROVAS||[]);
+  const pts = calcularPontosAluno(USER.id, turma, aulas, quizScores, PROVAS||[], _desafioPontos);
   const hero = document.getElementById('prof-pts-hero');
   if (hero) {
     hero.style.display = 'block';
@@ -9243,7 +9839,7 @@ async function exportarRelatorioMensal() {
         </tr>`;
       }).join('')}
     </table>
-    <div class="footer">ADTC Ayrton Senna 1 — EBD Frequência &nbsp;·&nbsp; Emitido em ${new Date().toLocaleDateString('pt-BR')}</div>
+    <div class="footer">ADTC Ayrton Senna 1 — EBD Frequência &nbsp;·&nbsp; Emitido em ${_agora().toLocaleDateString('pt-BR')}</div>
   </body></html>`);
   win.document.close();
 }
@@ -9254,7 +9850,7 @@ async function exportarRelatorioMensal() {
 function gerarComprovanteMatricula(alunoId) {
   const aluno = cacheAlunos.find(a => a.id === alunoId);
   if (!aluno) return;
-  const hoje = new Date().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+  const hoje = _agora().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
   const aulasT = cacheAulas.filter(a => a.turma === aluno.turma);
   const presencas = aulasT.filter(a => (a.presencas||{})[alunoId] === 'presente').length;
   const pct = aulasT.length ? Math.round((presencas/aulasT.length)*100) : 0;
@@ -9471,7 +10067,7 @@ function exportarListaAlunos() {
   }).sort((a,b) => a.nome.localeCompare(b.nome));
 
   if (!lista.length) { toast('Nenhum aluno para exportar', 'er'); return; }
-  const hoje = new Date().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
+  const hoje = _agora().toLocaleDateString('pt-BR', { day:'numeric', month:'long', year:'numeric' });
   const turmaLabel = TN[turma] || 'Todas as turmas';
 
   const win = window.open('', '_blank');
@@ -10119,7 +10715,7 @@ async function gestorSalvarAlteracoes() {
       .single();
     if (!errBusca && licRow) {
       await sbClient.from('banco_questoes')
-        .update({ perguntas: _gestorPergs, updated_at: new Date().toISOString() })
+        .update({ perguntas: _gestorPergs, updated_at: _agoraISO() })
         .eq('id', licRow.id);
       // Atualizar cache do banco
       var licaoLocal = _bancoLicoes.find(function(l){ return l.id === licRow.id; });
@@ -10556,47 +11152,80 @@ function formatarDataLocal(iso) {
 // ══════════════════════════════════════════════
 // PIX
 // ══════════════════════════════════════════════
+// ── PIX POR TURMA ──
 async function renderPix() {
-  var nome = await sbGetConfig('pix_nome') || 'Igreja AD';
-  var banco = await sbGetConfig('pix_banco') || '';
-  var chave = await sbGetConfig('pix_chave') || '';
-  var qr = await sbGetConfig('pix_qrcode') || '';
-  var el = document.getElementById('pix-nome-display');
-  if (el) el.textContent = nome;
-  var elB = document.getElementById('pix-banco-display');
-  if (elB) elB.textContent = banco;
-  var elC = document.getElementById('pix-chave-display');
-  if (elC) elC.textContent = chave || 'Chave nao configurada';
+  const podeConfig = isAdmin() || ['pastor','super'].includes(USER && USER.perfil);
+  const cfgCard = document.getElementById('pix-config-card');
+
+  // Determinar turma do usuário atual
+  const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
+  const turmaExibir = ehAluno
+    ? (USER.turma_aluno || USER.turma || 'adultos')
+    : (USER && USER.turma && USER.turma !== 'todas' ? USER.turma : null);
+
+  const turmaLabel = { criancas: '🧒 Crianças', jovens: '🧑 Jovens', adultos: '👨 Adultos' };
+  const sufixo = turmaExibir || 'adultos';
+
+  var nome  = (await sbGetConfig('pix_nome_' + sufixo))  || (await sbGetConfig('pix_nome'))  || '';
+  var banco = (await sbGetConfig('pix_banco_' + sufixo)) || (await sbGetConfig('pix_banco')) || '';
+  var chave = (await sbGetConfig('pix_chave_' + sufixo)) || (await sbGetConfig('pix_chave')) || '';
+  var qr    = (await sbGetConfig('pix_qrcode_' + sufixo))|| (await sbGetConfig('pix_qrcode'))|| '';
+
+  var elTurma = document.getElementById('pix-turma-label');
+  if (elTurma) elTurma.textContent = turmaExibir ? (turmaLabel[turmaExibir] || '') : '';
+  var elNome = document.getElementById('pix-nome-display');
+  if (elNome) elNome.textContent = nome || 'Pix não configurado';
+  var elBanco = document.getElementById('pix-banco-display');
+  if (elBanco) elBanco.textContent = banco;
+  var elChave = document.getElementById('pix-chave-display');
+  if (elChave) elChave.textContent = chave || 'Chave não configurada';
   var qrWrap = document.getElementById('pix-qrcode-wrap');
   var qrImg = document.getElementById('pix-qrcode-img');
-  if (qr && qrWrap && qrImg) { qrWrap.style.display='block'; qrImg.src=qr; }
-  var cfgCard = document.getElementById('pix-config-card');
+  if (qrWrap && qrImg) { qrWrap.style.display = qr ? 'block' : 'none'; if (qr) qrImg.src = qr; }
+
   if (cfgCard) {
-    cfgCard.style.display = isAdmin() ? 'block' : 'none';
-    if (isAdmin()) {
-      document.getElementById('pix-cfg-nome').value = nome;
-      document.getElementById('pix-cfg-banco').value = banco;
-      document.getElementById('pix-cfg-chave').value = chave;
-      document.getElementById('pix-cfg-qr').value = qr;
+    cfgCard.style.display = podeConfig ? 'block' : 'none';
+    if (podeConfig) {
+      var turmas = ['criancas', 'jovens', 'adultos'];
+      for (var ti = 0; ti < turmas.length; ti++) {
+        var t = turmas[ti];
+        var n = (await sbGetConfig('pix_nome_' + t)) || '';
+        var b = (await sbGetConfig('pix_banco_' + t)) || '';
+        var c = (await sbGetConfig('pix_chave_' + t)) || '';
+        var q = (await sbGetConfig('pix_qrcode_' + t)) || '';
+        var elN = document.getElementById('pix-cfg-nome-'+t);
+        var elB = document.getElementById('pix-cfg-banco-'+t);
+        var elC = document.getElementById('pix-cfg-chave-'+t);
+        var elQ = document.getElementById('pix-cfg-qr-'+t);
+        if (elN) elN.value = n;
+        if (elB) elB.value = b;
+        if (elC) elC.value = c;
+        if (elQ) elQ.value = q;
+      }
     }
   }
 }
-async function salvarPix() {
-  var nome = document.getElementById('pix-cfg-nome').value.trim();
-  var banco = document.getElementById('pix-cfg-banco').value.trim();
-  var chave = document.getElementById('pix-cfg-chave').value.trim();
-  var qr = document.getElementById('pix-cfg-qr').value.trim();
-  await sbSetConfig('pix_nome', nome);
-  await sbSetConfig('pix_banco', banco);
-  await sbSetConfig('pix_chave', chave);
-  await sbSetConfig('pix_qrcode', qr);
-  toast('Pix configurado! \u2756', 'ok');
+
+async function salvarPixTurma(turma) {
+  var nome  = (document.getElementById('pix-cfg-nome-'+turma)  || {}).value || '';
+  var banco = (document.getElementById('pix-cfg-banco-'+turma) || {}).value || '';
+  var chave = (document.getElementById('pix-cfg-chave-'+turma) || {}).value || '';
+  var qr    = (document.getElementById('pix-cfg-qr-'+turma)    || {}).value || '';
+  await sbSetConfig('pix_nome_' + turma,   nome.trim());
+  await sbSetConfig('pix_banco_' + turma,  banco.trim());
+  await sbSetConfig('pix_chave_' + turma,  chave.trim());
+  await sbSetConfig('pix_qrcode_' + turma, qr.trim());
+  var labels = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+  toast('Pix ' + (labels[turma]||turma) + ' salvo! ❖', 'ok');
   renderPix();
 }
+
+async function salvarPix() { await salvarPixTurma('adultos'); }
+
 function copiarChavePix() {
   var chave = document.getElementById('pix-chave-display').textContent;
-  if (!chave || chave === 'Chave nao configurada') { toast('Nenhuma chave configurada', 'er'); return; }
-  navigator.clipboard.writeText(chave).then(function(){ toast('Chave copiada! \u2756', 'ok'); }).catch(function(){
+  if (!chave || chave === 'Chave não configurada' || chave === 'Chave nao configurada') { toast('Nenhuma chave configurada', 'er'); return; }
+  navigator.clipboard.writeText(chave).then(function(){ toast('Chave copiada! ❖', 'ok'); }).catch(function(){
     var ta = document.createElement('textarea');
     ta.value = chave; document.body.appendChild(ta); ta.select();
     document.execCommand('copy'); document.body.removeChild(ta);
@@ -11017,7 +11646,15 @@ async function excluirEscala(id) {
 
 async function carregarChavePix() {
   try {
-    var chave = await sbGetConfig('pix_chave');
+    // Determinar turma do usuário para pegar o Pix correto
+    const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
+    const turma = ehAluno
+      ? (USER.turma_aluno || USER.turma || 'adultos')
+      : (USER && USER.turma && USER.turma !== 'todas' ? USER.turma : 'adultos');
+
+    // Pegar chave específica da turma (fallback para chave geral)
+    var chave = (await sbGetConfig('pix_chave_' + turma)) || (await sbGetConfig('pix_chave')) || '';
+
     // Card do dashboard (admin/prof)
     var card = document.getElementById('dash-pix-card');
     var el = document.getElementById('dash-pix-chave');
