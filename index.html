@@ -2661,6 +2661,29 @@ function doLogout() {
 
 // ── INIT APP ──
 async function iniciarApp() {
+  // ── VERIFICAÇÃO IMEDIATA: se for aluno, vai direto para tela do aluno ──
+  const _ehPerfilAluno = USER.perfil === 'aluno' || _modoAtual === 'aluno';
+  if (_ehPerfilAluno) {
+    // Esconder TODAS as páginas, mostrar só pg-pg-aluno
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
+    const pgAluno = document.getElementById('pg-pg-aluno');
+    if (pgAluno) pgAluno.classList.add('on');
+    // Ocultar elementos de admin/prof
+    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'].forEach(function(id){
+      const el = document.getElementById(id); if(el) el.style.display='none';
+    });
+    preencherFormPerfil();
+    await carregarConfigs();
+    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
+    const _turmaOriginalA = USER.turma;
+    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = USER.turma_aluno;
+    registrarAcesso();
+    await renderAlunoProgresso();
+    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = _turmaOriginalA;
+    setTimeout(mostrarAvisosPopup, 1200);
+    return;
+  }
+
   // Topbar
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   document.getElementById('tb-uname').textContent = nomeExib;
@@ -2767,29 +2790,7 @@ async function iniciarApp() {
   const mesAtual = `${agora.getFullYear()}-${String(agora.getMonth()+1).padStart(2,'0')}`;
   const menEl = document.getElementById('men-mes'); if (menEl) menEl.value = mesAtual;
 
-  // Aluno: carregamento simplificado
-  // Inclui admin/professor em modo aluno
-  const _ehPerfilAluno = USER.perfil === 'aluno' || _modoAtual === 'aluno';
-  if (_ehPerfilAluno) {
-    // ESCONDER pg-dash imediatamente — aluno nunca deve ver o dashboard
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
-    const pgAluno = document.getElementById('pg-pg-aluno');
-    if (pgAluno) pgAluno.classList.add('on');
-    // Ocultar elementos exclusivos de admin/professor
-    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'].forEach(function(id){
-      const el = document.getElementById(id); if(el) el.style.display='none';
-    });
-    preencherFormPerfil();
-    await carregarConfigs();
-    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
-    const _turmaOriginal = USER.turma;
-    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = USER.turma_aluno;
-    registrarAcesso();
-    await renderAlunoProgresso();
-    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = _turmaOriginal;
-    setTimeout(mostrarAvisosPopup, 1200);
-    return;
-  }
+  // (bloco aluno movido para o topo da função)
 
   // Responsável: ver filhos
   if (USER.perfil === 'responsavel') {
@@ -5601,54 +5602,50 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
 }
 
 async function renderAlunoProgresso() {
-  // Determinar id e turma corretos
-  // No modo aluno de um admin/professor, usar turma_aluno e id do aluno na tabela alunos
-  const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
-  // Para o id: se é modo aluno e não é aluno real, buscar id na tabela alunos pelo login
-  let idAluno = USER.id;
-  if (_modo('aluno') && USER.perfil !== 'aluno') {
-    try {
-      const { data: alunoReal } = await sbClient.from('alunos')
-        .select('id').eq('login', USER.login).limit(1);
-      if (alunoReal && alunoReal.length) idAluno = alunoReal[0].id;
-    } catch(e) {}
+  // ─── Tela correta imediatamente ───
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  const pgAl = document.getElementById('pg-pg-aluno');
+  if (pgAl) pgAl.classList.add('on');
+
+  // ─── Turma e ID do aluno ───
+  let turmaAluno, idAluno;
+  if (USER.perfil === 'aluno') {
+    turmaAluno = USER.turma || 'adultos';
+    idAluno = USER.id;
+  } else {
+    // Admin/Prof em modo aluno
+    turmaAluno = USER.turma_aluno || USER.turma || 'adultos';
+    idAluno = USER._aluno_id || USER.id;
+    // Buscar id real se não tiver
+    if (!USER._aluno_id) {
+      try {
+        const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
+        if (al && al.length) { idAluno = al[0].id; USER._aluno_id = al[0].id; }
+      } catch(e) {}
+    }
   }
 
-  // Buscar dados frescos do banco sempre
+  // ─── Carregar dados ───
   await carregarQuizScoresDoAluno(idAluno, turmaAluno);
   await carregarProvas();
+  await carregarDesafios();
 
-  // Buscar aulas do banco (não usar cache que pode estar vazio)
   let aulasAluno = [];
   try {
     const { data } = await sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false });
     aulasAluno = data || [];
   } catch(e) {}
 
+  // ─── Preencher tela ───
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
-
-  // Garantir que a tela do aluno está visível (não o dashboard)
-  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
-  const pgAluno = document.getElementById('pg-pg-aluno');
-  if (pgAluno) pgAluno.classList.add('on');
-
   document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
-  carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
+  carregarChavePix();
 
-  // Carregar desafios primeiro, depois notificações
-  await carregarDesafios();
-  renderProvasNotifAluno(turmaAluno, true).catch(()=>{}); // desafios já carregados acima
+  // ─── Notificações (desafios já carregados) ───
+  renderProvasNotifAluno(turmaAluno, true).catch(e => console.warn('notif erro:', e));
 
-  // Calcular pontos e presenças reais usando ids corretos
-  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
-  const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
-  const quizzesFeitos = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
-  const provasFeitas = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
-  const desafiosFeitos = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'desafio' && p.resultados && p.resultados[idAluno]).length;
-  const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
-
-  // Painel de pontos — sempre visível
+    // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
   if (ptsHero) {
     ptsHero.style.display = 'block';
