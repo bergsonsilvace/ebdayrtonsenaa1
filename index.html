@@ -6492,26 +6492,48 @@ function voltarListaProvas() {
 
 
 // ── Verificar se item está dentro da janela de tempo (início/limite) ──
-function _dentroJanela(item) {
-  const agora = _agora();
-  if (item.data_inicio && new Date(item.data_inicio) > agora) return false;
-  if (item.data_limite && new Date(item.data_limite) < agora) return false;
-  return true;
-}
-// Retorna label de status da janela de tempo para exibição
-function _labelJanela(item) {
-  const agora = _agora();
-  if (item.data_inicio) {
-    const ini = new Date(item.data_inicio);
-    if (ini > agora) {
-      return `📅 Abre ${ini.toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})} às ${ini.toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})}`;
+// Trata tanto datetime (ex: "2026-04-20T14:00") quanto só data (ex: "2026-04-20")
+function _parseDataJanela(str, ehLimite) {
+  if (!str) return null;
+  // Se for só data (YYYY-MM-DD), interpretar como início do dia ou fim do dia em Brasília
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [y, m, d] = str.split('-').map(Number);
+    if (ehLimite) {
+      // Data limite sem hora → vale até o final do dia (23:59:59 de Brasília)
+      return new Date(y, m - 1, d, 23, 59, 59);
+    } else {
+      // Data início sem hora → vale desde o início do dia (00:00 de Brasília)
+      return new Date(y, m - 1, d, 0, 0, 0);
     }
   }
-  if (item.data_limite) {
-    const lim = new Date(item.data_limite);
-    if (lim > agora) {
-      return `⏰ Até ${lim.toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})} às ${lim.toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})}`;
-    }
+  // datetime-local: interpretar como horário de Brasília (sem timezone = local)
+  return new Date(str);
+}
+
+function _dentroJanela(item) {
+  const agora = _agora();
+  const ini = _parseDataJanela(item.data_inicio, false);
+  const lim = _parseDataJanela(item.data_limite, true);
+  if (ini && ini > agora) return false;
+  if (lim && lim < agora) return false;
+  return true;
+}
+
+function _labelJanela(item) {
+  const agora = _agora();
+  const ini = _parseDataJanela(item.data_inicio, false);
+  const lim = _parseDataJanela(item.data_limite, true);
+  if (ini && ini > agora) {
+    const soData = item.data_inicio && /^\d{4}-\d{2}-\d{2}$/.test(item.data_inicio);
+    return soData
+      ? `📅 Abre ${ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`
+      : `📅 Abre ${ini.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} às ${ini.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
+  }
+  if (lim && lim > agora) {
+    const soData = item.data_limite && /^\d{4}-\d{2}-\d{2}$/.test(item.data_limite);
+    return soData
+      ? `📅 Até ${lim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}`
+      : `⏰ Até ${lim.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})} às ${lim.toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'})}`;
   }
   return '';
 }
