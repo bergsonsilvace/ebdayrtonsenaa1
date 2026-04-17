@@ -2778,10 +2778,10 @@ async function iniciarApp() {
     curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
     const _turmaOriginal = USER.turma;
     if (_modo('aluno') && USER.turma_aluno) USER.turma = USER.turma_aluno;
-    renderAlunoProgresso();
-    if (_modo('aluno') && USER.turma_aluno) USER.turma = _turmaOriginal;
-    registrarAcesso();
     await _navTo('pg-aluno');
+    registrarAcesso();
+    renderAlunoProgresso(); // sem await — carrega em background após mostrar a tela
+    if (_modo('aluno') && USER.turma_aluno) USER.turma = _turmaOriginal;
     // Mostrar popup de avisos para o aluno após carregar
     setTimeout(mostrarAvisosPopup, 1200);
     return;
@@ -7595,21 +7595,30 @@ async function renderProvasNotifDash() {
   } catch(e) { box.innerHTML = ''; }
 }
 
-async function renderProvasNotifAluno(turmaAluno) {
+async function renderProvasNotifAluno(turmaArg) {
   const box = document.getElementById('aluno-provas-notif');
   if (!box) return;
   let html = '';
+  box.innerHTML = '';
   try {
     // ── Sempre recarregar desafios frescos do banco ──
     await carregarDesafios();
-    const hoje = _hojeStr();
 
-    // ID real do aluno
+    // Garantir turma e ID corretos independente do perfil
+    const turmaAluno = turmaArg
+      || (USER.perfil === 'aluno' ? USER.turma : null)
+      || USER.turma_aluno
+      || USER.turma
+      || 'adultos';
+
     let alunoId = USER.id;
-    if (_modo('aluno') && USER.perfil !== 'aluno') {
+    // Para admin/prof em modo aluno: buscar ID real na tabela alunos
+    if (USER.perfil !== 'aluno') {
       try {
-        const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
-        if (al && al.length) alunoId = al[0].id;
+        const { data: al } = await sbClient.from('alunos').select('id,turma').eq('login', USER.login).limit(1);
+        if (al && al.length) {
+          alunoId = al[0].id;
+        }
       } catch(e) {}
     }
 
@@ -7697,7 +7706,9 @@ async function renderProvasNotifAluno(turmaAluno) {
           <div class="prova-notif-arrow">›</div>
         </div>`).join('');
     }
-  } catch(e) {}
+  } catch(e) {
+    console.warn('renderProvasNotifAluno erro:', e);
+  }
   box.innerHTML = html;
 }
 // ══════════════════════════════════════════════
