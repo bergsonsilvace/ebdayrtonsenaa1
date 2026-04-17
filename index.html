@@ -1200,7 +1200,10 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       </div>
       <!-- Estatísticas detalhadas -->
       <div class="card" style="margin-bottom:12px">
-        <div class="ct">📊 Meu Desempenho</div>
+        <div class="chdr">
+          <div class="ct">📊 Meu Desempenho</div>
+          <button onclick="abrirHistoricoCompleto()" class="btn btn-ou btn-sm" style="font-size:11px">📋 Histórico</button>
+        </div>
         <div id="aluno-quiz-stats"></div>
       </div>
       <!-- Ranking e posições -->
@@ -1739,6 +1742,10 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
         <!-- Conteúdo: Resultados -->
         <div id="tab-quizzes-licao-prof" style="display:none">
+          <div style="display:flex;gap:8px;margin-bottom:12px">
+            <button id="ql-sub-feitos" onclick="selSubAbaQL('feitos',this)" class="btn btn-dk btn-sm" style="flex:1">✓ Quem fez</button>
+            <button id="ql-sub-pendentes" onclick="selSubAbaQL('pendentes',this)" class="btn btn-ou btn-sm" style="flex:1">⏳ Quem não fez</button>
+          </div>
           <div class="ttabs" id="ql-turma-tabs" style="margin-bottom:14px">
             <button class="ttab tc on" onclick="selQuizLicaoTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
             <button class="ttab tj" onclick="selQuizLicaoTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
@@ -2151,7 +2158,16 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="fg"><label class="fl">Data do evento <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" type="date" id="av-data-evento" onchange="toggleHorarioAviso()"></div>
         <div class="fg" id="av-horario-wrap" style="display:none"><label class="fl">Horário <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" type="time" id="av-horario" placeholder="Ex: 18:30"></div>
       </div>
-      <div class="fg" style="margin:0;display:flex;align-items:center;gap:10px"><input type="checkbox" id="av-fixado" style="width:16px;height:16px"><label for="av-fixado" style="font-size:13px;cursor:pointer">📌 Fixar este aviso no topo</label></div>
+      <div class="frow">
+        <div class="fg">
+          <label class="fl">⏰ Expira em <span style="font-size:10px;color:var(--ink-soft)">(opcional — some automaticamente)</span></label>
+          <input class="fc" type="datetime-local" id="av-expira-em">
+        </div>
+      </div>
+      <div style="display:flex;gap:14px;flex-wrap:wrap;margin-bottom:12px">
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="av-fixado" style="width:16px;height:16px"><span style="font-size:13px">📌 Fixar no topo</span></label>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="av-urgente" style="width:16px;height:16px;accent-color:var(--red)"><span style="font-size:13px">🚨 Urgente</span></label>
+      </div>
       <div class="mfoot">
         <button class="btn btn-ou btn-full" onclick="fecharModal('mo-aviso')">Cancelar</button>
         <button class="btn btn-gold btn-full" onclick="salvarAviso()">Publicar aviso</button>
@@ -2528,6 +2544,7 @@ function construirNav() {
     items.push({id:'pg-aluno',label:'Progresso'});
     items.push({id:'licoes',label:'Lições'});
     items.push({id:'provas',label:'Provas'});
+    items.push({id:'ranking',label:'Ranking'});
     items.push({id:'mural',label:'Avisos'});
     items.push({id:'calendario',label:'Calendário'});
     items.push({id:'pix',label:'Pix'});
@@ -2912,7 +2929,19 @@ async function _navTo(id) {
   else if (id === 'contestacoes') renderContestacoes('pendente');
   else if (id === 'historico') { cacheAulas = await sbGet('aulas',{},'data',false); renderHist(); }
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
-  else if (id === 'ranking') { cacheAlunos = await sbGet('alunos'); cacheAulas = await sbGet('aulas',{},'data',false); await renderRanking(); }
+  else if (id === 'ranking') {
+    const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
+    const rankTurmaAl = ehAluno ? (USER.turma_aluno || USER.turma) : null;
+    // Ocultar abas de turma para aluno
+    const rankTabs = document.getElementById('rank-ttabs');
+    if (rankTabs) rankTabs.style.display = ehAluno ? 'none' : '';
+    cacheAlunos = await sbGet('alunos');
+    cacheAulas = await sbGet('aulas',{},'data',false);
+    if (ehAluno && rankTurmaAl) {
+      curTurmaRank = rankTurmaAl;
+    }
+    await renderRanking();
+  }
   else if (id === 'config') carregarPaginaConfig();
   else if (id === 'pix') renderPix();
   else if (id === 'escalas') {
@@ -3153,16 +3182,25 @@ async function renderMural() {
     oracao:    { icon:'🙏', cor:'#4a1a6b', bg:'#faf0ff', borda:'#d8b8f5' }
   };
 
+  const agora = _agora();
   box.innerHTML = sorted.map(a => {
     const tc = tipoConfig[a.tipo] || tipoConfig.info;
-    const expirado = a.data_evento && a.data_evento < hoje;
-    // Usar só a data de criação — sem duplicar com data_evento na meta
-    const dtCriacao = new Date(a.created_at+'').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});
+    // Expirado: por expira_em (novo) ou data_evento passada (legado)
+    const expiradoPorData = a.expira_em && new Date(a.expira_em) < agora;
+    const expiradoLegado = !a.expira_em && a.data_evento && a.data_evento < hoje;
+    const expirado = expiradoPorData || expiradoLegado;
+    const urgente = a.urgente && !expirado;
+    const dtCriacao = new Date(a.created_at).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit',year:'numeric'});
+    const horaCriacao = new Date(a.created_at).toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'});
     const dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long'}) : '';
     const horarioStr = a.horario ? ` · ${a.horario.substring(0,5).replace(':','h')}` : '';
-    return `<div class="aviso-item ${a.fixado?'fixado':''}" style="border-color:${expirado?'#ccc':tc.borda};background:${expirado?'#f9f9f9':tc.bg};opacity:${expirado?'0.75':'1'}">
-      <div class="aviso-titulo" style="color:${expirado?'#999':tc.cor}">
+    const expiraStr = a.expira_em && !expirado
+      ? `⏰ Expira ${new Date(a.expira_em).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})} às ${new Date(a.expira_em).toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'})}`
+      : '';
+    return `<div class="aviso-item ${a.fixado?'fixado':''}" style="border-color:${expirado?'#ccc':urgente?'var(--red)':tc.borda};background:${expirado?'#f9f9f9':urgente?'#fff5f5':tc.bg};opacity:${expirado?'0.6':'1'}${urgente?';box-shadow:0 0 0 2px rgba(200,0,0,.15)':''}">
+      <div class="aviso-titulo" style="color:${expirado?'#999':urgente?'var(--red)':tc.cor}">
         ${a.fixado?'<span class="aviso-pin">📌</span>':''}
+        ${urgente?'<span style="font-size:10px;background:var(--red);color:white;padding:2px 7px;border-radius:10px;font-weight:700;margin-right:4px">🚨 URGENTE</span>':''}
         ${expirado?'<span style="font-size:10px;background:#e0e0e0;color:#888;padding:2px 7px;border-radius:10px;font-weight:700;margin-right:4px">⏰ Expirado</span>':''}
         <span>${tc.icon} ${a.titulo}</span>
         ${podeGerenciarAvisos?`<span style="margin-left:auto;display:flex;gap:5px">
@@ -3172,10 +3210,11 @@ async function renderMural() {
       </div>
       <div class="aviso-corpo" style="color:${expirado?'#aaa':'inherit'}">${a.conteudo}</div>
       ${a.observacoes ? `<div style="margin-top:6px;font-size:12px;color:${expirado?'#bbb':tc.cor};background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;line-height:1.5">📎 ${a.observacoes}</div>` : ''}
-      <div class="aviso-meta" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:6px">
+      <div class="aviso-meta" style="display:flex;gap:10px;flex-wrap:wrap;margin-top:8px;align-items:center">
         ${dtEvento ? `<span style="color:${expirado?'#bbb':tc.cor};font-weight:600">📅 ${dtEvento}${horarioStr}</span>` : ''}
         ${a.turma && a.turma !== 'todas' ? `<span style="color:${expirado?'#bbb':tc.cor}">👥 ${TN[a.turma]||a.turma}</span>` : ''}
-        ${!dtEvento && !a.turma ? `<span style="color:var(--ink-soft);font-size:10px">${a.autor}</span>` : ''}
+        ${expiraStr ? `<span style="color:var(--warn);font-size:11px;font-weight:600">${expiraStr}</span>` : ''}
+        <span style="color:var(--ink-soft);font-size:10px;margin-left:auto">${a.autor} · ${dtCriacao} ${horaCriacao}</span>
       </div>
     </div>`;
   }).join('');
@@ -3197,6 +3236,8 @@ function abrirModalAviso(id) {
   document.getElementById('av-turma').value = 'todas';
   document.getElementById('av-data-evento').value = '';
   document.getElementById('av-horario').value = '';
+  document.getElementById('av-expira-em').value = '';
+  document.getElementById('av-urgente').checked = false;
   const wrap = document.getElementById('av-horario-wrap');
   if (wrap) wrap.style.display = 'none';
   document.getElementById('mo-aviso').style.display = 'block';
@@ -3215,6 +3256,8 @@ async function editarAviso(id) {
   document.getElementById('av-turma').value = data.turma || 'todas';
   document.getElementById('av-data-evento').value = data.data_evento || '';
   document.getElementById('av-horario').value = data.horario || '';
+  document.getElementById('av-expira-em').value = data.expira_em ? data.expira_em.slice(0,16) : '';
+  document.getElementById('av-urgente').checked = !!data.urgente;
   const wrap = document.getElementById('av-horario-wrap');
   if (wrap) wrap.style.display = data.data_evento ? '' : 'none';
   document.getElementById('mo-aviso').style.display = 'block';
@@ -3230,12 +3273,16 @@ async function salvarAviso() {
   const turma = document.getElementById('av-turma').value;
 
   // Dado base — sem horario (caso coluna ainda não exista)
+  const expiraEm = document.getElementById('av-expira-em').value || null;
+  const urgente = document.getElementById('av-urgente').checked;
   const dado = {
     titulo, conteudo,
     observacoes: document.getElementById('av-obs').value.trim() || null,
     fixado: document.getElementById('av-fixado').checked,
+    urgente,
     tipo, turma,
     data_evento: dataEvento,
+    expira_em: expiraEm,
     autor: USER.nome
   };
 
@@ -5642,10 +5689,19 @@ async function renderAlunoProgresso() {
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
   carregarChavePix();
 
+  // ─── Calcular pontos e estatísticas ───
+  await carregarDesafioPontos();
+  const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
+  const quizzesFeitos  = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
+  const provasFeitas   = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
+  const desafiosFeitos = _desafioPontos.filter(d => d.aluno_id === idAluno).length;
+  const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
+  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
+
   // ─── Notificações (desafios já carregados) ───
   renderProvasNotifAluno(turmaAluno, true).catch(e => console.warn('notif erro:', e));
 
-    // Painel de pontos — sempre visível
+  // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
   if (ptsHero) {
     ptsHero.style.display = 'block';
@@ -5655,15 +5711,13 @@ async function renderAlunoProgresso() {
     document.getElementById('pts-provas').textContent = provasFeitas;
   }
 
-  // Medalhas
-  const medalhasCard = document.getElementById('aluno-medalhas-card');
-  const medalhas = calcularMedalhas(pts.total, presencasReais, seq);
-  if (medalhas.length && medalhasCard) {
-    medalhasCard.style.display = 'block';
-    document.getElementById('aluno-medalhas').innerHTML = medalhas.map(m =>
-      `<span class="medalha ${m.classe}">${m.icon} ${m.label}</span>`
-    ).join('');
-  }
+  // Medalhas automáticas — verificar e exibir em background
+  verificarEAtribuirMedalhas(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos)
+    .then(async novas => {
+      if (novas.length) novas.forEach(m => toast(`${m.icone} Nova medalha: ${m.titulo}!`, 'ok'));
+      const todasMedalhas = await carregarMedalhasAluno(idAluno);
+      renderMedalhasAluno(todasMedalhas);
+    }).catch(() => {});
 
   // Estatísticas detalhadas
   const statsEl = document.getElementById('aluno-quiz-stats');
@@ -5712,15 +5766,23 @@ async function renderAlunoProgresso() {
     if (!aulasAluno.length) {
       licEl.innerHTML = '<div style="padding:12px 0;color:var(--ink-soft);font-size:13px">Nenhuma aula registrada ainda.</div>';
     } else {
-      licEl.innerHTML = aulasAluno.slice(0, 10).map(au => {
-        const presente = (au.presencas||{})[idAluno] === 'presente'; // usa idAluno correto
+      const totalAulasPres = aulasAluno.length;
+      const pctFreqPres = totalAulasPres ? Math.round((presencasReais / totalAulasPres) * 100) : 0;
+      const corFreq = pctFreqPres >= 75 ? 'var(--tc)' : pctFreqPres >= 50 ? 'var(--warn)' : 'var(--red)';
+      const linhasHTML = aulasAluno.slice(0, 10).map(au => {
+        const presente = (au.presencas||{})[idAluno] === 'presente';
         const dt = new Date(au.data + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
-          <span style="font-size:18px">${presente ? '✅' : '❌'}</span>
-          <span style="font-size:13px;flex:1;color:var(--ink-mid)">${dt}${au.licao ? ' — ' + au.licao : ''}</span>
-          <span style="font-size:11px;font-weight:700;color:${presente ? 'var(--tc)' : 'var(--red)'}">${presente ? 'Presente' : 'Ausente'}</span>
-        </div>`;
+        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">'
+          + '<span style="font-size:18px">' + (presente ? '✅' : '❌') + '</span>'
+          + '<span style="font-size:13px;flex:1;color:var(--ink-mid)">' + dt + (au.licao ? ' — ' + au.licao : '') + '</span>'
+          + '<span style="font-size:11px;font-weight:700;color:' + (presente ? 'var(--tc)' : 'var(--red)') + '">' + (presente ? 'Presente' : 'Ausente') + '</span>'
+          + '</div>';
       }).join('');
+      licEl.innerHTML = '<div style="display:flex;gap:12px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--cb)">'
+        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--tc)">' + presencasReais + '</div><div style="font-size:11px;color:var(--ink-soft)">presenças</div></div>'
+        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:' + corFreq + '">' + pctFreqPres + '%</div><div style="font-size:11px;color:var(--ink-soft)">frequência</div></div>'
+        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--red)">' + (totalAulasPres - presencasReais) + '</div><div style="font-size:11px;color:var(--ink-soft)">faltas</div></div>'
+        + '</div>' + linhasHTML;
     }
   }
 
@@ -7583,8 +7645,8 @@ async function renderProvasNotifDash() {
     const ehAluno = USER.perfil === 'aluno' || _modo('aluno');
 
     const ativas = (data||[]).filter(p => {
-      if (p.data_limite && p.data_limite < hoje) return false;
       if (p.tipo === 'desafio') return false;
+      if (!_dentroJanela(p)) return false;
       // Para aluno: filtrar pela turma dele
       if (ehAluno && p.turma !== turmaUsuario) return false;
       return true;
@@ -7703,6 +7765,9 @@ async function renderProvasNotifAluno(turmaArg, jaCarregouDesafios) {
     const ativas = (data||[]).filter(p =>
       p.tipo !== 'desafio' && _dentroJanela(p)
     );
+    // Debug: log para identificar problemas
+    console.log('[notif] DESAFIOS:', DESAFIOS.length, 'turma:', turmaAluno, 'alunoId:', alunoId);
+    console.log('[notif] desafiosNovos:', desafiosNovos.length);
     if (ativas.length) {
       html += ativas.map(p => `
         <div class="prova-notif" onclick="navTo('provas')" style="margin-bottom:8px">
@@ -7895,6 +7960,89 @@ function calcularPtQuiz(diasAposAula, acertos, total) {
 function quizEstaDisponivel(dataAula) {
   const dias = Math.floor((new Date() - new Date(dataAula)) / 86400000);
   return dias <= RANKING_CONFIG.quiz_dias;
+}
+
+// ══════════════════════════════════════════════
+// MEDALHAS AUTOMÁTICAS
+// ══════════════════════════════════════════════
+const DEFINICOES_MEDALHAS = [
+  { tipo:'primeira_presenca',    icone:'🌟', titulo:'Primeira Presença',       descricao:'Compareceu pela primeira vez à EBD!' },
+  { tipo:'presenca_5',           icone:'✝️',  titulo:'5 Presenças',             descricao:'5 presenças na EBD' },
+  { tipo:'presenca_10',          icone:'📖', titulo:'10 Presenças',            descricao:'10 presenças na EBD' },
+  { tipo:'quiz_perfeito',        icone:'💯', titulo:'Quiz Perfeito',           descricao:'Acertou todas as questões de um quiz!' },
+  { tipo:'quiz_5',               icone:'⚡', titulo:'5 Quizzes',               descricao:'Respondeu 5 quizzes de lição' },
+  { tipo:'sequencia_3',          icone:'🔥', titulo:'Sequência de 3',          descricao:'3 semanas seguidas presente' },
+  { tipo:'desafio_cumprido',     icone:'🏆', titulo:'Desafio Cumprido',        descricao:'Cumpriu um desafio!' },
+  { tipo:'desafio_3',            icone:'💪', titulo:'3 Desafios',              descricao:'Cumpriu 3 desafios' },
+  { tipo:'pontos_50',            icone:'🥉', titulo:'50 Pontos',               descricao:'Acumulou 50 pontos no trimestre' },
+  { tipo:'pontos_100',           icone:'🥈', titulo:'100 Pontos',              descricao:'Acumulou 100 pontos no trimestre' },
+  { tipo:'pontos_200',           icone:'🥇', titulo:'200 Pontos',              descricao:'Acumulou 200 pontos no trimestre' },
+];
+
+async function verificarEAtribuirMedalhas(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos) {
+  if (!alunoId) return [];
+  try {
+    // Buscar medalhas já conquistadas
+    const { data: jaTemMedalhas } = await sbClient.from('medalhas').select('tipo').eq('aluno_id', alunoId);
+    const jaConquistadas = new Set((jaTemMedalhas || []).map(m => m.tipo));
+
+    const novas = [];
+    const presencas = aulas.filter(a => (a.presencas||{})[alunoId] === 'presente').length;
+    const quizzesFeitos = Object.keys(quizScoresAluno || {}).filter(k => k.startsWith(turma)).length;
+    const quizPerfeitoFeito = Object.values(quizScoresAluno || {}).some(q => q.pct === 100);
+    const desafiosCumpridos = desafioPontos.filter(d => d.aluno_id === alunoId).length;
+    const totalPts = calcularPontosAluno(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos);
+    const seq = calcularSemanasSeguidas(alunoId, turma, aulas);
+
+    const checar = [
+      { tipo:'primeira_presenca', cond: presencas >= 1 },
+      { tipo:'presenca_5',        cond: presencas >= 5 },
+      { tipo:'presenca_10',       cond: presencas >= 10 },
+      { tipo:'quiz_perfeito',     cond: quizPerfeitoFeito },
+      { tipo:'quiz_5',            cond: quizzesFeitos >= 5 },
+      { tipo:'sequencia_3',       cond: seq >= 3 },
+      { tipo:'desafio_cumprido',  cond: desafiosCumpridos >= 1 },
+      { tipo:'desafio_3',         cond: desafiosCumpridos >= 3 },
+      { tipo:'pontos_50',         cond: totalPts >= 50 },
+      { tipo:'pontos_100',        cond: totalPts >= 100 },
+      { tipo:'pontos_200',        cond: totalPts >= 200 },
+    ];
+
+    for (const c of checar) {
+      if (c.cond && !jaConquistadas.has(c.tipo)) {
+        const def = DEFINICOES_MEDALHAS.find(d => d.tipo === c.tipo);
+        if (def) {
+          await sbClient.from('medalhas').upsert({
+            aluno_id: alunoId, tipo: def.tipo, titulo: def.titulo,
+            descricao: def.descricao, icone: def.icone
+          }, { onConflict: 'aluno_id,tipo', ignoreDuplicates: true });
+          novas.push(def);
+        }
+      }
+    }
+    return novas;
+  } catch(e) { console.warn('medalhas erro:', e); return []; }
+}
+
+async function carregarMedalhasAluno(alunoId) {
+  try {
+    const { data } = await sbClient.from('medalhas').select('*').eq('aluno_id', alunoId).order('conquistada_em');
+    return data || [];
+  } catch(e) { return []; }
+}
+
+function renderMedalhasAluno(medalhas) {
+  const card = document.getElementById('aluno-medalhas-card');
+  const box = document.getElementById('aluno-medalhas');
+  if (!card || !box) return;
+  if (!medalhas.length) { card.style.display = 'none'; return; }
+  card.style.display = 'block';
+  box.innerHTML = medalhas.map(m =>
+    `<div title="${m.descricao}" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:10px;min-width:60px;text-align:center">
+      <span style="font-size:22px">${m.icone}</span>
+      <span style="font-size:10px;font-weight:700;color:var(--gold-deep);line-height:1.2">${m.titulo}</span>
+    </div>`
+  ).join('');
 }
 
 // ══════════════════════════════════════════════
@@ -9787,6 +9935,86 @@ function toggleQLicao(uid) {
   if (icon) icon.style.transform = aberto ? '' : 'rotate(180deg)';
 }
 
+// ── Sub-aba: quem fez / quem não fez ──
+let _qlSubAba = 'feitos';
+
+function selSubAbaQL(sub, el) {
+  _qlSubAba = sub;
+  document.getElementById('ql-sub-feitos').className = sub === 'feitos' ? 'btn btn-dk btn-sm' : 'btn btn-ou btn-sm';
+  document.getElementById('ql-sub-pendentes').className = sub === 'pendentes' ? 'btn btn-dk btn-sm' : 'btn btn-ou btn-sm';
+  if (sub === 'feitos') renderQuizzesLicao();
+  else renderQuemNaoFezQuiz();
+}
+
+async function renderQuemNaoFezQuiz() {
+  const box = document.getElementById('lista-quizzes-licao');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div>';
+  try {
+    // Buscar todos os resultados da turma
+    const { data: resultados } = await sbClient.from('quiz_resultados')
+      .select('aluno_id,licao_num').eq('turma', _qlTurmaAtual);
+
+    // Buscar alunos ativos da turma
+    const alunos = (await sbGet('alunos', { turma: _qlTurmaAtual })).filter(a => a.ativo !== false);
+
+    // Buscar lições da turma
+    const dados = LICOES[_qlTurmaAtual];
+    const licoes = dados ? dados.licoes : [];
+    const hoje = _hojeFortaleza();
+
+    // Filtrar lições que já passaram (quiz disponível ou expirado)
+    const licoesPassadas = licoes.filter(l => {
+      const [d, m] = l.data.split('/');
+      const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0);
+      return dataLic <= hoje;
+    });
+
+    if (!licoesPassadas.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">📚</div><div class="empty-txt">Nenhuma lição registrada ainda</div></div>';
+      return;
+    }
+
+    // Para cada lição, quem não fez
+    const feitos = {};
+    (resultados || []).forEach(r => {
+      if (!feitos[r.licao_num]) feitos[r.licao_num] = new Set();
+      feitos[r.licao_num].add(r.aluno_id);
+    });
+
+    box.innerHTML = licoesPassadas.map(lic => {
+      const fizeramEstaLicao = feitos[lic.num] || new Set();
+      const naoFizeram = alunos.filter(a => !fizeramEstaLicao.has(a.id));
+      if (!naoFizeram.length) {
+        return `<div style="border:1px solid var(--tc);background:var(--tc-bg);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px">
+          <div style="font-size:22px">🎉</div>
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);font-weight:600">Lição ${lic.num} · ${lic.data}</div>
+            <div style="font-size:14px;font-weight:700;color:var(--tc)">Todos fizeram! ✓</div>
+          </div>
+        </div>`;
+      }
+      return `<div style="border:1px solid var(--warn);background:#fffbf0;border-radius:var(--r);padding:12px 14px;margin-bottom:10px">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+          <div>
+            <div style="font-size:11px;color:var(--ink-soft);font-weight:600">Lição ${lic.num} · ${lic.data}</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink)">${lic.titulo}</div>
+          </div>
+          <div style="text-align:center">
+            <div style="font-size:20px;font-weight:700;color:var(--red);font-family:'Cormorant Garamond',serif">${naoFizeram.length}</div>
+            <div style="font-size:10px;color:var(--ink-soft)">pendente(s)</div>
+          </div>
+        </div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px">
+          ${naoFizeram.map(a => `<span style="background:white;border:1px solid var(--warn);border-radius:20px;padding:3px 10px;font-size:12px;font-weight:500;color:var(--ink)">${a.nome.split(' ')[0]}</span>`).join('')}
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro: ${e.message}</div>`;
+  }
+}
+
 function selQuizLicaoTurma(turma, el) {
   _qlTurmaAtual = turma;
   document.querySelectorAll('#ql-turma-tabs .ttab').forEach(t => t.classList.remove('on'));
@@ -11621,6 +11849,160 @@ function copiarChavePix() {
 // ══════════════════════════════════════════════
 // AVISOS POPUP NO LOGIN
 // ══════════════════════════════════════════════
+// ══════════════════════════════════════════════
+// HISTÓRICO COMPLETO DO ALUNO
+// ══════════════════════════════════════════════
+async function abrirHistoricoCompleto() {
+  const prev = document.getElementById('modal-hist-completo');
+  if (prev) prev.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'modal-hist-completo';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+
+  modal.innerHTML = `<div style="background:white;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden;animation:slideUp .3s cubic-bezier(.34,1.56,.64,1)">
+    <div style="background:var(--ink);padding:18px 20px;border-bottom:2px solid var(--gold);flex-shrink:0;display:flex;align-items:center;justify-content:space-between">
+      <div>
+        <div style="font-size:10px;text-transform:uppercase;color:var(--gold-l);font-weight:700;letter-spacing:.1em;margin-bottom:4px">📋 Histórico Completo</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:18px;color:white;font-weight:600">${PERFIL?.nome_exibicao || USER.nome.split(' ')[0]}</div>
+      </div>
+      <button onclick="document.getElementById('modal-hist-completo').remove()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+    </div>
+    <div id="hist-completo-body" style="flex:1;overflow-y:auto;padding:16px">
+      <div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando...</div>
+    </div>
+    <div style="padding:12px 16px;border-top:1px solid var(--cb);flex-shrink:0">
+      <button onclick="document.getElementById('modal-hist-completo').remove()" class="btn btn-ou btn-full">Fechar</button>
+    </div>
+  </div>`;
+
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+
+  // Carregar dados
+  await carregarHistoricoCompleto();
+}
+
+async function carregarHistoricoCompleto() {
+  const box = document.getElementById('hist-completo-body');
+  if (!box) return;
+
+  try {
+    const turmaAluno = USER.perfil === 'aluno' ? USER.turma : (USER.turma_aluno || USER.turma);
+    let idAluno = USER.id;
+    if (USER.perfil !== 'aluno' && USER._aluno_id) idAluno = USER._aluno_id;
+
+    // Buscar dados em paralelo
+    const [aulas, quizRes, provasRes, desafiosRes, medalhasRes] = await Promise.all([
+      sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false }),
+      sbClient.from('quiz_resultados').select('*').eq('aluno_id', idAluno).eq('turma', turmaAluno).order('licao_num'),
+      sbClient.from('provas').select('id,nome,tipo,resultados,data_inicio,data_limite').eq('turma', turmaAluno).eq('liberada', true),
+      sbClient.from('desafio_pontos').select('*,desafio:desafio_id(nome,pontos)').eq('aluno_id', idAluno),
+      carregarMedalhasAluno(idAluno)
+    ]);
+
+    const aulasData = aulas.data || [];
+    const quizData = quizRes.data || [];
+    const provasData = provasRes.data || [];
+    const desafiosData = desafiosRes.data || [];
+
+    // Presenças
+    const presencas = aulasData.filter(a => (a.presencas||{})[idAluno] === 'presente');
+    const faltas = aulasData.filter(a => (a.presencas||{})[idAluno] === 'falta');
+    const pctFreq = aulasData.length ? Math.round((presencas.length / aulasData.length) * 100) : 0;
+
+    // Quizzes
+    const mediaQuiz = quizData.length ? Math.round(quizData.reduce((s,q) => s + (q.pct||0), 0) / quizData.length) : 0;
+    const totalPtsQuiz = quizData.reduce((s,q) => s + (parseFloat(q.pontos)||0), 0);
+
+    // Provas
+    const provasFeitas = provasData.filter(p => p.resultados && p.resultados[idAluno] && p.tipo === 'prova');
+    const totalPtsProvas = provasFeitas.reduce((s,p) => s + (p.resultados[idAluno]?.pts || 0), 0);
+
+    // Desafios
+    const totalPtsDesafios = desafiosData.reduce((s,d) => s + (d.pontos || (d.desafio?.pontos || 0)), 0);
+
+    const totalPts = (presencas.length * (RANKING_CONFIG.pts_presenca || 10)) + totalPtsQuiz + totalPtsProvas + totalPtsDesafios;
+
+    box.innerHTML = `
+    <!-- Resumo geral -->
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:16px">
+      <div style="background:var(--ink);border-radius:var(--r);padding:14px;text-align:center">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:var(--gold-l)">${totalPts.toFixed(1)}</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:2px">Pontos totais</div>
+      </div>
+      <div style="background:var(--cream);border-radius:var(--r);padding:14px;text-align:center">
+        <div style="font-family:'Cormorant Garamond',serif;font-size:28px;font-weight:600;color:${pctFreq>=75?'var(--tc)':pctFreq>=50?'var(--warn)':'var(--red)'}">${pctFreq}%</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Frequência</div>
+      </div>
+    </div>
+
+    <!-- Presenças -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct">📅 Presenças (${presencas.length}/${aulasData.length})</div>
+      ${aulasData.slice(0,10).map(a => {
+        const status = (a.presencas||{})[idAluno];
+        const cor = status === 'presente' ? 'var(--tc)' : status === 'falta' ? 'var(--red)' : 'var(--ink-soft)';
+        const icon = status === 'presente' ? '✓' : status === 'falta' ? '✗' : '—';
+        const dt = new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--cb)">
+          <span style="font-size:14px;font-weight:700;color:${cor};width:20px">${icon}</span>
+          <span style="font-size:12px;color:var(--ink-soft);width:45px">${dt}</span>
+          <span style="font-size:12px;flex:1;color:var(--ink)">${a.licao_titulo || ('Lição '+(a.licao_num||''))}</span>
+        </div>`;
+      }).join('')}
+      ${aulasData.length > 10 ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:6px;text-align:center">+${aulasData.length-10} aulas anteriores</div>` : ''}
+    </div>
+
+    <!-- Quizzes -->
+    <div class="card" style="margin-bottom:12px">
+      <div class="ct">⚡ Quizzes (${quizData.length} feitos · média ${mediaQuiz}%)</div>
+      ${quizData.map(r => {
+        const cor = r.pct>=70?'var(--tc)':r.pct>=50?'var(--warn)':'var(--red)';
+        const dt = r.data_resposta ? new Date(r.data_resposta).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'}) : '';
+        const dados = LICOES[turmaAluno];
+        const lic = dados ? dados.licoes.find(l => l.num === r.licao_num) : null;
+        return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--cb)">
+          <div style="background:var(--ink);color:var(--gold-l);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${r.licao_num}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${lic ? lic.titulo : 'Lição '+r.licao_num}</div>
+            <div style="font-size:10px;color:var(--ink-soft)">${dt}</div>
+          </div>
+          <div style="text-align:right">
+            <div style="font-size:13px;font-weight:700;color:${cor}">${r.acertos}/${r.total} · ${r.pct}%</div>
+            ${r.pontos != null ? `<div style="font-size:10px;color:var(--gold-deep)">+${parseFloat(r.pontos).toFixed(1)} pts</div>` : ''}
+          </div>
+        </div>`;
+      }).join('') || '<div style="color:var(--ink-soft);font-size:13px;padding:8px 0">Nenhum quiz realizado ainda</div>'}
+    </div>
+
+    <!-- Desafios -->
+    ${desafiosData.length ? `<div class="card" style="margin-bottom:12px">
+      <div class="ct">🏆 Desafios Cumpridos (${desafiosData.length})</div>
+      ${desafiosData.map(d => `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--cb)">
+        <span style="font-size:18px">🏆</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:500">${d.desafio?.nome || 'Desafio'}</div></div>
+        <div style="font-size:13px;font-weight:700;color:var(--tc)">+${d.pontos || d.desafio?.pontos || 0} pts</div>
+      </div>`).join('')}
+    </div>` : ''}
+
+    <!-- Medalhas -->
+    ${medalhasRes.length ? `<div class="card" style="margin-bottom:12px">
+      <div class="ct">🏅 Minhas Medalhas (${medalhasRes.length})</div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding-top:4px">
+        ${medalhasRes.map(m => `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:10px;min-width:65px;text-align:center">
+          <span style="font-size:24px">${m.icone}</span>
+          <span style="font-size:10px;font-weight:700;color:var(--gold-deep);line-height:1.2">${m.titulo}</span>
+          <span style="font-size:9px;color:var(--ink-soft)">${new Date(m.conquistada_em).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'})}</span>
+        </div>`).join('')}
+      </div>
+    </div>` : ''}
+    `;
+  } catch(e) {
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
+
 async function mostrarAvisosPopup() {
   try {
     var avisos = await sbGet('avisos', {}, 'created_at', false);
@@ -11628,12 +12010,16 @@ async function mostrarAvisosPopup() {
     var hoje = _brasilia().split('T')[0];
     var lidos = USER.avisos_lidos || [];
     // Filtrar: não expirados + não lidos; fixados sempre aparecem
+    var agora = _agora();
     var naoLidos = avisos.filter(function(a) {
       if (lidos.includes(a.id)) return false;
-      if (a.data_evento && a.data_evento < hoje && !a.fixado) return false; // expirado
+      // Verificar expiração pelo novo campo expira_em
+      if (a.expira_em && new Date(a.expira_em) < agora) return false;
+      // Legado: expirado por data_evento passada
+      if (!a.expira_em && a.data_evento && a.data_evento < hoje && !a.fixado) return false;
       // Filtrar por turma
       if (a.turma && a.turma !== 'todas') {
-        const turmaAluno = USER.turma_aluno || USER.turma;
+        var turmaAluno = USER.turma_aluno || USER.turma;
         if (a.turma !== turmaAluno) return false;
       }
       return true;
@@ -11655,17 +12041,26 @@ async function mostrarAvisosPopup() {
     overlay.id = 'aviso-popup-overlay';
     overlay.style.cssText = 'position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.7);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(4px)';
 
+    // Urgentes primeiro, depois fixados, depois por data
+    naoLidos.sort(function(a,b){ return (b.urgente?2:b.fixado?1:0)-(a.urgente?2:a.fixado?1:0); });
     var itensHtml = naoLidos.map(function(a) {
       var tc = tipoConfig[a.tipo] || tipoConfig.info;
+      var urgente = a.urgente;
       var dtEvento = a.data_evento ? new Date(a.data_evento+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'}) : '';
       var horarioStr = a.horario ? ' às ' + a.horario.substring(0,5).replace(':','h') : '';
-      return '<div id="aviso-pp-' + a.id + '" style="padding:14px;border:1.5px solid ' + tc.borda + ';border-radius:10px;margin-bottom:10px;background:' + tc.bg + '">'
-        + (a.fixado ? '<div style="font-size:10px;color:' + tc.cor + ';font-weight:700;margin-bottom:4px">📌 FIXADO</div>' : '')
-        + '<div style="font-size:15px;font-weight:700;color:' + tc.cor + ';margin-bottom:6px">' + tc.icon + ' ' + (a.titulo||'') + '</div>'
+      var dtPublic = new Date(a.created_at).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'})
+        + ' ' + new Date(a.created_at).toLocaleTimeString('pt-BR',{timeZone:'America/Fortaleza',hour:'2-digit',minute:'2-digit'});
+      var bordaStyle = urgente ? '2px solid var(--red)' : '1.5px solid ' + tc.borda;
+      var bgStyle = urgente ? '#fff5f5' : tc.bg;
+      return '<div id="aviso-pp-' + a.id + '" style="padding:14px;border:' + bordaStyle + ';border-radius:10px;margin-bottom:10px;background:' + bgStyle + '">'
+        + (urgente ? '<div style="font-size:11px;background:var(--red);color:white;padding:3px 10px;border-radius:8px;font-weight:700;margin-bottom:8px;display:inline-block">🚨 URGENTE</div>' : '')
+        + (a.fixado && !urgente ? '<div style="font-size:10px;color:' + tc.cor + ';font-weight:700;margin-bottom:4px">📌 FIXADO</div>' : '')
+        + '<div style="font-size:15px;font-weight:700;color:' + (urgente?'var(--red)':tc.cor) + ';margin-bottom:6px">' + tc.icon + ' ' + (a.titulo||'') + '</div>'
         + '<div style="font-size:13px;color:#555;line-height:1.6;margin-bottom:6px">' + (a.conteudo||'') + '</div>'
         + (a.observacoes ? '<div style="font-size:12px;color:' + tc.cor + ';background:rgba(0,0,0,.04);border-radius:6px;padding:6px 10px;margin-bottom:6px;line-height:1.5">📎 ' + a.observacoes + '</div>' : '')
-        + (dtEvento ? '<div style="font-size:12px;font-weight:700;color:' + tc.cor + ';margin-bottom:8px;background:rgba(0,0,0,.05);padding:5px 10px;border-radius:6px;display:inline-block">📅 ' + dtEvento + horarioStr + '</div>' : '')
-        + '<button class="btn btn-gold btn-sm" style="width:100%" data-id="' + a.id + '" onclick="marcarAvisoPPLido(this.dataset.id)">✓ Marcar como lido</button>'
+        + (dtEvento ? '<div style="font-size:12px;font-weight:700;color:' + tc.cor + ';margin-bottom:8px;background:rgba(0,0,0,.05);padding:5px 10px;border-radius:6px;display:inline-block">📅 ' + dtEvento + horarioStr + '</div><br>' : '')
+        + '<div style="font-size:10px;color:var(--ink-soft);margin-bottom:8px">Publicado por ' + (a.autor||'') + ' · ' + dtPublic + '</div>'
+        + '<button class="btn btn-gold btn-sm" style="width:100%" data-id="' + a.id + '" onclick="marcarAvisoPPLido(this.dataset.id)">✓ Li e entendi</button>'
         + '</div>';
     }).join('');
 
