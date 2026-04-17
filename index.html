@@ -845,7 +845,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
   <div class="main" id="main-content">
 
     <!-- DASHBOARD -->
-    <div id="pg-dash" class="page on">
+    <div id="pg-dash" class="page">
       <div class="hero">
         <div class="hero-date" id="dash-date"></div>
         <div class="hero-saudacao">
@@ -2769,7 +2769,11 @@ async function iniciarApp() {
 
   // Aluno: carregamento simplificado
   // Inclui admin/professor em modo aluno
-  if (USER.perfil === 'aluno' || _modo('aluno')) {
+  const _ehPerfilAluno = USER.perfil === 'aluno' || _modoAtual === 'aluno';
+  if (_ehPerfilAluno) {
+    // Garantir que pg-dash não fique visível para aluno
+    const pgDash = document.getElementById('pg-dash');
+    if (pgDash) pgDash.classList.remove('on');
     // Ocultar TODOS os elementos exclusivos de admin/professor
     const elsOcultar = ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'];
     elsOcultar.forEach(function(id){ const el = document.getElementById(id); if(el) el.style.display='none'; });
@@ -2777,11 +2781,11 @@ async function iniciarApp() {
     await carregarConfigs();
     curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
     const _turmaOriginal = USER.turma;
-    if (_modo('aluno') && USER.turma_aluno) USER.turma = USER.turma_aluno;
+    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = USER.turma_aluno;
     await _navTo('pg-aluno');
     registrarAcesso();
     renderAlunoProgresso(); // sem await — carrega em background após mostrar a tela
-    if (_modo('aluno') && USER.turma_aluno) USER.turma = _turmaOriginal;
+    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = _turmaOriginal;
     // Mostrar popup de avisos para o aluno após carregar
     setTimeout(mostrarAvisosPopup, 1200);
     return;
