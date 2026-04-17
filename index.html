@@ -7430,23 +7430,58 @@ async function renderProvasNotifDash() {
 async function renderProvasNotifAluno(turmaAluno) {
   const box = document.getElementById('aluno-provas-notif');
   if (!box) return;
+  let html = '';
   try {
-    const { data } = await sbClient.from('provas').select('*').eq('liberada', true).eq('turma', turmaAluno);
+    // ── Notificação de desafios com participação confirmada ──
+    await carregarDesafios();
     const hoje = _hojeStr();
+
+    // ID real do aluno
+    let alunoId = USER.id;
+    if (_modo('aluno') && USER.perfil !== 'aluno') {
+      try {
+        const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
+        if (al && al.length) alunoId = al[0].id;
+      } catch(e) {}
+    }
+
+    const desafiosConfirmados = DESAFIOS.filter(d => {
+      if (d.turma !== turmaAluno || !d.liberado) return false;
+      if (d.data_limite && d.data_limite < hoje) return false;
+      const s = (d.cumprimentos || {})[alunoId];
+      return s && s.participacao_confirmada && !s.cumprido && !s.nao_cumprido;
+    });
+
+    if (desafiosConfirmados.length) {
+      html += desafiosConfirmados.map(d => `
+        <div onclick="selProvasTab('desafios',null);navTo('provas')" style="background:linear-gradient(135deg,#1a3a6b,#1c5090);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:center;gap:12px">
+          <div style="font-size:26px">💪</div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700;color:white">Participação confirmada!</div>
+            <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px;line-height:1.4">Desafio <strong style="color:var(--gold-l)">${d.nome}</strong> — agora é com você! Cumpra e ganhe ${d.pontos} pts ✦</div>
+          </div>
+          <div style="color:rgba(255,255,255,.4);font-size:20px">›</div>
+        </div>`).join('');
+    }
+
+    // ── Provas/quizzes disponíveis ──
+    const { data } = await sbClient.from('provas').select('*').eq('liberada', true).eq('turma', turmaAluno);
     const ativas = (data||[]).filter(p =>
       (!p.data_limite || p.data_limite >= hoje) && p.tipo !== 'desafio'
     );
-    if (!ativas.length) { box.innerHTML = ''; return; }
-    box.innerHTML = ativas.map(p => `
-      <div class="prova-notif" onclick="navTo('provas')" style="margin-bottom:8px">
-        <div class="prova-notif-icon">📝</div>
-        <div class="prova-notif-txt">
-          <div class="prova-notif-titulo">${p.nome}</div>
-          <div class="prova-notif-sub">${_tipoLabel(p.tipo)} disponível · Toque para fazer${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
-        </div>
-        <div class="prova-notif-arrow">›</div>
-      </div>`).join('');
-  } catch(e) { box.innerHTML = ''; }
+    if (ativas.length) {
+      html += ativas.map(p => `
+        <div class="prova-notif" onclick="navTo('provas')" style="margin-bottom:8px">
+          <div class="prova-notif-icon">📝</div>
+          <div class="prova-notif-txt">
+            <div class="prova-notif-titulo">${p.nome}</div>
+            <div class="prova-notif-sub">${_tipoLabel(p.tipo)} disponível · Toque para fazer${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+          </div>
+          <div class="prova-notif-arrow">›</div>
+        </div>`).join('');
+    }
+  } catch(e) {}
+  box.innerHTML = html;
 }
 // ══════════════════════════════════════════════
 // LIBERAÇÕES ESPECIAIS DE QUIZ
@@ -9321,40 +9356,86 @@ async function renderDesafiosAluno() {
   const box = document.getElementById('lista-provas-aluno');
   const hoje = _hojeStr();
   const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
+
+  // Buscar ID real do aluno (pode ser diferente de USER.id para admin/prof em modo aluno)
+  let alunoId = USER.id;
+  if (_modo('aluno') && USER.perfil !== 'aluno') {
+    try {
+      const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
+      if (al && al.length) alunoId = al[0].id;
+    } catch(e) {}
+  }
+
   const disponiveis = DESAFIOS.filter(d => {
     if (d.turma !== turmaAluno) return false;
     if (!d.liberado) return false;
     if (d.data_limite && d.data_limite < hoje) return false;
     return true;
   });
+
   if (!disponiveis.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">🏆</div><div class="empty-txt">Nenhum desafio disponível no momento</div></div>';
     return;
   }
+
   const catIcons = { visitante:'👥', versiculo:'📖', presenca:'✅', leitura:'📚', servico:'🤝', oracao:'🙏', compartilhar:'📲', outro:'⭐' };
+
   box.innerHTML = disponiveis.map(d => {
     const cum = d.cumprimentos || {};
-    const meuStatus = cum[USER.id];
+    const meuStatus = cum[alunoId];
     const icon = catIcons[d.categoria] || '⭐';
+
+    // ── 4 estados corretos ──
+    const isCumprido            = meuStatus?.cumprido === true;
+    const isNaoCumprido         = meuStatus?.nao_cumprido === true;
+    const isParticipConfirmada  = meuStatus?.participacao_confirmada === true && !isCumprido && !isNaoCumprido;
+    const isRejeitado           = meuStatus?.rejeitado === true;
+    const isPendente            = meuStatus && !isParticipConfirmada && !isCumprido && !isNaoCumprido && !isRejeitado;
+
     let statusHtml = '';
-    if (meuStatus?.confirmado) {
-      statusHtml = `<div style="background:var(--tc-bg);border:1px solid var(--tc);border-radius:8px;padding:10px;text-align:center;margin-top:8px">
-        <div style="font-size:18px;margin-bottom:4px">🎉</div>
-        <div style="font-size:13px;font-weight:700;color:var(--tc)">Desafio cumprido! +${d.pontos} pts</div>
+    let borderColor = 'var(--cb)';
+
+    if (isCumprido) {
+      borderColor = 'var(--tc)';
+      statusHtml = `<div style="background:var(--tc-bg);border:1px solid var(--tc);border-radius:10px;padding:14px;text-align:center;margin-top:8px">
+        <div style="font-size:24px;margin-bottom:6px">🎉</div>
+        <div style="font-size:14px;font-weight:700;color:var(--tc)">Desafio cumprido!</div>
+        <div style="font-size:12px;color:var(--tc);margin-top:3px;font-weight:600">+${d.pontos} pts conquistados ✦</div>
       </div>`;
-    } else if (meuStatus) {
-      statusHtml = `<div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:8px;padding:10px;text-align:center;margin-top:8px">
+    } else if (isNaoCumprido) {
+      borderColor = 'var(--red)';
+      statusHtml = `<div style="background:var(--red-bg);border:1px solid var(--red);border-radius:10px;padding:12px;text-align:center;margin-top:8px">
+        <div style="font-size:13px;font-weight:700;color:var(--red)">✗ Desafio não cumprido</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Continue tentando nos próximos desafios!</div>
+      </div>`;
+    } else if (isParticipConfirmada) {
+      borderColor = 'var(--gold)';
+      statusHtml = `<div style="background:linear-gradient(135deg,#1a3a6b,#1c5090);border-radius:10px;padding:14px;text-align:center;margin-top:8px">
+        <div style="font-size:22px;margin-bottom:6px">💪</div>
+        <div style="font-size:14px;font-weight:700;color:white">Participação confirmada!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:4px;line-height:1.5">Agora é com você! Cumpra o desafio<br>e ganhe <strong style="color:var(--gold-l)">${d.pontos} pts</strong> ✦</div>
+      </div>`;
+    } else if (isRejeitado) {
+      borderColor = 'var(--cb)';
+      statusHtml = `<div style="background:#f5f5f5;border-radius:8px;padding:10px;text-align:center;margin-top:8px">
+        <div style="font-size:12px;color:var(--ink-soft)">✕ Participação não aprovada</div>
+      </div>`;
+    } else if (isPendente) {
+      borderColor = 'var(--gold)';
+      statusHtml = `<div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:10px;padding:12px;text-align:center;margin-top:8px">
         <div style="font-size:13px;font-weight:600;color:var(--gold-deep)">⏳ Aguardando confirmação do professor</div>
-        <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Você se inscreveu neste desafio</div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Sua inscrição foi enviada</div>
       </div>`;
     } else {
-      const nInscritos = Object.keys(cum).length;
+      // Não inscrito
+      const nInscritos = Object.keys(cum).filter(k => !cum[k].rejeitado).length;
       const cheio = d.limite_participantes > 0 && nInscritos >= d.limite_participantes;
       statusHtml = cheio
         ? `<div style="font-size:12px;color:var(--red);margin-top:8px;text-align:center">Limite de participantes atingido</div>`
         : `<button class="btn btn-gold btn-full" style="margin-top:8px" onclick="inscreverDesafio('${d.id}')">🏆 Aceitar desafio</button>`;
     }
-    return `<div class="prova-card" style="border-color:${meuStatus?.confirmado?'var(--tc)':meuStatus?'var(--gold)':'var(--cb)'}">
+
+    return `<div class="prova-card" style="border-color:${borderColor}">
       <div class="prova-titulo">${icon} ${d.nome}</div>
       <div class="prova-meta" style="margin-bottom:8px">
         <span class="prova-badge badge-desafio">DESAFIO</span>
