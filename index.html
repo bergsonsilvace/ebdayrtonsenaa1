@@ -1338,20 +1338,13 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- PIX -->
     <div id="pg-pix" class="page">
-      <div class="ph"><h2>Ofertas <em>via Pix</em></h2><p>Contribua com a obra de Deus</p></div>
+      <div class="ph"><h2>Ofertas <em>via Pix</em></h2><p>Configure as chaves Pix por turma</p></div>
 
-      <!-- Card de exibição do Pix (para alunos — mostra só o da turma) -->
-      <div id="pix-display-area">
-        <div style="background:linear-gradient(135deg,#00a859,#00cc6a);border-radius:var(--r);padding:20px;color:white;text-align:center;margin-bottom:16px" id="pix-card-display">
+      <!-- Mensagem para alunos -->
+      <div id="pix-msg-aluno" style="display:none">
+        <div class="card" style="text-align:center;padding:24px">
           <div style="font-size:36px;margin-bottom:8px">💚</div>
-          <div style="font-size:13px;opacity:.7;font-weight:600;text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px" id="pix-turma-label"></div>
-          <div style="font-size:18px;font-weight:700;margin-bottom:4px" id="pix-nome-display">EBD Frequencia</div>
-          <div style="font-size:12px;opacity:.8" id="pix-banco-display"></div>
-          <div style="font-size:13px;background:rgba(255,255,255,.2);padding:8px 14px;border-radius:20px;margin:10px auto;display:inline-block;word-break:break-all" id="pix-chave-display">Chave nao configurada</div>
-          <div style="margin-top:10px"><button class="btn btn-gold btn-sm" onclick="copiarChavePix()">📋 Copiar chave</button></div>
-        </div>
-        <div id="pix-qrcode-wrap" style="text-align:center;margin:16px 0;display:none">
-          <img id="pix-qrcode-img" style="max-width:220px;border-radius:12px;border:4px solid white">
+          <div style="font-size:15px;color:var(--ink-soft);line-height:1.6">A chave Pix da sua turma<br>está disponível na <strong>tela inicial</strong>.</div>
         </div>
       </div>
 
@@ -1365,7 +1358,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-criancas" placeholder="Ex: Nubank, Caixa..."></div>
           <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-criancas" placeholder="CPF, e-mail, telefone ou aleatória"></div>
           <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-criancas" placeholder="https://..."></div>
-          <button class="btn btn-sm" style="background:var(--tc);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('criancas')">✓ Salvar Pix Crianças</button>
+          <button class="btn btn-sm" style="background:var(--tc);color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('criancas')">✓ Salvar Pix Crianças</button>
         </div>
 
         <!-- Jovens -->
@@ -1375,7 +1368,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-jovens" placeholder="Ex: Nubank, Caixa..."></div>
           <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-jovens" placeholder="CPF, e-mail, telefone ou aleatória"></div>
           <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-jovens" placeholder="https://..."></div>
-          <button class="btn btn-sm" style="background:var(--tj);color:white;border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('jovens')">✓ Salvar Pix Jovens</button>
+          <button class="btn btn-sm" style="background:var(--tj);color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('jovens')">✓ Salvar Pix Jovens</button>
         </div>
 
         <!-- Adultos -->
@@ -1385,7 +1378,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-adultos" placeholder="Ex: Nubank, Caixa..."></div>
           <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-adultos" placeholder="CPF, e-mail, telefone ou aleatória"></div>
           <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-adultos" placeholder="https://..."></div>
-          <button class="btn btn-sm" style="background:var(--gold);color:var(--ink);border:none;border-radius:8px;padding:8px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('adultos')">✓ Salvar Pix Adultos</button>
+          <button class="btn btn-sm" style="background:var(--gold);color:var(--ink);border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('adultos')">✓ Salvar Pix Adultos</button>
         </div>
       </div>
     </div>
@@ -1615,16 +1608,54 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     <!-- PROVAS & SIMULADOS (professor/super) -->
     <div id="pg-provas" class="page">
       <div class="ph"><h2>Provas & <em>Avaliações</em></h2><p>Crie, libere e acompanhe os resultados</p></div>
-      <div id="provas-prof-area">
-        <!-- Abas internas -->
-        <div class="ttabs" id="provas-prof-tabs" style="margin-bottom:14px">
-          <button class="ttab on" onclick="selProvasProfTab('avaliacoes',this)">📝 Provas & Quizzes</button>
-          <button class="ttab" onclick="selProvasProfTab('desafios',this)">🏆 Desafios</button>
-          <button class="ttab" onclick="selProvasProfTab('quizzes-licao',this)">⚡ Quizzes de Lição</button>
+
+      <!-- ── MENU PRINCIPAL (cards de navegação) ── -->
+      <div id="provas-menu-cards">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+
+          <!-- Card: Provas & Quizzes -->
+          <div onclick="abrirSecaoProvas('avaliacoes')" style="background:var(--ink);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:28px;margin-bottom:8px">📝</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:white;font-weight:600;line-height:1.2">Provas &<br>Quizzes</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:6px">Criar e gerenciar</div>
+            <div style="position:absolute;bottom:10px;right:12px;font-size:18px;color:rgba(255,255,255,.15)">›</div>
+          </div>
+
+          <!-- Card: Desafios -->
+          <div onclick="abrirSecaoProvas('desafios')" style="background:linear-gradient(135deg,#7a5c00,#b8972a);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+            <div style="font-size:28px;margin-bottom:8px">🏆</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:17px;color:white;font-weight:600;line-height:1.2">Desafios</div>
+            <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:6px">Criar e acompanhar</div>
+            <div style="position:absolute;bottom:10px;right:12px;font-size:18px;color:rgba(255,255,255,.15)">›</div>
+          </div>
         </div>
 
+        <!-- Card: Resultados (largura total) -->
+        <div onclick="abrirSecaoProvas('resultados')" style="background:linear-gradient(135deg,#1a3a6b,#1c5090);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font-size:32px">📊</div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:19px;color:white;font-weight:600">Resultados</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Quizzes de lição · Provas · Simulados</div>
+            </div>
+            <div style="margin-left:auto;font-size:22px;color:rgba(255,255,255,.2)">›</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── ÁREA DE CONTEÚDO (ocultada por padrão) ── -->
+      <div id="provas-prof-area" style="display:none">
+
+        <!-- Botão voltar -->
+        <button onclick="voltarMenuProvas()" style="display:flex;align-items:center;gap:6px;background:none;border:none;color:var(--gold-deep);font-size:13px;font-weight:700;cursor:pointer;padding:0;margin-bottom:16px">
+          ← Voltar
+        </button>
+
+        <!-- Título da seção atual -->
+        <div id="provas-secao-titulo" style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:var(--ink);margin-bottom:16px"></div>
+
         <!-- Conteúdo: Avaliações -->
-        <div id="tab-avaliacoes-prof">
+        <div id="tab-avaliacoes-prof" style="display:none">
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px">
             <button class="btn btn-dk btn-sm" onclick="abrirModalProva('','prova')" style="display:flex;align-items:center;gap:6px;padding:8px 14px">
               <span>📝</span><span>Criar Prova</span>
@@ -1649,7 +1680,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div id="lista-desafios-prof"></div>
         </div>
 
-        <!-- Conteúdo: Quizzes de Lição -->
+        <!-- Conteúdo: Resultados -->
         <div id="tab-quizzes-licao-prof" style="display:none">
           <div class="ttabs" id="ql-turma-tabs" style="margin-bottom:14px">
             <button class="ttab tc on" onclick="selQuizLicaoTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
@@ -1659,7 +1690,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           <div id="lista-quizzes-licao"></div>
         </div>
       </div>
-      <!-- Resultados de uma prova -->
+
+      <!-- Resultados de uma prova específica -->
       <div id="provas-resultado-area" style="display:none">
         <button class="btn btn-ou btn-sm" onclick="voltarListaProvas()" style="margin-bottom:14px">← Voltar</button>
         <div class="card" style="background:var(--ink);border-color:var(--ink);margin-bottom:14px">
@@ -5622,9 +5654,6 @@ async function carregarProvas() {
 // ── VISÃO DO PROFESSOR/SUPER ──
 async function renderProvasProf() {
   await carregarProvas();
-  document.getElementById('provas-prof-area').style.display = 'block';
-  document.getElementById('provas-resultado-area').style.display = 'none';
-
   // Garantir que a aba avaliacoes está ativa
   const tabAval = document.getElementById('tab-avaliacoes-prof');
   const tabDes = document.getElementById('tab-desafios-prof');
@@ -6167,6 +6196,7 @@ async function verResultados(id) {
   await carregarProvas();
   const p = PROVAS.find(x => x.id === id);
   if (!p) return;
+  document.getElementById('provas-menu-cards').style.display = 'none';
   document.getElementById('provas-prof-area').style.display = 'none';
   document.getElementById('provas-resultado-area').style.display = 'block';
   document.getElementById('res-tipo-badge').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
@@ -6354,6 +6384,7 @@ async function confirmarCorrecaoPontos(alunoId, turma, provaId) {
 function voltarListaProvas() {
   document.getElementById('provas-prof-area').style.display = 'block';
   document.getElementById('provas-resultado-area').style.display = 'none';
+  document.getElementById('provas-menu-cards').style.display = 'none';
 }
 
 // ── VISÃO DO ALUNO ──
@@ -9370,22 +9401,67 @@ async function salvarObservacao() {
 let _provasTab = 'disponiveis';
 let _provasProfTab = 'avaliacoes';
 
+// Nova função de navegação por cards
+async function abrirSecaoProvas(secao) {
+  _provasProfTab = secao;
+  // Ocultar menu, mostrar área de conteúdo
+  document.getElementById('provas-menu-cards').style.display = 'none';
+  document.getElementById('provas-prof-area').style.display = 'block';
+  document.getElementById('provas-resultado-area').style.display = 'none';
+
+  // Ocultar todas as tabs
+  ['tab-avaliacoes-prof','tab-desafios-prof','tab-quizzes-licao-prof'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  // Títulos e ícones por seção
+  const titulos = {
+    avaliacoes: '📝 Provas & Quizzes',
+    desafios:   '🏆 Desafios',
+    resultados: '📊 Resultados'
+  };
+  const tituloEl = document.getElementById('provas-secao-titulo');
+  if (tituloEl) tituloEl.textContent = titulos[secao] || '';
+
+  // Mostrar conteúdo correto
+  if (secao === 'avaliacoes') {
+    document.getElementById('tab-avaliacoes-prof').style.display = '';
+    await renderProvasProf();
+  } else if (secao === 'desafios') {
+    document.getElementById('tab-desafios-prof').style.display = '';
+    await renderDesafiosProf();
+  } else if (secao === 'resultados') {
+    document.getElementById('tab-quizzes-licao-prof').style.display = '';
+    await renderQuizzesLicao();
+  }
+}
+
+function voltarMenuProvas() {
+  document.getElementById('provas-menu-cards').style.display = '';
+  document.getElementById('provas-prof-area').style.display = 'none';
+  document.getElementById('provas-resultado-area').style.display = 'none';
+}
+
+// Compatibilidade com código antigo que chama selProvasProfTab
 async function selProvasProfTab(tab, el) {
-  _provasProfTab = tab;
-  document.querySelectorAll('#provas-prof-tabs .ttab').forEach(t => t.classList.remove('on'));
-  if (el) el.classList.add('on');
-  document.getElementById('tab-avaliacoes-prof').style.display = tab === 'avaliacoes' ? '' : 'none';
-  document.getElementById('tab-desafios-prof').style.display = tab === 'desafios' ? '' : 'none';
-  document.getElementById('tab-quizzes-licao-prof').style.display = tab === 'quizzes-licao' ? '' : 'none';
-  if (tab === 'avaliacoes') await renderProvasProf();
-  else if (tab === 'desafios') await renderDesafiosProf();
-  else if (tab === 'quizzes-licao') await renderQuizzesLicao();
+  const mapa = { 'avaliacoes': 'avaliacoes', 'desafios': 'desafios', 'quizzes-licao': 'resultados' };
+  await abrirSecaoProvas(mapa[tab] || tab);
 }
 
 // ══════════════════════════════════════════════════════
 // RELATÓRIO DE QUIZZES DE LIÇÃO
 // ══════════════════════════════════════════════════════
 let _qlTurmaAtual = 'criancas';
+
+function toggleQLicao(uid) {
+  const body = document.getElementById(uid);
+  const icon = document.getElementById(uid + '-icon');
+  if (!body) return;
+  const aberto = body.style.display !== 'none';
+  body.style.display = aberto ? 'none' : 'block';
+  if (icon) icon.style.transform = aberto ? '' : 'rotate(180deg)';
+}
 
 function selQuizLicaoTurma(turma, el) {
   _qlTurmaAtual = turma;
@@ -9435,6 +9511,7 @@ async function renderQuizzesLicao() {
         ? Math.round(resps.reduce((s, r) => s + (r.pct || 0), 0) / nResponderam)
         : 0;
       const corMedia = mediaAcertos >= 70 ? 'var(--tc)' : mediaAcertos >= 50 ? 'var(--warn)' : 'var(--red)';
+      const uid = `ql-lic-${numLic}`;
 
       const linhasAlunos = resps.map(r => {
         const aluno = alunos.find(a => a.id === r.aluno_id);
@@ -9443,31 +9520,37 @@ async function renderQuizzesLicao() {
         const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
         const pts = r.pontos != null ? parseFloat(r.pontos) : null;
         const dt = r.data_resposta ? new Date(r.data_resposta).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'}) : '';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--cb);flex-wrap:wrap">
-          <div style="flex:1;font-size:13px;font-weight:500;min-width:120px">${nome}</div>
-          <div style="font-size:11px;color:var(--ink-soft)">${dt}</div>
-          <div style="display:flex;gap:6px;align-items:center">
-            <span style="font-size:12px;font-weight:700;color:${cor}">${r.acertos}/${r.total} (${pct}%)</span>
-            ${pts != null ? `<span style="font-size:11px;background:var(--gold-pale);color:var(--gold-deep);padding:1px 7px;border-radius:10px;font-weight:700">+${pts} pts</span>` : ''}
-            <button onclick="verRespostasQuizLicao('${r.aluno_id}','${_qlTurmaAtual}',${numLic},'${nome.replace(/'/g,"&apos;")}')" style="font-size:10px;padding:2px 8px;border:1px solid var(--tj);border-radius:6px;background:#e8f0ff;color:var(--tj);cursor:pointer">👁 Ver</button>
-            <button onclick="abrirCorrecaoPtsQuiz('${r.aluno_id}','${_qlTurmaAtual}',${numLic},'${nome.replace(/'/g,"&apos;")}')" style="font-size:10px;padding:2px 8px;border:1px solid var(--warn);border-radius:6px;background:#fff8e0;color:#7a5000;cursor:pointer">✏️ Pts</button>
+        return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--cb);flex-wrap:wrap">
+          <div style="flex:1;font-size:13px;font-weight:500;min-width:100px">${nome}</div>
+          <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
+            <span style="font-size:11px;color:var(--ink-soft)">${dt}</span>
+            <span style="font-size:12px;font-weight:700;color:${cor}">${r.acertos}/${r.total} · ${pct}%</span>
+            ${pts != null ? `<span style="font-size:11px;background:var(--gold-pale);color:var(--gold-deep);padding:1px 7px;border-radius:10px;font-weight:700">+${pts}pts</span>` : ''}
+            <button data-aid="${r.aluno_id}" data-turma="${_qlTurmaAtual}" data-num="${numLic}" data-nome="${nome.replace(/"/g,'&quot;')}" onclick="verRespostasQuizLicao(this.dataset.aid,this.dataset.turma,parseInt(this.dataset.num),this.dataset.nome)" style="font-size:10px;padding:2px 8px;border:1px solid var(--tj);border-radius:6px;background:#e8f0ff;color:var(--tj);cursor:pointer">👁 Ver</button>
+            <button data-aid="${r.aluno_id}" data-turma="${_qlTurmaAtual}" data-num="${numLic}" data-nome="${nome.replace(/"/g,'&quot;')}" onclick="abrirCorrecaoPtsQuiz(this.dataset.aid,this.dataset.turma,parseInt(this.dataset.num),this.dataset.nome)" style="font-size:10px;padding:2px 8px;border:1px solid var(--warn);border-radius:6px;background:#fff8e0;color:#7a5000;cursor:pointer">✏️ Pts</button>
           </div>
         </div>`;
       }).join('');
 
-      return `<div class="card" style="margin-bottom:12px">
-        <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px">
-          <div>
-            <div style="font-size:10px;text-transform:uppercase;color:var(--ink-soft);font-weight:600;letter-spacing:.06em;margin-bottom:3px">Lição ${numLic}${data ? ' · ' + data : ''}</div>
-            <div style="font-size:15px;font-weight:700;color:var(--ink)">${titulo}</div>
+      // Card colapsável
+      return `<div style="border:1px solid var(--cb);border-radius:var(--r);margin-bottom:10px;overflow:hidden">
+        <!-- Cabeçalho clicável -->
+        <div onclick="toggleQLicao('${uid}')" style="display:flex;align-items:center;gap:12px;padding:12px 14px;cursor:pointer;background:white;transition:background .15s" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='white'">
+          <div style="background:var(--ink);color:var(--gold-l);font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${numLic}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:11px;color:var(--ink-soft);font-weight:600;margin-bottom:2px">${data ? data + ' · ' : ''}${nResponderam} aluno(s)</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${titulo}</div>
           </div>
-          <div style="text-align:center;flex-shrink:0">
-            <div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;color:${corMedia};line-height:1">${mediaAcertos}%</div>
+          <div style="text-align:right;flex-shrink:0">
+            <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:${corMedia}">${mediaAcertos}%</div>
             <div style="font-size:10px;color:var(--ink-soft)">média</div>
           </div>
+          <div id="${uid}-icon" style="color:var(--ink-soft);font-size:18px;flex-shrink:0;transition:transform .2s">▼</div>
         </div>
-        <div style="font-size:11px;color:var(--ink-soft);margin-bottom:8px;font-weight:600">${nResponderam} aluno(s) responderam</div>
-        ${linhasAlunos}
+        <!-- Corpo colapsável -->
+        <div id="${uid}" style="display:none;padding:0 14px 10px;border-top:1px solid var(--cb);background:white">
+          ${linhasAlunos || '<div style="padding:12px 0;color:var(--ink-soft);font-size:13px">Nenhum resultado</div>'}
+        </div>
       </div>`;
     }).join('');
 
@@ -11155,53 +11238,31 @@ function formatarDataLocal(iso) {
 // ── PIX POR TURMA ──
 async function renderPix() {
   const podeConfig = isAdmin() || ['pastor','super'].includes(USER && USER.perfil);
-  const cfgCard = document.getElementById('pix-config-card');
-
-  // Determinar turma do usuário atual
   const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
-  const turmaExibir = ehAluno
-    ? (USER.turma_aluno || USER.turma || 'adultos')
-    : (USER && USER.turma && USER.turma !== 'todas' ? USER.turma : null);
 
-  const turmaLabel = { criancas: '🧒 Crianças', jovens: '🧑 Jovens', adultos: '👨 Adultos' };
-  const sufixo = turmaExibir || 'adultos';
+  // Mostrar mensagem para alunos, configs para admin/pastor/super
+  const msgAluno = document.getElementById('pix-msg-aluno');
+  const cfgCard = document.getElementById('pix-config-card');
+  if (msgAluno) msgAluno.style.display = ehAluno ? 'block' : 'none';
+  if (cfgCard) cfgCard.style.display = podeConfig ? 'block' : 'none';
 
-  var nome  = (await sbGetConfig('pix_nome_' + sufixo))  || (await sbGetConfig('pix_nome'))  || '';
-  var banco = (await sbGetConfig('pix_banco_' + sufixo)) || (await sbGetConfig('pix_banco')) || '';
-  var chave = (await sbGetConfig('pix_chave_' + sufixo)) || (await sbGetConfig('pix_chave')) || '';
-  var qr    = (await sbGetConfig('pix_qrcode_' + sufixo))|| (await sbGetConfig('pix_qrcode'))|| '';
-
-  var elTurma = document.getElementById('pix-turma-label');
-  if (elTurma) elTurma.textContent = turmaExibir ? (turmaLabel[turmaExibir] || '') : '';
-  var elNome = document.getElementById('pix-nome-display');
-  if (elNome) elNome.textContent = nome || 'Pix não configurado';
-  var elBanco = document.getElementById('pix-banco-display');
-  if (elBanco) elBanco.textContent = banco;
-  var elChave = document.getElementById('pix-chave-display');
-  if (elChave) elChave.textContent = chave || 'Chave não configurada';
-  var qrWrap = document.getElementById('pix-qrcode-wrap');
-  var qrImg = document.getElementById('pix-qrcode-img');
-  if (qrWrap && qrImg) { qrWrap.style.display = qr ? 'block' : 'none'; if (qr) qrImg.src = qr; }
-
-  if (cfgCard) {
-    cfgCard.style.display = podeConfig ? 'block' : 'none';
-    if (podeConfig) {
-      var turmas = ['criancas', 'jovens', 'adultos'];
-      for (var ti = 0; ti < turmas.length; ti++) {
-        var t = turmas[ti];
-        var n = (await sbGetConfig('pix_nome_' + t)) || '';
-        var b = (await sbGetConfig('pix_banco_' + t)) || '';
-        var c = (await sbGetConfig('pix_chave_' + t)) || '';
-        var q = (await sbGetConfig('pix_qrcode_' + t)) || '';
-        var elN = document.getElementById('pix-cfg-nome-'+t);
-        var elB = document.getElementById('pix-cfg-banco-'+t);
-        var elC = document.getElementById('pix-cfg-chave-'+t);
-        var elQ = document.getElementById('pix-cfg-qr-'+t);
-        if (elN) elN.value = n;
-        if (elB) elB.value = b;
-        if (elC) elC.value = c;
-        if (elQ) elQ.value = q;
-      }
+  // Carregar dados nos campos de config
+  if (podeConfig) {
+    var turmas = ['criancas', 'jovens', 'adultos'];
+    for (var ti = 0; ti < turmas.length; ti++) {
+      var t = turmas[ti];
+      var n = (await sbGetConfig('pix_nome_' + t)) || '';
+      var b = (await sbGetConfig('pix_banco_' + t)) || '';
+      var c = (await sbGetConfig('pix_chave_' + t)) || '';
+      var q = (await sbGetConfig('pix_qrcode_' + t)) || '';
+      var elN = document.getElementById('pix-cfg-nome-'+t);
+      var elB = document.getElementById('pix-cfg-banco-'+t);
+      var elC = document.getElementById('pix-cfg-chave-'+t);
+      var elQ = document.getElementById('pix-cfg-qr-'+t);
+      if (elN) elN.value = n;
+      if (elB) elB.value = b;
+      if (elC) elC.value = c;
+      if (elQ) elQ.value = q;
     }
   }
 }
