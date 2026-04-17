@@ -2771,22 +2771,22 @@ async function iniciarApp() {
   // Inclui admin/professor em modo aluno
   const _ehPerfilAluno = USER.perfil === 'aluno' || _modoAtual === 'aluno';
   if (_ehPerfilAluno) {
-    // Garantir que pg-dash não fique visível para aluno
-    const pgDash = document.getElementById('pg-dash');
-    if (pgDash) pgDash.classList.remove('on');
-    // Ocultar TODOS os elementos exclusivos de admin/professor
-    const elsOcultar = ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'];
-    elsOcultar.forEach(function(id){ const el = document.getElementById(id); if(el) el.style.display='none'; });
+    // ESCONDER pg-dash imediatamente — aluno nunca deve ver o dashboard
+    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
+    const pgAluno = document.getElementById('pg-pg-aluno');
+    if (pgAluno) pgAluno.classList.add('on');
+    // Ocultar elementos exclusivos de admin/professor
+    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'].forEach(function(id){
+      const el = document.getElementById(id); if(el) el.style.display='none';
+    });
     preencherFormPerfil();
     await carregarConfigs();
     curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
     const _turmaOriginal = USER.turma;
     if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = USER.turma_aluno;
-    await _navTo('pg-aluno');
     registrarAcesso();
-    renderAlunoProgresso(); // sem await — carrega em background após mostrar a tela
+    await renderAlunoProgresso();
     if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = _turmaOriginal;
-    // Mostrar popup de avisos para o aluno após carregar
     setTimeout(mostrarAvisosPopup, 1200);
     return;
   }
@@ -5626,12 +5626,19 @@ async function renderAlunoProgresso() {
   } catch(e) {}
 
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
+
+  // Garantir que a tela do aluno está visível (não o dashboard)
+  document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
+  const pgAluno = document.getElementById('pg-pg-aluno');
+  if (pgAluno) pgAluno.classList.add('on');
+
   document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
   carregarChavePix();
   document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
 
-  // Mostrar notificação de provas disponíveis (sem await para não bloquear o render)
-  renderProvasNotifAluno(turmaAluno).catch(()=>{});
+  // Carregar desafios primeiro, depois notificações
+  await carregarDesafios();
+  renderProvasNotifAluno(turmaAluno, true).catch(()=>{}); // desafios já carregados acima
 
   // Calcular pontos e presenças reais usando ids corretos
   const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
@@ -7599,14 +7606,14 @@ async function renderProvasNotifDash() {
   } catch(e) { box.innerHTML = ''; }
 }
 
-async function renderProvasNotifAluno(turmaArg) {
+async function renderProvasNotifAluno(turmaArg, jaCarregouDesafios) {
   const box = document.getElementById('aluno-provas-notif');
   if (!box) return;
   let html = '';
   box.innerHTML = '';
   try {
-    // ── Sempre recarregar desafios frescos do banco ──
-    await carregarDesafios();
+    // Recarregar só se necessário
+    if (!jaCarregouDesafios) await carregarDesafios();
 
     // Garantir turma e ID corretos independente do perfil
     const turmaAluno = turmaArg
