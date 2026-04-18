@@ -110,7 +110,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .main{flex:1;padding:20px 18px;max-width:760px;width:100%;margin:0 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* PAGE */
-.page{display:none;animation:fadeUp .3s ease}.page.on{display:block}
+.page{display:none;animation:fadeUp .3s ease}.page.on{display:block}#pg-pg-aluno{animation:none!important}/* modo-aluno: pg-dash sempre visivel */
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
@@ -1163,26 +1163,13 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- ÁREA DO ALUNO -->
     <div id="pg-pg-aluno" class="page">
+
       <div class="pg-aluno-hero">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-l);font-weight:600;margin-bottom:6px">Meu Progresso</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:white;margin-bottom:3px" id="aluno-saud"></div>
+        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-l);font-weight:600;margin-bottom:6px">MEU PROGRESSO</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:white;margin-bottom:3px" id="aluno-saud">Carregando...</div>
         <div style="font-size:12px;color:rgba(255,255,255,.45)" id="aluno-turma-txt"></div>
       </div>
-      <!-- Notificação de provas disponíveis -->
-      <div id="aluno-provas-notif" style="margin-bottom:4px"></div>
-      <!-- Pix — oferta — logo após saudação -->
-      <div class="card" id="aluno-pix-card" style="margin-bottom:12px;display:none;border-color:var(--gold);background:var(--gold-pale)">
-        <div class="ct" style="color:var(--gold-deep)">🙏 Contribua com sua oferta</div>
-        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">
-          Sua oferta é uma demonstração de fé e gratidão. Copie a chave Pix abaixo para contribuir:
-        </div>
-        <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--gold);border-radius:var(--r);padding:10px 14px;margin-bottom:8px">
-          <span style="font-size:18px">💛</span>
-          <div id="aluno-pix-chave" style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all">—</div>
-          <button onclick="copiarPixAluno()" style="background:var(--gold);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer">Copiar</button>
-        </div>
-        <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
-      </div>
+
       <!-- Pontuação geral -->
       <div class="pts-hero" id="aluno-pts-hero" style="display:none">
         <div class="pts-total" id="aluno-pts-total">0</div>
@@ -1449,6 +1436,84 @@ input,select,textarea{font-family:'Outfit',sans-serif}
         <div class="fg" style="margin:0"><label class="fl">Meta — Adultos</label><input class="fc" type="number" id="cfg-meta-a" placeholder="Ex: 30" min="0"></div>
       </div>
       <button class="btn btn-gold btn-full" onclick="salvarConfig()" style="margin-bottom:12px">✓ Salvar configurações</button>
+
+      <!-- DIA E HORÁRIO DA EBD -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">📅 Dia e horário da EBD</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Define o countdown na tela inicial.</div>
+        <div class="frow">
+          <div class="fg">
+            <label class="fl">Dia da semana</label>
+            <select class="fc" id="cfg-ebd-dia">
+              <option value="domingo">Domingo</option>
+              <option value="segunda">Segunda-feira</option>
+              <option value="terca">Terça-feira</option>
+              <option value="quarta">Quarta-feira</option>
+              <option value="quinta">Quinta-feira</option>
+              <option value="sexta">Sexta-feira</option>
+              <option value="sabado">Sábado</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Horário</label>
+            <input class="fc" type="time" id="cfg-ebd-horario">
+          </div>
+        </div>
+        <button class="btn btn-gold btn-sm btn-full" onclick="salvarCfgEbd()">✓ Salvar</button>
+      </div>
+
+      <!-- TRIMESTRE -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">📆 Trimestre atual</div>
+        <div class="fg"><label class="fl">Nome do trimestre</label><input class="fc" id="cfg-trim-nome" placeholder="Ex: 2º Trimestre 2026"></div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Início</label><input class="fc" type="date" id="cfg-trim-inicio"></div>
+          <div class="fg" style="margin:0"><label class="fl">Fim</label><input class="fc" type="date" id="cfg-trim-fim"></div>
+        </div>
+        <button class="btn btn-gold btn-sm btn-full" onclick="salvarCfgTrimestre()">✓ Salvar</button>
+      </div>
+
+      <!-- WHATSAPP DA IGREJA -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">📞 WhatsApp da igreja</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Número usado para feedback e contato. Com código do país (ex: 5585999999999).</div>
+        <div class="fg" style="margin:0"><label class="fl">Número WhatsApp</label><input class="fc" id="cfg-whats-numero" placeholder="5585999999999" type="tel"></div>
+        <button class="btn btn-gold btn-sm btn-full" onclick="salvarCfgWhatsNumero()" style="margin-top:10px">✓ Salvar</button>
+      </div>
+
+      <!-- VERSÍCULO DO SEMESTRE -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">✦ Versículo do semestre</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Aparece no rodapé e na área do Pix.</div>
+        <div class="fg" style="margin:0"><label class="fl">Versículo</label><textarea class="fc" id="cfg-versiculo" rows="3" placeholder='"Porque nunca a profecia foi produzida por vontade de homem algum..." — 2 Pe 1.21'></textarea></div>
+        <button class="btn btn-gold btn-sm btn-full" onclick="salvarCfgVersiculo()" style="margin-top:10px">✓ Salvar</button>
+      </div>
+
+      <!-- BOAS-VINDAS -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">👋 Mensagem de boas-vindas</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Aparece no popup quando o aluno loga.</div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+          <input type="checkbox" id="cfg-bv-ativo" style="width:16px;height:16px">
+          <label for="cfg-bv-ativo" style="font-size:13px;cursor:pointer">Ativar popup de boas-vindas</label>
+        </div>
+        <div class="fg" style="margin:0"><label class="fl">Mensagem</label><textarea class="fc" id="cfg-bv-msg" rows="3" placeholder="Bem-vindo à EBD!..."></textarea></div>
+        <button class="btn btn-gold btn-sm btn-full" onclick="salvarCfgBoasVindas()" style="margin-top:10px">✓ Salvar</button>
+      </div>
+
+      <!-- WHATSAPP CREDENCIAIS -->
+      <div class="card" style="margin-bottom:12px">
+        <div class="ct">📱 WhatsApp — Credenciais do aluno</div>
+        <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">
+          Mensagem enviada ao aluno após cadastro. Use <strong>{nome}</strong>, <strong>{login}</strong>, <strong>{senha}</strong>, <strong>{turma}</strong> e <strong>{link}</strong> como variáveis.
+        </div>
+        <div class="fg"><label class="fl">🔗 Link do sistema</label><input class="fc" id="cfg-whats-link" placeholder="https://ebdayrtonsenna1.vercel.app"></div>
+        <div class="fg" style="margin:0"><label class="fl">💬 Texto da mensagem</label><textarea class="fc" id="cfg-whats-msg" rows="8" placeholder="Olá, {nome}!..."></textarea></div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-ou btn-sm" onclick="previewMsgWhats()" style="flex:1">👁 Pré-visualizar</button>
+          <button class="btn btn-gold btn-sm" onclick="salvarConfigWhats()" style="flex:1">✓ Salvar</button>
+        </div>
+      </div>
 
       <!-- REGRAS DO RANKING -->
       <div class="card" style="margin-bottom:12px">
@@ -2340,6 +2405,13 @@ async function alterarModo(modo) {
   if (!papeisReais.includes(modo)) return;
   _modoAtual = modo;
 
+  // Gerenciar classe modo-aluno IMEDIATAMENTE
+  if (modo === 'aluno') {
+    document.body.classList.add('modo-aluno');
+  } else {
+    document.body.classList.remove('modo-aluno');
+  }
+
   // Salvar preferência na sessão
   try { sessionStorage.setItem('_modoEBD', modo); } catch(e) {}
 
@@ -2357,7 +2429,7 @@ async function alterarModo(modo) {
     setTimeout(function(){ banner.classList.remove('show'); }, 2500);
   }
 
-  // Reconstruir nav e recarregar app no novo modo — vai para tela inicial do modo
+  // Reconstruir nav e recarregar app no novo modo
   construirNav();
   await iniciarApp();
 }
@@ -2412,6 +2484,16 @@ let quizAtual = null;
 let freqPresencas = {}, freqVisitantes = [], isDirty = false, aulaAtualId = null;
 let cacheAlunos = [], cacheAulas = [], chartFreq = null;
 let cfgNomeIgreja = 'Igreja Assembleia de Deus', cfgNomeEBD = 'Escola Bíblica Dominical';
+let cfgEbdDia = 1; // 0=Dom,1=Seg,2=Ter,3=Qua,4=Qui,5=Sex,6=Sab
+let cfgEbdHorario = '19:00';
+let cfgEbdDiaNome = 'Segunda';
+let cfgWhatsNumero = '';
+let cfgTrimestreNome = '2º Trimestre 2026';
+let cfgTrimestreInicio = '2026-04-01';
+let cfgTrimestrefim = '2026-06-30';
+let cfgBoasVindasAtivo = true;
+let cfgBoasVindasMsg = 'Bem-vindo à EBD! Que Deus abençoe seu estudo da Palavra. ✦';
+let cfgVersiculo = '';
 var _lbAberta = {}; // estado de leitura bíblica expandida por lição
 const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos', todas:'Todas as turmas' };
 const AVC = { criancas:'av-c', jovens:'av-j', adultos:'av-a' };
@@ -2435,14 +2517,34 @@ function mostrarTela(id) {
 
 async function carregarConfigs() {
   try {
-    const nome = await sbGetConfig('nome_igreja');
-    const ebd = await sbGetConfig('nome_ebd');
+    const [nome, ebd, dia, hor, whats, trim, tini, tfim, bvAtivo, bvMsg, vers] = await Promise.all([
+      sbGetConfig('nome_igreja'), sbGetConfig('nome_ebd'),
+      sbGetConfig('ebd_dia_semana'), sbGetConfig('ebd_horario'),
+      sbGetConfig('ebd_whats_numero'),
+      sbGetConfig('trimestre_nome'), sbGetConfig('trimestre_inicio'), sbGetConfig('trimestre_fim'),
+      sbGetConfig('boas_vindas_ativo'), sbGetConfig('boas_vindas_msg'),
+      sbGetConfig('versículo_semestre')
+    ]);
     if (nome) cfgNomeIgreja = nome;
     if (ebd) cfgNomeEBD = ebd;
+    if (whats) cfgWhatsNumero = whats;
+    if (trim) cfgTrimestreNome = trim;
+    if (tini) cfgTrimestreInicio = tini;
+    if (tfim) cfgTrimestrefim = tfim;
+    if (bvMsg) cfgBoasVindasMsg = bvMsg;
+    if (vers) cfgVersiculo = vers;
+    cfgBoasVindasAtivo = bvAtivo !== 'false';
+    // Dia e horário da EBD
+    const diasMap = {'domingo':0,'segunda':1,'terca':2,'quarta':3,'quinta':4,'sexta':5,'sabado':6};
+    const diasNome = {'domingo':'Domingo','segunda':'Segunda','terca':'Terça','quarta':'Quarta','quinta':'Quinta','sexta':'Sexta','sabado':'Sábado'};
+    if (dia && diasMap[dia] !== undefined) {
+      cfgEbdDia = diasMap[dia];
+      cfgEbdDiaNome = diasNome[dia] || dia;
+    }
+    if (hor) cfgEbdHorario = hor;
     const el = document.getElementById('l-nome-igreja');
     if (el) el.textContent = cfgNomeIgreja;
   } catch(e) {}
-  // Carregar regras do ranking em background
   carregarRegraRanking().catch(() => {});
   carregarLiberacoes().catch(() => {});
 }
@@ -2512,13 +2614,14 @@ async function doLogin() {
       if (!ehResp) {
         ehResp = await _verificarResponsavel(a.id);
         if (ehResp) {
-          // Atualizar coluna para futuras sessões (sem bloquear o login)
           sbClient.from('alunos').update({ eh_responsavel: true }).eq('id', a.id).then(()=>{}).catch(()=>{});
         }
       }
       USER = ehResp
         ? { ...a, perfil: 'responsavel' }
         : { ...a, perfil: 'aluno' };
+      // Aplicar modo-aluno IMEDIATAMENTE — antes de qualquer await
+      if (!ehResp) document.body.classList.add('modo-aluno');
       btn.disabled=false; btn.textContent='Entrar';
       await finalizarLogin(); return;
     }
@@ -2541,6 +2644,7 @@ function construirNav() {
   // MODO ALUNO: apenas itens do aluno, independente do perfil real
   if (p === 'aluno' || modo === 'aluno') {
     const turmaAluno = USER.turma_aluno || USER.turma || 'adultos';
+    items.push({id:'dash',label:'Início'});
     items.push({id:'pg-aluno',label:'Progresso'});
     items.push({id:'licoes',label:'Lições'});
     items.push({id:'provas',label:'Provas'});
@@ -2577,7 +2681,7 @@ function construirNav() {
       return '<button class="tb-btn' + (isFirst ? ' on' : '') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
     }).join('');
   }
-  const activeId = (p === 'aluno' || modo === 'aluno') ? 'pg-aluno' : p === 'responsavel' ? 'responsavel' : 'dash';
+  const activeId = (p === 'aluno' || modo === 'aluno') ? 'dash' : p === 'responsavel' ? 'responsavel' : 'dash';
   syncDrawerNav(items, activeId);
 }
 async function finalizarLogin() {
@@ -2666,6 +2770,7 @@ function doLogout() {
   USER = null; PERFIL = null; freqPresencas = {}; freqVisitantes = []; isDirty = false;
   cacheAlunos = []; cacheAulas = []; _respFilhoAtual = null;
   _modoAtual = null;
+  document.body.classList.remove('modo-aluno');
   try { sessionStorage.removeItem('_modoEBD'); } catch(e) {}
   if (chartFreq) { chartFreq.destroy(); chartFreq = null; }
   if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null; }
@@ -2678,28 +2783,9 @@ function doLogout() {
 
 // ── INIT APP ──
 async function iniciarApp() {
-  // ── VERIFICAÇÃO IMEDIATA: se for aluno, vai direto para tela do aluno ──
+  // ── Remover modo-aluno — todos usam pg-dash como tela inicial ──
+  document.body.classList.remove('modo-aluno');
   const _ehPerfilAluno = USER.perfil === 'aluno' || _modoAtual === 'aluno';
-  if (_ehPerfilAluno) {
-    // Esconder TODAS as páginas, mostrar só pg-pg-aluno
-    document.querySelectorAll('.page').forEach(function(p) { p.classList.remove('on'); });
-    const pgAluno = document.getElementById('pg-pg-aluno');
-    if (pgAluno) pgAluno.classList.add('on');
-    // Ocultar elementos de admin/prof
-    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes'].forEach(function(id){
-      const el = document.getElementById(id); if(el) el.style.display='none';
-    });
-    preencherFormPerfil();
-    await carregarConfigs();
-    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
-    const _turmaOriginalA = USER.turma;
-    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = USER.turma_aluno;
-    registrarAcesso();
-    await renderAlunoProgresso();
-    if (_modoAtual === 'aluno' && USER.turma_aluno) USER.turma = _turmaOriginalA;
-    setTimeout(mostrarAvisosPopup, 1200);
-    return;
-  }
 
   // Topbar
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
@@ -2848,6 +2934,24 @@ async function iniciarApp() {
   // Sincronizar banco de questões com memória (sem bloquear)
   sincronizarBancoComMemoria();
 
+  if (_ehPerfilAluno) {
+    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
+    const turmaAl = USER.turma_aluno || USER.turma;
+    registrarAcesso();
+
+    // 1. Pré-carregar TODOS os dados antes de mostrar qualquer tela
+    if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+    if (!cacheAulas.length) cacheAulas = await sbGet('aulas',{},'data',false);
+    await carregarDesafios();
+    await carregarProvas();
+
+    // 2. SÓ AGORA mostrar a tela — já com dados prontos, sem piscar
+    await _navTo('dash');
+    await renderDash();
+    setTimeout(mostrarAvisosPopup, 1200);
+    return;
+  }
+
   renderDash(); renderAlunos(); renderHist(); carregarAulaExistente(); renderFreq();
   popularDropdownLicao(curTurmaFreq);
   registrarAcesso();
@@ -2855,9 +2959,9 @@ async function iniciarApp() {
   popularFiltroLicao();
   initSessionTimeout();
   injetarTutorialOverlay();
-  if (USER.perfil !== 'aluno') setTimeout(mostrarTutorial, 1200);
+  setTimeout(mostrarTutorial, 1200);
   const fab = document.getElementById('feedback-fab');
-  if (fab) fab.style.display = USER.perfil !== 'aluno' ? 'flex' : 'none';
+  if (fab) fab.style.display = 'flex';
   // Navegar para o dashboard — sempre ao final, com await
   await _navTo('dash');
 }
@@ -2903,15 +3007,26 @@ async function _navTo(id) {
   document.getElementById('main-content').scrollTop = 0;
 
   if (id === 'dash') {
-    if (isProfessor() && !isAdmin()) {
-      const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
-      const arrays = await Promise.all(profTs.map(function(t){ return sbGet('alunos',{turma:t}); }));
-      cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
+    const ehAlunoNav = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
+    if (ehAlunoNav) {
+      // Aluno: renderizar com cache existente — sem await, sem piscar
+      renderDash();
+      // Atualizar desafios/provas em background silencioso
+      const turmaAl = USER.turma_aluno || USER.turma;
+      Promise.all([carregarDesafios(), carregarProvas()]).then(() => {
+        renderProvasNotifAluno(turmaAl, true).catch(()=>{});
+      }).catch(()=>{});
     } else {
-      cacheAlunos = await sbGet('alunos');
+      if (isProfessor() && !isAdmin()) {
+        const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
+        const arrays = await Promise.all(profTs.map(function(t){ return sbGet('alunos',{turma:t}); }));
+        cacheAlunos = arrays.reduce(function(a,b){ return a.concat(b); },[]);
+      } else {
+        cacheAlunos = await sbGet('alunos');
+      }
+      cacheAulas = await sbGet('aulas',{},'data',false);
+      renderDash();
     }
-    cacheAulas = await sbGet('aulas',{},'data',false);
-    renderDash();
   }
   else if (id === 'mural') renderMural();
   else if (id === 'alunos') {
@@ -2992,17 +3107,46 @@ function marcarDirty() { isDirty = true; document.getElementById('unsaved-banner
 
 // ── DASHBOARD ──
 async function renderDash() {
+  const ehAluno = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
+  const turmaAluno = ehAluno ? (USER.turma_aluno || USER.turma) : null;
+
+  // Para aluno: dados já pré-carregados no login — renderizar direto sem await
+  if (ehAluno) {
+    // Ocultar elementos exclusivos de admin/prof
+    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes',
+     'dash-aprovacao-notif','dash-contestacoes-notif','dash-chart-card'].forEach(function(id){
+      const el = document.getElementById(id); if(el) el.style.display='none';
+    });
+    // Notificações já carregadas — exibir imediatamente
+    renderProvasNotifAluno(turmaAluno, true).catch(()=>{});
+    renderMuralDash();
+    iniciarCountdown();
+    carregarChavePix();
+  }
+
   const alunos = cacheAlunos;
   let aulas = cacheAulas;
-  if (isProfessor() && !isAdmin()) {
+  if (isProfessor() && !isAdmin() && !ehAluno) {
     const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
     aulas = aulas.filter(function(a){ return profTs.includes(a.turma); });
   }
-  document.getElementById('ds-total').textContent = alunos.filter(a => (a.status||'ativo') === 'ativo').length;
-  document.getElementById('ds-aulas').textContent = aulas.length;
-  document.getElementById('ds-cri').textContent = alunos.filter(a => a.turma==='criancas'&&(a.status||'ativo')==='ativo').length + ' ativos';
-  document.getElementById('ds-jov').textContent = alunos.filter(a => a.turma==='jovens'&&(a.status||'ativo')==='ativo').length + ' ativos';
-  document.getElementById('ds-adu').textContent = alunos.filter(a => a.turma==='adultos'&&(a.status||'ativo')==='ativo').length + ' ativos';
+  if (ehAluno && turmaAluno) {
+    aulas = aulas.filter(function(a){ return a.turma === turmaAluno; });
+  }
+  // Stats — para aluno mostrar só da turma dele
+  if (ehAluno) {
+    const alunosTurma = alunos.filter(a => a.turma===turmaAluno && (a.status||'ativo')==='ativo');
+    document.getElementById('ds-total').textContent = alunosTurma.length;
+    document.getElementById('ds-aulas').textContent = aulas.length;
+    // Esconder card de alunos por turma e mostrar só o da turma do aluno
+    const turmaCard = document.querySelector('.card .ct');
+  } else {
+    document.getElementById('ds-total').textContent = alunos.filter(a => (a.status||'ativo') === 'ativo').length;
+    document.getElementById('ds-aulas').textContent = aulas.length;
+    document.getElementById('ds-cri').textContent = alunos.filter(a => a.turma==='criancas'&&(a.status||'ativo')==='ativo').length + ' ativos';
+    document.getElementById('ds-jov').textContent = alunos.filter(a => a.turma==='jovens'&&(a.status||'ativo')==='ativo').length + ' ativos';
+    document.getElementById('ds-adu').textContent = alunos.filter(a => a.turma==='adultos'&&(a.status||'ativo')==='ativo').length + ' ativos';
+  }
 
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   const primeiroNome = nomeExib || USER.nome.split(' ')[0] || 'Olá';
@@ -3074,10 +3218,13 @@ async function renderDash() {
   renderGraficoComparativoTurmas(alunos, aulas);
   renderMuralDash();
   iniciarCountdown();
-  renderProvasNotifDash();
-  renderContestacoesDashNotif();
-  renderAprovacaoNotifDash();
-  renderAvisoProvasVencendo();
+  // Para aluno: renderProvasNotifAluno já foi chamado antes — não sobrescrever
+  if (!ehAluno) {
+    renderProvasNotifDash();
+    renderContestacoesDashNotif();
+    renderAprovacaoNotifDash();
+    renderAvisoProvasVencendo();
+  }
 }
 
 async function renderMeta(ultima) {
@@ -3094,14 +3241,39 @@ async function renderMeta(ultima) {
 
 async function renderMuralDash() {
   const avisos = await sbGet('avisos', {}, 'created_at', false);
-  const fixados = avisos.filter(a => a.fixado).slice(0, 2);
   const box = document.getElementById('dash-mural');
-  if (!fixados.length) { box.innerHTML = ''; return; }
-  box.innerHTML = `<div style="margin-bottom:12px">${fixados.map(a => `
-    <div class="aviso-item fixado" onclick="navTo('mural')">
-      <div class="aviso-titulo">📌 ${a.titulo}</div>
-      <div class="aviso-corpo" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">${a.conteudo}</div>
-    </div>`).join('')}</div>`;
+  if (!box) return;
+  const agora = _agora();
+  const ehAluno = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
+  const turmaAluno = ehAluno ? (USER.turma_aluno || USER.turma) : null;
+  const tipoConfig = {
+    info:      { icon:'📢', cor:'#1c3f6e', bg:'#f0f5ff', borda:'#b8d0f5' },
+    importante:{ icon:'⚠️', cor:'#7a2000', bg:'#fff5f0', borda:'#f5b8a0' },
+    evento:    { icon:'🎉', cor:'#1a6b4a', bg:'#f0fff5', borda:'#b8f5c8' },
+    mudanca:   { icon:'📅', cor:'#5c4000', bg:'#fffbf0', borda:'#f5e4a0' },
+    oracao:    { icon:'🙏', cor:'#4a1a6b', bg:'#faf0ff', borda:'#d8b8f5' }
+  };
+  const visiveis = avisos.filter(a => {
+    // Verificar expiração
+    if (a.expira_em && new Date(a.expira_em) < agora) return false;
+    if (!a.expira_em && a.data_evento && a.data_evento < _hojeStr() && !a.fixado) return false;
+    // Filtrar por turma
+    if (a.turma && a.turma !== 'todas' && turmaAluno && a.turma !== turmaAluno) return false;
+    return true;
+  }).slice(0, 3);
+  if (!visiveis.length) { box.innerHTML = ''; return; }
+  box.innerHTML = '<div style="margin-bottom:12px">' + visiveis.map(a => {
+    const tc = tipoConfig[a.tipo] || tipoConfig.info;
+    const urgente = a.urgente;
+    return `<div class="aviso-item${a.fixado?' fixado':''}" onclick="navTo('mural')" style="border-color:${urgente?'var(--red)':tc.borda};background:${urgente?'#fff5f5':tc.bg};cursor:pointer;margin-bottom:8px">
+      <div class="aviso-titulo" style="color:${urgente?'var(--red)':tc.cor}">
+        ${urgente?'<span style="font-size:10px;background:var(--red);color:white;padding:1px 7px;border-radius:8px;margin-right:5px">🚨 URGENTE</span>':''}
+        ${a.fixado&&!urgente?'<span class="aviso-pin">📌</span>':''}
+        ${tc.icon} ${a.titulo}
+      </div>
+      <div class="aviso-corpo" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:${urgente?'#555':'inherit'}">${a.conteudo}</div>
+    </div>`;
+  }).join('') + '</div>';
 }
 
 function renderAniversariantes(alunos) {
@@ -4308,6 +4480,27 @@ function copiarSQLQuiz() {
 async function carregarPaginaConfig() {
   document.getElementById('cfg-nome-igreja').value = cfgNomeIgreja;
   document.getElementById('cfg-nome-ebd').value = cfgNomeEBD;
+  // WhatsApp credenciais
+  const whatsLink = await sbGetConfig('whats_link') || 'https://ebdayrtonsenna1.vercel.app';
+  const whatsMsg = await sbGetConfig('whats_msg') || '';
+  document.getElementById('cfg-whats-link').value = whatsLink;
+  document.getElementById('cfg-whats-msg').value = whatsMsg;
+  // EBD dia/horário
+  const ebdDia = await sbGetConfig('ebd_dia_semana') || 'segunda';
+  const ebdHor = await sbGetConfig('ebd_horario') || '19:00';
+  document.getElementById('cfg-ebd-dia').value = ebdDia;
+  document.getElementById('cfg-ebd-horario').value = ebdHor;
+  // Trimestre
+  document.getElementById('cfg-trim-nome').value = cfgTrimestreNome;
+  document.getElementById('cfg-trim-inicio').value = cfgTrimestreInicio;
+  document.getElementById('cfg-trim-fim').value = cfgTrimestrefim;
+  // WhatsApp número
+  document.getElementById('cfg-whats-numero').value = cfgWhatsNumero;
+  // Versículo
+  document.getElementById('cfg-versiculo').value = cfgVersiculo;
+  // Boas-vindas
+  document.getElementById('cfg-bv-ativo').checked = cfgBoasVindasAtivo;
+  document.getElementById('cfg-bv-msg').value = cfgBoasVindasMsg;
   const metas = await sbGet('metas');
   ['criancas','jovens','adultos'].forEach(t => {
     const m = metas.find(x=>x.turma===t);
@@ -5648,22 +5841,18 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
   } catch(e) { /* tabela ainda não existe — silencioso */ }
 }
 
-async function renderAlunoProgresso() {
-  // ─── Tela correta imediatamente ───
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
-  const pgAl = document.getElementById('pg-pg-aluno');
-  if (pgAl) pgAl.classList.add('on');
+// Cache dos dados do aluno — evita re-fetch ao navegar entre abas
+let _cacheAlunoProgresso = null;
 
+async function renderAlunoProgresso() {
   // ─── Turma e ID do aluno ───
   let turmaAluno, idAluno;
   if (USER.perfil === 'aluno') {
     turmaAluno = USER.turma || 'adultos';
     idAluno = USER.id;
   } else {
-    // Admin/Prof em modo aluno
     turmaAluno = USER.turma_aluno || USER.turma || 'adultos';
     idAluno = USER._aluno_id || USER.id;
-    // Buscar id real se não tiver
     if (!USER._aluno_id) {
       try {
         const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
@@ -5672,34 +5861,69 @@ async function renderAlunoProgresso() {
     }
   }
 
-  // ─── Carregar dados ───
-  await carregarQuizScoresDoAluno(idAluno, turmaAluno);
-  await carregarProvas();
-  await carregarDesafios();
+  // ─── Mostrar pg-pg-aluno imediatamente ───
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('on'));
+  const pgAl = document.getElementById('pg-pg-aluno');
+  if (pgAl) pgAl.classList.add('on');
 
+  // ─── Se tem cache, renderiza AGORA sem await e atualiza silenciosamente ───
+  if (_cacheAlunoProgresso && _cacheAlunoProgresso.idAluno === idAluno) {
+    _renderAlunoProgressoComDados(_cacheAlunoProgresso);
+    // Atualizar cache em background sem piscar
+    _carregarDadosAlunoProgresso(idAluno, turmaAluno).then(dados => {
+      _cacheAlunoProgresso = dados;
+    }).catch(()=>{});
+    return;
+  }
+
+  // ─── Primeira vez: carregar tudo em paralelo ───
+  const dados = await _carregarDadosAlunoProgresso(idAluno, turmaAluno);
+  _cacheAlunoProgresso = dados;
+  _renderAlunoProgressoComDados(dados);
+  return;
+}
+
+async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
+  await Promise.all([
+    carregarQuizScoresDoAluno(idAluno, turmaAluno),
+    carregarProvas(),
+    carregarDesafios(),
+    carregarDesafioPontos()
+  ]);
   let aulasAluno = [];
   try {
     const { data } = await sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false });
     aulasAluno = data || [];
   } catch(e) {}
+  return { idAluno, turmaAluno, aulasAluno,
+    quizScoresSnap: {...quizScores},
+    provasSnap: [...(PROVAS||[])],
+    desafioSnap: [..._desafioPontos] };
+}
 
-  // ─── Preencher tela ───
+async function _renderAlunoProgressoComDados(dados) {
+  const { idAluno, turmaAluno, aulasAluno, quizScoresSnap, provasSnap, desafioSnap } = dados;
+  // Aplicar snapshots
+  Object.assign(quizScores, quizScoresSnap);
+
+  // ─── Preencher hero IMEDIATAMENTE — sem await ───
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
-  document.getElementById('aluno-saud').textContent = `Olá, ${nome}! ✦`;
-  document.getElementById('aluno-turma-txt').textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
-  carregarChavePix();
+  const h = new Date().getHours();
+  const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
+  const elSaud = document.getElementById('aluno-saud');
+  const elTurma = document.getElementById('aluno-turma-txt');
+  const heroLabel = document.getElementById('aluno-hero-label');
+  if (elSaud) elSaud.textContent = `${saud}, ${nome}! ✦`;
+  if (elTurma) elTurma.textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
+
 
   // ─── Calcular pontos e estatísticas ───
-  await carregarDesafioPontos();
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
   const quizzesFeitos  = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
   const provasFeitas   = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
   const desafiosFeitos = _desafioPontos.filter(d => d.aluno_id === idAluno).length;
   const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
   const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
-
-  // ─── Notificações (desafios já carregados) ───
-  renderProvasNotifAluno(turmaAluno, true).catch(e => console.warn('notif erro:', e));
 
   // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
@@ -5799,8 +6023,10 @@ async function renderAlunoProgresso() {
     if (statsEl) statsEl.after(certBtn);
   }
 
-  // Ranking do aluno + ranking da turma
-  await renderRankingAluno(aulasAluno, idAluno, turmaAluno);
+
+
+  // Ranking carrega em background sem bloquear a exibição
+  renderRankingAluno(aulasAluno, idAluno, turmaAluno).catch(()=>{});
 }
 
 // ══════════════════════════════════════════════
@@ -7568,7 +7794,6 @@ window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferr
 function renderCountdown() {
   let box = document.getElementById('dash-countdown');
   if (!box) {
-    // Create it dynamically if missing
     const main = document.getElementById('main-content');
     if (!main) return;
     box = document.createElement('div');
@@ -7576,25 +7801,26 @@ function renderCountdown() {
     main.prepend(box);
   }
   const agora = new Date();
-  const diaSemana = agora.getDay(); // 0=Dom, 1=Seg
-  // Dias até a próxima segunda (1)
-  let diasAte = (1 - diaSemana + 7) % 7;
+  const diaSemana = agora.getDay();
+  const diaAlvo = typeof cfgEbdDia !== 'undefined' ? cfgEbdDia : 1;
+  const horStr = typeof cfgEbdHorario !== 'undefined' ? cfgEbdHorario : '19:00';
+  const [horH, horM] = horStr.split(':').map(Number);
+  let diasAte = (diaAlvo - diaSemana + 7) % 7;
   if (diasAte === 0) {
-    // É segunda — já passou das 19h?
-    if (agora.getHours() >= 19) diasAte = 7; // próxima semana
+    if (agora.getHours() > horH || (agora.getHours() === horH && agora.getMinutes() >= horM)) diasAte = 7;
   }
-  if (diasAte === 0) diasAte = 0; // ainda hoje antes das 19h
   const proximo = new Date(agora);
   proximo.setDate(agora.getDate() + diasAte);
-  proximo.setHours(19, 0, 0, 0);
+  proximo.setHours(horH, horM, 0, 0);
   const diff = proximo - agora;
   if (diff <= 0) { box.innerHTML = ''; return; }
   const dias = Math.floor(diff / 86400000);
   const horas = Math.floor((diff % 86400000) / 3600000);
   const mins = Math.floor((diff % 3600000) / 60000);
   const secs = Math.floor((diff % 60000) / 1000);
+  const diaNome = typeof cfgEbdDiaNome !== 'undefined' ? cfgEbdDiaNome : 'Segunda';
   box.innerHTML = `<div class="countdown-box">
-    <div class="countdown-label">✦ Próxima EBD — Segunda às 19h</div>
+    <div class="countdown-label">✦ Próxima EBD — ${diaNome} às ${horStr.replace(':','h')}</div>
     <div class="countdown-nums">
       <div class="cd-unit"><span class="cd-num">${String(dias).padStart(2,'0')}</span><span class="cd-label">dias</span></div>
       <div class="cd-sep">:</div>
@@ -7638,17 +7864,24 @@ async function renderContestacoesDashNotif() {
 async function renderProvasNotifDash() {
   const box = document.getElementById('dash-provas-notif');
   if (!box) return;
+  // Para aluno: usar renderProvasNotifAluno em vez desta
+  const ehAluno = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
+  if (ehAluno) {
+    const turmaAl = USER.turma_aluno || USER.turma;
+    await renderProvasNotifAluno(turmaAl, false);
+    return;
+  }
   try {
     const { data } = await sbClient.from('provas').select('*').eq('liberada', true);
     const hoje = _hojeStr();
     const turmaUsuario = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
-    const ehAluno = USER.perfil === 'aluno' || _modo('aluno');
+    const ehAlunoLocal = USER.perfil === 'aluno' || _modo('aluno');
 
     const ativas = (data||[]).filter(p => {
       if (p.tipo === 'desafio') return false;
       if (!_dentroJanela(p)) return false;
       // Para aluno: filtrar pela turma dele
-      if (ehAluno && p.turma !== turmaUsuario) return false;
+      if (ehAlunoLocal && p.turma !== turmaUsuario) return false;
       return true;
     });
 
@@ -7666,10 +7899,12 @@ async function renderProvasNotifDash() {
 }
 
 async function renderProvasNotifAluno(turmaArg, jaCarregouDesafios) {
-  const box = document.getElementById('aluno-provas-notif');
-  if (!box) return;
+  const boxDash = document.getElementById('dash-provas-notif');
+  const boxAluno = document.getElementById('aluno-provas-notif');
+  // Limpar ambos com segurança
+  if (boxDash) boxDash.innerHTML = '';
+  if (boxAluno) boxAluno.innerHTML = '';
   let html = '';
-  box.innerHTML = '';
   try {
     // Recarregar só se necessário
     if (!jaCarregouDesafios) await carregarDesafios();
@@ -7782,7 +8017,9 @@ async function renderProvasNotifAluno(turmaArg, jaCarregouDesafios) {
   } catch(e) {
     console.warn('renderProvasNotifAluno erro:', e);
   }
-  box.innerHTML = html;
+  // Escrever nas duas áreas — dash e pg-aluno
+  if (boxDash) boxDash.innerHTML = html;
+  if (boxAluno) boxAluno.innerHTML = html;
 }
 // ══════════════════════════════════════════════
 // LIBERAÇÕES ESPECIAIS DE QUIZ
@@ -12116,22 +12353,90 @@ function fecharAvisosPopup() {
 // ══════════════════════════════════════════════
 // WHATSAPP CREDENCIAIS
 // ══════════════════════════════════════════════
-function enviarCredenciaisWhatsapp(nome, tel, login, senha, turma) {
-  if (!tel) { toast('Aluno sem telefone', 'er'); return; }
-  var turmaLabel = TN[turma] || turma;
-  var msg = [
-    'Ola, ' + nome + '!',
-    '',
-    'Seu acesso ao EBD Frequencia foi criado!',
-    '',
-    'Link: https://rtonsenna1.vercel.app',
-    '',
-    'Login: ' + login,
-    'Senha: ' + senha,
-    'Turma: ' + turmaLabel,
-    '',
-    'ADTC Ayrton Senna 1'
-  ].join('\n');
+async function salvarCfgEbd() {
+  const dia = document.getElementById('cfg-ebd-dia').value;
+  const hor = document.getElementById('cfg-ebd-horario').value;
+  if (!hor) { toast('Informe o horário', 'er'); return; }
+  await Promise.all([sbSetConfig('ebd_dia_semana', dia), sbSetConfig('ebd_horario', hor)]);
+  await carregarConfigs();
+  iniciarCountdown();
+  toast('✦ Dia e horário da EBD salvos!', 'ok');
+}
+
+async function salvarCfgTrimestre() {
+  const nome = document.getElementById('cfg-trim-nome').value.trim();
+  const ini = document.getElementById('cfg-trim-inicio').value;
+  const fim = document.getElementById('cfg-trim-fim').value;
+  if (!nome) { toast('Informe o nome do trimestre', 'er'); return; }
+  await Promise.all([
+    sbSetConfig('trimestre_nome', nome),
+    sbSetConfig('trimestre_inicio', ini),
+    sbSetConfig('trimestre_fim', fim)
+  ]);
+  cfgTrimestreNome = nome; cfgTrimestreInicio = ini; cfgTrimestrefim = fim;
+  toast('✦ Trimestre salvo!', 'ok');
+}
+
+async function salvarCfgWhatsNumero() {
+  const num = document.getElementById('cfg-whats-numero').value.replace(/\D/g,'');
+  await sbSetConfig('ebd_whats_numero', num);
+  cfgWhatsNumero = num;
+  toast('✦ Número do WhatsApp salvo!', 'ok');
+}
+
+async function salvarCfgVersiculo() {
+  const v = document.getElementById('cfg-versiculo').value.trim();
+  await sbSetConfig('versículo_semestre', v);
+  cfgVersiculo = v;
+  toast('✦ Versículo salvo!', 'ok');
+}
+
+async function salvarCfgBoasVindas() {
+  const ativo = document.getElementById('cfg-bv-ativo').checked;
+  const msg = document.getElementById('cfg-bv-msg').value.trim();
+  await Promise.all([
+    sbSetConfig('boas_vindas_ativo', String(ativo)),
+    sbSetConfig('boas_vindas_msg', msg)
+  ]);
+  cfgBoasVindasAtivo = ativo; cfgBoasVindasMsg = msg;
+  toast('✦ Boas-vindas salvo!', 'ok');
+}
+
+async function salvarConfigWhats() {
+  const link = document.getElementById('cfg-whats-link').value.trim();
+  const msg = document.getElementById('cfg-whats-msg').value.trim();
+  if (!link || !msg) { toast('Preencha link e mensagem', 'er'); return; }
+  await sbSetConfig('whats_link', link);
+  await sbSetConfig('whats_msg', msg);
+  toast('✦ Configuração do WhatsApp salva!', 'ok');
+}
+
+function previewMsgWhats() {
+  const msg = document.getElementById('cfg-whats-msg').value;
+  const link = document.getElementById('cfg-whats-link').value;
+  const preview = msg
+    .replace(/{nome}/g, 'João da Silva')
+    .replace(/{login}/g, 'joaosilva')
+    .replace(/{senha}/g, '1234')
+    .replace(/{turma}/g, 'Crianças')
+    .replace(/{link}/g, link);
+  alert('📱 Prévia da mensagem:\n\n' + preview);
+}
+
+async function _getMsgWhats(nome, login, senha, turma) {
+  const link = await sbGetConfig('whats_link') || 'https://ebdayrtonsenna1.vercel.app';
+  const tmpl = await sbGetConfig('whats_msg') || 'Olá, {nome}!\n\nSeu acesso ao EBD Frequência foi criado!\n\n🔗 Link: {link}\n\n👤 Login: {login}\n🔒 Senha: {senha}\n📚 Turma: {turma}\n\nADTC Ayrton Senna 1';
+  return tmpl
+    .replace(/{nome}/g, nome)
+    .replace(/{login}/g, login)
+    .replace(/{senha}/g, senha)
+    .replace(/{turma}/g, TN[turma] || turma)
+    .replace(/{link}/g, link);
+}
+
+async function enviarCredenciaisWhatsapp(nome, tel, login, senha, turma) {
+  if (!tel) { toast('Aluno sem telefone cadastrado', 'er'); return; }
+  const msg = await _getMsgWhats(nome, login, senha, turma);
   var telLimpo = tel.replace(/\D/g, '');
   var telFull = telLimpo.startsWith('55') ? telLimpo : '55' + telLimpo;
   window.open('https://wa.me/' + telFull + '?text=' + encodeURIComponent(msg), '_blank');
