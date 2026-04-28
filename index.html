@@ -13608,18 +13608,16 @@ window.addEventListener('appinstalled', function() {
 function mostrarModalPWA() {
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone) return;
-  if (localStorage.getItem('pwa-instalou') === '1') return;
 
   const modal = document.getElementById('pwa-modal');
   if (!modal) return;
-
-  // Forçar exibição
   modal.setAttribute('style', 'display:flex!important;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px');
 
   const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const btn = document.getElementById('pwa-btn-instalar');
   const hint = document.getElementById('pwa-ios-hint');
-  const btnFechar = document.getElementById('pwa-btn-fechar');
+
+  // iOS: instrução manual | Outros: botão instalar
   if (isIOS) {
     if (btn) btn.style.display = 'none';
     if (hint) hint.style.display = 'block';
@@ -13627,10 +13625,12 @@ function mostrarModalPWA() {
     if (btn) btn.style.display = 'block';
     if (hint) hint.style.display = 'none';
   }
-  // No login: "Agora não" | Após login: "Já fiz a instalação"
-  const appTela = document.getElementById('scr-app');
-  const noLogin = !appTela || appTela.style.display === 'none' || appTela.style.display === '';
-  if (btnFechar) btnFechar.textContent = noLogin ? 'Agora não' : '✓ Já fiz a instalação';
+}
+
+function pwaBtnJaInstalei() {
+  localStorage.setItem('pwa-instalou', '1');
+  fecharModalPWA();
+  toast('✦ Perfeito! Acesse pelo ícone na tela inicial.', 'ok');
 }
 
 function fecharModalPWA() {
@@ -13764,16 +13764,17 @@ if ('serviceWorker' in navigator) {
             <span style="font-size:17px">📶</span><span style="font-size:12px;color:rgba(255,255,255,.65)">Funciona mesmo sem internet</span>
           </div>
         </div>
-        <button id="pwa-btn-instalar" onclick="acaoInstalarPWA()" style="width:100%;background:#c6a664;color:#111008;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:9px">
+        <button id="pwa-btn-instalar" onclick="acaoInstalarPWA()" style="width:100%;background:#c6a664;color:#111008;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px">
           📲 Instalar agora
         </button>
-        <div id="pwa-ios-hint" style="display:none;background:rgba(198,166,100,.08);border:1px solid rgba(198,166,100,.2);border-radius:10px;padding:10px 12px;margin-bottom:9px;text-align:center">
+        <div id="pwa-ios-hint" style="display:none;background:rgba(198,166,100,.08);border:1px solid rgba(198,166,100,.2);border-radius:10px;padding:10px 12px;margin-bottom:8px;text-align:center">
           <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.7">
             No iPhone toque em <strong style="color:#c6a664">⬆️ Compartilhar</strong> e depois<br>
             <strong style="color:#c6a664">Adicionar à Tela de Início</strong>
           </div>
         </div>
-        <button id="pwa-btn-fechar" onclick="pwaBtnFecharClick()" style="width:100%;background:rgba(255,255,255,.04);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px;font-size:12px;cursor:pointer">Agora não</button>
+        <button id="pwa-btn-ja-instalei" onclick="pwaBtnJaInstalei()" style="width:100%;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px;font-size:12px;cursor:pointer;margin-bottom:8px">✓ Já fiz a instalação</button>
+        <button id="pwa-btn-fechar" onclick="fecharModalPWA()" style="width:100%;background:transparent;color:rgba(255,255,255,.25);border:none;border-radius:12px;padding:8px;font-size:11px;cursor:pointer">Agora não</button>
       </div>
     </div>
   </div>
