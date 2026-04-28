@@ -4417,10 +4417,22 @@ async function renderRanking() {
     return;
   }
 
-  // Carregar quizzes de todos os alunos do banco
-  await carregarQuizScoresTodos();
-  await carregarProvas();
-  await carregarDesafioPontos();
+  // Carregar quizzes, provas, desafios e bônus juntos
+  await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
+
+  // Buscar bônus manuais da turma
+  let bonusTurma = [];
+  try {
+    const { data: bData } = await sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank);
+    bonusTurma = bData || [];
+  } catch(e) {}
+
+  // Função auxiliar: calcular bônus de um aluno
+  function _bonusDoAluno(alunoId) {
+    return bonusTurma
+      .filter(b => !b.aluno_ids || b.aluno_ids.includes(alunoId))
+      .reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
+  }
 
   let ranking;
 
@@ -4428,16 +4440,18 @@ async function renderRanking() {
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
+      const bonus = _bonusDoAluno(a.id);
+      const totalPts = (ptsBase.total||0) + bonus;
       const presTotal = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
-      const pctBar = Math.min(Math.round((pts.total / maxPts) * 100), 100);
+      const pctBar = Math.min(Math.round((totalPts / maxPts) * 100), 100);
       const pctFreq = aulasT.length ? Math.round((presTotal / aulasT.length) * 100) : 0;
-      return { aluno: a, valor: pts.total, presencas: presTotal, pct: pctFreq, label: pts.total + ' pts', pctBar, idade: _idadeParaDesempate(a.nasc) };
+      return { aluno: a, valor: totalPts, presencas: presTotal, pct: pctFreq, label: totalPts + ' pts', pctBar, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
       if (b.presencas !== a.presencas) return b.presencas - a.presencas;
       if (b.pct !== a.pct) return b.pct - a.pct;
-      return a.idade - b.idade; // timestamp menor = mais velho = frente
+      return a.idade - b.idade;
     });
   } else {
     if (!aulasT.length) {
@@ -4448,8 +4462,10 @@ async function renderRanking() {
       const presencas = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
-      return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: pts.total, idade: _idadeParaDesempate(a.nasc) };
+      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
+      const bonus = _bonusDoAluno(a.id);
+      const totalPts = (ptsBase.total||0) + bonus;
+      return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: totalPts, idade: _idadeParaDesempate(a.nasc) };
     }).sort((a, b) => {
       if (b.valor !== a.valor) return b.valor - a.valor;
       if (b.pct !== a.pct) return b.pct - a.pct;
@@ -9453,10 +9469,18 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
       .select('*').eq('turma', turmaUsar);
     const aulas = aulasData || [];
 
-    // Carregar quizzes E provas do banco
-    await carregarQuizScoresTodos();
-    await carregarProvas();
-    await carregarDesafioPontos();
+    // Carregar quizzes, provas, desafios e bônus
+    await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
+
+    // Buscar bônus manuais da turma
+    let bonusTurmaRank = [];
+    try {
+      const { data: bData } = await sbClient.from('bonus_pontos').select('*').eq('turma', turmaUsar);
+      bonusTurmaRank = bData || [];
+    } catch(e) {}
+    const _bonusAluno = (id) => bonusTurmaRank
+      .filter(b => !b.aluno_ids || b.aluno_ids.includes(id))
+      .reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
 
     if (!alunos.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
 
@@ -9465,24 +9489,26 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
       const sc = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
+      const totalPts = (ptsBase.total||0) + _bonusAluno(a.id);
       const idade = _idadeParaDesempate(a.nasc);
-      return { id: a.id, nome: a.nome, pres, pct, pts: pts.total, idade };
+      return { id: a.id, nome: a.nome, pres, pct, pts: totalPts, idade };
     }).sort((a, b) => {
       if (b.pres !== a.pres) return b.pres - a.pres;
       if (b.pct !== a.pct) return b.pct - a.pct;
       if (b.pts !== a.pts) return b.pts - a.pts;
-      return a.idade - b.idade; // timestamp menor = mais velho = frente
+      return a.idade - b.idade;
     });
 
     // Ranking PONTOS: pts → presenças → % → idade (mais velho sobe)
     const rankingGeral = alunos.map(a => {
       const sc = _quizScoresParaAluno(a.id);
-      const pts = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
+      const totalPts = (ptsBase.total||0) + _bonusAluno(a.id);
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
       const idade = _idadeParaDesempate(a.nasc);
-      return { id: a.id, nome: a.nome, pts: pts.total, pres, pct, quizzes: pts.quizzes, provas: pts.provas, idade };
+      return { id: a.id, nome: a.nome, pts: totalPts, pres, pct, quizzes: ptsBase.quizzes, provas: ptsBase.provas, idade };
     }).sort((a, b) => {
       if (b.pts !== a.pts) return b.pts - a.pts;
       if (b.pres !== a.pres) return b.pres - a.pres;
