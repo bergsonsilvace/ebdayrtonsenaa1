@@ -13608,6 +13608,8 @@ window.addEventListener('appinstalled', function() {
 function mostrarModalPWA() {
   if (window.matchMedia('(display-mode: standalone)').matches) return;
   if (window.navigator.standalone) return;
+  // Não mostrar se já instalou E confirmou
+  if (localStorage.getItem('pwa-instalou') === '1') return;
 
   const modal = document.getElementById('pwa-modal');
   if (!modal) return;
@@ -13617,7 +13619,6 @@ function mostrarModalPWA() {
   const btn = document.getElementById('pwa-btn-instalar');
   const hint = document.getElementById('pwa-ios-hint');
 
-  // iOS: instrução manual | Outros: botão instalar
   if (isIOS) {
     if (btn) btn.style.display = 'none';
     if (hint) hint.style.display = 'block';
