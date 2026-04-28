@@ -818,6 +818,9 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div class="lerr" id="lerr">Usuário ou senha incorretos.</div>
     </div>
     <div class="lhint">Professores e alunos — solicite o acesso ao superintendente.</div>
+
+
+
   </div>
 </div>
 
@@ -3048,6 +3051,8 @@ async function iniciarApp() {
   popularDropdownLicao(curTurmaFreq);
   registrarAcesso();
   setTimeout(mostrarAvisosPopup, 1500);
+  // Modal PWA após login
+  setTimeout(mostrarModalPWA, 2500);
   popularFiltroLicao();
   initSessionTimeout();
   injetarTutorialOverlay();
@@ -13552,28 +13557,106 @@ function promoverProf(profId, nomeProf) {
   };
 }
 // ── PWA INSTALL ──
-function instalarApp() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    deferredPrompt.userChoice.then(result => {
-      if (result.outcome === 'accepted') toast('App instalado! ✦', 'ok');
-      deferredPrompt = null;
-      document.getElementById('btn-instalar-app').style.display = 'none';
-    });
+let _pwaPrompt = null;
+
+// Capturar prompt de instalação (Android/Chrome/Edge)
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _pwaPrompt = e;
+});
+
+window.addEventListener('appinstalled', function() {
+  fecharModalPWA();
+  toast('✦ App instalado!', 'ok');
+});
+
+function mostrarModalPWA() {
+  if (window.matchMedia('(display-mode: standalone)').matches) return;
+  if (window.navigator.standalone) return;
+  if (localStorage.getItem('pwa-instalou') === '1') return;
+
+  const modal = document.getElementById('pwa-modal');
+  if (!modal) return;
+
+  // Forçar exibição
+  modal.setAttribute('style', 'display:flex!important;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px');
+
+  const isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  const btn = document.getElementById('pwa-btn-instalar');
+  const hint = document.getElementById('pwa-ios-hint');
+  const btnFechar = document.getElementById('pwa-btn-fechar');
+  if (isIOS) {
+    if (btn) btn.style.display = 'none';
+    if (hint) hint.style.display = 'block';
   } else {
-    toast('Para instalar: use o menu do navegador → "Adicionar à tela inicial"', '');
+    if (btn) btn.style.display = 'block';
+    if (hint) hint.style.display = 'none';
+  }
+  // No login: "Agora não" | Após login: "Já fiz a instalação"
+  const appTela = document.getElementById('scr-app');
+  const noLogin = !appTela || appTela.style.display === 'none' || appTela.style.display === '';
+  if (btnFechar) btnFechar.textContent = noLogin ? 'Agora não' : '✓ Já fiz a instalação';
+}
+
+function fecharModalPWA() {
+  const modal = document.getElementById('pwa-modal');
+  if (modal) modal.style.display = 'none';
+  // "Agora não" — não salva nada, aparece na próxima vez
+}
+
+function fecharModalPWAInstalou() {
+  const modal = document.getElementById('pwa-modal');
+  if (modal) modal.style.display = 'none';
+  // Usuário instalou — não mostrar mais no login
+  localStorage.setItem('pwa-instalou', '1');
+}
+
+function fecharBannerLoginPWA() { fecharModalPWA(); }
+
+function pwaBtnFecharClick() {
+  // No login: "Agora não" — aparece de novo na próxima vez
+  // Após login: "Já fiz a instalação" — não aparece mais no login
+  const noLogin = document.getElementById('scr-login') &&
+    getComputedStyle(document.getElementById('scr-login')).display !== 'none';
+  if (noLogin) fecharModalPWA();
+  else fecharModalPWAInstalou();
+}
+
+async function acaoInstalarPWA() {
+  if (_pwaPrompt) {
+    _pwaPrompt.prompt();
+    const result = await _pwaPrompt.userChoice;
+    if (result.outcome === 'accepted') {
+      toast('✦ App instalado!', 'ok');
+      fecharModalPWAInstalou(); // não aparece mais no login
+    } else {
+      fecharModalPWA(); // recusou — aparece de novo
+    }
+    _pwaPrompt = null;
+  } else {
+    // iOS ou sem prompt — considerar como instalou
+    fecharModalPWAInstalou();
   }
 }
 
-window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
-  const btn = document.getElementById('btn-instalar-app');
-  if (btn) btn.style.display = 'flex';
-});
+function instalarApp() { acaoInstalarPWA(); }
+function _mostrarModalPWADepoisDoLogin() { mostrarModalPWA(); }
 
 // ── START ──
+// Limpar flag antiga se existir (compatibilidade)
+try { localStorage.removeItem('pwa-nao-agora'); } catch(e) {}
+
 initSB();
+
+// Mostrar modal PWA na tela de login
+window.addEventListener('DOMContentLoaded', function() {
+  // Limpar TODAS as flags antigas para garantir exibição
+  localStorage.removeItem('pwa-fechou');
+  localStorage.removeItem('pwa-nao-agora');
+  localStorage.removeItem('pwa-instalou');
+  localStorage.removeItem('pwa-descartado');
+  setTimeout(mostrarModalPWA, 1500);
+});
 </script>
 
 <!-- FEEDBACK FAB -->
@@ -13582,11 +13665,50 @@ initSB();
 <script>
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
-    // Basic offline caching hint
-    navigator.serviceWorker.register('data:text/javascript,self.addEventListener("fetch",e=>{});').catch(()=>{});
+    navigator.serviceWorker.register('/sw.js').then(reg => {
+      console.log('SW registrado');
+    }).catch(()=>{});
   });
 }
 </script>
+  <!-- MODAL INSTALAÇÃO PWA -->
+  <div id="pwa-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.75);backdrop-filter:blur(6px);align-items:center;justify-content:center;padding:20px">
+    <div style="background:#111008;border-radius:22px;width:100%;max-width:340px;overflow:hidden;border:1.5px solid rgba(198,166,100,.35);box-shadow:0 24px 60px rgba(0,0,0,.5)">
+      <div style="background:#c6a664;padding:28px 24px 22px;text-align:center">
+        <div style="width:70px;height:70px;background:#111008;border-radius:16px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(0,0,0,.35)">
+          <img src="/icon-192.png" style="width:50px;height:50px;border-radius:11px" onerror="this.style.display='none';this.parentElement.innerHTML='✦'">
+        </div>
+        <div style="font-size:17px;font-weight:700;color:#111008">EBD Frequência</div>
+        <div style="font-size:11px;color:rgba(17,16,8,.55);margin-top:2px">ADTC Ayrton Senna 1</div>
+      </div>
+      <div style="padding:22px 22px 20px">
+        <div style="font-size:15px;font-weight:700;color:white;text-align:center;margin-bottom:5px">Instale o app!</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.45);text-align:center;line-height:1.6;margin-bottom:18px">Acesse mais rápido, receba notificações e use mesmo sem internet.</div>
+        <div style="display:flex;flex-direction:column;gap:7px;margin-bottom:18px">
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.05);border-radius:10px">
+            <span style="font-size:17px">⚡</span><span style="font-size:12px;color:rgba(255,255,255,.65)">Ícone na tela inicial do celular</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.05);border-radius:10px">
+            <span style="font-size:17px">🔔</span><span style="font-size:12px;color:rgba(255,255,255,.65)">Avisos e notificações em tempo real</span>
+          </div>
+          <div style="display:flex;align-items:center;gap:10px;padding:8px 12px;background:rgba(255,255,255,.05);border-radius:10px">
+            <span style="font-size:17px">📶</span><span style="font-size:12px;color:rgba(255,255,255,.65)">Funciona mesmo sem internet</span>
+          </div>
+        </div>
+        <button id="pwa-btn-instalar" onclick="acaoInstalarPWA()" style="width:100%;background:#c6a664;color:#111008;border:none;border-radius:12px;padding:14px;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:9px">
+          📲 Instalar agora
+        </button>
+        <div id="pwa-ios-hint" style="display:none;background:rgba(198,166,100,.08);border:1px solid rgba(198,166,100,.2);border-radius:10px;padding:10px 12px;margin-bottom:9px;text-align:center">
+          <div style="font-size:11px;color:rgba(255,255,255,.55);line-height:1.7">
+            No iPhone toque em <strong style="color:#c6a664">⬆️ Compartilhar</strong> e depois<br>
+            <strong style="color:#c6a664">Adicionar à Tela de Início</strong>
+          </div>
+        </div>
+        <button id="pwa-btn-fechar" onclick="pwaBtnFecharClick()" style="width:100%;background:rgba(255,255,255,.04);color:rgba(255,255,255,.4);border:1px solid rgba(255,255,255,.08);border-radius:12px;padding:11px;font-size:12px;cursor:pointer">Agora não</button>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL SELEÇÃO DE AULA PARA FJ -->
   <div id="mo-sel-aula-fj" style="display:none;position:fixed;inset:0;z-index:2000;background:rgba(0,0,0,.6);align-items:center;justify-content:center">
     <div style="background:white;border-radius:16px;width:calc(100% - 32px);max-width:680px;max-height:85vh;display:flex;flex-direction:column;overflow:hidden;margin:0 auto">
