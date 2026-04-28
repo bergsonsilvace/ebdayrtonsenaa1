@@ -824,7 +824,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
   </div>
 
   <!-- MODAL PWA — position:absolute cobre a tela de login -->
-  <div id="pwa-login-modal" style="display:flex;position:absolute;inset:0;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:20px;z-index:999">
+  <div id="pwa-login-modal" style="display:none;position:absolute;inset:0;background:rgba(0,0,0,.65);align-items:center;justify-content:center;padding:20px;z-index:999">
     <div style="background:#111008;border-radius:20px;width:100%;max-width:340px;border:1.5px solid rgba(198,166,100,.35);overflow:hidden">
       <div style="background:#c6a664;padding:22px 18px 18px;text-align:center">
         <div style="width:58px;height:58px;background:#111008;border-radius:14px;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:24px">✦</div>
@@ -13713,18 +13713,16 @@ function pwaBtnNaoAgoraLogin() {
 
 async function pwaBtnInstalarLogin() {
   var m = document.getElementById('pwa-login-modal');
+  if (m) m.style.display = 'none';
+  // Salvar flag SEMPRE — independente do prompt
+  localStorage.setItem('pwa-instalou', '1');
   if (_pwaPrompt) {
     _pwaPrompt.prompt();
-    var result = await _pwaPrompt.userChoice;
-    if (result.outcome === 'accepted') {
-      localStorage.setItem('pwa-instalou', '1');
-      toast('✦ App instalado!', 'ok');
-    }
+    _pwaPrompt.userChoice.then(function(result) {
+      if (result.outcome === 'accepted') toast('✦ App instalado!', 'ok');
+    });
     _pwaPrompt = null;
   }
-  if (m) m.style.display = 'none';
-  if (result && result.outcome !== 'accepted') return;
-  localStorage.setItem('pwa-instalou', '1');
 }
 </script>
 
