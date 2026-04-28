@@ -1540,37 +1540,35 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             <label class="fl">Pontos por presença</label>
             <input class="fc" type="number" id="rk-pts-presenca" value="10" min="0">
           </div>
-          <div style="font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">FJ — Falta Justificada</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Por padrão FJ não gera pontos. Ative abaixo para cada turma que quiser.</div>
-          <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:14px">
-            <div style="background:var(--cream);border-radius:var(--r);padding:10px 12px;border:1px solid var(--cb)">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="rk-fj-vale-c" style="width:15px;height:15px"><span style="font-size:13px;font-weight:600">🟢 Crianças — FJ vale pontos</span></label>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <label style="font-size:12px;color:var(--ink-soft)">Pontos:</label>
-                <input class="fc" type="number" id="rk-pts-fj-c" value="0" min="0" style="width:80px">
-              </div>
-            </div>
-            <div style="background:var(--cream);border-radius:var(--r);padding:10px 12px;border:1px solid var(--cb)">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="rk-fj-vale-j" style="width:15px;height:15px"><span style="font-size:13px;font-weight:600">🔵 Jovens — FJ vale pontos</span></label>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <label style="font-size:12px;color:var(--ink-soft)">Pontos:</label>
-                <input class="fc" type="number" id="rk-pts-fj-j" value="0" min="0" style="width:80px">
-              </div>
-            </div>
-            <div style="background:var(--cream);border-radius:var(--r);padding:10px 12px;border:1px solid var(--cb)">
-              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-                <label style="display:flex;align-items:center;gap:8px;cursor:pointer"><input type="checkbox" id="rk-fj-vale-a" style="width:15px;height:15px"><span style="font-size:13px;font-weight:600">🔴 Adultos — FJ vale pontos</span></label>
-              </div>
-              <div style="display:flex;align-items:center;gap:8px">
-                <label style="font-size:12px;color:var(--ink-soft)">Pontos:</label>
-                <input class="fc" type="number" id="rk-pts-fj-a" value="0" min="0" style="width:80px">
-              </div>
-            </div>
+          <div style="font-size:11px;font-weight:700;color:var(--warn);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">FJ — Falta Justificada com Pontuação</div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">
+            Selecione a turma e a aula. O sistema busca automaticamente quem está com FJ naquele dia e aplica os pontos.
           </div>
+          <div class="fg">
+            <label class="fl">Turma</label>
+            <select class="fc" id="fj-turma" onchange="carregarAulasFJ()">
+              <option value="criancas">🟢 Crianças</option>
+              <option value="jovens">🔵 Jovens</option>
+              <option value="adultos">🔴 Adultos</option>
+            </select>
+          </div>
+          <div class="fg">
+            <label class="fl">Aula / Dia selecionada</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div id="fj-aula-chip" style="flex:1;min-height:36px;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhuma aula selecionada</div>
+              <button type="button" onclick="abrirModalAulasFJ()" class="btn btn-ou btn-sm" style="white-space:nowrap">📅 Selecionar</button>
+            </div>
+            <input type="hidden" id="fj-aula-id">
+          </div>
+          <div class="fg" style="margin:0">
+            <label class="fl">Pontos para quem tem FJ</label>
+            <input class="fc" type="number" id="fj-pts" value="5" min="1" placeholder="Ex: 5">
+          </div>
+          <div id="fj-preview" style="margin-top:10px;display:none">
+            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px">Alunos com FJ nessa aula:</div>
+            <div id="fj-preview-lista"></div>
+          </div>
+          <button onclick="verificarEAplicarFJ()" class="btn btn-gold btn-full" style="margin-top:12px">✦ Aplicar Pontos FJ</button>
           <div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">⚡ Quiz da Lição</div>
           <div class="frow">
             <div class="fg"><label class="fl">Pontos no dia da aula</label><input class="fc" type="number" id="rk-pts-quiz-dia0" value="10" min="0"></div>
@@ -1596,6 +1594,52 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: nota 8.5 × 10 = <strong>85 pts</strong></div>
           </div>
           <button onclick="salvarRegraRanking()" style="width:100%;padding:10px;background:var(--gold);border:none;border-radius:8px;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">✓ Salvar Regras</button>
+        </div>
+
+        <!-- BÔNUS MANUAL -->
+        <div class="card" style="margin-bottom:12px">
+          <div class="chdr">
+            <div class="ct">⭐ Pontuação Bônus Manual</div>
+            <button class="btn btn-ou btn-sm" onclick="carregarHistoricoBonus()">↺</button>
+          </div>
+          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
+            Adicione pontos extras a alunos específicos ou a toda a turma sem precisar criar um desafio.
+          </div>
+          <div class="fg"><label class="fl">Turma</label>
+            <select class="fc" id="bonus-turma" onchange="atualizarDestBonus()">
+              <option value="criancas">🟢 Crianças</option>
+              <option value="jovens">🔵 Jovens</option>
+              <option value="adultos">🔴 Adultos</option>
+            </select>
+          </div>
+          <div class="fg" style="margin-bottom:10px">
+            <label class="fl">👥 Destinatário</label>
+            <div style="display:flex;gap:8px">
+              <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+                <input type="radio" name="bonus-dest" id="bonus-dest-todos" value="todos" checked onchange="toggleDestBonus()" style="width:15px;height:15px">
+                <span style="font-size:13px;font-weight:600">👥 Todos</span>
+              </label>
+              <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+                <input type="radio" name="bonus-dest" id="bonus-dest-espec" value="especifico" onchange="toggleDestBonus()" style="width:15px;height:15px">
+                <span style="font-size:13px;font-weight:600">👤 Específico</span>
+              </label>
+            </div>
+          </div>
+          <div id="bonus-aluno-wrap" style="display:none;margin-bottom:10px">
+            <label class="fl">Alunos selecionados</label>
+            <div style="display:flex;gap:8px;align-items:center">
+              <div id="bonus-alunos-chips" style="flex:1;min-height:36px;padding:6px 10px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhum selecionado</div>
+              <button type="button" onclick="abrirModalSelecionarAlunosBonus()" class="btn btn-ou btn-sm">+ Selecionar</button>
+            </div>
+          </div>
+          <div class="fg"><label class="fl">⭐ Motivo</label><input class="fc" id="bonus-motivo" placeholder="Ex: Participação surpresa, Versículo decorado..."></div>
+          <div class="fg"><label class="fl">📝 Descrição <span style="color:var(--ink-soft);font-size:10px">(opcional)</span></label><input class="fc" id="bonus-desc" placeholder="Detalhes adicionais..."></div>
+          <div class="frow">
+            <div class="fg"><label class="fl">🏆 Pontos</label><input class="fc" type="number" id="bonus-pts" placeholder="Ex: 10" min="1" value="10"></div>
+            <div class="fg" style="margin:0"><label class="fl">📅 Data</label><input class="fc" type="date" id="bonus-data"></div>
+          </div>
+          <button onclick="salvarBonusManual()" class="btn btn-gold btn-full" style="margin-top:4px">⭐ Aplicar Bônus</button>
+          <div id="bonus-historico" style="margin-top:14px"></div>
         </div>
         <div class="card" style="margin-bottom:12px">
           <div class="chdr">
@@ -4539,17 +4583,17 @@ function copiarSQLQuiz() {
 }
 
 function selCfgTab(tab, el) {
-  // Atualizar botões
   document.querySelectorAll('.cfg-tab').forEach(b => {
     const on = b.dataset.tab === tab;
     b.style.background = on ? 'var(--ink)' : 'white';
     b.style.color = on ? 'var(--gold-l)' : 'var(--ink)';
     b.style.borderColor = on ? 'var(--gold)' : 'var(--cb)';
   });
-  // Mostrar aba correta
   document.querySelectorAll('.cfg-tab-content').forEach(d => d.style.display = 'none');
   const t = document.getElementById('cfg-tab-' + tab);
   if (t) t.style.display = 'block';
+  // Carregar aulas FJ ao abrir aba Ranking
+  if (tab === 'ranking') carregarAulasFJ();
 }
 
 async function salvarConfigIgreja() {
@@ -4571,6 +4615,10 @@ async function salvarConfigIgreja() {
 }
 
 async function carregarPaginaConfig() {
+  // Inicializar data do bônus com hoje
+  const bonusDataEl = document.getElementById('bonus-data');
+  if (bonusDataEl && !bonusDataEl.value) bonusDataEl.value = _hojeStr();
+  carregarHistoricoBonus();
   document.getElementById('cfg-nome-igreja').value = cfgNomeIgreja;
   document.getElementById('cfg-nome-ebd').value = cfgNomeEBD;
   // WhatsApp credenciais
@@ -5987,11 +6035,19 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
     carregarDesafioPontos()
   ]);
   let aulasAluno = [];
+  let bonusAluno = [];
   try {
-    const { data } = await sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false });
-    aulasAluno = data || [];
+    const [aulasRes, bonusRes] = await Promise.all([
+      sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false }),
+      sbClient.from('bonus_pontos').select('*').eq('turma', turmaAluno).order('created_at', { ascending: false })
+    ]);
+    aulasAluno = aulasRes.data || [];
+    // Filtrar bônus: para todos OU para esse aluno
+    bonusAluno = (bonusRes.data || []).filter(b =>
+      !b.aluno_ids || b.aluno_ids.includes(idAluno)
+    );
   } catch(e) {}
-  return { idAluno, turmaAluno, aulasAluno,
+  return { idAluno, turmaAluno, aulasAluno, bonusAluno,
     quizScoresSnap: {...quizScores},
     provasSnap: [...(PROVAS||[])],
     desafioSnap: [..._desafioPontos] };
@@ -6019,7 +6075,10 @@ async function _renderAlunoProgressoComDados(dados) {
   const provasFeitas   = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
   const desafiosFeitos = _desafioPontos.filter(d => d.aluno_id === idAluno).length;
   const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
-  const pts = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
+  const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
+  // Somar bônus manuais
+  const bonusTotal = (dados.bonusAluno || []).reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
+  const pts = { ...ptsBase, total: (ptsBase.total||0) + bonusTotal, bonus: bonusTotal };
 
   // Painel de pontos — sempre visível
   const ptsHero = document.getElementById('aluno-pts-hero');
@@ -12566,6 +12625,295 @@ function fecharAvisosPopup() {
 }
 
 // ══════════════════════════════════════════════
+// FJ — FALTA JUSTIFICADA COM PONTUAÇÃO
+// ══════════════════════════════════════════════
+// Modal de seleção de aula para FJ
+let _fjAulaSelecionada = null; // { id, data, titulo, fjs }
+
+async function abrirModalAulasFJ() {
+  const turma = document.getElementById('fj-turma').value;
+  const modal = document.getElementById('mo-sel-aula-fj');
+  const label = document.getElementById('fj-modal-turma-label');
+  const lista = document.getElementById('fj-aulas-lista');
+  if (label) label.textContent = 'Turma de ' + (TN[turma] || turma);
+  modal.style.display = 'flex';
+  lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink-soft)">⏳ Carregando aulas...</div>';
+  try {
+    // Buscar SEMPRE do banco — independente de cache
+    const [aulasRes, alunosRes] = await Promise.all([
+      sbClient.from('aulas').select('id,data,licao,presencas').eq('turma', turma).order('data', { ascending: false }).limit(30),
+      cacheAlunos.length ? Promise.resolve({data: cacheAlunos}) : sbClient.from('alunos').select('*')
+    ]);
+    const data = aulasRes.data || [];
+    if (alunosRes.data) cacheAlunos = alunosRes.data;
+    if (!data.length) {
+      lista.innerHTML = '<div style="text-align:center;padding:30px;color:var(--ink-soft)"><div style="font-size:32px;margin-bottom:8px">📋</div><div>Nenhuma aula registrada para essa turma ainda.</div></div>';
+      return;
+    }
+    lista.innerHTML = data.map(a => {
+      const dt = new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
+      const titulo = a.licao || '';
+      const fjIds = Object.entries(a.presencas||{}).filter(([,v]) => v === 'fj').map(([id]) => id);
+      const fjAlunos = cacheAlunos.filter(al => fjIds.includes(al.id));
+      const sel = _fjAulaSelecionada && _fjAulaSelecionada.id === a.id;
+      const dtEsc = dt.replace(/'/g,"\'");
+      const titEsc = titulo.replace(/'/g,"\'");
+      return `<div onclick="selecionarAulaFJ('${a.id}','${dtEsc}','${titEsc}',${JSON.stringify(fjIds)})" 
+        style="padding:12px;margin-bottom:6px;border-radius:var(--r);border:2px solid ${sel?'var(--gold)':'var(--cb)'};background:${sel?'var(--gold-pale)':'white'};cursor:pointer;transition:.15s">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+          <div style="font-size:13px;font-weight:700;color:var(--ink)">${dt}</div>
+          ${fjIds.length ? `<span style="background:var(--warn);color:white;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px">${fjIds.length} FJ</span>` : '<span style="background:var(--cb);color:var(--ink-soft);font-size:11px;padding:2px 8px;border-radius:10px">Sem FJ</span>'}
+        </div>
+        ${titulo ? `<div style="font-size:12px;color:var(--ink-soft)">${titulo}</div>` : ''}
+        ${fjAlunos.length ? `<div style="margin-top:6px;font-size:11px;color:var(--warn);font-weight:600">👤 ${fjAlunos.map(al=>al.nome.split(' ')[0]).join(', ')}</div>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    lista.innerHTML = `<div style="color:var(--red);padding:12px">Erro: ${e.message}</div>`;
+  }
+}
+
+function selecionarAulaFJ(id, dt, titulo, fjIds) {
+  _fjAulaSelecionada = { id, dt, titulo, fjIds };
+  fecharModalAulasFJ();
+  // Atualizar chip
+  const chip = document.getElementById('fj-aula-chip');
+  const hiddenId = document.getElementById('fj-aula-id');
+  if (chip) {
+    chip.style.color = 'var(--ink)';
+    chip.innerHTML = `<strong>${dt}</strong>${titulo ? ' · ' + titulo : ''} <span style="background:var(--warn);color:white;font-size:10px;padding:1px 6px;border-radius:8px;margin-left:4px">${fjIds.length} FJ</span>`;
+  }
+  if (hiddenId) hiddenId.value = id;
+  // Mostrar preview
+  previewAlunosFJ(fjIds);
+}
+
+function fecharModalAulasFJ() {
+  document.getElementById('mo-sel-aula-fj').style.display = 'none';
+}
+
+async function previewAlunosFJ(fjIds) {
+  const preview = document.getElementById('fj-preview');
+  const lista = document.getElementById('fj-preview-lista');
+  if (!fjIds || !fjIds.length) {
+    preview.style.display = 'block';
+    lista.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;padding:8px 0">⚠️ Nenhum aluno com FJ nessa aula.</div>';
+    return;
+  }
+  if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+  const fjAlunos = cacheAlunos.filter(a => fjIds.includes(a.id));
+  preview.style.display = 'block';
+  lista.innerHTML = fjAlunos.map(a =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
+      ${a.foto_url ? `<img src="${a.foto_url}" style="width:32px;height:32px;border-radius:50%;object-fit:cover">` : `<div style="width:32px;height:32px;border-radius:50%;background:var(--warn);color:white;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${a.nome[0]}</div>`}
+      <span style="font-size:13px;font-weight:500;flex:1">${a.nome}</span>
+      <span style="font-size:11px;background:var(--warn);color:white;padding:2px 8px;border-radius:10px;font-weight:700">FJ</span>
+    </div>`
+  ).join('');
+}
+
+async function verificarEAplicarFJ() {
+  if (!_fjAulaSelecionada) { toast('Selecione uma aula primeiro', 'er'); return; }
+  const pts = parseFloat(document.getElementById('fj-pts').value);
+  const turma = document.getElementById('fj-turma').value;
+  if (!pts || pts <= 0) { toast('Informe uma pontuação válida', 'er'); return; }
+  const { id: aulaId, dt, titulo, fjIds } = _fjAulaSelecionada;
+  if (!fjIds.length) { toast('Nenhum aluno com FJ nessa aula', 'er'); return; }
+  try {
+    const { data: aula } = await sbClient.from('aulas').select('data,licao').eq('id', aulaId).single();
+    const tituloAula = aula?.licao || titulo || '';
+    const motivo = `FJ com pontos — ${dt}${tituloAula ? ' · ' + tituloAula : ''}`;
+    await sbClient.from('bonus_pontos').insert({
+      motivo, pontos: pts, turma,
+      aluno_ids: fjIds,
+      data_referencia: aula?.data || _hojeStr(),
+      criado_por: USER.nome,
+      descricao: `Falta justificada com pontuação para ${fjIds.length} aluno(s)`
+    });
+    _cacheAlunoProgresso = null;
+    toast(`✦ ${pts} pts aplicados para ${fjIds.length} aluno(s) com FJ!`, 'ok');
+    // Limpar
+    _fjAulaSelecionada = null;
+    document.getElementById('fj-aula-id').value = '';
+    document.getElementById('fj-aula-chip').textContent = 'Nenhuma aula selecionada';
+    document.getElementById('fj-aula-chip').style.color = 'var(--ink-soft)';
+    document.getElementById('fj-preview').style.display = 'none';
+    carregarHistoricoBonus();
+  } catch(e) {
+    toast('Erro: ' + e.message, 'er');
+  }
+}
+
+function carregarAulasFJ() { /* resetar ao trocar turma */
+  _fjAulaSelecionada = null;
+  const chip = document.getElementById('fj-aula-chip');
+  if (chip) { chip.textContent = 'Nenhuma aula selecionada'; chip.style.color = 'var(--ink-soft)'; }
+  document.getElementById('fj-preview').style.display = 'none';
+}
+
+// ══════════════════════════════════════════════
+// BÔNUS MANUAL DE PONTUAÇÃO
+// ══════════════════════════════════════════════
+let _alunosBonusSelecionados = [];
+
+function toggleDestBonus() {
+  const espec = document.getElementById('bonus-dest-espec').checked;
+  document.getElementById('bonus-aluno-wrap').style.display = espec ? 'block' : 'none';
+  if (espec && !_alunosBonusSelecionados.length) abrirModalSelecionarAlunosBonus();
+}
+
+function atualizarDestBonus() {
+  _alunosBonusSelecionados = [];
+  _atualizarChipsBonus();
+}
+
+function _atualizarChipsBonus() {
+  const box = document.getElementById('bonus-alunos-chips');
+  if (!box) return;
+  if (!_alunosBonusSelecionados.length) {
+    box.textContent = 'Nenhum selecionado';
+    box.style.color = 'var(--ink-soft)';
+    return;
+  }
+  box.style.color = 'var(--ink)';
+  box.innerHTML = _alunosBonusSelecionados.map(a =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--gold);color:var(--ink);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;margin:2px">${a.nome.split(' ')[0]}</span>`
+  ).join('');
+}
+
+async function abrirModalSelecionarAlunosBonus() {
+  const turma = document.getElementById('bonus-turma').value;
+  if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+  // Reutilizar o modal de seleção de alunos mas com contexto de bônus
+  _modalAlunosContexto = 'bonus';
+  _alunosSelecionados = [..._alunosBonusSelecionados]; // copiar seleção atual
+  const modal = document.getElementById('mo-sel-alunos');
+  const label = document.getElementById('sel-alunos-turma-label');
+  if (label) label.textContent = 'Turma de ' + (TN[turma] || turma);
+  document.getElementById('sel-alunos-busca').value = '';
+  // Override turma para buscar alunos da turma do bônus
+  _modalAlunosTurmaOverride = turma;
+  modal.style.display = 'flex';
+  _renderListaAlunosModal(turma, '');
+}
+
+let _modalAlunosContexto = 'prova'; // 'prova' ou 'bonus'
+let _modalAlunosTurmaOverride = null;
+
+function _renderListaAlunosModal(turmaForca, filtro) {
+  const turma = turmaForca || document.getElementById('pv-turma')?.value || 'criancas';
+  const box = document.getElementById('sel-alunos-lista');
+  const countEl = document.getElementById('sel-alunos-count');
+  let alunos = cacheAlunos.filter(a => a.turma === turma && (a.status||'ativo') === 'ativo');
+  alunos.sort((a,b) => a.nome.localeCompare(b.nome));
+  if (filtro) alunos = alunos.filter(a => a.nome.toLowerCase().includes(filtro.toLowerCase()));
+  box.innerHTML = alunos.map(a => {
+    const sel = _alunosSelecionados.some(s => s.id === a.id);
+    return `<label style="display:flex;align-items:center;gap:12px;padding:10px 4px;border-bottom:1px solid var(--cb);cursor:pointer">
+      <input type="checkbox" ${sel?'checked':''} onchange="toggleAlunoSel('${a.id}','${a.nome.replace(/'/g,"\'")}',this)" style="width:18px;height:18px;flex-shrink:0;accent-color:var(--tc)">
+      ${a.foto_url ? `<img src="${a.foto_url}" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex-shrink:0">` : `<div style="width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--gold-l);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0">${a.nome[0]}</div>`}
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:${sel?'700':'500'};color:var(--ink)">${a.nome}</div>
+      </div>
+      ${sel?'<span style="color:var(--tc);font-size:18px">✓</span>':''}
+    </label>`;
+  }).join('');
+  if (!alunos.length) box.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-soft)">Nenhum aluno encontrado</div>';
+  const tot = _alunosSelecionados.length;
+  if (countEl) countEl.textContent = tot ? `${tot} selecionado${tot>1?'s':''}` : 'Nenhum selecionado';
+}
+
+// Sobrescrever confirmarSelecaoAlunos para suportar contexto
+const _confirmarSelecaoAlunosOrig = window.confirmarSelecaoAlunos;
+function confirmarSelecaoAlunos() {
+  fecharModalSelecionarAlunos();
+  if (_modalAlunosContexto === 'bonus') {
+    _alunosBonusSelecionados = [..._alunosSelecionados];
+    _atualizarChipsBonus();
+    _modalAlunosTurmaOverride = null;
+  } else {
+    _atualizarChipsAlunos();
+  }
+  _modalAlunosContexto = 'prova';
+}
+
+// Sobrescrever filtrarListaAlunos para usar turma correta
+function filtrarListaAlunos() {
+  const filtro = document.getElementById('sel-alunos-busca').value;
+  const turma = _modalAlunosTurmaOverride || document.getElementById('pv-turma')?.value || 'criancas';
+  _renderListaAlunosModal(turma, filtro);
+}
+
+async function salvarBonusManual() {
+  const motivo = document.getElementById('bonus-motivo').value.trim();
+  const desc = document.getElementById('bonus-desc').value.trim();
+  const pts = parseFloat(document.getElementById('bonus-pts').value);
+  const turma = document.getElementById('bonus-turma').value;
+  const data = document.getElementById('bonus-data').value || _hojeStr();
+  const paraEspec = document.getElementById('bonus-dest-espec').checked;
+
+  if (!motivo) { toast('Informe o motivo do bônus', 'er'); return; }
+  if (!pts || pts <= 0) { toast('Informe uma pontuação válida', 'er'); return; }
+  if (paraEspec && !_alunosBonusSelecionados.length) { toast('Selecione ao menos um aluno', 'er'); return; }
+
+  const dado = {
+    motivo, descricao: desc || null, pontos: pts, turma,
+    data_referencia: data,
+    aluno_ids: paraEspec ? _alunosBonusSelecionados.map(a => a.id) : null,
+    criado_por: USER.nome
+  };
+
+  try {
+    await sbClient.from('bonus_pontos').insert(dado);
+    toast(`⭐ Bônus de ${pts} pts aplicado!`, 'ok');
+    // Limpar campos
+    document.getElementById('bonus-motivo').value = '';
+    document.getElementById('bonus-desc').value = '';
+    document.getElementById('bonus-pts').value = '10';
+    document.getElementById('bonus-dest-todos').checked = true;
+    document.getElementById('bonus-aluno-wrap').style.display = 'none';
+    _alunosBonusSelecionados = [];
+    _atualizarChipsBonus();
+    // Invalidar cache do aluno
+    _cacheAlunoProgresso = null;
+    carregarHistoricoBonus();
+  } catch(e) {
+    toast('Erro ao salvar bônus: ' + e.message, 'er');
+  }
+}
+
+async function carregarHistoricoBonus() {
+  const box = document.getElementById('bonus-historico');
+  if (!box) return;
+  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Carregando...</div>';
+  try {
+    const { data } = await sbClient.from('bonus_pontos').select('*').order('created_at', { ascending: false }).limit(20);
+    if (!data || !data.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Nenhum bônus registrado ainda.</div>'; return; }
+    box.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Histórico</div>'
+      + data.map(b => {
+        const dt = new Date(b.created_at).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'});
+        const dest = b.aluno_ids ? `${b.aluno_ids.length} aluno(s)` : 'Todos';
+        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
+          <div style="width:36px;height:36px;background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold-deep);flex-shrink:0">+${b.pontos}</div>
+          <div style="flex:1;min-width:0">
+            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.motivo}</div>
+            <div style="font-size:11px;color:var(--ink-soft)">${TN[b.turma]||b.turma} · ${dest} · ${dt}</div>
+          </div>
+          <button onclick="deletarBonus('${b.id}')" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:4px">✕</button>
+        </div>`;
+      }).join('');
+  } catch(e) { box.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar</div>'; }
+}
+
+async function deletarBonus(id) {
+  if (!confirm('Remover este bônus?')) return;
+  await sbClient.from('bonus_pontos').delete().eq('id', id);
+  _cacheAlunoProgresso = null;
+  toast('Bônus removido', 'ok');
+  carregarHistoricoBonus();
+}
+
+// ══════════════════════════════════════════════
 // WHATSAPP CREDENCIAIS
 // ══════════════════════════════════════════════
 async function salvarCfgEbd() {
@@ -13065,6 +13413,22 @@ if ('serviceWorker' in navigator) {
   });
 }
 </script>
+  <!-- MODAL SELEÇÃO DE AULA PARA FJ -->
+  <div id="mo-sel-aula-fj" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center">
+    <div style="background:white;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:10px;color:var(--gold-l);font-weight:700;text-transform:uppercase;letter-spacing:.1em">Selecionar aula</div>
+          <div style="color:white;font-size:15px;font-weight:600;margin-top:2px" id="fj-modal-turma-label">Turma</div>
+        </div>
+        <button onclick="fecharModalAulasFJ()" style="width:30px;height:30px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div id="fj-aulas-lista" style="flex:1;overflow-y:auto;padding:8px 16px">
+        <div style="text-align:center;padding:20px;color:var(--ink-soft)">⏳ Carregando aulas...</div>
+      </div>
+    </div>
+  </div>
+
   <!-- MODAL SELEÇÃO DE ALUNOS PARA PROVA/QUIZ -->
   <div id="mo-sel-alunos" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);display:none;align-items:flex-end;justify-content:center">
     <div style="background:white;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:80vh;display:flex;flex-direction:column;overflow:hidden">
