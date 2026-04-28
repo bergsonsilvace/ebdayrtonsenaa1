@@ -8,6 +8,9 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="EBD Freq">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon" href="/icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
 <link rel="manifest" href="data:application/json,{&quot;name&quot;:&quot;EBD Frequência&quot;,&quot;short_name&quot;:&quot;EBD&quot;,&quot;start_url&quot;:&quot;/&quot;,&quot;display&quot;:&quot;standalone&quot;,&quot;background_color&quot;:&quot;#111008&quot;,&quot;theme_color&quot;:&quot;#b8972a&quot;}">
 <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;1,400;1,600&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
@@ -110,7 +113,20 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .main{flex:1;padding:20px 18px;max-width:760px;width:100%;margin:0 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
 
 /* PAGE */
-.page{display:none;animation:fadeUp .3s ease}.page.on{display:block}#pg-pg-aluno{animation:none!important}/* modo-aluno: pg-dash sempre visivel */
+.page{display:none;animation:fadeUp .3s ease}.page.on{display:block}#pg-pg-aluno{animation:none!important}
+.cfg-acc-item{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;transition:background .15s;background:white;user-select:none}
+.cfg-acc-item:active{background:#faf8f4}
+.cfg-acc-item.open{background:#fffbf2}
+.cfg-acc-ico{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.cfg-acc-info{flex:1}
+.cfg-acc-info b{display:block;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:1px}
+.cfg-acc-info span{font-size:11px;color:var(--ink-soft)}
+.cfg-acc-arrow{font-size:16px;color:var(--cb2);transition:transform .25s;font-weight:300}
+.cfg-acc-arrow.open{transform:rotate(90deg);color:var(--gold-deep)}
+.cfg-acc-body{max-height:0;overflow:hidden;transition:max-height .35s ease}
+.cfg-acc-body.open{max-height:3000px}
+.cfg-acc-content{padding:14px;background:#faf8f4;border-top:.5px solid var(--cb)}
+.cfg-acc-div{height:.5px;background:var(--cb);margin:0 14px}/* modo-aluno: pg-dash sempre visivel */
 @keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 
@@ -1423,277 +1439,242 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
     <!-- CONFIGURAÇÕES (só admin) -->
     <div id="pg-config" class="page">
-      <div class="ph"><h2><em>Configurações</em> da EBD</h2><p>Personalize o sistema</p></div>
 
-      <!-- ABAS DE CONFIG -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px" id="cfg-tabs">
-        <button onclick="selCfgTab('igreja',this)" class="cfg-tab on" data-tab="igreja" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--gold);background:var(--ink);color:var(--gold-l);font-size:11px;font-weight:700;cursor:pointer;text-align:center">🏛 Igreja</button>
-        <button onclick="selCfgTab('ebd',this)" class="cfg-tab" data-tab="ebd" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--cb);background:white;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center">📅 EBD</button>
-        <button onclick="selCfgTab('trimestre',this)" class="cfg-tab" data-tab="trimestre" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--cb);background:white;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center">📆 Trimestre</button>
-        <button onclick="selCfgTab('whatsapp',this)" class="cfg-tab" data-tab="whatsapp" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--cb);background:white;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center">📱 WhatsApp</button>
-        <button onclick="selCfgTab('ranking',this)" class="cfg-tab" data-tab="ranking" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--cb);background:white;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center">🏆 Ranking</button>
-        <button onclick="selCfgTab('sistema',this)" class="cfg-tab" data-tab="sistema" style="flex:1;min-width:70px;padding:8px 6px;border-radius:8px;border:1.5px solid var(--cb);background:white;color:var(--ink);font-size:11px;font-weight:700;cursor:pointer;text-align:center">⚙️ Sistema</button>
+      <!-- HEADER -->
+      <div style="background:var(--ink);border-radius:16px;padding:22px 18px 20px;margin-bottom:16px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:-30px;right:-30px;width:120px;height:120px;border-radius:50%;background:var(--gold);opacity:.07;pointer-events:none"></div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.14em;color:var(--gold-l);font-weight:700;margin-bottom:5px">Sistema EBD</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:24px;color:white;font-weight:400;font-style:italic;margin-bottom:2px">Configurações</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.35)">Personalize o sistema da sua EBD</div>
       </div>
 
-      <!-- ABA: IGREJA -->
-      <div id="cfg-tab-igreja" class="cfg-tab-content">
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">🏛 Dados da igreja</div>
-          <div class="fg"><label class="fl">Nome da igreja</label><input class="fc" id="cfg-nome-igreja" placeholder="Nome da sua igreja"></div>
-          <div class="fg" style="margin:0"><label class="fl">Nome da EBD</label><input class="fc" id="cfg-nome-ebd" placeholder="Escola Bíblica Dominical"></div>
-        </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">🎯 Metas de assistência</div>
-          <div class="fg"><label class="fl">Meta — Crianças</label><input class="fc" type="number" id="cfg-meta-c" placeholder="Ex: 15" min="0"></div>
-          <div class="fg"><label class="fl">Meta — Jovens</label><input class="fc" type="number" id="cfg-meta-j" placeholder="Ex: 20" min="0"></div>
-          <div class="fg" style="margin:0"><label class="fl">Meta — Adultos</label><input class="fc" type="number" id="cfg-meta-a" placeholder="Ex: 30" min="0"></div>
-        </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">✦ Versículo do semestre</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Aparece na área do Pix da tela inicial.</div>
-          <div class="fg" style="margin:0"><label class="fl">Versículo</label><textarea class="fc" id="cfg-versiculo" rows="3" placeholder='"Cada um dê conforme propôs no seu coração" — 2 Co 9.7'></textarea></div>
-        </div>
-        <button class="btn btn-gold btn-full" onclick="salvarConfigIgreja()">✓ Salvar</button>
-      </div>
+      <!-- LISTA ACCORDION -->
+      <div id="cfg-acc-list" style="background:white;border-radius:14px;overflow:hidden;border:1px solid var(--cb)">
 
-      <!-- ABA: EBD -->
-      <div id="cfg-tab-ebd" class="cfg-tab-content" style="display:none">
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">📅 Dia e horário da EBD</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">Define o <strong>countdown</strong> que aparece na tela inicial para todos os alunos.</div>
-          <div class="frow">
-            <div class="fg">
-              <label class="fl">Dia da semana</label>
-              <select class="fc" id="cfg-ebd-dia">
-                <option value="domingo">Domingo</option>
-                <option value="segunda">Segunda-feira</option>
-                <option value="terca">Terça-feira</option>
-                <option value="quarta">Quarta-feira</option>
-                <option value="quinta">Quinta-feira</option>
-                <option value="sexta">Sexta-feira</option>
-                <option value="sabado">Sábado</option>
-              </select>
+        <!-- ITEM: IGREJA -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('igreja',this)">
+          <div class="cfg-acc-ico" style="background:#fdf3dc">🏛</div>
+          <div class="cfg-acc-info"><b>Igreja</b><span>Nome, metas e versículo</span></div>
+          <div class="cfg-acc-arrow">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-igreja">
+          <div class="cfg-acc-content">
+            <div class="fg"><label class="fl">Nome da Igreja</label><input class="fc" id="cfg-nome-igreja" placeholder="Nome da sua igreja"></div>
+            <div class="fg"><label class="fl">Nome da EBD</label><input class="fc" id="cfg-nome-ebd" placeholder="Escola Bíblica Dominical"></div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🎯 Metas de assistência</div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Crianças</label><input class="fc" type="number" id="cfg-meta-c" placeholder="Ex: 22" min="0"></div>
+              <div class="fg"><label class="fl">Jovens</label><input class="fc" type="number" id="cfg-meta-j" placeholder="Ex: 15" min="0"></div>
+              <div class="fg" style="margin:0"><label class="fl">Adultos</label><input class="fc" type="number" id="cfg-meta-a" placeholder="Ex: 20" min="0"></div>
             </div>
-            <div class="fg">
-              <label class="fl">Horário</label>
-              <input class="fc" type="time" id="cfg-ebd-horario">
-            </div>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">✦ Versículo do semestre</div>
+            <div class="fg" style="margin:0"><label class="fl">Texto</label><textarea class="fc" id="cfg-versiculo" rows="3" placeholder='"Cada um dê conforme propôs no seu coração" — 2 Co 9.7'></textarea></div>
+            <button onclick="salvarConfigIgreja()" class="btn btn-gold btn-full" style="margin-top:14px">✓ Salvar Igreja</button>
           </div>
-          <button class="btn btn-gold btn-full" onclick="salvarCfgEbd()">✓ Salvar</button>
-        </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">👋 Mensagem de boas-vindas</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Popup exibido quando o aluno loga.</div>
-          <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
-            <input type="checkbox" id="cfg-bv-ativo" style="width:16px;height:16px">
-            <label for="cfg-bv-ativo" style="font-size:13px;cursor:pointer">Ativar popup de boas-vindas</label>
-          </div>
-          <div class="fg" style="margin:0"><label class="fl">Mensagem</label><textarea class="fc" id="cfg-bv-msg" rows="3" placeholder="Bem-vindo à EBD! Que Deus abençoe..."></textarea></div>
-          <button class="btn btn-gold btn-full" onclick="salvarCfgBoasVindas()" style="margin-top:10px">✓ Salvar</button>
-        </div>
-      </div>
-
-      <!-- ABA: TRIMESTRE -->
-      <div id="cfg-tab-trimestre" class="cfg-tab-content" style="display:none">
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">📆 Trimestre atual</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">Define o período dos <strong>relatórios</strong> e o <strong>cálculo de pontos</strong>.</div>
-          <div class="fg"><label class="fl">Nome do trimestre</label><input class="fc" id="cfg-trim-nome" placeholder="Ex: 2º Trimestre 2026"></div>
-          <div class="frow">
-            <div class="fg"><label class="fl">Data de início</label><input class="fc" type="date" id="cfg-trim-inicio"></div>
-            <div class="fg" style="margin:0"><label class="fl">Data de fim</label><input class="fc" type="date" id="cfg-trim-fim"></div>
-          </div>
-          <button class="btn btn-gold btn-full" onclick="salvarCfgTrimestre()" style="margin-top:4px">✓ Salvar</button>
-        </div>
-      </div>
-
-      <!-- ABA: WHATSAPP -->
-      <div id="cfg-tab-whatsapp" class="cfg-tab-content" style="display:none">
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">📞 WhatsApp da igreja</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px">Usado no botão de <strong>Feedback</strong> do sistema. Com código do país (ex: 5585999999999).</div>
-          <div class="fg" style="margin:0"><label class="fl">Número</label><input class="fc" id="cfg-whats-numero" placeholder="5585999999999" type="tel"></div>
-          <button class="btn btn-gold btn-full" onclick="salvarCfgWhatsNumero()" style="margin-top:10px">✓ Salvar</button>
-        </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">📱 Mensagem de credenciais do aluno</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Enviada ao responsável após <strong>cadastrar um aluno</strong>. Use <strong>{nome}</strong>, <strong>{login}</strong>, <strong>{senha}</strong>, <strong>{turma}</strong>, <strong>{link}</strong>.</div>
-          <div class="fg"><label class="fl">🔗 Link do sistema</label><input class="fc" id="cfg-whats-link" placeholder="https://ebdayrtonsenna1.vercel.app"></div>
-          <div class="fg" style="margin:0"><label class="fl">💬 Texto da mensagem</label><textarea class="fc" id="cfg-whats-msg" rows="7" placeholder="Olá, {nome}!..."></textarea></div>
-          <div style="margin-top:10px;display:flex;gap:8px">
-            <button class="btn btn-ou btn-sm" onclick="previewMsgWhats()" style="flex:1">👁 Pré-visualizar</button>
-            <button class="btn btn-gold btn-sm" onclick="salvarConfigWhats()" style="flex:1">✓ Salvar</button>
-          </div>
-        </div>
-      </div>
-
-      <!-- ABA: RANKING -->
-      <div id="cfg-tab-ranking" class="cfg-tab-content" style="display:none">
-
-        <!-- CARD: PRESENÇA -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="chdr">
-            <div class="ct">📅 Presença</div>
-            <button class="btn btn-ou btn-sm" onclick="carregarRegraRanking()">↺</button>
-          </div>
-          <div class="fg" style="margin-bottom:12px">
-            <label class="fl">Pontos por presença</label>
-            <input class="fc" type="number" id="rk-pts-presenca" value="10" min="0">
-          </div>
-          <button onclick="salvarPtsPresenca()" class="btn btn-gold btn-full">✓ Salvar</button>
         </div>
 
-        <!-- CARD: FJ -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">🟡 Falta Justificada com Pontuação</div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">
-            Selecione a turma e a aula. O sistema mostra quem está com FJ e aplica os pontos só para eles.
-          </div>
-          <div class="fg">
-            <label class="fl">Turma</label>
-            <select class="fc" id="fj-turma" onchange="carregarAulasFJ()">
-              <option value="criancas">🟢 Crianças</option>
-              <option value="jovens">🔵 Jovens</option>
-              <option value="adultos">🔴 Adultos</option>
-            </select>
-          </div>
-          <div class="fg">
-            <label class="fl">Aula / Dia</label>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div id="fj-aula-chip" style="flex:1;min-height:36px;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhuma aula selecionada</div>
-              <button type="button" onclick="abrirModalAulasFJ()" class="btn btn-ou btn-sm" style="white-space:nowrap">📅 Selecionar</button>
-            </div>
-            <input type="hidden" id="fj-aula-id">
-          </div>
-          <div class="fg" style="margin:0">
-            <label class="fl">Pontos para quem tem FJ</label>
-            <input class="fc" type="number" id="fj-pts" value="5" min="1" placeholder="Ex: 5">
-          </div>
-          <div id="fj-preview" style="margin-top:10px;display:none">
-            <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px">Alunos com FJ nessa aula:</div>
-            <div id="fj-preview-lista"></div>
-          </div>
-          <button onclick="verificarEAplicarFJ()" class="btn btn-gold btn-full" style="margin-top:12px">✦ Aplicar Pontos FJ</button>
-        </div>
+        <div class="cfg-acc-div"></div>
 
-        <!-- CARD: QUIZ -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="chdr">
-            <div class="ct">⚡ Quiz da Lição</div>
-          </div>
-          <div class="frow">
-            <div class="fg"><label class="fl">Pontos no dia da aula</label><input class="fc" type="number" id="rk-pts-quiz-dia0" value="10" min="0"></div>
-            <div class="fg"><label class="fl">Decréscimo por dia</label><input class="fc" type="number" id="rk-pts-quiz-dec" value="1" min="0"></div>
-          </div>
-          <div class="fg" style="margin-bottom:14px">
-            <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:var(--cream);border-radius:var(--rsm);border:1px solid var(--cb)">
-              <input type="checkbox" id="rk-quiz-proporcional" style="width:18px;height:18px;cursor:pointer;accent-color:var(--tj)">
-              <div>
-                <div style="font-size:13px;font-weight:700;color:var(--ink)">Descontar pontos por questão errada</div>
-                <div style="font-size:11px;color:var(--ink-soft);margin-top:2px">Pontos = (acertos ÷ total) × pts do dia</div>
+        <!-- ITEM: EBD -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('ebd',this)">
+          <div class="cfg-acc-ico" style="background:#e8f4fd">📅</div>
+          <div class="cfg-acc-info"><b>EBD</b><span>Dia, horário e boas-vindas</span></div>
+          <div class="cfg-acc-arrow">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-ebd">
+          <div class="cfg-acc-content">
+            <div class="frow">
+              <div class="fg"><label class="fl">Dia da semana</label>
+                <select class="fc" id="cfg-ebd-dia">
+                  <option value="domingo">Domingo</option>
+                  <option value="segunda">Segunda-feira</option>
+                  <option value="terca">Terça-feira</option>
+                  <option value="quarta">Quarta-feira</option>
+                  <option value="quinta">Quinta-feira</option>
+                  <option value="sexta">Sexta-feira</option>
+                  <option value="sabado">Sábado</option>
+                </select>
               </div>
-            </label>
+              <div class="fg" style="margin:0"><label class="fl">Horário</label><input class="fc" type="time" id="cfg-ebd-horario"></div>
+            </div>
+            <button onclick="salvarCfgEbd()" class="btn btn-gold btn-full" style="margin-top:4px">✓ Salvar EBD</button>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">👋 Boas-vindas</div>
+            <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px">
+              <input type="checkbox" id="cfg-bv-ativo" style="width:16px;height:16px">
+              <label for="cfg-bv-ativo" style="font-size:13px;cursor:pointer">Ativar popup de boas-vindas ao logar</label>
+            </div>
+            <div class="fg" style="margin:0"><textarea class="fc" id="cfg-bv-msg" rows="3" placeholder="Bem-vindo à EBD!..."></textarea></div>
+            <button onclick="salvarCfgBoasVindas()" class="btn btn-ou btn-full" style="margin-top:10px">✓ Salvar Boas-vindas</button>
           </div>
-          <div class="fg" style="margin-bottom:4px">
-            <label class="fl">Quiz disponível por quantos dias após a aula</label>
-            <input class="fc" type="number" id="rk-quiz-dias" value="6" min="1" max="13">
-          </div>
-          <button onclick="salvarRegraQuiz()" class="btn btn-gold btn-full">✓ Salvar</button>
         </div>
 
-        <!-- CARD: PROVAS -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="ct">📝 Provas</div>
-          <div class="fg" style="margin-bottom:4px">
-            <label class="fl">Fórmula: nota × fator</label>
-            <input class="fc" type="number" id="rk-pts-prova-fator" value="10" min="1" step="0.5">
-            <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: nota 8.5 × 10 = <strong>85 pts</strong></div>
+        <div class="cfg-acc-div"></div>
+
+        <!-- ITEM: TRIMESTRE -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('trimestre',this)">
+          <div class="cfg-acc-ico" style="background:#edf7ee">📆</div>
+          <div class="cfg-acc-info"><b>Trimestre</b><span>Período e nome do trimestre</span></div>
+          <div class="cfg-acc-arrow">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-trimestre">
+          <div class="cfg-acc-content">
+            <div class="fg"><label class="fl">Nome do trimestre</label><input class="fc" id="cfg-trim-nome" placeholder="Ex: 2º Trimestre 2026"></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Início</label><input class="fc" type="date" id="cfg-trim-inicio"></div>
+              <div class="fg" style="margin:0"><label class="fl">Fim</label><input class="fc" type="date" id="cfg-trim-fim"></div>
+            </div>
+            <button onclick="salvarCfgTrimestre()" class="btn btn-gold btn-full" style="margin-top:4px">✓ Salvar Trimestre</button>
           </div>
-          <button onclick="salvarRegraProva()" class="btn btn-gold btn-full">✓ Salvar</button>
         </div>
 
-        <!-- BÔNUS MANUAL -->
-        <div class="card" style="margin-bottom:12px">
-          <div class="chdr">
-            <div class="ct">⭐ Pontuação Bônus Manual</div>
-            <button class="btn btn-ou btn-sm" onclick="carregarHistoricoBonus()">↺</button>
-          </div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">
-            Adicione pontos extras a alunos específicos ou a toda a turma sem precisar criar um desafio.
-          </div>
-          <div class="fg"><label class="fl">Turma</label>
-            <select class="fc" id="bonus-turma" onchange="atualizarDestBonus()">
-              <option value="criancas">🟢 Crianças</option>
-              <option value="jovens">🔵 Jovens</option>
-              <option value="adultos">🔴 Adultos</option>
-            </select>
-          </div>
-          <div class="fg" style="margin-bottom:10px">
-            <label class="fl">👥 Destinatário</label>
-            <div style="display:flex;gap:8px">
-              <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
-                <input type="radio" name="bonus-dest" id="bonus-dest-todos" value="todos" checked onchange="toggleDestBonus()" style="width:15px;height:15px">
-                <span style="font-size:13px;font-weight:600">👥 Todos</span>
-              </label>
-              <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
-                <input type="radio" name="bonus-dest" id="bonus-dest-espec" value="especifico" onchange="toggleDestBonus()" style="width:15px;height:15px">
-                <span style="font-size:13px;font-weight:600">👤 Específico</span>
-              </label>
-            </div>
-          </div>
-          <div id="bonus-aluno-wrap" style="display:none;margin-bottom:10px">
-            <label class="fl">Alunos selecionados</label>
-            <div style="display:flex;gap:8px;align-items:center">
-              <div id="bonus-alunos-chips" style="flex:1;min-height:36px;padding:6px 10px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhum selecionado</div>
-              <button type="button" onclick="abrirModalSelecionarAlunosBonus()" class="btn btn-ou btn-sm">+ Selecionar</button>
-            </div>
-          </div>
-          <div class="fg"><label class="fl">⭐ Motivo</label><input class="fc" id="bonus-motivo" placeholder="Ex: Participação surpresa, Versículo decorado..."></div>
-          <div class="fg"><label class="fl">📝 Descrição <span style="color:var(--ink-soft);font-size:10px">(opcional)</span></label><input class="fc" id="bonus-desc" placeholder="Detalhes adicionais..."></div>
-          <div class="frow">
-            <div class="fg"><label class="fl">🏆 Pontos</label><input class="fc" type="number" id="bonus-pts" placeholder="Ex: 10" min="1" value="10"></div>
-            <div class="fg" style="margin:0"><label class="fl">📅 Data</label><input class="fc" type="date" id="bonus-data"></div>
-          </div>
-          <button onclick="salvarBonusManual()" class="btn btn-gold btn-full" style="margin-top:4px">⭐ Aplicar Bônus</button>
-          <div id="bonus-historico" style="margin-top:14px"></div>
+        <div class="cfg-acc-div"></div>
+
+        <!-- ITEM: WHATSAPP -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('whatsapp',this)">
+          <div class="cfg-acc-ico" style="background:#edfdf0">📱</div>
+          <div class="cfg-acc-info"><b>WhatsApp</b><span>Número e mensagem de credenciais</span></div>
+          <div class="cfg-acc-arrow">›</div>
         </div>
-        <div class="card" style="margin-bottom:12px">
-          <div class="chdr">
-            <div class="ct">🔓 Liberações Especiais de Quiz</div>
-            <button class="btn btn-ou btn-sm" onclick="carregarLiberacoes()">↺</button>
+        <div class="cfg-acc-body" id="cfg-body-whatsapp">
+          <div class="cfg-acc-content">
+            <div class="fg"><label class="fl">📞 Número da Igreja</label><input class="fc" id="cfg-whats-numero" placeholder="5585999999999" type="tel"></div>
+            <button onclick="salvarCfgWhatsNumero()" class="btn btn-ou btn-full">✓ Salvar Número</button>
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">📱 Mensagem de credenciais</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Use <b>{nome}</b>, <b>{login}</b>, <b>{senha}</b>, <b>{turma}</b>, <b>{link}</b></div>
+            <div class="fg"><label class="fl">Link do sistema</label><input class="fc" id="cfg-whats-link" placeholder="https://ebdayrtonsenna1.vercel.app"></div>
+            <div class="fg" style="margin:0"><label class="fl">Texto da mensagem</label><textarea class="fc" id="cfg-whats-msg" rows="6" placeholder="Olá, {nome}!..."></textarea></div>
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button onclick="previewMsgWhats()" class="btn btn-ou btn-sm" style="flex:1">👁 Prévia</button>
+              <button onclick="salvarConfigWhats()" class="btn btn-gold btn-sm" style="flex:1">✓ Salvar</button>
+            </div>
           </div>
-          <div style="font-size:12px;color:var(--ink-soft);margin-bottom:14px;line-height:1.5">Libere uma lição específica com prazo extra e pontuação fixa.</div>
-          <div class="frow">
+        </div>
+
+        <div class="cfg-acc-div"></div>
+
+        <!-- ITEM: RANKING -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('ranking',this)">
+          <div class="cfg-acc-ico" style="background:#fdf5e8">🏆</div>
+          <div class="cfg-acc-info"><b>Ranking</b><span>Pontuação, FJ e bônus manual</span></div>
+          <div class="cfg-acc-arrow">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-ranking">
+          <div class="cfg-acc-content">
+
+            <!-- Presença -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin-bottom:8px">📅 Presença</div>
+            <div class="fg" style="margin-bottom:10px"><label class="fl">Pontos por presença</label><input class="fc" type="number" id="rk-pts-presenca" value="10" min="0"></div>
+            <button onclick="salvarPtsPresenca()" class="btn btn-ou btn-sm btn-full">✓ Salvar Presença</button>
+
+            <!-- FJ -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--warn);margin:14px 0 8px">🟡 Falta Justificada com Pontuação</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Selecione a turma e a aula para aplicar pontos a quem tem FJ.</div>
             <div class="fg"><label class="fl">Turma</label>
-              <select class="fc" id="lib-turma">
-                <option value="criancas">Crianças</option>
-                <option value="jovens">Jovens</option>
-                <option value="adultos">Adultos</option>
+              <select class="fc" id="fj-turma" onchange="carregarAulasFJ()">
+                <option value="criancas">🟢 Crianças</option>
+                <option value="jovens">🔵 Jovens</option>
+                <option value="adultos">🔴 Adultos</option>
               </select>
             </div>
-            <div class="fg"><label class="fl">Lição nº</label><input class="fc" type="number" id="lib-licao" min="1" max="13" placeholder="Ex: 1"></div>
-          </div>
-          <div class="frow">
-            <div class="fg"><label class="fl">Liberar por (dias)</label><input class="fc" type="number" id="lib-dias" min="1" max="30" placeholder="Ex: 2" value="2"></div>
-            <div class="fg" style="margin:0"><label class="fl">Pontuação fixa (pts)</label><input class="fc" type="number" id="lib-pts" min="0" placeholder="Ex: 10" value="10"></div>
-          </div>
-          <button onclick="salvarLiberacao()" style="width:100%;padding:10px;background:var(--ink);border:none;border-radius:8px;color:white;font-size:13px;font-weight:700;cursor:pointer;margin:10px 0 6px">🔓 Liberar Quiz</button>
-          <div id="lista-liberacoes"></div>
-        </div>
-      </div>
+            <div class="fg">
+              <label class="fl">Aula / Dia</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div id="fj-aula-chip" style="flex:1;min-height:36px;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhuma aula selecionada</div>
+                <button type="button" onclick="abrirModalAulasFJ()" class="btn btn-ou btn-sm" style="white-space:nowrap">📅 Selecionar</button>
+              </div>
+              <input type="hidden" id="fj-aula-id">
+            </div>
+            <div class="fg" style="margin:0"><label class="fl">Pontos para quem tem FJ</label><input class="fc" type="number" id="fj-pts" value="5" min="1"></div>
+            <div id="fj-preview" style="margin-top:10px;display:none">
+              <div style="font-size:12px;font-weight:700;color:var(--ink-soft);margin-bottom:6px">Alunos com FJ:</div>
+              <div id="fj-preview-lista"></div>
+            </div>
+            <button onclick="verificarEAplicarFJ()" class="btn btn-gold btn-full" style="margin-top:10px">✦ Aplicar Pontos FJ</button>
 
-      <!-- ABA: SISTEMA -->
-      <div id="cfg-tab-sistema" class="cfg-tab-content" style="display:none">
-        <div class="card" style="margin-bottom:12px">
-          <div class="chdr"><div class="ct">📋 Log de acessos</div><button class="btn btn-ou btn-sm" onclick="carregarLogAcessos()">↺ Atualizar</button></div>
-          <div id="lista-log-acessos"><div class="empty-txt" style="padding:10px 0;color:var(--ink-soft)">Clique em Atualizar para carregar</div></div>
+            <!-- Quiz -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">⚡ Quiz da Lição</div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Pontos no dia</label><input class="fc" type="number" id="rk-pts-quiz-dia0" value="10" min="0"></div>
+              <div class="fg" style="margin:0"><label class="fl">Decréscimo/dia</label><input class="fc" type="number" id="rk-pts-quiz-dec" value="1" min="0"></div>
+            </div>
+            <div class="fg" style="margin-bottom:10px">
+              <label style="display:flex;align-items:center;gap:10px;cursor:pointer;padding:10px;background:var(--cream);border-radius:var(--rsm);border:1px solid var(--cb)">
+                <input type="checkbox" id="rk-quiz-proporcional" style="width:18px;height:18px;accent-color:var(--tj)">
+                <div><div style="font-size:13px;font-weight:700">Descontar por questão errada</div><div style="font-size:11px;color:var(--ink-soft)">Pontos = (acertos ÷ total) × pts do dia</div></div>
+              </label>
+            </div>
+            <div class="fg" style="margin-bottom:10px"><label class="fl">Dias disponível após a aula</label><input class="fc" type="number" id="rk-quiz-dias" value="6" min="1" max="13"></div>
+            <button onclick="salvarRegraQuiz()" class="btn btn-ou btn-sm btn-full">✓ Salvar Quiz</button>
+
+            <!-- Provas -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">📝 Provas</div>
+            <div class="fg" style="margin-bottom:10px"><label class="fl">Fórmula: nota × fator</label><input class="fc" type="number" id="rk-pts-prova-fator" value="10" min="1" step="0.5"><div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: nota 8.5 × 10 = <strong>85 pts</strong></div></div>
+            <button onclick="salvarRegraProva()" class="btn btn-ou btn-sm btn-full">✓ Salvar Provas</button>
+
+            <!-- Liberações -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🔓 Liberações de Quiz</div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Turma</label><select class="fc" id="lib-turma"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+              <div class="fg" style="margin:0"><label class="fl">Lição nº</label><input class="fc" type="number" id="lib-licao" min="1" max="13" placeholder="Ex: 1"></div>
+            </div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Liberar por (dias)</label><input class="fc" type="number" id="lib-dias" min="1" max="30" value="2"></div>
+              <div class="fg" style="margin:0"><label class="fl">Pontos fixos</label><input class="fc" type="number" id="lib-pts" min="0" value="10"></div>
+            </div>
+            <button onclick="salvarLiberacao()" class="btn btn-dk btn-full" style="margin-bottom:6px">🔓 Liberar Quiz</button>
+            <div id="lista-liberacoes"></div>
+
+            <!-- Bônus Manual -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">⭐ Pontuação Bônus Manual</div>
+            <div class="fg"><label class="fl">Turma</label><select class="fc" id="bonus-turma" onchange="atualizarDestBonus()"><option value="criancas">🟢 Crianças</option><option value="jovens">🔵 Jovens</option><option value="adultos">🔴 Adultos</option></select></div>
+            <div class="fg" style="margin-bottom:10px">
+              <label class="fl">Destinatário</label>
+              <div style="display:flex;gap:8px">
+                <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white"><input type="radio" name="bonus-dest" id="bonus-dest-todos" value="todos" checked onchange="toggleDestBonus()" style="width:15px;height:15px"><span style="font-size:13px;font-weight:600">👥 Todos</span></label>
+                <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white"><input type="radio" name="bonus-dest" id="bonus-dest-espec" value="especifico" onchange="toggleDestBonus()" style="width:15px;height:15px"><span style="font-size:13px;font-weight:600">👤 Específico</span></label>
+              </div>
+            </div>
+            <div id="bonus-aluno-wrap" style="display:none;margin-bottom:10px">
+              <label class="fl">Alunos selecionados</label>
+              <div style="display:flex;gap:8px;align-items:center">
+                <div id="bonus-alunos-chips" style="flex:1;min-height:36px;padding:6px 10px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhum selecionado</div>
+                <button type="button" onclick="abrirModalSelecionarAlunosBonus()" class="btn btn-ou btn-sm">+ Selecionar</button>
+              </div>
+            </div>
+            <div class="fg"><label class="fl">Motivo</label><input class="fc" id="bonus-motivo" placeholder="Ex: Participação surpresa..."></div>
+            <div class="fg"><label class="fl">Descrição <span style="color:var(--ink-soft);font-size:10px">(opcional)</span></label><input class="fc" id="bonus-desc" placeholder="Detalhes adicionais..."></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Pontos</label><input class="fc" type="number" id="bonus-pts" value="10" min="1"></div>
+              <div class="fg" style="margin:0"><label class="fl">Data</label><input class="fc" type="date" id="bonus-data"></div>
+            </div>
+            <button onclick="salvarBonusManual()" class="btn btn-gold btn-full">⭐ Aplicar Bônus</button>
+            <div id="bonus-historico" style="margin-top:14px"></div>
+          </div>
         </div>
-      </div>
+
+        <div class="cfg-acc-div"></div>
+
+        <!-- ITEM: SISTEMA -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('sistema',this)">
+          <div class="cfg-acc-ico" style="background:#f2f2f2">⚙️</div>
+          <div class="cfg-acc-info"><b>Sistema</b><span>Log de acessos</span></div>
+          <div class="cfg-acc-arrow">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-sistema">
+          <div class="cfg-acc-content">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+              <div style="font-size:13px;font-weight:600">Log de acessos</div>
+              <button class="btn btn-ou btn-sm" onclick="carregarLogAcessos()">↺ Atualizar</button>
+            </div>
+            <div id="lista-log-acessos"><div style="color:var(--ink-soft);font-size:13px">Clique em Atualizar para carregar</div></div>
+          </div>
+        </div>
+
+      </div><!-- /cfg-acc-list -->
 
     </div>
 
-        <!-- LIÇÕES -->
-    <div id="pg-licoes" class="page">
+        <div id="pg-licoes" class="page">
       <div class="ph"><h2>Lições <em>Bíblicas</em></h2><p id="licoes-sub">2º Trimestre 2026</p></div>
       <div class="ttabs" id="licoes-ttabs">
         <button class="ttab tc on" onclick="selTurmaLicoes('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
@@ -4614,17 +4595,37 @@ function copiarSQLQuiz() {
   });
 }
 
+function toggleCfgAcc(key, itemEl) {
+  const body = document.getElementById('cfg-body-' + key);
+  const arrow = itemEl.querySelector('.cfg-acc-arrow');
+  const isOpen = body.classList.contains('open');
+  // Fechar todos
+  document.querySelectorAll('.cfg-acc-body').forEach(b => b.classList.remove('open'));
+  document.querySelectorAll('.cfg-acc-arrow').forEach(a => { a.classList.remove('open'); });
+  document.querySelectorAll('.cfg-acc-item').forEach(i => i.classList.remove('open'));
+  // Abrir o clicado (se estava fechado)
+  if (!isOpen) {
+    body.classList.add('open');
+    arrow.classList.add('open');
+    itemEl.classList.add('open');
+    // Carregar dados ao abrir
+    if (key === 'ranking') { carregarRegraRanking(); carregarLiberacoes(); carregarHistoricoBonus(); carregarAulasFJ(); }
+    if (key === 'sistema') carregarLogAcessos();
+    if (key === 'igreja' || key === 'ebd' || key === 'trimestre' || key === 'whatsapp') carregarPaginaConfig();
+  }
+}
+
 function selCfgTab(tab, el) {
   document.querySelectorAll('.cfg-tab').forEach(b => {
     const on = b.dataset.tab === tab;
-    b.style.background = on ? 'var(--ink)' : 'white';
-    b.style.color = on ? 'var(--gold-l)' : 'var(--ink)';
-    b.style.borderColor = on ? 'var(--gold)' : 'var(--cb)';
+    b.style.background = on ? 'var(--ink)' : 'var(--cream)';
+    b.style.color = on ? 'var(--gold-l)' : 'var(--ink-soft)';
+    b.style.transform = on ? 'scale(1.04)' : 'scale(1)';
+    b.style.boxShadow = on ? '0 4px 14px rgba(0,0,0,.18)' : 'none';
   });
   document.querySelectorAll('.cfg-tab-content').forEach(d => d.style.display = 'none');
   const t = document.getElementById('cfg-tab-' + tab);
-  if (t) t.style.display = 'block';
-  // Carregar aulas FJ ao abrir aba Ranking
+  if (t) { t.style.display = 'block'; t.style.animation = 'fadeUp .2s ease'; }
   if (tab === 'ranking') carregarAulasFJ();
 }
 
@@ -4650,7 +4651,6 @@ async function carregarPaginaConfig() {
   // Inicializar data do bônus com hoje
   const bonusDataEl = document.getElementById('bonus-data');
   if (bonusDataEl && !bonusDataEl.value) bonusDataEl.value = _hojeStr();
-  carregarHistoricoBonus();
   document.getElementById('cfg-nome-igreja').value = cfgNomeIgreja;
   document.getElementById('cfg-nome-ebd').value = cfgNomeEBD;
   // WhatsApp credenciais
@@ -5055,17 +5055,79 @@ function selTurmaLicoes(turma, el) {
 }
 
 function renderLicoes() {
-  const dados = LICOES[curTurmaLicoes];
-  if (!dados) return;
-  document.getElementById('lic-periodo').textContent = dados.periodo;
-  document.getElementById('lic-tema').textContent = dados.tema;
-  document.getElementById('lic-subtema').textContent = dados.subtema;
-  document.getElementById('lic-coment').textContent = dados.comentarista;
-  document.getElementById('licoes-sub').textContent = dados.tema;
-
-  const hoje = new Date();
+  const turma = curTurmaLicoes;
+  const trimestres = LICOES_TRIMESTRES[turma] || [];
   const box = document.getElementById('lista-licoes');
-  box.innerHTML = dados.licoes.map(lic => {
+  if (!box) return;
+
+  // Esconder cabeçalho fixo — accordion tem o próprio
+  ['lic-periodo','lic-tema','lic-subtema','lic-coment'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.style.display = 'none';
+  });
+
+  if (!trimestres.length) {
+    box.innerHTML = '<div class="empty"><div class="empty-icon">📖</div><div class="empty-txt">Nenhum trimestre cadastrado</div></div>';
+    return;
+  }
+
+  // Renderizar accordion de trimestres
+  box.innerHTML = '<div id="lic-trim-acc" style="display:flex;flex-direction:column;gap:8px">' +
+    trimestres.map((trim, idx) => {
+      const aberto = trim.atual;
+      return `<div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);margin-bottom:8px">
+        <!-- Header: dourado fechado, preto aberto -->
+        <div onclick="toggleLicTrimestre('${turma}','${trim.id}',this)" style="background:${aberto ? 'var(--ink)' : 'var(--gold-pale)'};padding:18px 16px;cursor:pointer;position:relative;overflow:hidden;transition:background .25s">
+          <div style="position:absolute;top:-20px;right:-20px;width:90px;height:90px;border-radius:50%;background:var(--gold);opacity:.15;pointer-events:none"></div>
+          <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:12px">
+            <div style="flex:1">
+              <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto ? 'var(--gold-l)' : 'var(--gold-deep)'};margin-bottom:6px">${trim.dados.periodo}</div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:500;margin-bottom:4px;color:${aberto ? 'white' : 'var(--ink)'}">${trim.dados.tema}</div>
+              <div style="font-size:12px;margin-bottom:2px;color:${aberto ? 'rgba(255,255,255,.45)' : 'var(--ink-soft)'}">${trim.dados.subtema || ''}</div>
+              <div style="font-size:11px;color:${aberto ? 'rgba(255,255,255,.3)' : 'var(--ink-soft)'}">${trim.dados.comentarista || ''}</div>
+            </div>
+            <div style="font-size:20px;transition:transform .3s;transform:${aberto ? 'rotate(90deg)' : 'none'};flex-shrink:0;margin-top:4px;color:${aberto ? 'var(--gold)' : 'var(--gold-deep)'}" class="lic-trim-arrow">›</div>
+          </div>
+        </div>
+        <!-- Lições do trimestre -->
+        <div id="lic-trim-body-${trim.id}" style="max-height:${aberto ? '9999px' : '0'};overflow:hidden;transition:max-height .4s ease">
+          <div style="padding:12px">
+            ${_renderLicoesLista(trim.dados, turma)}
+          </div>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+}
+
+function toggleLicTrimestre(turma, trimId, headerEl) {
+  const trimestres = LICOES_TRIMESTRES[turma] || [];
+  trimestres.forEach(trim => {
+    const body = document.getElementById('lic-trim-body-' + trim.id);
+    const header = body ? body.previousElementSibling : null;
+    const arrow = header ? header.querySelector('.lic-trim-arrow') : null;
+    const isThis = trim.id === trimId;
+    const abrir = isThis && body && body.style.maxHeight === '0px';
+
+    if (body) body.style.maxHeight = abrir ? '9999px' : '0px';
+    if (arrow) {
+      arrow.style.transform = abrir ? 'rotate(90deg)' : 'none';
+      arrow.style.color = abrir ? 'var(--gold)' : 'var(--gold-deep)';
+    }
+    if (header) {
+      header.style.background = abrir ? 'var(--ink)' : 'var(--gold-pale)';
+      const divs = header.querySelectorAll(':scope > div > div > div');
+      if (divs[0]) divs[0].style.color = abrir ? 'var(--gold-l)' : 'var(--gold-deep)';
+      if (divs[1]) divs[1].style.color = abrir ? 'white' : 'var(--ink)';
+      if (divs[2]) divs[2].style.color = abrir ? 'rgba(255,255,255,.45)' : 'var(--ink-soft)';
+      if (divs[3]) divs[3].style.color = abrir ? 'rgba(255,255,255,.3)' : 'var(--ink-soft)';
+    }
+  });
+}
+
+function _renderLicoesLista(dados, turmaRender) {
+  if (!dados || !dados.licoes) return '<div style="padding:12px;color:var(--ink-soft);font-size:13px">Nenhuma lição cadastrada.</div>';
+  const hoje = new Date();
+  return dados.licoes.map(lic => {
     const maxDias = RANKING_CONFIG.quiz_dias ?? 6;
     const [d, m] = lic.data.split('/');
     const dataLic = new Date(2026, parseInt(m)-1, parseInt(d), 0, 0, 0, 0);
@@ -5102,7 +5164,8 @@ function renderLicoes() {
       quizBadge = `<div style="font-size:10px;color:var(--ink-soft);margin-top:5px">📅 ${lic.data}</div>`;
     }
 
-    return `<div onclick="abrirLicao('${curTurmaLicoes}',${lic.num})" style="background:white;border:1px solid ${borderColor};border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='${borderColor}';this.style.transform=''">
+    const turmaParaAbrir = turmaRender || curTurmaLicoes;
+    return `<div onclick="abrirLicao('${turmaParaAbrir}',${lic.num})" style="background:white;border:1px solid ${borderColor};border-radius:var(--r);padding:14px;margin-bottom:9px;cursor:pointer;display:flex;align-items:flex-start;gap:12px;transition:all .2s;position:relative;overflow:hidden" onmouseover="this.style.borderColor='var(--gold)';this.style.transform='translateY(-1px)'" onmouseout="this.style.borderColor='${borderColor}';this.style.transform=''">
       <div style="background:var(--ink);color:var(--gold-l);font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0">${lic.num}</div>
       <div style="flex:1;min-width:0">
         <div style="font-size:14px;font-weight:600;margin-bottom:3px;color:var(--ink);word-break:break-word;white-space:normal">${lic.titulo}${ehHoje?' 📖':''}</div>
@@ -6017,6 +6080,29 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
 // Cache dos dados do aluno — evita re-fetch ao navegar entre abas
 let _cacheAlunoProgresso = null;
 let _cacheAlunoTs = 0; // timestamp do cache
+// ═══════════════════════════════════════════════════════
+// TODOS OS TRIMESTRES — accordion de lições
+// Adicione trimestres anteriores aqui
+// ═══════════════════════════════════════════════════════
+const LICOES_TRIMESTRES = {
+  criancas: [
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
+      dados: LICOES.criancas },
+    // Exemplo de trimestre anterior — descomente e preencha para adicionar:
+    // { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
+    //   dados: { tema: 'Nome do Tema', subtema: '...', comentarista: '...', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
+  ],
+  jovens: [
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
+      dados: LICOES.jovens },
+  ],
+  adultos: [
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
+      dados: LICOES.adultos },
+  ],
+};
+
+
 const _CACHE_TTL = 60000; // 60 segundos — recarrega automaticamente
 
 async function renderAlunoProgresso() {
