@@ -1,86 +1,87 @@
-// EBD Frequência — Service Worker v1.0
-const CACHE_NAME = 'ebd-freq-v1';
-const OFFLINE_URL = '/';
+// EBD Frequência — Service Worker v2.0
+const CACHE = 'ebd-v2';
 
-// Arquivos para cache offline
-const CACHE_FILES = [
-  '/',
-  '/index.html',
-  '/manifest.json'
-];
-
-// Instalação — fazer cache dos arquivos essenciais
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      return cache.addAll(CACHE_FILES);
-    }).then(() => self.skipWaiting())
-  );
-});
-
-// Ativação — limpar caches antigos
-self.addEventListener('activate', event => {
-  event.waitUntil(
-    caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE_NAME).map(k => caches.delete(k)))
-    ).then(() => self.clients.claim())
-  );
-});
-
-// Fetch — network first, fallback para cache
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') return;
-  if (!event.request.url.startsWith(self.location.origin)) return;
-  // Supabase — sempre online
-  if (event.request.url.includes('supabase.co')) return;
-
-  event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        // Atualizar cache com resposta fresca
-        const clone = response.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(event.request, clone));
-        return response;
-      })
-      .catch(() => {
-        return caches.match(event.request).then(cached => {
-          return cached || caches.match(OFFLINE_URL);
-        });
-      })
-  );
-});
-
-// Push Notification recebida
-self.addEventListener('push', event => {
-  let data = { title: 'EBD Frequência', body: 'Nova notificação', icon: '/icon-192.png' };
-  try {
-    if (event.data) data = { ...data, ...event.data.json() };
-  } catch(e) {}
-
-  event.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: data.icon || '/icon-192.png',
-      badge: '/icon-192.png',
-      vibrate: [200, 100, 200],
-      data: data.url ? { url: data.url } : {},
-      actions: data.actions || [],
-      tag: data.tag || 'ebd-notif',
-      renotify: true
+// Instalação — cachear a página principal
+self.addEventListener('install', function(e) {
+  e.waitUntil(
+    caches.open(CACHE).then(function(cache) {
+      return cache.addAll(['/']);
+    }).then(function() {
+      return self.skipWaiting();
     })
   );
 });
 
-// Clique na notificação — abrir/focar o app
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  const url = (event.notification.data && event.notification.data.url) ? event.notification.data.url : '/';
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(windowClients => {
-      for (const client of windowClients) {
-        if (client.url === url && 'focus' in client) return client.focus();
+// Ativação — limpar caches antigos
+self.addEventListener('activate', function(e) {
+  e.waitUntil(
+    caches.keys().then(function(keys) {
+      return Promise.all(
+        keys.filter(function(k) { return k !== CACHE; })
+          .map(function(k) { return caches.delete(k); })
+      );
+    }).then(function() {
+      return self.clients.claim();
+    })
+  );
+});
+
+// Fetch — cache first para HTML, network first para Supabase
+self.addEventListener('fetch', function(e) {
+  var url = e.request.url;
+
+  // Supabase — sempre online, nunca cachear
+  if (url.includes('supabase.co')) return;
+
+  // Só GET
+  if (e.request.method !== 'GET') return;
+
+  e.respondWith(
+    // Tentar rede primeiro
+    fetch(e.request).then(function(response) {
+      // Se deu certo, cachear e retornar
+      if (response && response.status === 200) {
+        var clone = response.clone();
+        caches.open(CACHE).then(function(cache) {
+          cache.put(e.request, clone);
+        });
       }
-      if (clients.openWindow) return clients.openWindow(url);
+      return response;
+    }).catch(function() {
+      // Sem internet — retornar do cache
+      return caches.match(e.request).then(function(cached) {
+        if (cached) return cached;
+        // Fallback para a página principal
+        return caches.match('/');
+      });
+    })
+  );
+});
+
+// Push notification
+self.addEventListener('push', function(e) {
+  var data = { title: 'EBD Frequência', body: 'Nova notificação' };
+  try { if (e.data) data = Object.assign(data, e.data.json()); } catch(err) {}
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+      icon: '/icon-192.png',
+      badge: '/icon-192.png',
+      vibrate: [200, 100, 200],
+      tag: 'ebd-notif'
+    })
+  );
+});
+
+// Clique na notificação
+self.addEventListener('notificationclick', function(e) {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window' }).then(function(list) {
+      for (var c of list) {
+        if ('focus' in c) return c.focus();
+      }
+      if (clients.openWindow) return clients.openWindow('/');
     })
   );
 });
