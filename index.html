@@ -1607,7 +1607,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             <!-- RECUPERAÇÃO DE PRESENÇA -->
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🔁 Recuperação de Presença</div>
             <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Pontos fixos ao fazer prova do tipo <strong>Recuperação de Presença</strong>. Independente da nota — valor fixo.</div>
-            <div class="fg" style="margin-bottom:10px"><label class="fl">Pontos por recuperação</label><input class="fc" type="number" id="rk-pts-recuperacao" value="10" min="0"><div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: aluno faltou → faz recuperação → ganha 10 pts fixos</div></div>
+            <div class="fg" style="margin-bottom:10px"><label class="fl">Pontuação máxima por recuperação</label><input class="fc" type="number" id="rk-pts-recuperacao" value="10" min="0"><div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Pontos proporcionais ao acerto. Ex: máx 10pts → tirou 80% → ganha 8pts · 100% → 10pts · 60% → 6pts</div></div>
             <button onclick="salvarPtsRecuperacao()" class="btn btn-ou btn-sm btn-full">✓ Salvar Recuperação</button>
 
             <!-- FJ -->
@@ -7081,11 +7081,18 @@ async function verResultados(id) {
     return;
   }
   const alunos = await sbGet('alunos', { turma: p.turma });
+  const ptsRecuperacao = RANKING_CONFIG.pts_recuperacao_presenca ?? 10;
+  const ehRecuperacao = p.tipo === 'recuperacao';
   const lista = Object.entries(resultados).map(([alunoId, res]) => {
     const aluno = alunos.find(a => a.id === alunoId);
     const nome = aluno ? aluno.nome : 'Aluno ' + alunoId.substring(0, 6);
     const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
-    const nota = (pct / 10).toFixed(1);
+    // Recuperação: pontos fixos. Prova normal: nota × fator
+    // Recuperação: proporcional ao acerto com teto. Prova normal: nota × fator
+    const notaNum = ehRecuperacao
+      ? parseFloat(((pct / 100) * ptsRecuperacao).toFixed(1))
+      : parseFloat((pct / 10).toFixed(1));
+    const nota = notaNum.toFixed(1);
     const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
     const obs = p.observacoes?.[alunoId] || '';
     return { alunoId, nome, acertos: res.acertos, pct, nota, cor, data: res.data, obs };
@@ -8861,13 +8868,15 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
 
   // Provas — separar recuperação de presença de provas normais
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio').forEach(p => {
+    const res = p.resultados[alunoId];
+    const nQ = (p.questoes || []).length;
+    const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
     if (p.tipo === 'recuperacao') {
-      // Recuperação de presença: pontos fixos configurados
-      pts += ptsRecuperacao; ptsProv += ptsRecuperacao;
+      // Recuperação: proporcional ao acerto, teto = pts configurado
+      // Ex: 80% de 10pts = 8pts | 100% = 10pts | 60% = 6pts
+      const ganhou = parseFloat(((pct / 100) * ptsRecuperacao).toFixed(1));
+      pts += ganhou; ptsProv += ganhou;
     } else {
-      const res = p.resultados[alunoId];
-      const nQ = (p.questoes || []).length;
-      const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
       const nota = pct / 10;
       const bonus = Math.round(nota * fatorProva);
       pts += bonus; ptsProv += bonus;
