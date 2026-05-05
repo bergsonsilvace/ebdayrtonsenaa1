@@ -1604,6 +1604,12 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             <div class="fg" style="margin-bottom:10px"><label class="fl">Pontos por presença</label><input class="fc" type="number" id="rk-pts-presenca" value="10" min="0"></div>
             <button onclick="salvarPtsPresenca()" class="btn btn-ou btn-sm btn-full">✓ Salvar Presença</button>
 
+            <!-- RECUPERAÇÃO DE PRESENÇA -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🔁 Recuperação de Presença</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Pontos fixos ao fazer prova do tipo <strong>Recuperação de Presença</strong>. Independente da nota — valor fixo.</div>
+            <div class="fg" style="margin-bottom:10px"><label class="fl">Pontos por recuperação</label><input class="fc" type="number" id="rk-pts-recuperacao" value="10" min="0"><div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ex: aluno faltou → faz recuperação → ganha 10 pts fixos</div></div>
+            <button onclick="salvarPtsRecuperacao()" class="btn btn-ou btn-sm btn-full">✓ Salvar Recuperação</button>
+
             <!-- FJ -->
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--warn);margin:14px 0 8px">🟡 Falta Justificada com Pontuação</div>
             <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Selecione a turma e a aula para aplicar pontos a quem tem FJ.</div>
@@ -2123,7 +2129,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <input type="hidden" id="pv-id">
       <div class="fg"><label class="fl">Nome</label><input class="fc" id="pv-nome" placeholder="Ex: Prova Bimestral, Simulado Lições 1-5"></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
+        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="recuperacao">🔁 Recuperação de Presença</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
         <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal();onTurmaProvaChange();atualizarSelectAlunoProva()"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       </div>
       <div class="fg" style="margin-bottom:10px">
@@ -3208,6 +3214,11 @@ async function _navTo(id) {
     }
     if (ehAluno && turmaAluno) {
       curTurmaLicoes = turmaAluno;
+    }
+    // Garantir que quizScores está carregado antes de renderizar
+    if (ehAluno && USER) {
+      const alunoId = USER._aluno_id || USER.aluno_id || USER.id;
+      await carregarQuizScoresDoAluno(alunoId, curTurmaLicoes);
     }
     renderLicoes();
   }
@@ -5275,6 +5286,8 @@ async function abrirLicao(turma, num) {
   const hojeZ = _hojeFortaleza();
   const diasAposAula = Math.floor((hojeZ - dataLic) / 86400000);
   const liberacao = getLiberacaoAtiva(turma, num);
+  // Bug 5: quiz só disponível se há aula registrada para essa lição
+  const aulaRegistrada = cacheAulas.some(a => a.turma === turma && a.licao === lic.titulo);
   const quizDisp = liberacao
     ? true
     : diasAposAula >= 0 && diasAposAula <= (RANKING_CONFIG.quiz_dias ?? 6);
@@ -5769,6 +5782,12 @@ async function mostrarResultado() {
         };
       });
 
+      // Bug 5: verificar se já fez antes de salvar
+      const chaveQuiz = `${turmaAtual}-${quizAtual.licaoNum}`;
+      if (quizScores[chaveQuiz]) {
+        toast('⚠️ Você já realizou este quiz!', 'er');
+        return;
+      }
       const { error } = await sbClient.from('quiz_resultados').upsert({
         aluno_id: alunoId,
         turma: q.turma,
@@ -6386,6 +6405,15 @@ async function renderProvasProf() {
   const ehProfSimples = isProfessor() && !isAdmin();
 
   box.innerHTML = minhas.map(p => {
+    // Bug 3: alerta para provas sem questões
+    if (!p.questoes || p.questoes.length === 0) {
+      return `<div style="background:var(--red-bg);border:1.5px solid var(--red);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">⚠️</span>
+        <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--red)">${p.nome}</div>
+        <div style="font-size:11px;color:var(--ink-soft)">Prova sem questões — edite para adicionar antes de liberar</div></div>
+        <button onclick="editarProva('${p.id}')" class="btn btn-ou btn-sm">✏️ Editar</button>
+      </div>`;
+    }
     const encerrada = p.data_limite && p.data_limite < hoje;
     // status_aprovacao: 'pendente' | 'rejeitada' | 'revisao' | 'aprovada' (default)
     const statusAp = p.status_aprovacao || (p.aprovada === false ? 'pendente' : 'aprovada');
@@ -6502,8 +6530,8 @@ function _atualizarChipsAlunos() {
 
 async function abrirModalSelecionarAlunos() {
   const turma = document.getElementById('pv-turma').value;
-  // Garantir que cacheAlunos está carregado
-  if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+  // Bug 6: sempre recarregar para garantir turma correta
+  cacheAlunos = await sbGet('alunos');
   const modal = document.getElementById('mo-sel-alunos');
   const label = document.getElementById('sel-alunos-turma-label');
   if (label) label.textContent = 'Turma de ' + (TN[turma] || turma);
@@ -6585,6 +6613,11 @@ async function abrirModalProva(id, tipoPresel) {
   document.getElementById('pv-id').value = id || '';
   extrasCount = 0;
   document.getElementById('pv-extras-list').innerHTML = '';
+  // Bug 1: resetar seleção de alunos ao abrir modal
+  _alunosSelecionados = [];
+  _atualizarChipsAlunos();
+  document.getElementById('pv-dest-todos').checked = true;
+  document.getElementById('pv-aluno-wrap').style.display = 'none';
 
   if (id) {
     // Buscar dados frescos do banco — não depender do cache PROVAS
@@ -6601,7 +6634,21 @@ async function abrirModalProva(id, tipoPresel) {
       document.getElementById('pv-turma').value = p.turma || 'adultos';
       document.getElementById('pv-tempo').value = p.tempo_minutos || 0;
       document.getElementById('pv-data-limite').value = p.data_limite ? p.data_limite.slice(0,16) : '';
-    document.getElementById('pv-data-inicio').value = p.data_inicio ? p.data_inicio.slice(0,16) : '';
+      document.getElementById('pv-data-inicio').value = p.data_inicio ? p.data_inicio.slice(0,16) : '';
+      // Bug 2: restaurar aluno_ids ao editar prova
+      if (p.aluno_ids && p.aluno_ids.length) {
+        document.getElementById('pv-dest-espec').checked = true;
+        document.getElementById('pv-aluno-wrap').style.display = 'block';
+        if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+        _alunosSelecionados = p.aluno_ids.map(aid => {
+          const a = cacheAlunos.find(x => x.id === aid);
+          return a ? { id: a.id, nome: a.nome } : { id: aid, nome: aid };
+        });
+        _atualizarChipsAlunos();
+      } else {
+        document.getElementById('pv-dest-todos').checked = true;
+        document.getElementById('pv-aluno-wrap').style.display = 'none';
+      }
       setTimeout(() => {
         const extrasApenas = (p.questoes || []).filter(q => q.origem === 'extra');
         extrasApenas.forEach(q => adicionarQuestaoExtra(q));
@@ -6833,6 +6880,9 @@ async function salvarProva() {
   const statusInicial = aprovadaAuto ? 'aprovada' : 'pendente';
   const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado' }[tipo] || 'Avaliação';
 
+  const espec = document.getElementById('pv-dest-espec') && document.getElementById('pv-dest-espec').checked;
+  const alunoIds = espec && _alunosSelecionados.length ? _alunosSelecionados.map(a => a.id) : null;
+
   const dado = {
     nome, tipo, turma, tempo_minutos: tempo,
     data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel,
@@ -6841,14 +6891,15 @@ async function salvarProva() {
     status_aprovacao: statusInicial,
     criado_por: USER.nome,
     obs_aprovacao: null,
-    historico_aprovacao: []
+    historico_aprovacao: [],
+    aluno_ids: alunoIds
   };
 
   try {
     if (editId) {
       // Diagnóstico: mostrar o id que será salvo
       console.log('Editando prova id:', editId, 'tipo:', typeof editId);
-      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes };
+      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes, aluno_ids: alunoIds };
 
       // Tentar update direto sem passar por sbUpdate para ver erro bruto
       const { data: dataUp, error: errUp } = await sbClient.from('provas').update(dadoEdicao).eq('id', editId).select();
@@ -7075,14 +7126,28 @@ async function verRespostasAluno(provaId, alunoId, nomeAluno) {
   const pct = res ? (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0)) : 0;
   const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
   const questoesHtml = res ? p.questoes.map((q, i) => {
-    const respAluno = res.respostas ? res.respostas[i] : null;
-    const acertou = respAluno ? (respAluno.acertou || respAluno.valor === q.a) : false;
-    const marcou = respAluno ? (respAluno.valor || respAluno.texto || '—') : '— Sem resposta';
+    // Respostas: campo novo (string) ou legado (objeto) ou ausente
+    const temRespostas = res.respostas && Object.keys(res.respostas).length > 0;
+    if (!temRespostas) {
+      // Prova antiga — não tem respostas salvas, mostrar só resultado
+      const acertou = false; // não sabemos
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
+        <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4">${i+1}. ${q.q}</div>
+        <div style="font-size:12px;color:var(--ink-soft);padding:6px 10px;background:var(--cream);border-radius:6px">
+          📋 Resposta não registrada — disponível em provas realizadas após a atualização do sistema
+        </div>
+        <div style="font-size:12px;color:var(--tc);margin-top:4px">✓ Correta: ${q.a}</div>
+      </div>`;
+    }
+    const respRaw = res.respostas[i];
+    const marcou = typeof respRaw === 'string' ? respRaw : (respRaw?.valor || respRaw?.texto || null);
+    const acertou = marcou ? (marcou === q.a) : false;
+    const marcouLabel = marcou || '— Sem resposta';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
       <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4">${i+1}. ${q.q}</div>
       <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
         <span style="padding:3px 9px;border-radius:6px;font-size:12px;background:${acertou?'var(--tc-bg)':'var(--red-bg)'};color:${acertou?'var(--tc)':'var(--red)'};font-weight:700">${acertou?'✓ Correto':'✗ Incorreto'}</span>
-        <span style="font-size:12px;color:var(--ink-mid)">Marcou: <strong>${marcou}</strong></span>
+        <span style="font-size:12px;color:var(--ink-mid)">Marcou: <strong>${marcouLabel}</strong></span>
       </div>
       ${!acertou ? `<div style="font-size:12px;color:var(--tc);margin-top:4px">✓ Correta: ${q.a}</div>` : ''}
     </div>`;
@@ -7572,8 +7637,14 @@ async function entregarProva(automatico = false) {
   });
   const pct = Math.round((acertos / p.questoes.length) * 100);
 
+  // Bug 7: incluir respostas individuais para gabarito
+  const respostasMap = {};
+  p.questoes.forEach((q, i) => {
+    respostasMap[i] = provaRespostas[i]?.valor ?? null;
+  });
+
   // Salvar no Supabase com id correto
-  const resultados = { ...(p.resultados || {}), [alunoId]: { acertos, total: p.questoes.length, pct, data: _agoraISO() } };
+  const resultados = { ...(p.resultados || {}), [alunoId]: { acertos, total: p.questoes.length, pct, data: _agoraISO(), respostas: respostasMap } };
   await sbUpdate('provas', p.id, { resultados });
 
   // Atualizar cache local
@@ -7583,6 +7654,8 @@ async function entregarProva(automatico = false) {
   // Mostrar resultado
   mostrarResultadoAluno(p, acertos, pct);
 
+  // Bug 4: invalidar cache para atualizar pontuação imediatamente
+  _cacheAlunoProgresso = null;
   // Atualizar progresso e ranking em background
   setTimeout(async function() {
     try { await renderAlunoProgresso(); } catch(e) {}
@@ -8307,6 +8380,11 @@ async function renderProvasNotifDash() {
         const idAtual = USER._aluno_id || USER.id;
         if (!p.aluno_ids.includes(idAtual)) return false;
       }
+      // Bug 7: ocultar prova que o aluno já fez
+      if (ehAlunoLocal && p.resultados) {
+        const idAtual = USER._aluno_id || USER.id;
+        if (p.resultados[idAtual]) return false;
+      }
       return true;
     });
 
@@ -8547,6 +8625,8 @@ async function carregarRegraRanking() {
     if (data) {
       RANKING_CONFIG = { ...RANKING_CONFIG, ...data };
       document.getElementById('rk-pts-presenca').value = data.pts_presenca ?? 10;
+      if (document.getElementById('rk-pts-recuperacao'))
+        document.getElementById('rk-pts-recuperacao').value = data.pts_recuperacao_presenca ?? 10;
       document.getElementById('rk-pts-quiz-dia0').value = data.pts_quiz_dia0 ?? 10;
       document.getElementById('rk-pts-quiz-dec').value = data.pts_quiz_dec ?? 1;
       document.getElementById('rk-quiz-proporcional').checked = data.pts_quiz_proporcional ?? false;
@@ -8563,6 +8643,15 @@ async function salvarPtsPresenca() {
     await sbClient.from('ranking_config').update({ pts_presenca: pts }).eq('id', 1);
     RANKING_CONFIG.pts_presenca = pts;
     toast('✦ Pontos de presença salvos!', 'ok');
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+async function salvarPtsRecuperacao() {
+  const pts = parseFloat(document.getElementById('rk-pts-recuperacao').value) || 10;
+  try {
+    await sbClient.from('ranking_config').update({ pts_recuperacao_presenca: pts }).eq('id', 1);
+    RANKING_CONFIG.pts_recuperacao_presenca = pts;
+    toast('✦ Pontos de recuperação salvos!', 'ok');
   } catch(e) { toast('Erro: ' + e.message, 'er'); }
 }
 
@@ -8750,34 +8839,39 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
 
   const ptsPorPresenca = RANKING_CONFIG.pts_presenca ?? 10;
   const fatorProva = RANKING_CONFIG.pts_prova_fator ?? 10;
+  const ptsRecuperacao = RANKING_CONFIG.pts_recuperacao_presenca ?? 10;
 
   // Presenças
   aulas.filter(a => a.turma === turma).forEach(a => {
     const statusPres = (a.presencas||{})[alunoId];
     if (statusPres === 'presente') { pts += ptsPorPresenca; ptsPres += ptsPorPresenca; }
     else if (statusPres === 'fj') {
-      // FJ vale pontos se configurado para a turma
       const fjVale = turma === 'criancas' ? RANKING_CONFIG.fj_vale_criancas : turma === 'jovens' ? RANKING_CONFIG.fj_vale_jovens : RANKING_CONFIG.fj_vale_adultos;
       const ptsFj = turma === 'criancas' ? (RANKING_CONFIG.pts_fj_criancas||0) : turma === 'jovens' ? (RANKING_CONFIG.pts_fj_jovens||0) : (RANKING_CONFIG.pts_fj_adultos||0);
       if (fjVale && ptsFj > 0) { pts += ptsFj; ptsPres += ptsFj; }
     }
   });
 
-  // Quizzes — usar pontos salvos se existirem, senão calcular pelo acerto
+  // Quizzes
   Object.entries(quizScores).forEach(([key, val]) => {
     if (!key.startsWith(turma)) return;
     const bonus = val.pontos != null ? val.pontos : (val.acertos * 2);
     pts += bonus; ptsQ += bonus;
   });
 
-  // Provas (não desafios — desafios têm tabela própria)
+  // Provas — separar recuperação de presença de provas normais
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio').forEach(p => {
-    const res = p.resultados[alunoId];
-    const nQ = (p.questoes || []).length;
-    const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
-    const nota = pct / 10;
-    const bonus = Math.round(nota * fatorProva);
-    pts += bonus; ptsProv += bonus;
+    if (p.tipo === 'recuperacao') {
+      // Recuperação de presença: pontos fixos configurados
+      pts += ptsRecuperacao; ptsProv += ptsRecuperacao;
+    } else {
+      const res = p.resultados[alunoId];
+      const nQ = (p.questoes || []).length;
+      const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
+      const nota = pct / 10;
+      const bonus = Math.round(nota * fatorProva);
+      pts += bonus; ptsProv += bonus;
+    }
   });
 
   // Desafios — ler da tabela desafio_pontos
@@ -12944,7 +13038,7 @@ async function verificarEAplicarFJ() {
       criado_por: USER.nome,
       descricao: `Falta justificada com pontuação para ${fjIds.length} aluno(s)`
     });
-    _cacheAlunoProgresso = null;
+    _cacheAlunoProgresso = null; // Bug 1: invalidar cache
     toast(`✦ ${pts} pts aplicados para ${fjIds.length} aluno(s) com FJ!`, 'ok');
     // Limpar
     _fjAulaSelecionada = null;
@@ -13080,6 +13174,7 @@ async function salvarBonusManual() {
   try {
     await sbClient.from('bonus_pontos').insert(dado);
     toast(`⭐ Bônus de ${pts} pts aplicado!`, 'ok');
+    _cacheAlunoProgresso = null; // Bug 1: invalidar cache
     // Limpar campos
     document.getElementById('bonus-motivo').value = '';
     document.getElementById('bonus-desc').value = '';
@@ -13629,8 +13724,13 @@ function mostrarModalPWA() {
 }
 
 function pwaBtnJaInstalei() {
+  // Bug 8: salvar flag em ambas as chaves para consistência total
   localStorage.setItem('pwa-instalou', '1');
+  localStorage.setItem('pwa-login-ok', '1');
   fecharModalPWA();
+  // Esconder também o modal do login se ainda estiver visível
+  const loginModal = document.getElementById('pwa-login-modal');
+  if (loginModal) loginModal.style.display = 'none';
   toast('✦ Perfeito! Acesse pelo ícone na tela inicial.', 'ok');
 }
 
@@ -13690,6 +13790,7 @@ window.addEventListener('DOMContentLoaded', function() {
   if (!m) return;
   // Esconder se já instalou ou roda como app
   if (localStorage.getItem('pwa-instalou') === '1' ||
+      localStorage.getItem('pwa-login-ok') === '1' ||
       window.matchMedia('(display-mode: standalone)').matches ||
       window.navigator.standalone) {
     m.style.display = 'none';
