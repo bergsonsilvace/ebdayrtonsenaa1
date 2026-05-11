@@ -13836,39 +13836,34 @@ function fecharModalAjuste() {
 }
 
 async function _renderizarMotivosBotoes() {
-  const box = document.getElementById('aj-motivos-lista');
-  if (!box) return;
-  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">⏳ Carregando motivos...</div>';
+  const listBonus = document.getElementById('aj-list-bonus');
+  const listDesc = document.getElementById('aj-list-desconto');
+  if (!listBonus || !listDesc) return;
+  const loading = '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">⏳ Carregando...</div>';
+  listBonus.innerHTML = loading;
+  listDesc.innerHTML = loading;
   try {
-    let data = await sbGet('motivos_pontuacao', { ativo: true }, 'tipo');
-    // Ordenar também por título dentro de cada tipo
+    let data = await sbGet('motivos_pontuacao', { ativo: true }, 'titulo');
     data = data.sort((a,b) => a.tipo.localeCompare(b.tipo) || a.titulo.localeCompare(b.titulo));
-    const error = null;
     if (!data || !data.length) {
-      box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Nenhum motivo cadastrado. Clique em "+ Novo motivo" para criar.</div>';
+      listBonus.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">Nenhum bônus cadastrado</div>';
+      listDesc.innerHTML = '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">Nenhum desconto cadastrado</div>';
       return;
     }
     window._motivosCache = data;
     _renderizarAccordionMotivos(data);
-    // Abrir bônus por padrão
     toggleAjAcc('bonus');
   } catch(e) {
-    box.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px 0">Erro ao carregar: ${e.message}</div>`;
+    listBonus.innerHTML = `<div style="padding:10px;font-size:12px;color:var(--red)">Erro: ${e.message}</div>`;
+    listDesc.innerHTML = '';
     console.error('Erro motivos:', e);
   }
 }
 
 function _renderizarAccordionMotivos(data) {
-  const box = document.getElementById('aj-motivos-lista');
-  if (!box) return;
   const bonus = data.filter(m => m.tipo === 'bonus');
   const descontos = data.filter(m => m.tipo === 'desconto');
 
-  // Atualizar contadores
-  const cb = document.getElementById('aj-count-bonus');
-  const cd = document.getElementById('aj-count-desconto');
-
-  // Renderizar listas dentro dos containers existentes
   const listBonus = document.getElementById('aj-list-bonus');
   const listDesc = document.getElementById('aj-list-desconto');
 
@@ -13880,9 +13875,8 @@ function _renderizarAccordionMotivos(data) {
     ? descontos.map(m => _renderMotivoBotao(m)).join('')
     : '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">Nenhum desconto cadastrado</div>';
 
-  // Atualizar contadores no header
-  box.querySelectorAll('[data-aj-count-bonus]').forEach(el => el.textContent = bonus.length);
-  box.querySelectorAll('[data-aj-count-desconto]').forEach(el => el.textContent = descontos.length);
+  document.querySelectorAll('[data-aj-count-bonus]').forEach(el => el.textContent = bonus.length);
+  document.querySelectorAll('[data-aj-count-desconto]').forEach(el => el.textContent = descontos.length);
 }
 
 function toggleAjAcc(tipo) {
