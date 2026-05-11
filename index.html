@@ -13840,9 +13840,10 @@ async function _renderizarMotivosBotoes() {
   if (!box) return;
   box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">⏳ Carregando motivos...</div>';
   try {
-    const { data, error } = await sbClient.from('motivos_pontuacao')
-      .select('*').eq('ativo', true).order('tipo').order('titulo');
-    if (error) throw error;
+    let data = await sbGet('motivos_pontuacao', { ativo: true }, 'tipo');
+    // Ordenar também por título dentro de cada tipo
+    data = data.sort((a,b) => a.tipo.localeCompare(b.tipo) || a.titulo.localeCompare(b.titulo));
+    const error = null;
     if (!data || !data.length) {
       box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Nenhum motivo cadastrado. Clique em "+ Novo motivo" para criar.</div>';
       return;
