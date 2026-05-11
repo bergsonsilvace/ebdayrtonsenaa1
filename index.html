@@ -13808,7 +13808,7 @@ function selAjustesTurma(turma, el) {
 
 // ── Abrir modal de aplicar ajuste ──
 async function abrirModalAplicarAjuste() {
-  // Reset
+  // Reset completo
   _motivoSelecionado = null;
   _alunosAjusteSelecionados = [];
   document.getElementById('aj-dest-todos').checked = true;
@@ -13816,15 +13816,19 @@ async function abrirModalAplicarAjuste() {
   document.getElementById('aj-pts-wrap').style.display = 'none';
   document.getElementById('aj-obs').value = '';
   document.getElementById('aj-turma').value = _ajustesTurma;
+  document.getElementById('aj-motivo-id').value = '';
+  document.getElementById('aj-motivo-texto').value = '';
+  document.getElementById('aj-tipo').value = '';
+  // Fechar formulário inline
+  fecharFormMotivoInline();
   // Atualizar chips
   const chips = document.getElementById('aj-alunos-chips');
   if (chips) { chips.textContent = 'Nenhum selecionado'; chips.style.color = 'var(--ink-soft)'; }
-
-  // Carregar motivos
-  await _renderizarMotivosBotoes();
-
+  // Abrir modal
   const modal = document.getElementById('mo-ajuste');
   modal.style.display = 'flex';
+  // Carregar motivos após abrir
+  await _renderizarMotivosBotoes();
 }
 
 function fecharModalAjuste() {
@@ -13834,17 +13838,23 @@ function fecharModalAjuste() {
 async function _renderizarMotivosBotoes() {
   const box = document.getElementById('aj-motivos-lista');
   if (!box) return;
-  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px">⏳ Carregando motivos...</div>';
+  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">⏳ Carregando motivos...</div>';
   try {
-    const { data } = await sbClient.from('motivos_pontuacao').select('*').eq('ativo', true).order('tipo').order('titulo');
+    const { data, error } = await sbClient.from('motivos_pontuacao')
+      .select('*').eq('ativo', true).order('tipo').order('titulo');
+    if (error) throw error;
     if (!data || !data.length) {
-      box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px">Nenhum motivo cadastrado. Clique em "Gerenciar Motivos" para criar.</div>';
+      box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Nenhum motivo cadastrado. Clique em "+ Novo motivo" para criar.</div>';
       return;
     }
-    // Guardar motivos para pesquisa
     window._motivosCache = data;
     _renderizarAccordionMotivos(data);
-  } catch(e) { box.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar motivos</div>'; }
+    // Abrir bônus por padrão
+    toggleAjAcc('bonus');
+  } catch(e) {
+    box.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px 0">Erro ao carregar: ${e.message}</div>`;
+    console.error('Erro motivos:', e);
+  }
 }
 
 function _renderizarAccordionMotivos(data) {
