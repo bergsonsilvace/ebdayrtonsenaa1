@@ -13865,12 +13865,12 @@ function _renderizarAccordionMotivos(data) {
   const descontos = data.filter(m => m.tipo === 'desconto');
 
   // Atualizar contadores
-  const cb = box.querySelector('#aj-count-bonus');
-  const cd = box.querySelector('#aj-count-desconto');
+  const cb = document.getElementById('aj-count-bonus');
+  const cd = document.getElementById('aj-count-desconto');
 
   // Renderizar listas dentro dos containers existentes
-  const listBonus = box.querySelector('#aj-list-bonus');
-  const listDesc = box.querySelector('#aj-list-desconto');
+  const listBonus = document.getElementById('aj-list-bonus');
+  const listDesc = document.getElementById('aj-list-desconto');
 
   if (listBonus) listBonus.innerHTML = bonus.length
     ? bonus.map(m => _renderMotivoBotao(m)).join('')
