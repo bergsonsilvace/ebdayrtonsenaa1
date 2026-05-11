@@ -1882,6 +1882,18 @@ input,select,textarea{font-family:'Outfit',sans-serif}
             <div style="margin-left:auto;font-size:22px;color:rgba(255,255,255,.2)">›</div>
           </div>
         </div>
+
+        <!-- Card: Ajustes de Pontuação -->
+        <div onclick="abrirSecaoProvas('ajustes')" style="background:linear-gradient(135deg,#3a1a6b,#6b2aa0);border-radius:var(--r);padding:18px 16px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;margin-top:12px" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform=''">
+          <div style="display:flex;align-items:center;gap:14px">
+            <div style="font-size:32px">⚖️</div>
+            <div>
+              <div style="font-family:'Cormorant Garamond',serif;font-size:19px;color:white;font-weight:600">Ajustes de Pontuação</div>
+              <div style="font-size:12px;color:rgba(255,255,255,.5);margin-top:3px">Bônus por participação · Desconto por comportamento</div>
+            </div>
+            <div style="margin-left:auto;font-size:22px;color:rgba(255,255,255,.2)">›</div>
+          </div>
+        </div>
       </div>
 
       <!-- ── ÁREA DE CONTEÚDO (ocultada por padrão) ── -->
@@ -1934,6 +1946,28 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           </div>
           <div id="lista-quizzes-licao"></div>
         </div>
+
+        <!-- Conteúdo: Ajustes de Pontuação -->
+        <div id="tab-ajustes-prof" style="display:none">
+          <!-- Turma selector -->
+          <div class="ttabs" style="margin-bottom:14px">
+            <button class="ttab tc on" onclick="selAjustesTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+            <button class="ttab tj" onclick="selAjustesTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
+            <button class="ttab ta" onclick="selAjustesTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
+          </div>
+          <!-- Botões de ação -->
+          <div style="display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap">
+            <button onclick="abrirModalAplicarAjuste()" class="btn btn-dk btn-sm" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+              <span>⚖️</span><span>Aplicar Ajuste</span>
+            </button>
+            <button onclick="abrirModalGerenciarMotivos()" class="btn btn-ou btn-sm" id="btn-gerenciar-motivos" style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px">
+              <span>📋</span><span>Gerenciar Motivos</span>
+            </button>
+          </div>
+          <!-- Histórico de ajustes -->
+          <div id="lista-ajustes-historico"></div>
+        </div>
+
       </div>
 
       <!-- Resultados de uma prova específica -->
@@ -4468,18 +4502,27 @@ async function renderRanking() {
   // Carregar quizzes, provas, desafios e bônus juntos
   await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
 
-  // Buscar bônus manuais da turma
+  // Buscar bônus manuais E ajustes da turma
   let bonusTurma = [];
+  let ajustesTurmaRank = [];
   try {
-    const { data: bData } = await sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank);
-    bonusTurma = bData || [];
+    const [bRes, aRes] = await Promise.all([
+      sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank),
+      sbClient.from('ajustes_pontuacao').select('*').eq('turma', curTurmaRank)
+    ]);
+    bonusTurma = bRes.data || [];
+    ajustesTurmaRank = aRes.data || [];
   } catch(e) {}
 
-  // Função auxiliar: calcular bônus de um aluno
+  // Função auxiliar: calcular bônus + ajustes de um aluno (nunca abaixo de 0)
   function _bonusDoAluno(alunoId) {
-    return bonusTurma
+    const bonus = bonusTurma
       .filter(b => !b.aluno_ids || b.aluno_ids.includes(alunoId))
       .reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
+    const ajustes = ajustesTurmaRank
+      .filter(a => !a.aluno_ids || a.aluno_ids.includes(alunoId))
+      .reduce((s, a) => s + (parseFloat(a.pontos)||0), 0);
+    return bonus + ajustes;
   }
 
   let ranking;
@@ -5759,18 +5802,44 @@ async function mostrarResultado() {
   const ehAluno = USER && USER.perfil === 'aluno';
   const ehModoAluno = USER && _modo('aluno');
 
-  if (ehModoAluno && USER.perfil !== 'aluno') {
-    try {
-      const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
-      if (al && al.length) alunoId = al[0].id;
-    } catch(e) {}
+  if (ehAluno) {
+    // Aluno direto — usar _aluno_id se disponível
+    alunoId = USER._aluno_id || USER.id;
+  } else if (ehModoAluno) {
+    // Responsável ou professor no modo aluno — usar o filho selecionado
+    if (_respFilhoAtual && _respFilhoAtual.id) {
+      alunoId = _respFilhoAtual.id;
+    } else if (USER._aluno_id) {
+      alunoId = USER._aluno_id;
+    } else {
+      try {
+        const { data: al } = await sbClient.from('alunos').select('id').eq('login', USER.login).limit(1);
+        if (al && al.length) alunoId = al[0].id;
+      } catch(e) {}
+    }
   }
 
   const deveSalvar = ehAluno || ehModoAluno;
 
   if (deveSalvar && alunoId) {
-    quizScores[`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos, data: _agoraISO() };
     try {
+      // Bug 1: verificar no banco se já fez ANTES de salvar (não no cache local)
+      const chaveQuiz = `${q.turma}-${q.licaoNum}`;
+      const { data: jaFez } = await sbClient.from('quiz_resultados')
+        .select('id')
+        .eq('aluno_id', alunoId)
+        .eq('turma', q.turma)
+        .eq('licao_num', q.licaoNum)
+        .maybeSingle();
+
+      if (jaFez) {
+        toast('⚠️ Você já realizou este quiz!', 'er');
+        return;
+      }
+
+      // Agora sim salvar no cache local
+      quizScores[chaveQuiz] = { acertos, total, pct, pontos: pontosGanhos, data: _agoraISO() };
+
       // Montar respostas detalhadas para salvar
       const respostasDetalhadas = q.embaralhadas.map((perg, i) => {
         const resp = q.respostas[i];
@@ -5782,12 +5851,6 @@ async function mostrarResultado() {
         };
       });
 
-      // Bug 5: verificar se já fez antes de salvar
-      const chaveQuiz = `${turmaAtual}-${quizAtual.licaoNum}`;
-      if (quizScores[chaveQuiz]) {
-        toast('⚠️ Você já realizou este quiz!', 'er');
-        return;
-      }
       const { error } = await sbClient.from('quiz_resultados').upsert({
         aluno_id: alunoId,
         turma: q.turma,
@@ -5804,7 +5867,9 @@ async function mostrarResultado() {
         toast('⚠️ Erro ao salvar: ' + error.message, 'er');
       } else {
         if (!_quizScoresTodos[alunoId]) _quizScoresTodos[alunoId] = {};
-        _quizScoresTodos[alunoId][`${q.turma}-${q.licaoNum}`] = { acertos, total, pct, pontos: pontosGanhos };
+        _quizScoresTodos[alunoId][chaveQuiz] = { acertos, total, pct, pontos: pontosGanhos };
+        // Invalidar cache para atualizar ranking
+        _cacheAlunoProgresso = null;
       }
     } catch(e) { toast('⚠️ Não foi possível salvar: ' + e.message, 'er'); }
   }
@@ -6220,9 +6285,14 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
     ]);
     aulasAluno = aulasRes.data || [];
     // Filtrar bônus: para todos OU para esse aluno
-    bonusAluno = (bonusRes.data || []).filter(b =>
-      !b.aluno_ids || b.aluno_ids.includes(idAluno)
+    const ajustesRes = await sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaAluno);
+    const ajustesAluno = (ajustesRes.data || []).filter(a =>
+      !a.aluno_ids || a.aluno_ids.includes(idAluno)
     );
+    bonusAluno = [
+      ...(bonusRes.data || []).filter(b => !b.aluno_ids || b.aluno_ids.includes(idAluno)),
+      ...ajustesAluno
+    ];
   } catch(e) {}
   return { idAluno, turmaAluno, aulasAluno, bonusAluno,
     quizScoresSnap: {...quizScores},
@@ -9752,15 +9822,26 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Carregar quizzes, provas, desafios e bônus
     await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
 
-    // Buscar bônus manuais da turma
+    // Buscar bônus manuais E ajustes da turma
     let bonusTurmaRank = [];
+    let ajustesTurmaAluno = [];
     try {
-      const { data: bData } = await sbClient.from('bonus_pontos').select('*').eq('turma', turmaUsar);
-      bonusTurmaRank = bData || [];
+      const [bRes, aRes] = await Promise.all([
+        sbClient.from('bonus_pontos').select('*').eq('turma', turmaUsar),
+        sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaUsar)
+      ]);
+      bonusTurmaRank = bRes.data || [];
+      ajustesTurmaAluno = aRes.data || [];
     } catch(e) {}
-    const _bonusAluno = (id) => bonusTurmaRank
-      .filter(b => !b.aluno_ids || b.aluno_ids.includes(id))
-      .reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
+    const _bonusAluno = (id) => {
+      const bonus = bonusTurmaRank
+        .filter(b => !b.aluno_ids || b.aluno_ids.includes(id))
+        .reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
+      const ajustes = ajustesTurmaAluno
+        .filter(a => !a.aluno_ids || a.aluno_ids.includes(id))
+        .reduce((s, a) => s + (parseFloat(a.pontos)||0), 0);
+      return bonus + ajustes;
+    };
 
     if (!alunos.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
 
@@ -10699,7 +10780,7 @@ async function abrirSecaoProvas(secao) {
   document.getElementById('provas-resultado-area').style.display = 'none';
 
   // Ocultar todas as tabs
-  ['tab-avaliacoes-prof','tab-desafios-prof','tab-quizzes-licao-prof'].forEach(id => {
+  ['tab-avaliacoes-prof','tab-desafios-prof','tab-quizzes-licao-prof','tab-ajustes-prof'].forEach(id => {
     const el = document.getElementById(id);
     if (el) el.style.display = 'none';
   });
@@ -10723,6 +10804,13 @@ async function abrirSecaoProvas(secao) {
   } else if (secao === 'resultados') {
     document.getElementById('tab-quizzes-licao-prof').style.display = '';
     await renderQuizzesLicao();
+  } else if (secao === 'ajustes') {
+    document.getElementById('tab-ajustes-prof').style.display = '';
+    if (tituloEl) tituloEl.textContent = '⚖️ Ajustes de Pontuação';
+    const btnGer = document.getElementById('btn-gerenciar-motivos');
+    // Professores, admins, superintendentes e pastores podem gerenciar motivos
+    if (btnGer) btnGer.style.display = ['admin','superintendente','pastor','professor','coord'].includes(USER?.perfil) ? '' : 'none';
+    selAjustesTurma(_ajustesTurma, null);
   }
 }
 
@@ -13695,6 +13783,525 @@ function promoverProf(profId, nomeProf) {
     } catch(e) { toast('Erro: '+e.message,'er'); }
   };
 }
+// ══════════════════════════════════════════════
+// SISTEMA DE AJUSTES DE PONTUAÇÃO
+// ══════════════════════════════════════════════
+let _ajustesTurma = 'adultos';
+let _motivoSelecionado = null;
+let _alunosAjusteSelecionados = [];
+
+// ── Navegar para aba de ajustes ──
+function abrirSecaoProvasAjustes() {
+  abrirSecaoProvas('ajustes');
+}
+
+// Atualizar abrirSecaoProvas para incluir ajustes
+const _abrirSecaoProvasOrig = window.abrirSecaoProvas;
+
+// ── Turma dos ajustes ──
+function selAjustesTurma(turma, el) {
+  _ajustesTurma = turma;
+  document.querySelectorAll('#tab-ajustes-prof .ttab').forEach(b => b.classList.remove('on'));
+  if (el) el.classList.add('on');
+  carregarHistoricoAjustes();
+}
+
+// ── Abrir modal de aplicar ajuste ──
+async function abrirModalAplicarAjuste() {
+  // Reset
+  _motivoSelecionado = null;
+  _alunosAjusteSelecionados = [];
+  document.getElementById('aj-dest-todos').checked = true;
+  document.getElementById('aj-alunos-wrap').style.display = 'none';
+  document.getElementById('aj-pts-wrap').style.display = 'none';
+  document.getElementById('aj-obs').value = '';
+  document.getElementById('aj-turma').value = _ajustesTurma;
+  // Atualizar chips
+  const chips = document.getElementById('aj-alunos-chips');
+  if (chips) { chips.textContent = 'Nenhum selecionado'; chips.style.color = 'var(--ink-soft)'; }
+
+  // Carregar motivos
+  await _renderizarMotivosBotoes();
+
+  const modal = document.getElementById('mo-ajuste');
+  modal.style.display = 'flex';
+}
+
+function fecharModalAjuste() {
+  document.getElementById('mo-ajuste').style.display = 'none';
+}
+
+async function _renderizarMotivosBotoes() {
+  const box = document.getElementById('aj-motivos-lista');
+  if (!box) return;
+  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px">⏳ Carregando motivos...</div>';
+  try {
+    const { data } = await sbClient.from('motivos_pontuacao').select('*').eq('ativo', true).order('tipo').order('titulo');
+    if (!data || !data.length) {
+      box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px">Nenhum motivo cadastrado. Clique em "Gerenciar Motivos" para criar.</div>';
+      return;
+    }
+    // Guardar motivos para pesquisa
+    window._motivosCache = data;
+    _renderizarAccordionMotivos(data);
+  } catch(e) { box.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar motivos</div>'; }
+}
+
+function _renderizarAccordionMotivos(data) {
+  const box = document.getElementById('aj-motivos-lista');
+  if (!box) return;
+  const bonus = data.filter(m => m.tipo === 'bonus');
+  const descontos = data.filter(m => m.tipo === 'desconto');
+
+  // Atualizar contadores
+  const cb = box.querySelector('#aj-count-bonus');
+  const cd = box.querySelector('#aj-count-desconto');
+
+  // Renderizar listas dentro dos containers existentes
+  const listBonus = box.querySelector('#aj-list-bonus');
+  const listDesc = box.querySelector('#aj-list-desconto');
+
+  if (listBonus) listBonus.innerHTML = bonus.length
+    ? bonus.map(m => _renderMotivoBotao(m)).join('')
+    : '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">Nenhum bônus cadastrado</div>';
+
+  if (listDesc) listDesc.innerHTML = descontos.length
+    ? descontos.map(m => _renderMotivoBotao(m)).join('')
+    : '<div style="padding:10px;font-size:12px;color:var(--ink-soft)">Nenhum desconto cadastrado</div>';
+
+  // Atualizar contadores no header
+  box.querySelectorAll('[data-aj-count-bonus]').forEach(el => el.textContent = bonus.length);
+  box.querySelectorAll('[data-aj-count-desconto]').forEach(el => el.textContent = descontos.length);
+}
+
+function toggleAjAcc(tipo) {
+  const body = document.getElementById('aj-body-' + tipo);
+  const arr = document.getElementById('aj-arr-' + tipo);
+  if (!body) return;
+  const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+  body.style.maxHeight = isOpen ? '0px' : '999px';
+  if (arr) arr.style.transform = isOpen ? 'none' : 'rotate(90deg)';
+}
+
+function pesquisarMotivos() {
+  const q = (document.getElementById('aj-pesq-motivo').value || '').toLowerCase();
+  const data = window._motivosCache || [];
+  if (!q) {
+    _renderizarAccordionMotivos(data);
+    return;
+  }
+  const filtrados = data.filter(m =>
+    m.titulo.toLowerCase().includes(q) || (m.descricao||'').toLowerCase().includes(q)
+  );
+  _renderizarAccordionMotivos(filtrados);
+  ['bonus','desconto'].forEach(t => {
+    const body = document.getElementById('aj-body-' + t);
+    const arr = document.getElementById('aj-arr-' + t);
+    if (body) body.style.maxHeight = '999px';
+    if (arr) arr.style.transform = 'rotate(90deg)';
+  });
+}
+
+// ── Funções inline de motivos no modal de Aplicar Ajuste ──
+function abrirNovoMotivoInline() {
+  const form = document.getElementById('aj-form-motivo');
+  const titulo = document.getElementById('aj-form-motivo-titulo');
+  if (!form) return;
+  document.getElementById('aj-mot-titulo').value = '';
+  document.getElementById('aj-mot-tipo').value = 'bonus';
+  document.getElementById('aj-mot-pontos').value = '2';
+  document.getElementById('aj-mot-desc').value = '';
+  document.getElementById('aj-mot-edit-id').value = '';
+  if (titulo) titulo.textContent = '+ Novo Motivo';
+  form.style.display = 'block';
+}
+
+function abrirEditarMotivoInline(id) {
+  // Buscar nos dados em cache
+  const m = (window._motivosCache || []).find(x => x.id === id);
+  const form = document.getElementById('aj-form-motivo');
+  const titulo = document.getElementById('aj-form-motivo-titulo');
+  if (!form || !m) return;
+  document.getElementById('aj-mot-titulo').value = m.titulo || '';
+  document.getElementById('aj-mot-tipo').value = m.tipo || 'bonus';
+  document.getElementById('aj-mot-pontos').value = m.pontos_padrao || 2;
+  document.getElementById('aj-mot-desc').value = m.descricao || '';
+  document.getElementById('aj-mot-edit-id').value = m.id || '';
+  if (titulo) titulo.textContent = '✏️ Editar Motivo';
+  form.style.display = 'block';
+  setTimeout(() => form.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+function fecharFormMotivoInline() {
+  const form = document.getElementById('aj-form-motivo');
+  if (form) form.style.display = 'none';
+}
+
+async function salvarMotivoInline() {
+  const titulo = document.getElementById('aj-mot-titulo').value.trim();
+  const tipo = document.getElementById('aj-mot-tipo').value;
+  const pontos = parseFloat(document.getElementById('aj-mot-pontos').value) || 0;
+  const desc = document.getElementById('aj-mot-desc').value.trim();
+  const editId = document.getElementById('aj-mot-edit-id').value;
+  if (!titulo) { toast('Informe o título do motivo', 'er'); return; }
+  if (!pontos || pontos <= 0) { toast('Informe a pontuação', 'er'); return; }
+  const dado = { titulo, tipo, pontos_padrao: pontos, descricao: desc || null };
+  if (editId) {
+    await sbClient.from('motivos_pontuacao').update(dado).eq('id', editId);
+    toast('✓ Motivo atualizado!', 'ok');
+  } else {
+    await sbClient.from('motivos_pontuacao').insert({ ...dado, criado_por: USER.nome });
+    toast('✓ Motivo criado!', 'ok');
+  }
+  fecharFormMotivoInline();
+  await _renderizarMotivosBotoes();
+}
+
+async function deletarMotivoInline(id) {
+  if (!confirm('Excluir este motivo?')) return;
+  await sbClient.from('motivos_pontuacao').delete().eq('id', id);
+  toast('Motivo excluído', 'ok');
+  await _renderizarMotivosBotoes();
+}
+
+function _renderMotivoBotao(m) {
+  const sel = _motivoSelecionado && _motivoSelecionado.id === m.id;
+  const cor = m.tipo === 'bonus' ? 'var(--tc)' : 'var(--red)';
+  const bg = m.tipo === 'bonus' ? 'var(--tc-bg)' : 'var(--red-bg)';
+  const icon = m.tipo === 'bonus' ? '⭐' : '⚠️';
+  const sinal = m.tipo === 'bonus' ? '+' : '-';
+  // Serializar motivo para edição
+  const mStr = JSON.stringify(m).replace(/\\/g,'\\\\').replace(/'/g,"\\'").replace(/"/g,'&quot;');
+  return `<div data-motivo-id="${m.id}" style="border-radius:var(--r);border:2px solid ${sel?cor:'var(--cb)'};background:${sel?bg:'white'};margin-bottom:6px;transition:.15s">
+    <!-- Linha clicável para selecionar -->
+    <div onclick="selecionarMotivo('${m.id}')" style="padding:10px 12px;cursor:pointer;display:flex;align-items:center;gap:10px">
+      <span style="font-size:18px">${icon}</span>
+      <div style="flex:1">
+        <div style="font-size:13px;font-weight:${sel?'700':'500'};color:var(--ink)">${m.titulo}</div>
+        ${m.descricao ? `<div style="font-size:11px;color:var(--ink-soft)">${m.descricao}</div>` : ''}
+      </div>
+      <div style="font-size:14px;font-weight:700;color:${cor};flex-shrink:0">${sinal}${m.pontos_padrao} pts</div>
+      ${sel ? `<span style="color:${cor};font-size:16px;flex-shrink:0">✓</span>` : ''}
+    </div>
+    <!-- Linha de ações -->
+    <div style="display:flex;gap:6px;padding:6px 10px;border-top:1px solid ${sel?cor:'var(--cb)'}">
+      <button onclick="event.stopPropagation();abrirEditarMotivoInline('${m.id}')" style="flex:1;background:#e8f7ee;border:1px solid var(--tc);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--tc);cursor:pointer;font-weight:700">✏️ Editar</button>
+      <button onclick="event.stopPropagation();deletarMotivoInline('${m.id}')" style="flex:1;background:#fdf0f0;border:1px solid var(--red);border-radius:6px;padding:6px 8px;font-size:12px;color:var(--red);cursor:pointer;font-weight:700">✕ Excluir</button>
+    </div>
+  </div>`;
+}
+
+function selecionarMotivo(id) {
+  const box = document.getElementById('aj-motivos-lista');
+  // Buscar motivo nos dados renderizados
+  sbClient.from('motivos_pontuacao').select('*').eq('id', id).single().then(({data: m}) => {
+    if (!m) return;
+    _motivoSelecionado = m;
+    // Atualizar visual
+    box.querySelectorAll('[data-motivo-id]').forEach(el => {
+      const isThis = el.dataset.motivoId === id;
+      const cor = m.tipo === 'bonus' ? 'var(--tc)' : 'var(--red)';
+      const bg = m.tipo === 'bonus' ? 'var(--tc-bg)' : 'var(--red-bg)';
+      el.style.borderColor = isThis ? cor : 'var(--cb)';
+      el.style.background = isThis ? bg : 'white';
+    });
+    // Mostrar campo de pontos
+    const wrap = document.getElementById('aj-pts-wrap');
+    const lbl = document.getElementById('aj-pts-label');
+    const inp = document.getElementById('aj-pontos');
+    const sinal = m.tipo === 'bonus' ? '⭐ Pontos a adicionar' : '⚠️ Pontos a remover';
+    if (lbl) lbl.textContent = sinal;
+    if (inp) inp.value = m.pontos_padrao;
+    if (wrap) wrap.style.display = 'block';
+    // Salvar hidden
+    document.getElementById('aj-motivo-id').value = m.id;
+    document.getElementById('aj-motivo-texto').value = m.titulo;
+    document.getElementById('aj-tipo').value = m.tipo;
+  });
+}
+
+function toggleDestAjuste() {
+  const espec = document.getElementById('aj-dest-espec').checked;
+  document.getElementById('aj-alunos-wrap').style.display = espec ? 'block' : 'none';
+  if (espec && !_alunosAjusteSelecionados.length) abrirModalSelecionarAlunosAjuste();
+}
+
+function ajTurmaChange() {
+  _alunosAjusteSelecionados = [];
+  const chips = document.getElementById('aj-alunos-chips');
+  if (chips) { chips.textContent = 'Nenhum selecionado'; chips.style.color = 'var(--ink-soft)'; }
+}
+
+async function abrirModalSelecionarAlunosAjuste() {
+  const turma = document.getElementById('aj-turma').value;
+  if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+  _modalAlunosContexto = 'ajuste';
+  _alunosSelecionados = [..._alunosAjusteSelecionados];
+  const modal = document.getElementById('mo-sel-alunos');
+  const label = document.getElementById('sel-alunos-turma-label');
+  if (label) label.textContent = 'Turma de ' + (TN[turma] || turma);
+  document.getElementById('sel-alunos-busca').value = '';
+  _modalAlunosTurmaOverride = turma;
+  modal.style.display = 'flex';
+  _renderListaAlunosModal(turma, '');
+}
+
+async function salvarAjuste() {
+  const motivoId = document.getElementById('aj-motivo-id').value;
+  const motivoTexto = document.getElementById('aj-motivo-texto').value;
+  const tipo = document.getElementById('aj-tipo').value;
+  const pts = parseFloat(document.getElementById('aj-pontos').value);
+  const turma = document.getElementById('aj-turma').value;
+  const obs = document.getElementById('aj-obs').value.trim();
+  const espec = document.getElementById('aj-dest-espec').checked;
+
+  if (!motivoId) { toast('Selecione um motivo', 'er'); return; }
+  if (!pts || pts <= 0) { toast('Informe a pontuação', 'er'); return; }
+  if (espec && !_alunosAjusteSelecionados.length) { toast('Selecione ao menos um aluno', 'er'); return; }
+
+  // Pontos: positivo para bônus, negativo para desconto
+  const pontosFinais = tipo === 'desconto' ? -Math.abs(pts) : Math.abs(pts);
+
+  try {
+    await sbClient.from('ajustes_pontuacao').insert({
+      motivo_id: motivoId,
+      motivo_texto: motivoTexto,
+      tipo,
+      pontos: pontosFinais,
+      turma,
+      aluno_ids: espec ? _alunosAjusteSelecionados.map(a => a.id) : null,
+      descricao: obs || null,
+      data_referencia: _hojeStr(),
+      aplicado_por: USER.nome
+    });
+    _cacheAlunoProgresso = null;
+    const dest = espec ? `${_alunosAjusteSelecionados.length} aluno(s)` : 'toda a turma';
+    toast(`✓ Ajuste aplicado para ${dest}!`, 'ok');
+    fecharModalAjuste();
+    carregarHistoricoAjustes();
+  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+}
+
+async function carregarHistoricoAjustes() {
+  const box = document.getElementById('lista-ajustes-historico');
+  if (!box) return;
+  box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px">⏳ Carregando...</div>';
+  try {
+    const { data } = await sbClient.from('ajustes_pontuacao').select('*')
+      .eq('turma', _ajustesTurma).order('created_at', { ascending: false }).limit(30);
+    if (!data || !data.length) {
+      box.innerHTML = '<div class="empty"><div class="empty-icon">⚖️</div><div class="empty-txt">Nenhum ajuste registrado ainda</div></div>';
+      return;
+    }
+    if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+    box.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:10px">Histórico de ajustes</div>'
+      + data.map(aj => {
+        const isBonus = aj.tipo === 'bonus';
+        const cor = isBonus ? 'var(--tc)' : 'var(--red)';
+        const bg = isBonus ? 'var(--tc-bg)' : 'var(--red-bg)';
+        const icon = isBonus ? '⭐' : '⚠️';
+        const sinal = aj.pontos > 0 ? '+' : '';
+        const dt = new Date(aj.created_at).toLocaleDateString('pt-BR', { timeZone: 'America/Fortaleza', day: '2-digit', month: '2-digit', year: '2-digit' });
+        const hora = new Date(aj.created_at).toLocaleTimeString('pt-BR', { timeZone: 'America/Fortaleza', hour: '2-digit', minute: '2-digit' });
+        const dest = aj.aluno_ids ? aj.aluno_ids.map(id => {
+          const a = cacheAlunos.find(x => x.id === id);
+          return a ? a.nome.split(' ')[0] : '?';
+        }).join(', ') : 'Todos';
+        const podeRemover = ['admin','superintendente','pastor'].includes(USER.perfil);
+        return `<div style="background:white;border-radius:var(--r);border:1px solid var(--cb);padding:12px;margin-bottom:8px">
+          <div style="display:flex;align-items:flex-start;gap:10px">
+            <div style="width:38px;height:38px;border-radius:8px;background:${bg};display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0">${icon}</div>
+            <div style="flex:1;min-width:0">
+              <div style="display:flex;align-items:center;gap:8px;margin-bottom:3px">
+                <span style="font-size:13px;font-weight:700;color:var(--ink)">${aj.motivo_texto}</span>
+                <span style="font-size:13px;font-weight:700;color:${cor}">${sinal}${aj.pontos} pts</span>
+              </div>
+              <div style="font-size:11px;color:var(--ink-soft)">👤 ${dest}</div>
+              ${aj.descricao ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:2px">📝 ${aj.descricao}</div>` : ''}
+              <div style="font-size:10px;color:var(--ink-soft);margin-top:4px">Por ${aj.aplicado_por} · ${dt} ${hora}</div>
+            </div>
+            ${podeRemover ? `<button onclick="removerAjuste('${aj.id}')" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:4px;flex-shrink:0">✕</button>` : ''}
+          </div>
+        </div>`;
+      }).join('');
+  } catch(e) { box.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar</div>'; }
+}
+
+async function removerAjuste(id) {
+  if (!confirm('Remover este ajuste? A pontuação será recalculada.')) return;
+  await sbClient.from('ajustes_pontuacao').delete().eq('id', id);
+  _cacheAlunoProgresso = null;
+  toast('Ajuste removido', 'ok');
+  carregarHistoricoAjustes();
+}
+
+// ── Gerenciar Motivos ──
+let _todosMotivos = [];
+
+async function abrirModalGerenciarMotivos() {
+  fecharFormMotivo();
+  document.getElementById('mot-pesquisa').value = '';
+  document.getElementById('mo-motivos').style.display = 'flex';
+  await carregarListaMotivos();
+  toggleMotAcc('bonus', true);
+}
+
+function fecharModalMotivos() {
+  document.getElementById('mo-motivos').style.display = 'none';
+}
+
+function toggleNovoMotivo() {
+  const wrap = document.getElementById('mot-form-wrap');
+  const isOpen = wrap.style.display !== 'none';
+  if (isOpen) fecharFormMotivo();
+  else abrirFormMotivo(null);
+}
+
+function abrirFormMotivo(m) {
+  const wrap = document.getElementById('mot-form-wrap');
+  const tituloEl = document.getElementById('mot-form-titulo');
+  document.getElementById('mot-titulo').value = m ? m.titulo : '';
+  document.getElementById('mot-tipo').value = m ? m.tipo : 'bonus';
+  document.getElementById('mot-pontos').value = m ? m.pontos_padrao : '2';
+  document.getElementById('mot-desc').value = m ? (m.descricao || '') : '';
+  document.getElementById('mot-edit-id').value = m ? m.id : '';
+  if (tituloEl) tituloEl.textContent = m ? '✏️ Editar Motivo' : '+ Novo Motivo';
+  wrap.style.display = 'block';
+  setTimeout(() => wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' }), 50);
+}
+
+function fecharFormMotivo() {
+  const wrap = document.getElementById('mot-form-wrap');
+  if (wrap) wrap.style.display = 'none';
+  const editId = document.getElementById('mot-edit-id');
+  if (editId) editId.value = '';
+}
+
+function toggleMotAcc(tipo, forceOpen) {
+  const body = document.getElementById('mot-body-' + tipo);
+  const arr = document.getElementById('mot-arr-' + tipo);
+  if (!body) return;
+  const isOpen = body.style.maxHeight && body.style.maxHeight !== '0px';
+  const abrir = forceOpen !== undefined ? forceOpen : !isOpen;
+  body.style.maxHeight = abrir ? '999px' : '0px';
+  if (arr) arr.style.transform = abrir ? 'rotate(90deg)' : 'none';
+}
+
+async function carregarListaMotivos() {
+  const { data } = await sbClient.from('motivos_pontuacao').select('*').order('titulo');
+  _todosMotivos = data || [];
+  _renderMotivosAccordion(_todosMotivos);
+}
+
+function _renderMotivosAccordion(motivos) {
+  const bonus = motivos.filter(m => m.tipo === 'bonus');
+  const descontos = motivos.filter(m => m.tipo === 'desconto');
+  const cb = document.getElementById('mot-count-bonus');
+  const cd = document.getElementById('mot-count-desconto');
+  if (cb) cb.textContent = bonus.length;
+  if (cd) cd.textContent = descontos.length;
+  _renderMotivoLista('mot-list-bonus', bonus, 'bonus');
+  _renderMotivoLista('mot-list-desconto', descontos, 'desconto');
+}
+
+function _renderMotivoLista(containerId, motivos, tipo) {
+  const box = document.getElementById(containerId);
+  if (!box) return;
+  const cor = tipo === 'bonus' ? 'var(--tc)' : 'var(--red)';
+  const sinal = tipo === 'bonus' ? '+' : '-';
+  if (!motivos.length) {
+    box.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--ink-soft)">Nenhum motivo cadastrado nesta categoria</div>';
+    return;
+  }
+  box.innerHTML = motivos.map(m => {
+    const mJson = encodeURIComponent(JSON.stringify(m));
+    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 14px;border-bottom:.5px solid var(--cb);${!m.ativo?'opacity:.5':''}">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:var(--ink);${!m.ativo?'text-decoration:line-through':''}">${m.titulo}</div>
+        ${m.descricao ? `<div style="font-size:11px;color:var(--ink-soft);margin-top:1px">${m.descricao}</div>` : ''}
+      </div>
+      <span style="font-size:13px;font-weight:700;color:${cor};white-space:nowrap;flex-shrink:0">${sinal}${m.pontos_padrao}pts</span>
+      <button onclick="abrirFormMotivo(JSON.parse(decodeURIComponent('${mJson}')))" style="background:none;border:1px solid var(--cb);border-radius:6px;padding:4px 8px;font-size:11px;color:var(--ink-soft);cursor:pointer">✏️</button>
+      <button onclick="toggleMotivo('${m.id}',${!m.ativo})" style="background:none;border:1px solid var(--cb);border-radius:6px;padding:4px 7px;font-size:10px;color:var(--ink-soft);cursor:pointer">${m.ativo?'❌':'✅'}</button>
+      <button onclick="deletarMotivo('${m.id}')" style="background:none;border:none;color:var(--red);font-size:16px;cursor:pointer;padding:2px">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function filtrarMotivos() {
+  const q = (document.getElementById('mot-pesquisa').value || '').toLowerCase();
+  if (!q) { _renderMotivosAccordion(_todosMotivos); return; }
+  const filtrados = _todosMotivos.filter(m =>
+    m.titulo.toLowerCase().includes(q) || (m.descricao||'').toLowerCase().includes(q)
+  );
+  _renderMotivosAccordion(filtrados);
+  toggleMotAcc('bonus', true);
+  toggleMotAcc('desconto', true);
+}
+
+async function salvarMotivo() {
+  const titulo = document.getElementById('mot-titulo').value.trim();
+  const tipo = document.getElementById('mot-tipo').value;
+  const pontos = parseFloat(document.getElementById('mot-pontos').value) || 0;
+  const desc = document.getElementById('mot-desc').value.trim();
+  const editId = document.getElementById('mot-edit-id').value;
+  if (!titulo) { toast('Informe o título do motivo', 'er'); return; }
+  if (!pontos || pontos <= 0) { toast('Informe a pontuação padrão', 'er'); return; }
+  const dado = { titulo, tipo, pontos_padrao: pontos, descricao: desc || null };
+  if (editId) {
+    await sbClient.from('motivos_pontuacao').update(dado).eq('id', editId);
+    toast('✓ Motivo atualizado!', 'ok');
+  } else {
+    await sbClient.from('motivos_pontuacao').insert({ ...dado, criado_por: USER.nome });
+    toast('✓ Motivo cadastrado!', 'ok');
+  }
+  fecharFormMotivo();
+  await carregarListaMotivos();
+  toggleMotAcc(tipo, true);
+}
+
+async function toggleMotivo(id, ativo) {
+  await sbClient.from('motivos_pontuacao').update({ ativo }).eq('id', id);
+  await carregarListaMotivos();
+}
+
+async function deletarMotivo(id) {
+  if (!confirm('Excluir este motivo? Esta ação não pode ser desfeita.')) return;
+  await sbClient.from('motivos_pontuacao').delete().eq('id', id);
+  toast('Motivo excluído', 'ok');
+  await carregarListaMotivos();
+}
+
+// ── Integrar no confirmar seleção de alunos ──
+const _confirmarSelecaoAlunosOrigAj = window.confirmarSelecaoAlunos;
+function confirmarSelecaoAlunos() {
+  fecharModalSelecionarAlunos();
+  if (_modalAlunosContexto === 'bonus') {
+    _alunosBonusSelecionados = [..._alunosSelecionados];
+    _atualizarChipsBonus();
+  } else if (_modalAlunosContexto === 'ajuste') {
+    _alunosAjusteSelecionados = [..._alunosSelecionados];
+    // Atualizar chips de ajuste
+    const chips = document.getElementById('aj-alunos-chips');
+    if (chips) {
+      if (!_alunosAjusteSelecionados.length) { chips.textContent = 'Nenhum selecionado'; chips.style.color = 'var(--ink-soft)'; }
+      else {
+        chips.style.color = 'var(--ink)';
+        chips.innerHTML = _alunosAjusteSelecionados.map(a =>
+          `<span style="display:inline-flex;align-items:center;background:linear-gradient(135deg,#3a1a6b,#6b2aa0);color:white;border-radius:20px;padding:2px 8px;font-size:11px;font-weight:600;margin:2px">${a.nome.split(' ')[0]}</span>`
+        ).join('');
+      }
+    }
+  } else {
+    _atualizarChipsAlunos();
+  }
+  _modalAlunosContexto = 'prova';
+  _modalAlunosTurmaOverride = null;
+}
+
+// ── Integrar ajustes no cálculo de pontos ──
+// (já integrado via tabela ajustes_pontuacao com pontos positivos/negativos)
+
 // ── PWA INSTALL ──
 let _pwaPrompt = null;
 
@@ -13884,6 +14491,198 @@ if ('serviceWorker' in navigator) {
         </div>
         <button id="pwa-btn-ja-instalei" onclick="pwaBtnJaInstalei()" style="width:100%;background:rgba(255,255,255,.06);color:rgba(255,255,255,.5);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:11px;font-size:12px;cursor:pointer;margin-bottom:8px">✓ Já fiz a instalação</button>
         <button id="pwa-btn-fechar" onclick="fecharModalPWA()" style="width:100%;background:transparent;color:rgba(255,255,255,.25);border:none;border-radius:12px;padding:8px;font-size:11px;cursor:pointer">Agora não</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: APLICAR AJUSTE DE PONTUAÇÃO -->
+  <div id="mo-ajuste" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center">
+    <div style="background:white;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#3a1a6b,#6b2aa0);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.6);font-weight:700;text-transform:uppercase;letter-spacing:.1em">Provas & Avaliações</div>
+          <div style="color:white;font-size:16px;font-weight:600;margin-top:2px">⚖️ Aplicar Ajuste de Pontuação</div>
+        </div>
+        <button onclick="fecharModalAjuste()" style="width:30px;height:30px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px">
+        <!-- Turma -->
+        <div class="fg"><label class="fl">Turma</label>
+          <select class="fc" id="aj-turma" onchange="ajTurmaChange()">
+            <option value="criancas">🟢 Crianças</option>
+            <option value="jovens">🔵 Jovens</option>
+            <option value="adultos">🔴 Adultos</option>
+          </select>
+        </div>
+        <!-- Selecionar motivo -->
+        <div class="fg">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+            <label class="fl" style="margin:0">Motivo</label>
+            <button onclick="abrirNovoMotivoInline()" class="btn btn-ou btn-sm">+ Novo motivo</button>
+          </div>
+
+          <!-- Form inline novo/editar -->
+          <div id="aj-form-motivo" style="display:none;background:#f5f2eb;border-radius:10px;border:1.5px solid var(--gold);padding:12px;margin-bottom:10px">
+            <div style="font-size:12px;font-weight:700;color:var(--ink);margin-bottom:10px" id="aj-form-motivo-titulo">+ Novo Motivo</div>
+            <div class="fg"><label class="fl">Título</label><input class="fc" id="aj-mot-titulo" placeholder="Ex: Participação na aula"></div>
+            <div class="frow">
+              <div class="fg"><label class="fl">Tipo</label>
+                <select class="fc" id="aj-mot-tipo">
+                  <option value="bonus">⭐ Bônus</option>
+                  <option value="desconto">⚠️ Desconto</option>
+                </select>
+              </div>
+              <div class="fg" style="margin:0"><label class="fl">Pontos</label><input class="fc" type="number" id="aj-mot-pontos" min="0" step="0.5" value="2"></div>
+            </div>
+            <div class="fg" style="margin:0"><label class="fl">Descrição <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" id="aj-mot-desc" placeholder="Quando usar..."></div>
+            <input type="hidden" id="aj-mot-edit-id">
+            <div style="display:flex;gap:8px;margin-top:10px">
+              <button onclick="fecharFormMotivoInline()" class="btn btn-ou btn-sm" style="flex:1">Cancelar</button>
+              <button onclick="salvarMotivoInline()" class="btn btn-gold btn-sm" style="flex:1">✓ Salvar</button>
+            </div>
+          </div>
+
+          <!-- Pesquisa -->
+          <input class="fc" id="aj-pesq-motivo" placeholder="🔍 Pesquisar motivo..." oninput="pesquisarMotivos()" style="margin-bottom:8px">
+
+          <!-- Accordion Bônus -->
+          <div id="aj-motivos-lista">
+            <div style="background:white;border-radius:10px;border:1px solid var(--cb);margin-bottom:6px;overflow:hidden">
+              <div onclick="toggleAjAcc('bonus')" style="display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;user-select:none">
+                <div style="width:28px;height:28px;border-radius:7px;background:#e8f7ee;display:flex;align-items:center;justify-content:center;font-size:14px">⭐</div>
+                <div style="flex:1;font-size:13px;font-weight:600;color:var(--tc)">Bônus</div>
+                <span data-aj-count-bonus style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:#e8f7ee;color:var(--tc)">0</span>
+                <span id="aj-arr-bonus" style="font-size:16px;color:var(--cb2);transition:transform .25s">›</span>
+              </div>
+              <div id="aj-body-bonus" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+                <div id="aj-list-bonus" style="border-top:.5px solid var(--cb);padding:6px"></div>
+              </div>
+            </div>
+
+            <!-- Accordion Descontos -->
+            <div style="background:white;border-radius:10px;border:1px solid var(--cb);overflow:hidden">
+              <div onclick="toggleAjAcc('desconto')" style="display:flex;align-items:center;gap:10px;padding:11px 12px;cursor:pointer;user-select:none">
+                <div style="width:28px;height:28px;border-radius:7px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;font-size:14px">⚠️</div>
+                <div style="flex:1;font-size:13px;font-weight:600;color:var(--red)">Descontos</div>
+                <span data-aj-count-desconto style="font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--red-bg);color:var(--red)">0</span>
+                <span id="aj-arr-desconto" style="font-size:16px;color:var(--cb2);transition:transform .25s">›</span>
+              </div>
+              <div id="aj-body-desconto" style="max-height:0;overflow:hidden;transition:max-height .35s ease">
+                <div id="aj-list-desconto" style="border-top:.5px solid var(--cb);padding:6px"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Pontos (editável) -->
+        <div id="aj-pts-wrap" style="display:none">
+          <div class="fg">
+            <label class="fl" id="aj-pts-label">Pontos</label>
+            <input class="fc" type="number" id="aj-pontos" min="0" step="0.5">
+            <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Valor padrão do motivo. Pode ajustar se necessário.</div>
+          </div>
+        </div>
+        <!-- Alunos -->
+        <div class="fg">
+          <label class="fl">Destinatário</label>
+          <div style="display:flex;gap:8px">
+            <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+              <input type="radio" name="aj-dest" id="aj-dest-todos" value="todos" checked onchange="toggleDestAjuste()" style="width:15px;height:15px">
+              <span style="font-size:13px;font-weight:600">👥 Todos</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+              <input type="radio" name="aj-dest" id="aj-dest-espec" value="especifico" onchange="toggleDestAjuste()" style="width:15px;height:15px">
+              <span style="font-size:13px;font-weight:600">👤 Específico</span>
+            </label>
+          </div>
+        </div>
+        <div id="aj-alunos-wrap" style="display:none;margin-bottom:10px">
+          <label class="fl">Alunos selecionados</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="aj-alunos-chips" style="flex:1;min-height:36px;padding:6px 10px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhum selecionado</div>
+            <button type="button" onclick="abrirModalSelecionarAlunosAjuste()" class="btn btn-ou btn-sm">+ Selecionar</button>
+          </div>
+        </div>
+        <!-- Observação -->
+        <div class="fg" style="margin:0">
+          <label class="fl">Observação <span style="color:var(--ink-soft);font-size:10px">(opcional)</span></label>
+          <input class="fc" id="aj-obs" placeholder="Detalhes adicionais...">
+        </div>
+        <input type="hidden" id="aj-motivo-id">
+        <input type="hidden" id="aj-motivo-texto">
+        <input type="hidden" id="aj-tipo">
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid var(--cb);flex-shrink:0;display:flex;gap:8px">
+        <button onclick="fecharModalAjuste()" class="btn btn-ou btn-sm" style="flex:1">Cancelar</button>
+        <button onclick="salvarAjuste()" class="btn btn-gold btn-sm" style="flex:1">✓ Aplicar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: GERENCIAR MOTIVOS -->
+  <div id="mo-motivos" style="display:none;position:fixed;inset:0;z-index:700;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center">
+    <div style="background:#f5f2eb;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:92vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="background:var(--ink);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:10px;color:var(--gold-l);font-weight:700;text-transform:uppercase;letter-spacing:.1em">Ajustes de Pontuação</div>
+          <div style="color:white;font-size:16px;font-weight:600;margin-top:2px">📋 Gerenciar Motivos</div>
+        </div>
+        <button onclick="fecharModalMotivos()" style="width:30px;height:30px;background:rgba(255,255,255,.1);border:none;border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:14px">
+        <!-- Pesquisa + botão novo -->
+        <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center">
+          <input class="fc" id="mot-pesquisa" placeholder="🔍 Pesquisar motivo..." oninput="filtrarMotivos()" style="flex:1;margin:0">
+          <button onclick="toggleNovoMotivo()" class="btn btn-dk btn-sm" style="white-space:nowrap">+ Novo</button>
+        </div>
+
+        <!-- Form novo/editar motivo (oculto por padrão) -->
+        <div id="mot-form-wrap" style="display:none;background:white;border-radius:12px;border:2px solid var(--gold);padding:14px;margin-bottom:12px">
+          <div style="font-size:13px;font-weight:700;color:var(--ink);margin-bottom:12px" id="mot-form-titulo">+ Novo Motivo</div>
+          <div class="fg"><label class="fl">Título</label><input class="fc" id="mot-titulo" placeholder="Ex: Participação na aula"></div>
+          <div class="frow">
+            <div class="fg">
+              <label class="fl">Tipo</label>
+              <select class="fc" id="mot-tipo">
+                <option value="bonus">⭐ Bônus</option>
+                <option value="desconto">⚠️ Desconto</option>
+              </select>
+            </div>
+            <div class="fg" style="margin:0"><label class="fl">Pontos padrão</label><input class="fc" type="number" id="mot-pontos" min="0" step="0.5" value="2"></div>
+          </div>
+          <div class="fg" style="margin:0"><label class="fl">Descrição <span style="font-size:10px;color:var(--ink-soft)">(opcional)</span></label><input class="fc" id="mot-desc" placeholder="Quando usar este motivo..."></div>
+          <input type="hidden" id="mot-edit-id">
+          <div style="display:flex;gap:8px;margin-top:12px">
+            <button onclick="fecharFormMotivo()" class="btn btn-ou btn-sm" style="flex:1">Cancelar</button>
+            <button onclick="salvarMotivo()" class="btn btn-gold btn-sm" style="flex:1">✓ Salvar</button>
+          </div>
+        </div>
+
+        <!-- Accordion: Bônus -->
+        <div id="mot-acc-bonus" style="background:white;border-radius:12px;border:1px solid var(--cb);margin-bottom:8px;overflow:hidden">
+          <div onclick="toggleMotAcc('bonus')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer">
+            <div style="width:32px;height:32px;border-radius:8px;background:#e8f7ee;display:flex;align-items:center;justify-content:center;font-size:16px">⭐</div>
+            <div style="flex:1;font-size:14px;font-weight:600;color:var(--tc)">Bônus</div>
+            <span id="mot-count-bonus" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:#e8f7ee;color:var(--tc)">0</span>
+            <span id="mot-arr-bonus" style="font-size:16px;color:var(--cb2);transition:transform .25s">›</span>
+          </div>
+          <div id="mot-body-bonus" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
+            <div id="mot-list-bonus" style="border-top:.5px solid var(--cb)"></div>
+          </div>
+        </div>
+
+        <!-- Accordion: Descontos -->
+        <div id="mot-acc-desconto" style="background:white;border-radius:12px;border:1px solid var(--cb);margin-bottom:8px;overflow:hidden">
+          <div onclick="toggleMotAcc('desconto')" style="display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer">
+            <div style="width:32px;height:32px;border-radius:8px;background:var(--red-bg);display:flex;align-items:center;justify-content:center;font-size:16px">⚠️</div>
+            <div style="flex:1;font-size:14px;font-weight:600;color:var(--red)">Descontos</div>
+            <span id="mot-count-desconto" style="font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--red-bg);color:var(--red)">0</span>
+            <span id="mot-arr-desconto" style="font-size:16px;color:var(--cb2);transition:transform .25s">›</span>
+          </div>
+          <div id="mot-body-desconto" style="max-height:0;overflow:hidden;transition:max-height .3s ease">
+            <div id="mot-list-desconto" style="border-top:.5px solid var(--cb)"></div>
+          </div>
+        </div>
+
       </div>
     </div>
   </div>
