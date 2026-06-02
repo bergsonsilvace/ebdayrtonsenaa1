@@ -26,7 +26,7 @@
   --r:12px;--rsm:8px;--rlg:20px;
 }
 html{font-size:16px}
-body{font-family:'Outfit',sans-serif;background:#0e0d08;color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;line-height:1.2}
 button{cursor:pointer;font-family:'Outfit',sans-serif}
 input,select,textarea{font-family:'Outfit',sans-serif}
@@ -120,12 +120,13 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 
 /* MAIN */
 .main{flex:1;padding:0;width:100%;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
-#pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
 
 /* PAGE — base */
-.page{display:none;animation:fadeUp .3s ease;padding:14px 16px}
+.page{display:none;animation:fadeUp .3s ease;padding:14px 16px;background:var(--cream)}
 .page.on{display:block}
 #pg-pg-aluno{animation:none!important}
+/* Dashboard e progresso aluno sempre escuros */
+#pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
 
 /* ── DESKTOP ── */
 @media(min-width:700px){
