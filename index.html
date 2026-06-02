@@ -2485,8 +2485,26 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let sbClient = null;
 async function initSB() {
   try { sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
-  mostrarTela('login');
   carregarConfigs().catch(function(){});
+
+  // Restaurar sessão se existir (máx 7 dias)
+  try {
+    const sessao = localStorage.getItem('_ebd_sessao');
+    if (sessao) {
+      const { login, senha, ts } = JSON.parse(sessao);
+      const seteDias = 7 * 24 * 60 * 60 * 1000;
+      if (login && senha && (Date.now() - ts) < seteDias) {
+        document.getElementById('lu').value = login;
+        document.getElementById('lp').value = senha;
+        await doLogin();
+        return;
+      } else {
+        localStorage.removeItem('_ebd_sessao');
+      }
+    }
+  } catch(e) {}
+
+  mostrarTela('login');
 }
 
 // ── STORAGE HELPERS ──
@@ -2859,6 +2877,13 @@ async function finalizarLogin() {
   const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
   PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
 
+  // Salvar sessão para restaurar ao recarregar
+  try {
+    localStorage.setItem('_ebd_sessao', JSON.stringify({
+      login: USER.login, senha: USER.senha, ts: Date.now()
+    }));
+  } catch(e) {}
+
   // Admin/Pastor/Super: acesso TOTAL — nunca filtrar por turma
   if (isAdmin()) {
     USER.turma = 'todas';
@@ -2944,6 +2969,8 @@ function doLogout() {
   Object.keys(quizScores).forEach(k => delete quizScores[k]);
   _cacheAlunoProgresso = null;
   PROVAS = [];
+  // Limpar sessão salva
+  try { localStorage.removeItem('_ebd_sessao'); } catch(e) {}
   document.body.classList.remove('modo-aluno');
   try { sessionStorage.removeItem('_modoEBD'); } catch(e) {}
   if (chartFreq) { chartFreq.destroy(); chartFreq = null; }
