@@ -31,7 +31,10 @@ h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;line-height:1.2}
 button{cursor:pointer;font-family:'Outfit',sans-serif}
 input,select,textarea{font-family:'Outfit',sans-serif}
 ::-webkit-scrollbar{width:4px}::-webkit-scrollbar-track{background:transparent}::-webkit-scrollbar-thumb{background:var(--cb);border-radius:4px}
-.screen{display:none}.screen.on{display:block}#scr-app{display:none;flex-direction:column;height:100vh;overflow:hidden}#scr-app.on{display:flex}#scr-login{position:fixed;inset:0;z-index:50}
+.screen{display:none}.screen.on{display:block}
+#scr-app{display:none;flex-direction:column;height:100dvh;overflow:hidden}
+#scr-app.on{display:flex}
+#scr-login{position:fixed;inset:0;z-index:50}
 
 /* LOADING */
 #scr-loading{background:var(--ink);display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px;min-height:100vh}
@@ -116,12 +119,13 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 }
 
 /* MAIN */
-.main{flex:1;padding:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
-/* Dashboard e progresso aluno: sem padding externo */
+.main{flex:1;padding:0;width:100%;min-height:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
 #pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
 
-/* ── MOBILE (padrão) ── */
-.page{padding:14px 16px}
+/* PAGE — base */
+.page{display:none;animation:fadeUp .3s ease;padding:14px 16px}
+.page.on{display:block}
+#pg-pg-aluno{animation:none!important}
 
 /* ── DESKTOP ── */
 @media(min-width:700px){
@@ -129,51 +133,27 @@ input,select,textarea{font-family:'Outfit',sans-serif}
   #scr-app{background:var(--cream)}
   .main{width:100%;max-width:100%}
   .topbar{border-bottom:1px solid rgba(255,255,255,.1)}
-
-  /* Todas as páginas ocupam tudo */
   .page{
     background:var(--cream);
-    min-height:calc(100vh - 56px);
+    min-height:calc(100vh - 50px);
     padding:32px 40px;
     box-sizing:border-box;
     width:100%;
   }
+  .page.on{display:block}
   #pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
-
-  /* Cards, stats, tabs — largura 100% */
   .card{border-radius:14px;padding:20px;width:100%;box-sizing:border-box}
-  .stats{width:100%;box-sizing:border-box}
+  .stats{width:100%;box-sizing:border-box;grid-template-columns:repeat(6,1fr)}
   .ttabs{width:100%;box-sizing:border-box}
   .status-filter{width:100%;box-sizing:border-box}
-
-  /* Page header */
   .ph h2{font-size:30px}
-
-  /* Tabs maiores */
-  .ttab{padding:10px 18px;font-size:13px}
-
-  /* Tabela ocupa largura */
+  .ttab{padding:10px 18px;font-size:13px;flex:1}
   .comp-table{width:100%}
-
-  /* Grid mensal — 4 colunas no desktop */
   .mensal-grid{grid-template-columns:repeat(4,1fr);gap:12px}
-
-  /* TODOS os filhos diretos preenchem a largura */
   .page > *{width:100%;box-sizing:border-box}
   #pg-dash.page > *,#pg-pg-aluno.page > *{width:auto}
-
-  /* Stats — mais colunas no desktop */
-  .stats{grid-template-columns:repeat(6,1fr)}
-
-  /* Tabs — cada tab ocupa proporcionalmente */
-  .ttab{flex:1}
-
-  /* Frow (formulário de 2 campos) — lado a lado */
   .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-
-
-/* PAGE */
-.page{display:none;animation:fadeUp .3s ease}.page.on{display:block}#pg-pg-aluno{animation:none!important}
+} /* fim @media desktop */
 .cfg-acc-item{display:flex;align-items:center;gap:12px;padding:13px 14px;cursor:pointer;transition:background .15s;background:white;user-select:none}
 .cfg-acc-item:active{background:#faf8f4}
 .cfg-acc-item.open{background:#fffbf2}
