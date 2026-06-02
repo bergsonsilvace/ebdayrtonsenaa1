@@ -802,7 +802,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 <div class="offline-banner" id="offline-banner">⚠ Sem conexão — alguns dados podem estar desatualizados</div>
 
 <!-- LOGIN -->
-<div id="scr-login" class="screen on" style="display:block;position:relative;min-height:100vh">
+<div id="scr-login" class="screen" style="display:none;position:relative;min-height:100vh">
   <div class="lbox">
     <div class="llogo">
       <div class="llogo-icon">✦</div>
@@ -2485,6 +2485,11 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 let sbClient = null;
 async function initSB() {
   try { sbClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); } catch(e) {}
+
+  // Mostrar splash enquanto verifica sessão
+  const splash = document.getElementById('scr-splash');
+  if (splash) { splash.style.display = 'flex'; }
+
   carregarConfigs().catch(function(){});
 
   // Restaurar sessão se existir (máx 7 dias)
@@ -2496,6 +2501,7 @@ async function initSB() {
       if (login && senha && (Date.now() - ts) < seteDias) {
         document.getElementById('lu').value = login;
         document.getElementById('lp').value = senha;
+        if (splash) splash.style.display = 'none';
         await doLogin();
         return;
       } else {
@@ -2504,6 +2510,8 @@ async function initSB() {
     }
   } catch(e) {}
 
+  // Sem sessão — mostrar login
+  if (splash) splash.style.display = 'none';
   mostrarTela('login');
 }
 
@@ -14776,6 +14784,14 @@ if ('serviceWorker' in navigator) {
         <button onclick="confirmarSelecaoAlunos()" class="btn btn-gold btn-sm">✓ Confirmar</button>
       </div>
     </div>
+  </div>
+
+  <!-- SPLASH SCREEN -->
+  <div id="scr-splash" style="display:none;position:fixed;inset:0;z-index:9999;background:var(--ink);align-items:center;justify-content:center;flex-direction:column;gap:16px">
+    <div style="font-size:40px">✦</div>
+    <div style="color:var(--gold);font-size:20px;font-weight:700;font-family:sans-serif">EBD Frequência</div>
+    <div style="width:40px;height:3px;background:var(--gold);border-radius:2px;animation:splash-bar 1s ease-in-out infinite alternate"></div>
+    <style>@keyframes splash-bar{from{width:20px;opacity:.4}to{width:60px;opacity:1}}</style>
   </div>
 
 </body>
