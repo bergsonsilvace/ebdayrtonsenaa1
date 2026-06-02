@@ -13236,6 +13236,10 @@ function confirmarSelecaoAlunos() {
     _alunosBonusSelecionados = [..._alunosSelecionados];
     _atualizarChipsBonus();
     _modalAlunosTurmaOverride = null;
+  } else if (_modalAlunosContexto === 'edit-bonus') {
+    _editBonusAlunosSel = [..._alunosSelecionados];
+    _atualizarChipsEditBonus();
+    _modalAlunosTurmaOverride = null;
   } else {
     _atualizarChipsAlunos();
   }
@@ -13293,22 +13297,132 @@ async function carregarHistoricoBonus() {
   if (!box) return;
   box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Carregando...</div>';
   try {
+    if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
     const { data } = await sbClient.from('bonus_pontos').select('*').order('created_at', { ascending: false }).limit(20);
     if (!data || !data.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:12px;padding:8px 0">Nenhum bônus registrado ainda.</div>'; return; }
     box.innerHTML = '<div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">Histórico</div>'
       + data.map(b => {
         const dt = new Date(b.created_at).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'});
-        const dest = b.aluno_ids ? `${b.aluno_ids.length} aluno(s)` : 'Todos';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">
-          <div style="width:36px;height:36px;background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold-deep);flex-shrink:0">+${b.pontos}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.motivo}</div>
-            <div style="font-size:11px;color:var(--ink-soft)">${TN[b.turma]||b.turma} · ${dest} · ${dt}</div>
+        let dest = 'Todos';
+        if (b.aluno_ids && b.aluno_ids.length) {
+          const nomes = b.aluno_ids.map(id => {
+            const a = cacheAlunos.find(x => x.id === id);
+            return a ? a.nome : '?';
+          });
+          dest = nomes.join(', ');
+        }
+        return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;background:var(--gold-pale);border:1.5px solid var(--gold);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:var(--gold-deep);flex-shrink:0">+${b.pontos}</div>
+            <div style="flex:1;min-width:0">
+              <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.motivo}</div>
+              <div style="font-size:11px;color:var(--ink-soft)">${TN[b.turma]||b.turma} · ${dt}</div>
+              <div style="font-size:11px;color:var(--ink);margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">👤 ${dest}</div>
+            </div>
+            <div style="display:flex;gap:6px;flex-shrink:0">
+              <button onclick="editarBonus('${b.id}')" style="background:none;border:1px solid var(--cb);border-radius:6px;color:var(--ink-soft);font-size:12px;cursor:pointer;padding:4px 8px">✏️</button>
+              <button onclick="deletarBonus('${b.id}')" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:4px">✕</button>
+            </div>
           </div>
-          <button onclick="deletarBonus('${b.id}')" style="background:none;border:none;color:var(--red);font-size:14px;cursor:pointer;padding:4px">✕</button>
         </div>`;
       }).join('');
   } catch(e) { box.innerHTML = '<div style="color:var(--red);font-size:12px">Erro ao carregar</div>'; }
+}
+
+let _editBonusAlunosSel = [];
+
+async function editarBonus(id) {
+  const { data: b } = await sbClient.from('bonus_pontos').select('*').eq('id', id).single();
+  if (!b) { toast('Bônus não encontrado', 'er'); return; }
+  if (!cacheAlunos.length) cacheAlunos = await sbGet('alunos');
+
+  // Preencher modal de edição
+  document.getElementById('eb-id').value = id;
+  document.getElementById('eb-motivo').value = b.motivo || '';
+  document.getElementById('eb-desc').value = b.descricao || '';
+  document.getElementById('eb-pts').value = b.pontos || 10;
+  document.getElementById('eb-turma').value = b.turma || 'criancas';
+  document.getElementById('eb-data').value = b.data_referencia || '';
+
+  if (b.aluno_ids && b.aluno_ids.length) {
+    _editBonusAlunosSel = b.aluno_ids.map(aid => {
+      const a = cacheAlunos.find(x => x.id === aid);
+      return { id: aid, nome: a ? a.nome : aid };
+    });
+    document.getElementById('eb-dest-espec').checked = true;
+    document.getElementById('eb-alunos-wrap').style.display = 'block';
+  } else {
+    _editBonusAlunosSel = [];
+    document.getElementById('eb-dest-todos').checked = true;
+    document.getElementById('eb-alunos-wrap').style.display = 'none';
+  }
+  _atualizarChipsEditBonus();
+  document.getElementById('mo-edit-bonus').style.display = 'flex';
+}
+
+function fecharModalEditBonus() {
+  document.getElementById('mo-edit-bonus').style.display = 'none';
+  _editBonusAlunosSel = [];
+}
+
+function toggleDestEditBonus() {
+  const espec = document.getElementById('eb-dest-espec').checked;
+  document.getElementById('eb-alunos-wrap').style.display = espec ? 'block' : 'none';
+}
+
+function _atualizarChipsEditBonus() {
+  const box = document.getElementById('eb-alunos-chips');
+  if (!box) return;
+  if (!_editBonusAlunosSel.length) {
+    box.textContent = 'Nenhum selecionado';
+    box.style.color = 'var(--ink-soft)';
+    return;
+  }
+  box.style.color = 'var(--ink)';
+  box.innerHTML = _editBonusAlunosSel.map(a =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;background:var(--gold);color:var(--ink);border-radius:20px;padding:2px 8px;font-size:11px;font-weight:700;margin:2px">${a.nome}</span>`
+  ).join('');
+}
+
+async function abrirSelAlunosEditBonus() {
+  const turma = document.getElementById('eb-turma').value;
+  _modalAlunosContexto = 'edit-bonus';
+  _alunosSelecionados = [..._editBonusAlunosSel];
+  _modalAlunosTurmaOverride = turma;
+  const modal = document.getElementById('mo-sel-alunos');
+  const label = document.getElementById('sel-alunos-turma-label');
+  if (label) label.textContent = 'Turma de ' + (TN[turma] || turma);
+  document.getElementById('sel-alunos-busca').value = '';
+  modal.style.display = 'flex';
+  _renderListaAlunosModal(turma, '');
+}
+
+async function salvarEdicaoBonus() {
+  const id = document.getElementById('eb-id').value;
+  const motivo = document.getElementById('eb-motivo').value.trim();
+  const desc = document.getElementById('eb-desc').value.trim();
+  const pts = parseFloat(document.getElementById('eb-pts').value);
+  const turma = document.getElementById('eb-turma').value;
+  const data = document.getElementById('eb-data').value || _hojeStr();
+  const paraEspec = document.getElementById('eb-dest-espec').checked;
+
+  if (!motivo) { toast('Informe o motivo', 'er'); return; }
+  if (!pts || pts <= 0) { toast('Informe uma pontuação válida', 'er'); return; }
+  if (paraEspec && !_editBonusAlunosSel.length) { toast('Selecione ao menos um aluno', 'er'); return; }
+
+  try {
+    await sbClient.from('bonus_pontos').update({
+      motivo, descricao: desc || null, pontos: pts, turma,
+      data_referencia: data,
+      aluno_ids: paraEspec ? _editBonusAlunosSel.map(a => a.id) : null
+    }).eq('id', id);
+    toast('✅ Bônus atualizado!', 'ok');
+    _cacheAlunoProgresso = null;
+    fecharModalEditBonus();
+    carregarHistoricoBonus();
+  } catch(e) {
+    toast('Erro ao salvar: ' + e.message, 'er');
+  }
 }
 
 async function deletarBonus(id) {
@@ -14727,6 +14841,59 @@ if ('serviceWorker' in navigator) {
         <div style="flex:1;font-size:12px;color:var(--ink-soft);display:flex;align-items:center" id="sel-alunos-count">0 selecionados</div>
         <button onclick="fecharModalSelecionarAlunos()" class="btn btn-ou btn-sm">Cancelar</button>
         <button onclick="confirmarSelecaoAlunos()" class="btn btn-gold btn-sm">✓ Confirmar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL EDITAR BÔNUS -->
+  <div id="mo-edit-bonus" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.6);align-items:flex-end;justify-content:center">
+    <div style="background:white;border-radius:22px 22px 0 0;width:100%;max-width:680px;max-height:90vh;display:flex;flex-direction:column;overflow:hidden">
+      <div style="background:linear-gradient(135deg,#b8972a,#d4af37);padding:16px 20px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+        <div>
+          <div style="font-size:10px;color:rgba(255,255,255,.7);font-weight:700;text-transform:uppercase;letter-spacing:.1em">Pontuação Bônus</div>
+          <div style="color:white;font-size:16px;font-weight:600;margin-top:2px">✏️ Editar Bônus</div>
+        </div>
+        <button onclick="fecharModalEditBonus()" style="width:30px;height:30px;background:rgba(255,255,255,.2);border:none;border-radius:8px;color:white;font-size:16px;cursor:pointer">✕</button>
+      </div>
+      <div style="flex:1;overflow-y:auto;padding:16px">
+        <input type="hidden" id="eb-id">
+        <div class="fg"><label class="fl">Motivo</label><input class="fc" id="eb-motivo" placeholder="Ex: Participação surpresa..."></div>
+        <div class="fg"><label class="fl">Descrição <span style="color:var(--ink-soft);font-size:10px">(opcional)</span></label><input class="fc" id="eb-desc" placeholder="Detalhes adicionais..."></div>
+        <div class="frow">
+          <div class="fg"><label class="fl">Pontos</label><input class="fc" type="number" id="eb-pts" min="1"></div>
+          <div class="fg" style="margin:0"><label class="fl">Data</label><input class="fc" type="date" id="eb-data"></div>
+        </div>
+        <div class="fg"><label class="fl">Turma</label>
+          <select class="fc" id="eb-turma">
+            <option value="criancas">🟢 Crianças</option>
+            <option value="jovens">🔵 Jovens</option>
+            <option value="adultos">🔴 Adultos</option>
+          </select>
+        </div>
+        <div class="fg" style="margin-bottom:10px">
+          <label class="fl">Destinatário</label>
+          <div style="display:flex;gap:8px">
+            <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+              <input type="radio" name="eb-dest" id="eb-dest-todos" value="todos" checked onchange="toggleDestEditBonus()" style="width:15px;height:15px">
+              <span style="font-size:13px;font-weight:600">👥 Todos</span>
+            </label>
+            <label style="display:flex;align-items:center;gap:6px;flex:1;padding:8px 12px;border:1.5px solid var(--cb);border-radius:var(--r);cursor:pointer;background:white">
+              <input type="radio" name="eb-dest" id="eb-dest-espec" value="especifico" onchange="toggleDestEditBonus()" style="width:15px;height:15px">
+              <span style="font-size:13px;font-weight:600">👤 Específico</span>
+            </label>
+          </div>
+        </div>
+        <div id="eb-alunos-wrap" style="display:none;margin-bottom:10px">
+          <label class="fl">Alunos selecionados</label>
+          <div style="display:flex;gap:8px;align-items:center">
+            <div id="eb-alunos-chips" style="flex:1;min-height:36px;padding:6px 10px;border:1.5px solid var(--cb);border-radius:var(--r);background:white;font-size:12px;color:var(--ink-soft)">Nenhum selecionado</div>
+            <button type="button" onclick="abrirSelAlunosEditBonus()" class="btn btn-ou btn-sm">+ Selecionar</button>
+          </div>
+        </div>
+      </div>
+      <div style="padding:12px 16px;border-top:1px solid var(--cb);display:flex;gap:8px;flex-shrink:0">
+        <button onclick="fecharModalEditBonus()" class="btn btn-ou" style="flex:1">Cancelar</button>
+        <button onclick="salvarEdicaoBonus()" class="btn btn-gold" style="flex:1">💾 Salvar</button>
       </div>
     </div>
   </div>
