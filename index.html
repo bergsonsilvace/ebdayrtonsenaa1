@@ -4394,9 +4394,11 @@ async function carregarQuizScoresTodos() {
 }
 
 function _quizScoresParaAluno(alunoId) {
-  // Se for o aluno logado, usa quizScores em memória (mais atualizado)
+  // Sempre usar _quizScoresTodos quando disponível — mais confiável
+  if (_quizScoresTodos[alunoId]) return _quizScoresTodos[alunoId];
+  // Se for o aluno logado e não tiver no cache geral, usa quizScores em memória
   if (USER && USER.id === alunoId) return quizScores;
-  return _quizScoresTodos[alunoId] || {};
+  return {};
 }
 
 async function selTurmaRanking(turma, el) {
@@ -6289,6 +6291,7 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
       sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false }),
       sbClient.from('bonus_pontos').select('*').eq('turma', turmaAluno).order('created_at', { ascending: false })
     ]);
+    console.log('DEBUG AULAS:', { turmaAluno, idAluno, totalAulas: (aulasRes.data||[]).length, erroAulas: aulasRes.error });
     aulasAluno = aulasRes.data || [];
     // Filtrar bônus: para todos OU para esse aluno
     const ajustesRes = await sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaAluno);
@@ -6299,7 +6302,7 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
       ...(bonusRes.data || []).filter(b => !b.aluno_ids || b.aluno_ids.includes(idAluno)),
       ...ajustesAluno
     ];
-  } catch(e) {}
+  } catch(e) { console.error('ERRO ao carregar aulas/bonus:', e.message, e); }
   return { idAluno, turmaAluno, aulasAluno, bonusAluno,
     quizScoresSnap: {...quizScores},
     provasSnap: [...(PROVAS||[])],
@@ -6324,6 +6327,7 @@ async function _renderAlunoProgressoComDados(dados) {
 
 
   // ─── Calcular pontos e estatísticas ───
+  console.log('DEBUG PONTOS:', { idAluno, turmaAluno, totalAulas: aulasAluno.length, totalProvas: (PROVAS||[]).length, quizKeys: Object.keys(quizScores) });
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
   const quizzesFeitos  = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
   const provasFeitas   = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
