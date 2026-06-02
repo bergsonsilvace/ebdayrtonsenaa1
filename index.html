@@ -26,7 +26,7 @@
   --r:12px;--rsm:8px;--rlg:20px;
 }
 html{font-size:16px}
-body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--ink);-webkit-font-smoothing:antialiased}
+body{font-family:'Outfit',sans-serif;background:#0e0d08;color:var(--ink);-webkit-font-smoothing:antialiased}
 h1,h2,h3,h4{font-family:'Cormorant Garamond',serif;line-height:1.2}
 button{cursor:pointer;font-family:'Outfit',sans-serif}
 input,select,textarea{font-family:'Outfit',sans-serif}
@@ -62,23 +62,24 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 /* APP */
 
 /* TOPBAR */
-.topbar{background:var(--ink);padding:0 16px;display:flex;align-items:center;gap:10px;height:56px;flex-shrink:0;z-index:200}
-.tb-brand{display:flex;align-items:center;gap:9px;flex-shrink:0;cursor:pointer}
-.tb-icon{width:32px;height:32px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:15px;font-weight:600;color:var(--ink)}
-.tb-name{font-family:'Cormorant Garamond',serif;font-size:16px;color:white}.tb-name em{color:var(--gold-l);font-style:italic}
-.tb-nav{flex:1;display:flex;justify-content:center;gap:2px;flex-wrap:nowrap}
-.tb-btn{padding:6px 10px;border:none;background:transparent;color:rgba(255,255,255,.45);font-size:12px;border-radius:7px;transition:all .2s;white-space:nowrap;cursor:pointer;font-family:'Outfit',sans-serif}
+.topbar{background:var(--ink);padding:0 12px;display:flex;align-items:center;gap:8px;height:50px;flex-shrink:0;z-index:200}
+.tb-brand{display:flex;align-items:center;gap:8px;flex-shrink:0;cursor:pointer}
+.tb-icon{width:28px;height:28px;background:var(--gold);border-radius:7px;display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:13px;font-weight:600;color:var(--ink)}
+.tb-name{font-family:'Cormorant Garamond',serif;font-size:14px;color:white;white-space:nowrap}.tb-name em{color:var(--gold-l);font-style:italic}
+.tb-nav{flex:1;display:flex;justify-content:flex-start;gap:1px;flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;min-width:0}
+.tb-nav::-webkit-scrollbar{display:none}
+.tb-btn{padding:5px 8px;border:none;background:transparent;color:rgba(255,255,255,.45);font-size:11px;border-radius:6px;transition:all .2s;white-space:nowrap;cursor:pointer;font-family:'Outfit',sans-serif;flex-shrink:0}
 .tb-btn:hover{color:white;background:rgba(255,255,255,.08)}.tb-btn.on{background:var(--gold);color:var(--ink);font-weight:600}
-.tb-user{display:flex;align-items:center;gap:8px;flex-shrink:0}
-.tb-av{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:white;border:2px solid rgba(255,255,255,.15);cursor:pointer;overflow:hidden;flex-shrink:0}
+.tb-user{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.tb-av{width:30px;height:30px;border-radius:50%;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:white;border:2px solid rgba(255,255,255,.15);cursor:pointer;overflow:hidden;flex-shrink:0}
 .tb-av img{width:100%;height:100%;object-fit:cover}
 .tb-info{display:none}
-@media(min-width:768px){.tb-info{display:block}.tb-uname{color:white;font-size:12px;font-weight:500}.tb-urole{color:rgba(255,255,255,.35);font-size:10px}}
-.logout-btn{padding:5px 11px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:transparent;color:rgba(255,255,255,.4);font-size:12px;transition:all .2s;cursor:pointer}
+@media(min-width:1200px){.tb-info{display:block}.tb-uname{color:white;font-size:11px;font-weight:500}.tb-urole{color:rgba(255,255,255,.35);font-size:10px}}
+.logout-btn{padding:4px 9px;border:1px solid rgba(255,255,255,.12);border-radius:6px;background:transparent;color:rgba(255,255,255,.4);font-size:11px;transition:all .2s;cursor:pointer;white-space:nowrap;flex-shrink:0}
 .logout-btn:hover{border-color:rgba(255,255,255,.4);color:white}
 /* Seletor de modo de visualização */
-.modo-seletor{display:flex;align-items:center;gap:4px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:3px;flex-shrink:0}
-.modo-btn{padding:4px 9px;border:none;border-radius:6px;background:transparent;color:rgba(255,255,255,.45);font-size:11px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.02em}
+.modo-seletor{display:flex;align-items:center;gap:2px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:7px;padding:2px;flex-shrink:0}
+.modo-btn{padding:3px 7px;border:none;border-radius:5px;background:transparent;color:rgba(255,255,255,.45);font-size:10px;font-weight:600;cursor:pointer;transition:all .2s;white-space:nowrap;letter-spacing:.02em}
 .modo-btn.on{background:var(--gold);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .modo-btn:hover:not(.on){background:rgba(255,255,255,.1);color:white}
 .modo-banner{display:none;position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--ink);color:var(--gold-l);border:1px solid var(--gold);border-radius:10px;padding:8px 18px;font-size:12px;font-weight:600;z-index:500;box-shadow:0 4px 20px rgba(0,0,0,.3);pointer-events:none;animation:fadeIn .3s}
@@ -108,9 +109,68 @@ input,select,textarea{font-family:'Outfit',sans-serif}
   .logout-btn{display:none}
   .tb-name{display:none}
 }
+@media(min-width:701px) and (max-width:1100px){
+  .tb-name{display:none}
+  .tb-info{display:none!important}
+  .logout-btn{display:none}
+}
 
 /* MAIN */
-.main{flex:1;padding:20px 18px;max-width:760px;width:100%;margin:0 auto;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.main{flex:1;padding:0;width:100%;overflow-y:auto;-webkit-overflow-scrolling:touch}
+/* Dashboard e progresso aluno: sem padding externo */
+#pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
+
+/* ── MOBILE (padrão) ── */
+.page{padding:14px 16px}
+
+/* ── DESKTOP ── */
+@media(min-width:700px){
+  body{background:var(--cream)}
+  #scr-app{background:var(--cream)}
+  .main{width:100%;max-width:100%}
+  .topbar{border-bottom:1px solid rgba(255,255,255,.1)}
+
+  /* Todas as páginas ocupam tudo */
+  .page{
+    background:var(--cream);
+    min-height:calc(100vh - 56px);
+    padding:32px 40px;
+    box-sizing:border-box;
+    width:100%;
+  }
+  #pg-dash.page,#pg-pg-aluno.page{padding:0;background:#111008}
+
+  /* Cards, stats, tabs — largura 100% */
+  .card{border-radius:14px;padding:20px;width:100%;box-sizing:border-box}
+  .stats{width:100%;box-sizing:border-box}
+  .ttabs{width:100%;box-sizing:border-box}
+  .status-filter{width:100%;box-sizing:border-box}
+
+  /* Page header */
+  .ph h2{font-size:30px}
+
+  /* Tabs maiores */
+  .ttab{padding:10px 18px;font-size:13px}
+
+  /* Tabela ocupa largura */
+  .comp-table{width:100%}
+
+  /* Grid mensal — 4 colunas no desktop */
+  .mensal-grid{grid-template-columns:repeat(4,1fr);gap:12px}
+
+  /* TODOS os filhos diretos preenchem a largura */
+  .page > *{width:100%;box-sizing:border-box}
+  #pg-dash.page > *,#pg-pg-aluno.page > *{width:auto}
+
+  /* Stats — mais colunas no desktop */
+  .stats{grid-template-columns:repeat(6,1fr)}
+
+  /* Tabs — cada tab ocupa proporcionalmente */
+  .ttab{flex:1}
+
+  /* Frow (formulário de 2 campos) — lado a lado */
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+
 
 /* PAGE */
 .page{display:none;animation:fadeUp .3s ease}.page.on{display:block}#pg-pg-aluno{animation:none!important}
@@ -134,16 +194,189 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .ph{margin-bottom:18px}.ph h2{font-size:26px;margin-bottom:3px}.ph h2 em{color:var(--gold-deep)}.ph p{color:var(--ink-soft);font-size:13px}
 
 /* HERO */
-.hero{background:var(--ink);border-radius:var(--rlg);padding:22px;margin-bottom:14px;position:relative;overflow:hidden}
-.hero::after{content:'✦';position:absolute;right:16px;top:4px;font-size:90px;color:rgba(255,255,255,.025);pointer-events:none;font-family:'Cormorant Garamond',serif}
-.hero-date{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--gold-l);margin-bottom:6px;font-weight:600}
-.hero h2{color:white;font-size:20px;margin-bottom:3px}.hero p{color:rgba(255,255,255,.4);font-size:13px}
-.hero-saudacao{display:flex;align-items:center;gap:12px;margin-bottom:10px}
-.hero-foto{width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.1);border:2px solid rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:white;overflow:hidden;flex-shrink:0}
+/* ── DASHBOARD PREMIUM 2026 ── */
+.hero{background:linear-gradient(145deg,#111008 0%,#1e1b0e 50%,#111008 100%);border-radius:0;padding:20px;margin-bottom:0;position:relative;overflow:hidden;box-shadow:none}
+.hero::before{content:'';position:absolute;top:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(circle,rgba(184,151,42,.09) 0%,transparent 65%);pointer-events:none}
+.hero::after{content:'✦';position:absolute;right:-4px;top:-18px;font-size:130px;color:rgba(184,151,42,.04);pointer-events:none;font-family:'Cormorant Garamond',serif;line-height:1}
+.hero-top-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;position:relative;z-index:1}
+.hero-date{font-size:9px;text-transform:uppercase;letter-spacing:.13em;color:rgba(184,151,42,.7);font-weight:700}
+.hero-cfg-btn{width:30px;height:30px;border-radius:8px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;flex-shrink:0;transition:background .2s}
+.hero-cfg-btn:hover{background:rgba(255,255,255,.1)}
+.hero h2{color:white;font-size:22px;margin-bottom:2px;font-family:'Cormorant Garamond',serif;font-weight:300;line-height:1.15}
+.hero h2 strong{font-weight:600;font-style:italic;color:#e8d48a}
+.hero p{color:rgba(255,255,255,.3);font-size:12px}
+.hero-saudacao{display:flex;align-items:center;gap:12px;margin-bottom:12px;position:relative;z-index:1}
+.hero-foto{width:46px;height:46px;border-radius:13px;background:rgba(184,151,42,.14);border:1.5px solid rgba(184,151,42,.3);display:flex;align-items:center;justify-content:center;font-family:'Cormorant Garamond',serif;font-size:18px;font-weight:600;color:#e8d48a;overflow:hidden;flex-shrink:0}
 .hero-foto img{width:100%;height:100%;object-fit:cover}
-.hero-role{display:inline-block;margin-top:6px;padding:3px 10px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:20px;font-size:11px;color:rgba(255,255,255,.6)}
-.hero-btn{display:inline-flex;align-items:center;gap:6px;margin-top:12px;padding:9px 16px;background:var(--gold);border:none;border-radius:var(--rsm);color:var(--ink);font-size:13px;font-weight:700;transition:all .2s}
-.hero-btn:hover{background:var(--gold-l)}
+.hero-role{display:inline-flex;align-items:center;margin-top:8px;padding:4px 12px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);border-radius:20px;font-size:11px;color:rgba(255,255,255,.4);letter-spacing:.04em;position:relative;z-index:1}
+.hero-btn{display:inline-flex;align-items:center;gap:6px;margin-top:14px;padding:10px 18px;background:var(--gold);border:none;border-radius:10px;color:var(--ink);font-size:13px;font-weight:700;transition:all .2s;letter-spacing:.02em;box-shadow:0 2px 10px rgba(184,151,42,.35);position:relative;z-index:1}
+.hero-btn:hover{background:var(--gold-l);transform:translateY(-1px);box-shadow:0 4px 14px rgba(184,151,42,.45)}
+.hero-btn-sec{display:inline-flex;align-items:center;gap:6px;margin-top:14px;margin-left:8px;padding:10px 14px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:10px;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;cursor:pointer;transition:all .2s;position:relative;z-index:1}
+.hero-btn-sec:hover{background:rgba(255,255,255,.12)}
+
+/* COUNTDOWN — dentro do hero */
+.dash-cd-n{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:600;color:#b8972a;line-height:1}
+.dash-cd-u{font-size:8px;color:rgba(255,255,255,.25);text-transform:uppercase;letter-spacing:.08em;margin-top:4px}
+.dash-cd-sep{font-size:26px;color:rgba(184,151,42,.35);font-weight:300;margin-bottom:12px;line-height:1}
+
+/* KPIS escuros */
+.dash-kpis{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.05);margin-bottom:14px}
+.dash-kpi{background:#111008;padding:12px 8px;text-align:center}
+.dash-kpi-n{font-family:'Cormorant Garamond',serif;font-size:24px;font-weight:600;line-height:1;margin-bottom:2px}
+.dash-kpi-l{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.2);font-weight:600}
+
+/* SEÇÃO LABEL escura */
+.dash-sec-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.18);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.dash-sec-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+
+/* SEÇÃO container */
+.dash-sec-block{padding:16px 0 0}
+.dash-sec-block+.dash-sec-block{border-top:1px solid rgba(255,255,255,.05)}
+.dash-hidden{display:none!important}
+
+/* NOTIFICAÇÕES no dashboard */
+.dash-notif{display:flex;align-items:center;gap:10px;border-radius:12px;padding:11px 13px;margin-bottom:8px}
+.dash-notif-warn{background:rgba(184,122,0,.08);border:1px solid rgba(184,122,0,.2)}
+.dash-notif-danger{background:rgba(184,42,42,.06);border:1px solid rgba(184,42,42,.2)}
+.dash-notif-icon{font-size:16px;flex-shrink:0}
+.dash-notif-body{flex:1}
+.dash-notif-title{font-size:12px;font-weight:600;margin-bottom:1px}
+.dash-notif-sub{font-size:10px;color:rgba(255,255,255,.3)}
+.dash-notif-btn{font-size:10px;font-weight:700;padding:4px 9px;border-radius:7px;font-family:'Outfit',sans-serif;cursor:pointer;white-space:nowrap}
+.dash-notif-btn-warn{background:rgba(184,122,0,.15);border:1px solid rgba(184,122,0,.3);color:#b87a00}
+.dash-notif-btn-danger{background:rgba(184,42,42,.12);border:1px solid rgba(184,42,42,.25);color:#c46060}
+
+/* TURMAS no dash */
+.dash-turmas{display:flex;flex-direction:column;gap:11px}
+.dash-turma{display:flex;align-items:center;gap:10px}
+.dash-turma-dot{width:9px;height:9px;border-radius:3px;flex-shrink:0}
+.dash-turma-name{width:66px;font-size:11px;font-weight:600;flex-shrink:0}
+.dash-turma-track{flex:1;height:5px;background:rgba(255,255,255,.06);border-radius:10px;overflow:hidden}
+.dash-turma-fill{height:5px;border-radius:10px}
+.dash-turma-count{font-size:11px;font-weight:700;width:54px;text-align:right;flex-shrink:0}
+
+/* GRÁFICO por turma */
+.dash-chart-legend{display:flex;gap:12px;margin-bottom:12px}
+.dash-leg{display:flex;align-items:center;gap:5px;font-size:10px;color:rgba(255,255,255,.35)}
+.dash-leg-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.dash-chart-bars{display:flex;align-items:flex-end;gap:6px;height:80px;position:relative}
+.dash-week{flex:1;display:flex;align-items:flex-end;gap:2px;height:100%;cursor:pointer;position:relative}
+.dash-week:hover .dash-tt{display:block}
+.dash-bar{border-radius:3px 3px 0 0;width:100%;transition:opacity .15s}
+.dash-week:hover .dash-bar{opacity:.7}
+.dash-chart-lbls{display:flex;gap:6px;margin-top:5px}
+.dash-chart-lbl{flex:1;text-align:center;font-size:8px;color:rgba(255,255,255,.2)}
+.dash-tt{display:none;position:absolute;bottom:calc(100% + 6px);left:50%;transform:translateX(-50%);background:#1e1c10;border:1px solid rgba(184,151,42,.25);border-radius:9px;padding:8px 10px;z-index:10;white-space:nowrap;min-width:105px}
+.dash-tt-date{font-size:9px;color:rgba(255,255,255,.3);margin-bottom:5px;text-align:center;font-weight:600}
+.dash-tt-row{display:flex;align-items:center;gap:5px;margin-bottom:3px}
+.dash-tt-row:last-child{margin-bottom:0}
+.dash-tt-dot{width:6px;height:6px;border-radius:2px;flex-shrink:0}
+.dash-tt-lbl{font-size:10px;color:rgba(255,255,255,.45);flex:1}
+.dash-tt-val{font-size:10px;font-weight:700;color:#fff}
+
+/* OFERTA card */
+.dash-oferta{background:rgba(184,151,42,.07);border:1px solid rgba(184,151,42,.15);border-radius:14px;padding:14px}
+.dash-oferta-top{display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:12px}
+.dash-oferta-lbl{font-size:9px;color:rgba(184,151,42,.5);text-transform:uppercase;letter-spacing:.12em;font-weight:700;margin-bottom:4px}
+.dash-oferta-val{font-size:26px;font-weight:700;color:#b8972a;line-height:1}
+.dash-oferta-avg-lbl{font-size:9px;color:rgba(255,255,255,.25);margin-bottom:2px;text-align:right}
+.dash-oferta-avg{font-size:16px;font-weight:600;color:rgba(255,255,255,.5);text-align:right}
+.dash-mini-bars{display:flex;align-items:flex-end;gap:3px;height:36px;position:relative}
+.dash-mini-week{flex:1;display:flex;align-items:flex-end;height:100%;cursor:pointer;position:relative}
+.dash-mini-week:hover .dash-tt{display:block}
+.dash-mini-bar{border-radius:2px 2px 0 0;width:100%}
+.dash-mini-week:hover .dash-mini-bar{opacity:.7}
+.dash-mini-lbls{display:flex;gap:3px;margin-top:4px}
+.dash-mini-lbl{flex:1;text-align:center;font-size:7px;color:rgba(255,255,255,.15)}
+
+/* DROPDOWN dentro do dash */
+.dash-drop-btn{display:flex;align-items:center;justify-content:space-between;padding:9px 10px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;margin-top:12px}
+.dash-drop-lbl{font-size:11px;font-weight:600;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.06em}
+.dash-drop-badge{font-size:10px;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.25);font-weight:600;margin-left:6px}
+.dash-arr{font-size:10px;color:rgba(255,255,255,.2);transition:transform .25s}
+.dash-arr.open{transform:rotate(180deg)}
+.dash-drop-content{padding-top:12px}
+
+/* Oferta por turma */
+.dash-turma-oferta{margin-bottom:12px}
+.dash-turma-oferta:last-child{margin-bottom:0}
+.dash-to-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.dash-to-name{display:flex;align-items:center;gap:6px;font-size:11px;font-weight:600}
+.dash-to-dot{width:8px;height:8px;border-radius:2px;flex-shrink:0}
+.dash-to-total{font-size:13px;font-weight:700;color:#b8972a}
+.dash-to-avg{font-size:10px;color:rgba(255,255,255,.25);margin-top:1px;text-align:right}
+.dash-to-bars{display:flex;align-items:flex-end;gap:3px;height:30px;position:relative}
+.dash-to-week{flex:1;display:flex;align-items:flex-end;height:100%;cursor:pointer;position:relative}
+.dash-to-week:hover .dash-tt{display:block}
+.dash-to-bar{border-radius:2px 2px 0 0;width:100%}
+.dash-to-week:hover .dash-to-bar{opacity:.7}
+.dash-to-lbls{display:flex;gap:3px;margin-top:3px}
+.dash-to-lbl{flex:1;text-align:center;font-size:7px;color:rgba(255,255,255,.15)}
+.dash-divider-turma{height:1px;background:rgba(255,255,255,.05);margin:10px 0}
+
+/* ÚLTIMA AULA no dash */
+.dash-aula{display:flex;align-items:center;gap:12px}
+.dash-aula-cal{width:46px;height:46px;border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0}
+.dash-aula-day{font-size:18px;font-weight:700;color:#fff;font-family:'Cormorant Garamond',serif;line-height:1}
+.dash-aula-mo{font-size:8px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.06em}
+
+/* RANKING no dash */
+.dash-rank-item{display:flex;align-items:center;gap:9px;padding:9px 10px;border-radius:11px;transition:background .15s}
+.dash-rank-item.gold{background:rgba(184,151,42,.08);border:1px solid rgba(184,151,42,.18)}
+.dash-rank-pos{font-size:12px;font-weight:700;width:16px;flex-shrink:0}
+.dash-rank-av{width:28px;height:28px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.dash-rank-name{flex:1;font-size:12px;font-weight:500;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;color:rgba(255,255,255,.7)}
+.dash-rank-turma{font-size:10px;color:rgba(255,255,255,.25)}
+.dash-rank-pts{font-size:12px;font-weight:700;flex-shrink:0}
+
+/* AVISOS no dash escuro */
+.dash-aviso{display:flex;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.dash-aviso:last-child{border:none;padding-bottom:0}
+.dash-aviso:first-child{padding-top:0}
+.dash-aviso-dot{width:7px;height:7px;border-radius:50%;margin-top:4px;flex-shrink:0}
+.dash-aviso-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:2px}
+.dash-aviso-txt{font-size:11px;color:rgba(255,255,255,.3);line-height:1.5}
+.dash-aviso-date{font-size:10px;color:rgba(255,255,255,.2);margin-top:2px}
+
+/* ANIVERSARIANTES no dash escuro */
+.dash-aniv{display:flex;align-items:center;gap:9px;padding:9px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.dash-aniv:last-child{border:none;padding-bottom:0}
+.dash-aniv:first-child{padding-top:0}
+.dash-aniv-av{width:30px;height:30px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#fff;flex-shrink:0}
+.dash-aniv-name{flex:1;font-size:12px;font-weight:500;color:rgba(255,255,255,.6);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.dash-aniv-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;color:#7a6010;background:rgba(184,151,42,.12);border:1px solid rgba(184,151,42,.2);white-space:nowrap}
+
+/* DASH FOOTER */
+.dash-footer{padding:13px 16px;border-top:1px solid rgba(255,255,255,.05);display:flex;align-items:center;justify-content:space-between;background:#111008;margin-top:16px}
+.dash-footer-txt{font-size:10px;color:rgba(255,255,255,.15);letter-spacing:.05em}
+.dash-footer-dots{display:flex;gap:5px}
+.dash-footer-dot{width:6px;height:6px;border-radius:50%}
+
+/* MODAL PERSONALIZAÇÃO */
+.dash-cfg-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:500;align-items:flex-end;justify-content:center}
+.dash-cfg-overlay.open{display:flex}
+.dash-cfg-modal{background:#161410;border-radius:22px 22px 0 0;width:100%;max-width:480px;padding:20px;max-height:85vh;overflow-y:auto}
+.dash-cfg-title{font-size:15px;font-weight:600;color:#fff;margin-bottom:3px}
+.dash-cfg-sub{font-size:11px;color:rgba(255,255,255,.3);margin-bottom:18px}
+.dash-toggle-row{display:flex;align-items:center;justify-content:space-between;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.05)}
+.dash-toggle-row:last-of-type{border:none}
+.dash-toggle-lbl{font-size:13px;color:rgba(255,255,255,.7)}
+.dash-toggle-sub{font-size:10px;color:rgba(255,255,255,.25);margin-top:1px}
+.dash-switch{width:40px;height:22px;border-radius:11px;position:relative;cursor:pointer;flex-shrink:0;transition:background .2s}
+.dash-switch.on{background:#b8972a}
+.dash-switch.off{background:rgba(255,255,255,.1)}
+.dash-switch-knob{width:18px;height:18px;border-radius:50%;background:white;position:absolute;top:2px;transition:left .2s}
+.dash-switch.on .dash-switch-knob{left:20px}
+.dash-switch.off .dash-switch-knob{left:2px}
+.dash-cfg-close{width:100%;margin-top:16px;padding:12px;background:#b8972a;border:none;border-radius:12px;font-size:13px;font-weight:700;color:#111008;font-family:'Outfit',sans-serif;cursor:pointer}
+
+/* META no novo estilo */
+.meta-bar{margin-top:14px;position:relative;z-index:1}
+.meta-label{display:flex;justify-content:space-between;font-size:11px;margin-bottom:5px}
+.meta-label span:first-child{color:rgba(255,255,255,.3)}
+.meta-label span:last-child{color:#b8972a;font-weight:700}
+.meta-track{background:rgba(255,255,255,.07);border-radius:10px;height:4px;overflow:hidden}
+.meta-fill{background:linear-gradient(90deg,#b8972a,#e8d48a);border-radius:10px;height:4px;transition:width .6s cubic-bezier(.4,0,.2,1)}
 
 /* META PROGRESS */
 .meta-bar{margin-top:10px}
@@ -457,8 +690,97 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .lb-verso-ref{font-size:11px;color:var(--ink-soft);text-align:right;margin-top:4px;font-weight:600}
 
 /* ALUNO AREA */
-.pg-aluno-hero{background:var(--ink);border-radius:var(--rlg);padding:22px;margin-bottom:14px}
+/* ── PROGRESSO ALUNO PREMIUM 2026 ── */
+.pg-aluno-hero{background:linear-gradient(145deg,#111008 0%,#1e1b0e 50%,#111008 100%);border-radius:0;padding:22px 20px 0;margin-bottom:0;position:relative;overflow:hidden}
+.pg-aluno-hero::before{content:'';position:absolute;top:-80px;right:-80px;width:240px;height:240px;background:radial-gradient(circle,rgba(184,151,42,.07) 0%,transparent 65%);pointer-events:none}
+.pg-aluno-hero::after{content:'✦';position:absolute;right:-8px;top:-20px;font-size:140px;color:rgba(184,151,42,.04);pointer-events:none;font-family:'Cormorant Garamond',serif;line-height:1}
 
+/* Faixa de posição no ranking */
+.aluno-pos-strip{display:flex;align-items:center;justify-content:space-between;background:rgba(184,151,42,.07);border-top:1px solid rgba(184,151,42,.12);padding:13px 20px}
+.aluno-pos-rank{font-size:26px;font-weight:700;color:#b8972a;line-height:1}
+.aluno-pos-sub{font-size:11px;color:rgba(255,255,255,.35)}
+.aluno-pos-detail{font-size:10px;color:rgba(255,255,255,.2);margin-top:1px}
+.aluno-pos-badge{font-size:10px;font-weight:700;padding:3px 10px;border-radius:20px;background:rgba(184,151,42,.15);color:#b8972a;border:1px solid rgba(184,151,42,.25)}
+
+/* KPIs do aluno */
+.pts-hero{background:#111008;border-radius:0;padding:0;margin-bottom:0;text-align:left}
+.pts-total{font-family:'Cormorant Garamond',serif;font-size:64px;font-weight:700;color:#b8972a;line-height:1;letter-spacing:-2px;padding:0 20px}
+.pts-label{font-size:10px;color:rgba(255,255,255,.2);margin-bottom:18px;padding:0 20px;text-transform:uppercase;letter-spacing:.1em}
+.pts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:rgba(255,255,255,.05);border-radius:0;overflow:hidden;margin-bottom:0}
+.pts-item{background:#0c0b07;padding:12px 8px;text-align:center}
+.pts-item-n{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:700;line-height:1;margin-bottom:2px}
+.pts-item-l{font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:rgba(255,255,255,.2);font-weight:600}
+
+/* Corpo do progresso aluno */
+.aluno-body{background:#111008;padding:20px;border-radius:0 0 22px 22px}
+.aluno-sec-lbl{font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:rgba(255,255,255,.2);font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.aluno-sec-lbl::after{content:'';flex:1;height:1px;background:rgba(255,255,255,.06)}
+.aluno-sep{height:1px;background:rgba(255,255,255,.05);margin:20px 0}
+
+/* Barras de progresso */
+.aluno-prog{display:flex;flex-direction:column;gap:12px}
+.aluno-prog-item{display:flex;align-items:center;gap:10px}
+.aluno-prog-icon{width:30px;height:30px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0}
+.aluno-prog-info{flex:1}
+.aluno-prog-name{font-size:11px;color:rgba(255,255,255,.45);margin-bottom:4px}
+.aluno-prog-track{background:rgba(255,255,255,.06);border-radius:10px;height:5px}
+.aluno-prog-fill{height:5px;border-radius:10px}
+.aluno-prog-pct{font-size:12px;font-weight:700;width:30px;text-align:right;flex-shrink:0}
+
+/* Dropdown genérico do aluno */
+.aluno-drop-btn{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.06);border-radius:10px;cursor:pointer;width:100%;font-family:'Outfit',sans-serif;margin-top:14px}
+.aluno-drop-lbl{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:600;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:.07em}
+.aluno-drop-badge{font-size:10px;padding:1px 7px;border-radius:20px;background:rgba(255,255,255,.06);color:rgba(255,255,255,.3);font-weight:600}
+.aluno-arr{font-size:10px;color:rgba(255,255,255,.2);transition:transform .25s}
+.aluno-arr.open{transform:rotate(180deg)}
+.aluno-drop-content{padding-top:12px}
+
+/* Histórico abas */
+.aluno-hist-tabs{display:flex;gap:6px;margin-bottom:14px;flex-wrap:wrap}
+.aluno-hist-tab{padding:5px 11px;border-radius:20px;font-size:11px;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;border:1px solid rgba(255,255,255,.08);background:rgba(255,255,255,.04);color:rgba(255,255,255,.35);transition:all .15s}
+.aluno-hist-tab.on{background:rgba(184,151,42,.15);border-color:rgba(184,151,42,.3);color:#b8972a}
+.aluno-hist-items{display:flex;flex-direction:column;gap:0}
+.aluno-hist-item{display:flex;align-items:flex-start;gap:10px;padding:11px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.aluno-hist-item:last-child{border:none;padding-bottom:0}
+.aluno-hist-item:first-child{padding-top:0}
+.aluno-hist-icon{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;flex-shrink:0;margin-top:1px}
+.aluno-hist-body{flex:1;min-width:0}
+.aluno-hist-title{font-size:12px;font-weight:600;color:rgba(255,255,255,.65);margin-bottom:2px;text-transform:uppercase;letter-spacing:.03em;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.aluno-hist-date{font-size:10px;color:rgba(255,255,255,.25);margin-bottom:4px}
+.aluno-hist-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px}
+.aluno-hist-pts{font-size:12px;font-weight:700;color:#b8972a;white-space:nowrap;flex-shrink:0}
+
+/* Medalhas do aluno */
+.aluno-medalhas{display:flex;flex-wrap:wrap;gap:7px}
+.aluno-medal{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.07);border-radius:10px;padding:6px 10px}
+.aluno-medal-icon{font-size:15px}
+.aluno-medal-txt{font-size:11px;font-weight:500;color:rgba(255,255,255,.45)}
+
+/* Ranking do aluno */
+.aluno-rank-mine{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;background:rgba(184,151,42,.08);border:1px solid rgba(184,151,42,.18);border-radius:10px;margin-bottom:10px}
+.aluno-rank-list{display:flex;flex-direction:column;gap:4px}
+.aluno-rank-item{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:10px;transition:background .15s}
+.aluno-rank-item.me{background:rgba(184,151,42,.08);border:1px solid rgba(184,151,42,.15)}
+.aluno-rank-pos{font-size:11px;font-weight:700;width:16px;flex-shrink:0}
+.aluno-rank-av{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;color:#fff;flex-shrink:0}
+.aluno-rank-name{flex:1;font-size:12px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.aluno-rank-pts{font-size:11px;font-weight:700;flex-shrink:0}
+
+/* Presenças do aluno */
+.aluno-pres-item{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.aluno-pres-item:last-child{border:none;padding-bottom:0}
+.aluno-pres-item:first-child{padding-top:0}
+.aluno-pres-num{width:26px;height:26px;border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;flex-shrink:0}
+.aluno-pres-info{flex:1;min-width:0}
+.aluno-pres-title{font-size:12px;font-weight:500;color:rgba(255,255,255,.6);overflow:hidden;white-space:nowrap;text-overflow:ellipsis}
+.aluno-pres-date{font-size:10px;color:rgba(255,255,255,.22);margin-top:1px}
+.aluno-pres-tag{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap;flex-shrink:0}
+
+/* Stat row do aluno */
+.aluno-stat-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04)}
+.aluno-stat-row:last-child{border:none}
+.aluno-stat-lbl{font-size:12px;color:rgba(255,255,255,.35)}
+.aluno-stat-val{font-size:12px;font-weight:600;color:rgba(255,255,255,.7)}
 /* RESPONSÁVEL */
 .resp-filho-card{background:white;border:1px solid var(--cb);border-radius:var(--r);padding:14px;margin-bottom:10px;cursor:pointer;transition:all .2s;display:flex;align-items:center;gap:12px}
 .resp-filho-card:hover,.resp-filho-card:active{border-color:var(--gold);transform:translateY(-1px);box-shadow:0 3px 12px rgba(0,0,0,.08)}
@@ -546,14 +868,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .cd-unit{text-align:center}.cd-num{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:white;line-height:1;display:block}
 .cd-label{font-size:9px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.08em}
 .cd-sep{font-family:'Cormorant Garamond',serif;font-size:28px;color:var(--gold);line-height:1;padding-top:4px}
-/* PONTUAÇÃO ALUNO */
-.pts-hero{background:linear-gradient(135deg,#1a2744,#2c3e6b);border-radius:var(--rlg);padding:20px;margin-bottom:12px;text-align:center}
-.pts-total{font-family:'Cormorant Garamond',serif;font-size:48px;font-weight:600;color:var(--gold-l);line-height:1;margin-bottom:4px}
-.pts-label{font-size:12px;color:rgba(255,255,255,.5);margin-bottom:12px}
-.pts-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-.pts-item{background:rgba(255,255,255,.08);border-radius:var(--rsm);padding:10px;text-align:center}
-.pts-item-n{font-family:'Cormorant Garamond',serif;font-size:20px;font-weight:600;color:white}
-.pts-item-l{font-size:10px;color:rgba(255,255,255,.4)}
+/* PONTUAÇÃO ALUNO — estilos movidos para seção premium 2026 acima */
 /* RANKING PONTOS */
 .rank-pts{font-size:11px;color:var(--gold-deep);font-weight:700;background:var(--gold-pale);padding:3px 9px;border-radius:10px;white-space:nowrap}
 /* FICHA ALUNO */
@@ -763,6 +1078,72 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 .session-overlay{position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.8);display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
 .session-box{background:white;border-radius:var(--rlg);padding:28px;text-align:center;max-width:320px;width:100%}
 @media print{.topbar,.ttabs,.btn,.fi-btns,.ai-acts,.hero-btn,.filtros,.logout-btn,.visit-add,.fi-remove,.unsaved-banner,.mural-section{display:none!important}body{background:white!important}.card{box-shadow:none!important}}
+
+/* ── BOTÃO TEMA ── */
+.tb-theme-btn{width:28px;height:28px;border-radius:7px;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);color:rgba(255,255,255,.6);font-size:13px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;flex-shrink:0}
+.tb-theme-btn:hover{background:rgba(255,255,255,.15);color:#fff}
+
+/* ── TEMA ESCURO ── */
+body.tema-escuro .page:not(#pg-dash):not(#pg-pg-aluno){background:#111008!important}
+body.tema-escuro .card{background:#1a1810;border-color:rgba(255,255,255,.08)}
+body.tema-escuro .stat{background:#1a1810;border-color:rgba(255,255,255,.08)}
+body.tema-escuro .stat-n{color:#fff}
+body.tema-escuro .stat-l{color:rgba(255,255,255,.4)}
+body.tema-escuro .ct,.tema-escuro .fl{color:rgba(255,255,255,.35)}
+body.tema-escuro h2:not(.hero h2):not(.ph h2~*){color:#fff}
+body.tema-escuro .ph h2{color:#fff}
+body.tema-escuro .ph h2 em{color:var(--gold)}
+body.tema-escuro .ph p{color:rgba(255,255,255,.4)}
+body.tema-escuro .ai{border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .ai-nome{color:#fff}
+body.tema-escuro .ai-meta{color:rgba(255,255,255,.4)}
+body.tema-escuro .btn-ic{background:#1a1810;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.5)}
+body.tema-escuro .btn-ic:hover{border-color:var(--gold);color:#fff}
+body.tema-escuro .tr-row{border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .tr-name{color:#fff}
+body.tema-escuro .tr-ct{color:rgba(255,255,255,.45)}
+body.tema-escuro .hist-item{background:#1a1810;border-color:rgba(255,255,255,.07)}
+body.tema-escuro .hist-tit{color:#fff}
+body.tema-escuro .hist-trm{color:rgba(255,255,255,.4)}
+body.tema-escuro .hist-d{background:#0c0b07}
+body.tema-escuro .mc{background:#1a1810;border-color:rgba(255,255,255,.07)}
+body.tema-escuro .mv{color:#fff}
+body.tema-escuro .ml{color:rgba(255,255,255,.4)}
+body.tema-escuro .mc.dest{background:#0c0b07}
+body.tema-escuro .sep{background:rgba(255,255,255,.07)}
+body.tema-escuro .lic-item{background:#1a1810;border-color:rgba(255,255,255,.07)}
+body.tema-escuro .lic-titulo{color:#fff}
+body.tema-escuro .lic-data,.body.tema-escuro .lic-resumo{color:rgba(255,255,255,.4)}
+body.tema-escuro .rank-item{border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .rank-nome{color:#fff}
+body.tema-escuro .rank-info{color:rgba(255,255,255,.4)}
+body.tema-escuro .rank-bar{background:rgba(255,255,255,.08)}
+body.tema-escuro .ficha-row{border-bottom-color:rgba(255,255,255,.07)}
+body.tema-escuro .ficha-label{color:rgba(255,255,255,.4)}
+body.tema-escuro .ficha-val{color:#fff}
+body.tema-escuro .al-hist-item{border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .al-hist-data{color:rgba(255,255,255,.4)}
+body.tema-escuro .cal-item{background:#1a1810;border-color:rgba(255,255,255,.07)}
+body.tema-escuro .cal-titulo{color:#fff}
+body.tema-escuro .cal-data{color:rgba(255,255,255,.4)}
+body.tema-escuro .aviso-item{background:#1a1810;border-color:rgba(255,255,255,.08)}
+body.tema-escuro .aviso-titulo{color:#fff}
+body.tema-escuro .aviso-corpo{color:rgba(255,255,255,.5)}
+body.tema-escuro .cfg-acc-item{background:#1a1810;border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .cfg-acc-item b{color:#fff}
+body.tema-escuro .cfg-acc-item span{color:rgba(255,255,255,.4)}
+body.tema-escuro .fc{background:#1a1810;border-color:rgba(255,255,255,.12);color:#fff}
+body.tema-escuro .fc::placeholder{color:rgba(255,255,255,.25)}
+body.tema-escuro select.fc option{background:#1a1810;color:#fff}
+body.tema-escuro .fl{color:rgba(255,255,255,.5)}
+body.tema-escuro .ttab{background:#1a1810;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+body.tema-escuro .ttab:hover{border-color:var(--gold);color:#fff}
+body.tema-escuro .status-filter-btn{background:#1a1810;border-color:rgba(255,255,255,.1);color:rgba(255,255,255,.4)}
+body.tema-escuro .comp-table th{color:rgba(255,255,255,.4);border-bottom-color:rgba(255,255,255,.1)}
+body.tema-escuro .comp-table td{color:rgba(255,255,255,.7);border-bottom-color:rgba(255,255,255,.06)}
+body.tema-escuro .empty{color:rgba(255,255,255,.3)}
+body.tema-escuro .unsaved-banner{background:rgba(184,151,42,.12);border-color:rgba(184,151,42,.3);color:#b8972a}
+body.tema-escuro .dash-notif.dash-notif-warn,.body.tema-escuro .prova-notif{background:rgba(184,122,0,.08)!important}
 </style>
 </head>
 <body>
@@ -872,6 +1253,7 @@ input,select,textarea{font-family:'Outfit',sans-serif}
       <div class="modo-seletor" id="modo-seletor" style="display:none"></div>
       <div class="tb-info"><div class="tb-uname" id="tb-uname"></div><div class="tb-urole" id="tb-urole"></div></div>
       <div class="tb-av" id="tb-av" onclick="navTo('perfil')" title="Meu perfil"></div>
+      <button class="tb-theme-btn" id="tb-theme-btn" onclick="toggleTema()" title="Alternar tema"></button>
       <button class="logout-btn" onclick="tentarLogout()">Sair</button>
       <button class="hbg-btn" onclick="abrirDrawer()" aria-label="Menu">
         <span></span><span></span><span></span>
@@ -899,9 +1281,14 @@ input,select,textarea{font-family:'Outfit',sans-serif}
   <div class="main" id="main-content">
 
     <!-- DASHBOARD -->
-    <div id="pg-dash" class="page">
+    <div id="pg-dash" class="page" style="background:#111008;overflow:hidden;margin-bottom:0">
+
+      <!-- HERO -->
       <div class="hero">
-        <div class="hero-date" id="dash-date"></div>
+        <div class="hero-top-row">
+          <div class="hero-date" id="dash-date"></div>
+          <div class="hero-cfg-btn" onclick="abrirDashCfg()" title="Personalizar">⚙️</div>
+        </div>
         <div class="hero-saudacao">
           <div class="hero-foto" id="hero-foto"></div>
           <div>
@@ -910,47 +1297,191 @@ input,select,textarea{font-family:'Outfit',sans-serif}
           </div>
         </div>
         <div class="hero-role" id="dash-role-badge"></div>
-        <br><button class="hero-btn" id="dash-aula-btn" onclick="navTo('freq')">+ Registrar aula de hoje</button>
+        <div>
+          <button class="hero-btn" id="dash-aula-btn" onclick="navTo('freq')">+ Registrar aula de hoje</button>
+          <button class="hero-btn-sec" onclick="navTo('historico')">Histórico</button>
+        </div>
         <div class="meta-bar" id="dash-meta-bar" style="display:none">
           <div class="meta-label"><span id="meta-label-txt">Meta de assistência</span><span id="meta-pct-txt">0%</span></div>
           <div class="meta-track"><div class="meta-fill" id="meta-fill" style="width:0%"></div></div>
         </div>
-      </div>
-      <!-- Card Pix — logo após o hero, igual ao do aluno -->
-      <div class="card" id="dash-pix-card" style="display:none;border-color:var(--gold);background:var(--gold-pale);margin-bottom:12px">
-        <div class="ct" style="color:var(--gold-deep)">🙏 Contribua com sua oferta</div>
-        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:10px;line-height:1.6">
-          Sua oferta é uma demonstração de fé e gratidão. Copie a chave Pix abaixo para contribuir:
+
+        <!-- COUNTDOWN dentro do hero -->
+        <div id="dash-countdown" style="margin-top:18px;padding-top:16px;border-top:1px solid rgba(255,255,255,.07);text-align:center;position:relative;z-index:1">
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.13em;color:rgba(184,151,42,.55);font-weight:700;margin-bottom:10px">✦ Próxima EBD — <span id="dash-cd-ev">—</span></div>
+          <div style="display:flex;align-items:flex-end;justify-content:center;gap:6px">
+            <div style="text-align:center;min-width:42px">
+              <div class="dash-cd-n" id="dash-cd-d">--</div>
+              <div class="dash-cd-u">dias</div>
+            </div>
+            <div class="dash-cd-sep">:</div>
+            <div style="text-align:center;min-width:42px">
+              <div class="dash-cd-n" id="dash-cd-h">--</div>
+              <div class="dash-cd-u">horas</div>
+            </div>
+            <div class="dash-cd-sep">:</div>
+            <div style="text-align:center;min-width:42px">
+              <div class="dash-cd-n" id="dash-cd-m">--</div>
+              <div class="dash-cd-u">min</div>
+            </div>
+            <div class="dash-cd-sep">:</div>
+            <div style="text-align:center;min-width:42px">
+              <div class="dash-cd-n" id="dash-cd-s">--</div>
+              <div class="dash-cd-u">seg</div>
+            </div>
+          </div>
         </div>
-        <div style="display:flex;align-items:center;gap:8px;background:white;border:1px solid var(--gold);border-radius:var(--r);padding:10px 14px;margin-bottom:8px">
-          <span style="font-size:18px">💛</span>
-          <div id="dash-pix-chave" style="flex:1;font-size:13px;font-weight:600;color:var(--ink);word-break:break-all">—</div>
-          <button onclick="copiarChavePixDash()" style="background:var(--gold);border:none;border-radius:6px;padding:5px 10px;font-size:12px;font-weight:700;color:var(--ink);cursor:pointer">Copiar</button>
+      </div>
+
+      <!-- KPIS -->
+      <div class="dash-kpis">
+        <div class="dash-kpi"><div class="dash-kpi-n" id="ds-total" style="color:#fff">—</div><div class="dash-kpi-l">Alunos</div></div>
+        <div class="dash-kpi" style="border-left:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.05)"><div class="dash-kpi-n" id="ds-aulas" style="color:#b8972a">—</div><div class="dash-kpi-l">Aulas</div></div>
+        <div class="dash-kpi"><div class="dash-kpi-n" id="ds-visit" style="color:#fff">—</div><div class="dash-kpi-l">Visitantes</div></div>
+      </div>
+
+      <!-- BODY ESCURO -->
+      <div style="padding:16px;background:#111008">
+
+        <!-- Pix Card -->
+        <div id="dash-pix-card" style="display:none;background:rgba(184,151,42,.08);border:1px solid rgba(184,151,42,.2);border-radius:14px;padding:14px;margin-bottom:12px">
+          <div style="font-size:10px;color:rgba(184,151,42,.6);text-transform:uppercase;letter-spacing:.1em;font-weight:700;margin-bottom:8px">🙏 Contribua com sua oferta</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.3);margin-bottom:10px;line-height:1.6">Sua oferta é uma demonstração de fé e gratidão.</div>
+          <div style="display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);border:1px solid rgba(184,151,42,.2);border-radius:10px;padding:10px 14px;margin-bottom:8px">
+            <span style="font-size:16px">💛</span>
+            <div id="dash-pix-chave" style="flex:1;font-size:13px;font-weight:600;color:rgba(255,255,255,.7);word-break:break-all">—</div>
+            <button onclick="copiarChavePixDash()" style="background:#b8972a;border:none;border-radius:7px;padding:5px 10px;font-size:12px;font-weight:700;color:#111008;cursor:pointer;font-family:'Outfit',sans-serif">Copiar</button>
+          </div>
+          <div style="font-size:11px;color:rgba(255,255,255,.2);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
         </div>
-        <div style="font-size:11px;color:var(--ink-soft);text-align:center;font-style:italic">✦ "Cada um dê conforme propôs no seu coração" — 2 Co 9.7</div>
+
+        <!-- Notificações -->
+        <div id="dash-aprovacao-notif"></div>
+        <div id="dash-contestacoes-notif"></div>
+        <div id="dash-provas-notif"></div>
+        <div id="dash-alertas"></div>
+
+        <!-- SEÇÃO: Frequência por turma -->
+        <div class="dash-sec-block" id="dash-sec-freq">
+          <div class="dash-sec-lbl">Frequência por turma</div>
+          <div class="dash-turmas">
+            <div class="dash-turma"><div class="dash-turma-dot" style="background:#1a6b4a"></div><div class="dash-turma-name" style="color:#1a6b4a">Crianças</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-c" style="background:#1a6b4a;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-c" style="color:#1a6b4a">—</div></div>
+            <div class="dash-turma"><div class="dash-turma-dot" style="background:#4a7eb8"></div><div class="dash-turma-name" style="color:#4a7eb8">Jovens</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-j" style="background:#4a7eb8;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-j" style="color:#4a7eb8">—</div></div>
+            <div class="dash-turma"><div class="dash-turma-dot" style="background:#b8972a"></div><div class="dash-turma-name" style="color:#b8972a">Adultos</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-a" style="background:#b8972a;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-a" style="color:#b8972a">—</div></div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO: Gráfico semanal por turma -->
+        <div class="dash-sec-block" id="dash-sec-grafico">
+          <div class="dash-sec-lbl">Histórico semanal por turma</div>
+          <div class="dash-chart-legend">
+            <div class="dash-leg"><div class="dash-leg-dot" style="background:#1a6b4a"></div>Crianças</div>
+            <div class="dash-leg"><div class="dash-leg-dot" style="background:#4a7eb8"></div>Jovens</div>
+            <div class="dash-leg"><div class="dash-leg-dot" style="background:#b8972a"></div>Adultos</div>
+          </div>
+          <div class="dash-chart-bars" id="dash-chart-bars"></div>
+          <div class="dash-chart-lbls" id="dash-chart-lbls"></div>
+        </div>
+
+        <!-- SEÇÃO: Oferta -->
+        <div class="dash-sec-block" id="dash-sec-oferta">
+          <div class="dash-sec-lbl">Ofertas · trimestre</div>
+          <div class="dash-oferta">
+            <div class="dash-oferta-top">
+              <div><div class="dash-oferta-lbl">Total arrecadado</div><div class="dash-oferta-val" id="dash-oferta-total">R$ —</div></div>
+              <div><div class="dash-oferta-avg-lbl">Média por aula</div><div class="dash-oferta-avg" id="dash-oferta-avg">R$ —</div></div>
+            </div>
+            <div class="dash-mini-bars" id="dash-oferta-bars"></div>
+            <div class="dash-mini-lbls" id="dash-oferta-lbls"></div>
+            <button class="dash-drop-btn" onclick="dashToggle('oferta-turmas','ofertaArr')">
+              <span class="dash-drop-lbl">Ver por turma</span>
+              <span class="dash-arr" id="ofertaArr">▼</span>
+            </button>
+            <div id="oferta-turmas" style="display:none" class="dash-drop-content">
+              <div class="dash-turma-oferta">
+                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#1a6b4a"></div><span style="color:#1a6b4a">Crianças</span></div><div><div class="dash-to-total" id="dash-oferta-c-total">—</div><div class="dash-to-avg" id="dash-oferta-c-avg">—</div></div></div>
+                <div class="dash-to-bars" id="dash-oferta-bars-c"></div>
+                <div class="dash-to-lbls" id="dash-oferta-lbls-c"></div>
+              </div>
+              <div class="dash-divider-turma"></div>
+              <div class="dash-turma-oferta">
+                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#4a7eb8"></div><span style="color:#4a7eb8">Jovens</span></div><div><div class="dash-to-total" id="dash-oferta-j-total">—</div><div class="dash-to-avg" id="dash-oferta-j-avg">—</div></div></div>
+                <div class="dash-to-bars" id="dash-oferta-bars-j"></div>
+                <div class="dash-to-lbls" id="dash-oferta-lbls-j"></div>
+              </div>
+              <div class="dash-divider-turma"></div>
+              <div class="dash-turma-oferta">
+                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#b8972a"></div><span style="color:#b8972a">Adultos</span></div><div><div class="dash-to-total" id="dash-oferta-a-total">—</div><div class="dash-to-avg" id="dash-oferta-a-avg">—</div></div></div>
+                <div class="dash-to-bars" id="dash-oferta-bars-a"></div>
+                <div class="dash-to-lbls" id="dash-oferta-lbls-a"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- SEÇÃO: Última aula -->
+        <div class="dash-sec-block" id="dash-sec-aula">
+          <div class="dash-sec-lbl">Última aula registrada</div>
+          <div id="dash-ultima"></div>
+        </div>
+
+        <!-- SEÇÃO: Ranking -->
+        <div class="dash-sec-block" id="dash-sec-ranking">
+          <div class="dash-sec-lbl">Top ranking geral</div>
+          <div id="dash-ranking-top3" style="display:flex;flex-direction:column;gap:5px"></div>
+        </div>
+
+        <!-- SEÇÃO: Alunos por turma (legado hidden, dados usados pelo novo) -->
+        <div style="display:none">
+          <div id="ds-cri">—</div>
+          <div id="ds-jov">—</div>
+          <div id="ds-adu">—</div>
+        </div>
+
+        <!-- SEÇÃO: Mural -->
+        <div class="dash-sec-block" id="dash-sec-mural">
+          <div class="dash-sec-lbl">Mural de avisos</div>
+          <div id="dash-mural"></div>
+        </div>
+
+        <!-- SEÇÃO: Aniversariantes -->
+        <div class="dash-sec-block" id="dash-sec-aniv">
+          <div class="dash-sec-lbl">Aniversariantes do mês</div>
+          <div id="dash-aniversariantes"></div>
+        </div>
+
+        <!-- Gráfico legado (mantido para compatibilidade) -->
+        <div id="dash-chart-card" style="display:none">
+          <div class="chart-wrap" style="height:190px"><canvas id="chart-freq"></canvas></div>
+        </div>
+
       </div>
-      <div id="dash-aprovacao-notif"></div>
-      <div id="dash-contestacoes-notif"></div>
-      <div id="dash-provas-notif"></div>
-      <div id="dash-mural"></div>
-      <div id="dash-aniversariantes"></div>
-      <div id="dash-countdown"></div>
-      <div id="dash-alertas"></div>
-      <div class="stats">
-        <div class="stat"><div class="stat-n" id="ds-total">—</div><div class="stat-l">Total de alunos</div></div>
-        <div class="stat"><div class="stat-n" id="ds-aulas">—</div><div class="stat-l">Aulas registradas</div></div>
-        <div class="stat"><div class="stat-n" id="ds-visit">—</div><div class="stat-l">Visitantes (último)</div></div>
+
+      <!-- FOOTER -->
+      <div class="dash-footer">
+        <div class="dash-footer-txt">EBD FREQUÊNCIA · 2026</div>
+        <div class="dash-footer-dots">
+          <div class="dash-footer-dot" style="background:#1a6b4a"></div>
+          <div class="dash-footer-dot" style="background:#4a7eb8"></div>
+          <div class="dash-footer-dot" style="background:#b8972a"></div>
+        </div>
       </div>
-      <div class="card">
-        <div class="ct">Alunos por turma</div>
-        <div class="tr-row"><div class="dot dot-c" style="width:9px;height:9px;border-radius:50%;flex-shrink:0"></div><div class="tr-name">Crianças</div><div class="tr-ct" id="ds-cri">—</div></div>
-        <div class="tr-row"><div class="dot dot-j" style="width:9px;height:9px;border-radius:50%;flex-shrink:0"></div><div class="tr-name">Jovens</div><div class="tr-ct" id="ds-jov">—</div></div>
-        <div class="tr-row"><div class="dot dot-a" style="width:9px;height:9px;border-radius:50%;flex-shrink:0"></div><div class="tr-name">Adultos</div><div class="tr-ct" id="ds-adu">—</div></div>
-      </div>
-      <div class="card"><div class="ct">Última aula registrada</div><div id="dash-ultima"></div></div>
-      <div class="card" id="dash-chart-card" style="display:none">
-        <div class="ct">Frequência — últimas 8 semanas</div>
-        <div class="chart-wrap" style="height:190px"><canvas id="chart-freq"></canvas></div>
+
+    </div>
+
+    <!-- MODAL PERSONALIZAÇÃO DASHBOARD -->
+    <div class="dash-cfg-overlay" id="dashCfgModal" onclick="if(event.target===this)fecharDashCfg()">
+      <div class="dash-cfg-modal">
+        <div class="dash-cfg-title">⚙️ Personalizar dashboard</div>
+        <div class="dash-cfg-sub">Escolha o que quer ver na tela inicial</div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Frequência por turma</div><div class="dash-toggle-sub">Barras de presença atual</div></div><div class="dash-switch on" id="dsw-freq" onclick="dashToggleSec('freq')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Gráfico semanal</div><div class="dash-toggle-sub">Histórico das últimas semanas</div></div><div class="dash-switch on" id="dsw-grafico" onclick="dashToggleSec('grafico')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Ofertas</div><div class="dash-toggle-sub">Total e média por aula</div></div><div class="dash-switch on" id="dsw-oferta" onclick="dashToggleSec('oferta')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Última aula</div><div class="dash-toggle-sub">Detalhes da aula mais recente</div></div><div class="dash-switch on" id="dsw-aula" onclick="dashToggleSec('aula')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Top ranking</div><div class="dash-toggle-sub">Os 3 primeiros colocados</div></div><div class="dash-switch on" id="dsw-ranking" onclick="dashToggleSec('ranking')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Mural de avisos</div><div class="dash-toggle-sub">Comunicados recentes</div></div><div class="dash-switch on" id="dsw-mural" onclick="dashToggleSec('mural')"><div class="dash-switch-knob"></div></div></div>
+        <div class="dash-toggle-row"><div><div class="dash-toggle-lbl">Aniversariantes</div><div class="dash-toggle-sub">Parabéns do mês</div></div><div class="dash-switch on" id="dsw-aniv" onclick="dashToggleSec('aniv')"><div class="dash-switch-knob"></div></div></div>
+        <button class="dash-cfg-close" onclick="fecharDashCfg()">Salvar preferências</button>
       </div>
     </div>
 
@@ -1216,46 +1747,110 @@ input,select,textarea{font-family:'Outfit',sans-serif}
     </div>
 
     <!-- ÁREA DO ALUNO -->
-    <div id="pg-pg-aluno" class="page">
+    <div id="pg-pg-aluno" class="page" style="background:#111008;overflow:hidden;margin-bottom:0">
 
+      <!-- HERO -->
       <div class="pg-aluno-hero">
-        <div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--gold-l);font-weight:600;margin-bottom:6px">MEU PROGRESSO</div>
-        <div style="font-family:'Cormorant Garamond',serif;font-size:22px;color:white;margin-bottom:3px" id="aluno-saud">Carregando...</div>
-        <div style="font-size:12px;color:rgba(255,255,255,.45)" id="aluno-turma-txt"></div>
+        <div style="font-size:9px;text-transform:uppercase;letter-spacing:.16em;color:rgba(184,151,42,.55);font-weight:700;margin-bottom:10px;position:relative;z-index:1">Meu progresso · Trimestre atual</div>
+        <div style="font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:300;color:#fff;line-height:1.05;margin-bottom:3px;position:relative;z-index:1" id="aluno-saud">Carregando...</div>
+        <div style="font-size:12px;color:rgba(255,255,255,.25);letter-spacing:.04em;margin-bottom:20px;position:relative;z-index:1" id="aluno-turma-txt"></div>
       </div>
 
-      <!-- Pontuação geral -->
+      <!-- PONTUAÇÃO -->
       <div class="pts-hero" id="aluno-pts-hero" style="display:none">
-        <div class="pts-total" id="aluno-pts-total">0</div>
-        <div class="pts-label">pontos acumulados no trimestre</div>
+        <div style="padding:4px 20px 0">
+          <div class="pts-total" id="aluno-pts-total">0</div>
+          <div class="pts-label">pontos acumulados no trimestre</div>
+        </div>
         <div class="pts-grid">
-          <div class="pts-item"><div class="pts-item-n" id="pts-presencas">0</div><div class="pts-item-l">presenças</div></div>
-          <div class="pts-item"><div class="pts-item-n" id="pts-quizzes">0</div><div class="pts-item-l">quizzes</div></div>
-          <div class="pts-item"><div class="pts-item-n" id="pts-provas">0</div><div class="pts-item-l">provas</div></div>
+          <div class="pts-item"><div class="pts-item-n" id="pts-presencas" style="color:#1a6b4a">0</div><div class="pts-item-l">Presenças</div></div>
+          <div class="pts-item" style="border-left:1px solid rgba(255,255,255,.05);border-right:1px solid rgba(255,255,255,.05)"><div class="pts-item-n" id="pts-quizzes" style="color:#b8972a">0</div><div class="pts-item-l">Quizzes</div></div>
+          <div class="pts-item"><div class="pts-item-n" id="pts-provas" style="color:#4a7eb8">0</div><div class="pts-item-l">Provas</div></div>
         </div>
       </div>
-      <!-- Medalhas -->
-      <div class="card" id="aluno-medalhas-card" style="margin-bottom:12px;display:none">
-        <div class="ct">Minhas medalhas</div>
-        <div id="aluno-medalhas" style="display:flex;flex-wrap:wrap;gap:6px"></div>
-      </div>
-      <!-- Estatísticas detalhadas -->
-      <div class="card" style="margin-bottom:12px">
-        <div class="chdr">
-          <div class="ct">📊 Meu Desempenho</div>
-          <button onclick="abrirHistoricoCompleto()" class="btn btn-ou btn-sm" style="font-size:11px">📋 Histórico</button>
+
+      <!-- FAIXA RANKING -->
+      <div class="aluno-pos-strip" id="aluno-pos-strip" style="display:none">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="aluno-pos-rank" id="aluno-pos-num">—</div>
+          <div>
+            <div class="aluno-pos-sub">posição no ranking</div>
+            <div class="aluno-pos-detail" id="aluno-pos-detail">—</div>
+          </div>
         </div>
-        <div id="aluno-quiz-stats"></div>
+        <div class="aluno-pos-badge" id="aluno-pos-turma">—</div>
       </div>
-      <!-- Ranking e posições -->
-      <div class="card" id="aluno-ranking-card" style="margin-bottom:12px">
-        <div class="ct">🏆 Ranking & Posições</div>
-        <div id="aluno-ranking-pos"></div>
-      </div>
-      <!-- Histórico de presenças -->
-      <div class="card" style="margin-bottom:12px">
-        <div class="chdr"><div class="ct">📋 Minhas Presenças</div></div>
-        <div id="aluno-licoes-prog"></div>
+
+      <!-- CORPO -->
+      <div class="aluno-body">
+
+        <!-- DESEMPENHO -->
+        <div class="aluno-sec-lbl">📊 Meu desempenho</div>
+        <div class="aluno-prog" id="aluno-prog-bars">
+          <div class="aluno-prog-item">
+            <div class="aluno-prog-icon" style="background:rgba(26,107,74,.2);color:#1a6b4a">P</div>
+            <div class="aluno-prog-info"><div class="aluno-prog-name">Frequência</div><div class="aluno-prog-track"><div class="aluno-prog-fill" id="aluno-pbar-freq" style="background:#1a6b4a;width:0%"></div></div></div>
+            <div class="aluno-prog-pct" id="aluno-ppct-freq" style="color:#1a6b4a">0%</div>
+          </div>
+          <div class="aluno-prog-item">
+            <div class="aluno-prog-icon" style="background:rgba(184,151,42,.15);color:#b8972a">Q</div>
+            <div class="aluno-prog-info"><div class="aluno-prog-name">Média quizzes</div><div class="aluno-prog-track"><div class="aluno-prog-fill" id="aluno-pbar-quiz" style="background:#b8972a;width:0%"></div></div></div>
+            <div class="aluno-prog-pct" id="aluno-ppct-quiz" style="color:#b8972a">0%</div>
+          </div>
+          <div class="aluno-prog-item">
+            <div class="aluno-prog-icon" style="background:rgba(74,126,184,.15);color:#4a7eb8">Pr</div>
+            <div class="aluno-prog-info"><div class="aluno-prog-name">Média provas</div><div class="aluno-prog-track"><div class="aluno-prog-fill" id="aluno-pbar-prova" style="background:#4a7eb8;width:0%"></div></div></div>
+            <div class="aluno-prog-pct" id="aluno-ppct-prova" style="color:#4a7eb8">0%</div>
+          </div>
+        </div>
+
+        <!-- Histórico completo dropdown -->
+        <button class="aluno-drop-btn" onclick="alunoToggle('aluno-hist-content','alunoHistArr')">
+          <div class="aluno-drop-lbl">📋 Histórico completo</div>
+          <span class="aluno-arr" id="alunoHistArr">▼</span>
+        </button>
+        <div id="aluno-hist-content" style="display:none" class="aluno-drop-content">
+          <div class="aluno-hist-tabs" id="aluno-hist-tabs">
+            <button class="aluno-hist-tab on" onclick="setAlunoHistTab('quiz',this)">⚡ Quizzes</button>
+            <button class="aluno-hist-tab" onclick="setAlunoHistTab('provas',this)">📝 Provas</button>
+            <button class="aluno-hist-tab" onclick="setAlunoHistTab('desafios',this)">🏆 Desafios</button>
+            <button class="aluno-hist-tab" onclick="setAlunoHistTab('bonus',this)">⭐ Bônus</button>
+          </div>
+          <div id="aluno-hist-quiz" class="aluno-hist-items"></div>
+          <div id="aluno-hist-provas" class="aluno-hist-items" style="display:none"></div>
+          <div id="aluno-hist-desafios" class="aluno-hist-items" style="display:none"></div>
+          <div id="aluno-hist-bonus" class="aluno-hist-items" style="display:none"></div>
+          <!-- Legado: aluno-quiz-stats mantido para funções existentes -->
+          <div id="aluno-quiz-stats" style="display:none"></div>
+        </div>
+
+        <div class="aluno-sep"></div>
+
+        <!-- MEDALHAS -->
+        <div id="aluno-medalhas-card" style="display:none">
+          <div class="aluno-sec-lbl">🏅 Minhas medalhas</div>
+          <div class="aluno-medalhas" id="aluno-medalhas"></div>
+          <div class="aluno-sep"></div>
+        </div>
+
+        <!-- RANKING -->
+        <div id="aluno-ranking-card">
+          <div class="aluno-sec-lbl">🏆 Ranking & Posições</div>
+          <div id="aluno-ranking-pos"></div>
+        </div>
+
+        <div class="aluno-sep"></div>
+
+        <!-- PRESENÇAS -->
+        <div class="aluno-sec-lbl">📋 Minhas Presenças</div>
+        <button class="aluno-drop-btn" style="margin-top:0" onclick="alunoToggle('aluno-pres-content','alunoPresArr')">
+          <div class="aluno-drop-lbl">Ver presenças <span class="aluno-drop-badge" id="aluno-pres-badge">—</span></div>
+          <span class="aluno-arr" id="alunoPresArr">▼</span>
+        </button>
+        <div id="aluno-pres-content" style="display:none" class="aluno-drop-content">
+          <div id="aluno-licoes-prog"></div>
+        </div>
+
       </div>
     </div>
 
@@ -2627,7 +3222,14 @@ async function alterarModo(modo) {
 
   // Reconstruir nav e recarregar app no novo modo
   construirNav();
+  _renderSeletorModo();
+  // Limpar cache para garantir dados frescos no novo modo
+  cacheAlunos = [];
+  cacheAulas = [];
+  // Garantir que está no dash com conteúdo renderizado
   await iniciarApp();
+  await _navTo('dash');
+  await renderDash();
 }
 
 // Inicializar modo padrão com base nos papéis
@@ -3165,7 +3767,6 @@ async function iniciarApp() {
   popularDropdownLicao(curTurmaFreq);
   registrarAcesso();
   setTimeout(mostrarAvisosPopup, 1500);
-  // Modal PWA após login
   setTimeout(mostrarModalPWA, 2500);
   popularFiltroLicao();
   initSessionTimeout();
@@ -3173,8 +3774,9 @@ async function iniciarApp() {
   setTimeout(mostrarTutorial, 1200);
   const fab = document.getElementById('feedback-fab');
   if (fab) fab.style.display = 'flex';
-  // Navegar para o dashboard — sempre ao final, com await
+  // Navegar para o dashboard e garantir que renderiza
   await _navTo('dash');
+  await renderDash();
 }
 
 function atualizarAvatarTopbar() {
@@ -3326,49 +3928,57 @@ async function renderDash() {
   const ehAluno = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
   const turmaAluno = ehAluno ? (USER.turma_aluno || USER.turma) : null;
 
-  // Para aluno: dados já pré-carregados no login — renderizar direto sem await
   if (ehAluno) {
-    // Ocultar elementos exclusivos de admin/prof
-    ['dash-aula-btn','dash-meta-bar','dash-alertas','dash-aniversariantes',
-     'dash-aprovacao-notif','dash-contestacoes-notif','dash-chart-card'].forEach(function(id){
+    // Modo aluno: esconder seções exclusivas de admin
+    ['dash-aula-btn','dash-meta-bar','dash-alertas',
+     'dash-aprovacao-notif','dash-contestacoes-notif','dash-chart-card',
+     'dash-sec-freq','dash-sec-grafico','dash-sec-oferta','dash-sec-ranking',
+     'dash-sec-aniv','dash-countdown','dash-footer'].forEach(function(id){
       const el = document.getElementById(id); if(el) el.style.display='none';
     });
-    // Notificações já carregadas — exibir imediatamente
     renderProvasNotifAluno(turmaAluno, true).catch(()=>{});
     renderMuralDash();
-    iniciarCountdown();
     carregarChavePix();
+    return;
   }
+
+  // Modo admin/prof: RESTAURAR todas as seções que podem ter sido escondidas pelo modo aluno
+  ['dash-aula-btn','dash-alertas','dash-aprovacao-notif',
+   'dash-contestacoes-notif','dash-countdown','dash-footer'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el) el.style.display='';
+  });
+  // Seções do dash — respeitar preferências de personalização (só restaurar se não tiver dash-hidden)
+  ['dash-sec-freq','dash-sec-grafico','dash-sec-oferta','dash-sec-ranking',
+   'dash-sec-aniv','dash-sec-aula','dash-sec-mural'].forEach(function(id){
+    const el = document.getElementById(id);
+    if(el && !el.classList.contains('dash-hidden')) el.style.display='';
+  });
 
   const alunos = cacheAlunos;
   let aulas = cacheAulas;
-  if (isProfessor() && !isAdmin() && !ehAluno) {
+  if (isProfessor() && !isAdmin()) {
     const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
     aulas = aulas.filter(function(a){ return profTs.includes(a.turma); });
   }
-  if (ehAluno && turmaAluno) {
-    aulas = aulas.filter(function(a){ return a.turma === turmaAluno; });
-  }
-  // Stats — para aluno mostrar só da turma dele
-  if (ehAluno) {
-    const alunosTurma = alunos.filter(a => a.turma===turmaAluno && (a.status||'ativo')==='ativo');
-    document.getElementById('ds-total').textContent = alunosTurma.length;
-    document.getElementById('ds-aulas').textContent = aulas.length;
-    // Esconder card de alunos por turma e mostrar só o da turma do aluno
-    const turmaCard = document.querySelector('.card .ct');
-  } else {
-    document.getElementById('ds-total').textContent = alunos.filter(a => (a.status||'ativo') === 'ativo').length;
-    document.getElementById('ds-aulas').textContent = aulas.length;
-    document.getElementById('ds-cri').textContent = alunos.filter(a => a.turma==='criancas'&&(a.status||'ativo')==='ativo').length + ' ativos';
-    document.getElementById('ds-jov').textContent = alunos.filter(a => a.turma==='jovens'&&(a.status||'ativo')==='ativo').length + ' ativos';
-    document.getElementById('ds-adu').textContent = alunos.filter(a => a.turma==='adultos'&&(a.status||'ativo')==='ativo').length + ' ativos';
-  }
 
+  // KPIs
+  document.getElementById('ds-total').textContent = alunos.filter(a => (a.status||'ativo')==='ativo').length;
+  document.getElementById('ds-aulas').textContent = aulas.length;
+  const aulaSort = [...aulas].sort((a,b) => b.data.localeCompare(a.data));
+  const ultima = aulaSort[0];
+  document.getElementById('ds-visit').textContent = ultima ? (ultima.visitantes||[]).length : 0;
+
+  // Legado (hidden divs)
+  document.getElementById('ds-cri').textContent = alunos.filter(a=>a.turma==='criancas'&&(a.status||'ativo')==='ativo').length+' ativos';
+  document.getElementById('ds-jov').textContent = alunos.filter(a=>a.turma==='jovens'&&(a.status||'ativo')==='ativo').length+' ativos';
+  document.getElementById('ds-adu').textContent = alunos.filter(a=>a.turma==='adultos'&&(a.status||'ativo')==='ativo').length+' ativos';
+
+  // Saudação
   const nomeExib = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
-  const primeiroNome = nomeExib || USER.nome.split(' ')[0] || 'Olá';
   const hora = new Date().getHours();
   const saud = hora < 12 ? 'Bom dia' : hora < 18 ? 'Boa tarde' : 'Boa noite';
-  document.getElementById('dash-saudacao').textContent = `${saud}, ${primeiroNome}! ✦`;
+  document.getElementById('dash-saudacao').innerHTML = `${saud}, <strong>${nomeExib}!</strong> ✦`;
   document.getElementById('dash-role-badge').textContent = (function(){
     var sexo = USER.sexo || 'M';
     var profLabel = sexo==='F' ? 'Professora' : 'Professor';
@@ -3376,7 +3986,6 @@ async function renderDash() {
       var papelPrincipal = USER.perfil === 'adm' ? '✦ Administrador'
         : USER.perfil === 'pastor' ? (sexo==='F' ? 'Pastora' : 'Pastor')
         : '✦ Superintendente';
-      // Saudação combinada se também for professor
       if (USER._turmas_prof && USER._turmas_prof.length) {
         var tsLabel = USER._turmas_prof.length >= 3 ? 'Todas as turmas'
           : USER._turmas_prof.map(function(t){ return TN[t]||t; }).join(' e ');
@@ -3385,62 +3994,376 @@ async function renderDash() {
       return papelPrincipal;
     }
     var tsProf = Array.isArray(USER.turmas) && USER.turmas.length
-      ? USER.turmas
-      : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
-    var tsLabel = tsProf.length === 3
-      ? 'Todas as turmas'
+      ? USER.turmas : (USER.turma && USER.turma !== 'todas' ? [USER.turma] : ['adultos']);
+    var tsLabel = tsProf.length === 3 ? 'Todas as turmas'
       : tsProf.map(function(t){return TN[t]||t;}).join(' e ');
-    var map = {
-      professor: profLabel + ' — ' + tsLabel,
-      professor_convidado: profLabel + ' Convidado(a)',
-      aluno: (sexo==='F'?'Aluna':'Aluno') + ' — ' + (TN[USER.turma]||'')
-    };
-    return map[USER.perfil] || USER.perfil;
+    return profLabel + ' — ' + tsLabel;
   })();
 
-  // Foto no hero
+  // Foto hero
   const heroFoto = document.getElementById('hero-foto');
-  if (PERFIL?.foto_url) {
-    heroFoto.innerHTML = `<img src="${PERFIL.foto_url}" alt="foto">`;
-  } else {
-    heroFoto.textContent = ini(USER.nome);
-  }
+  if (PERFIL?.foto_url) heroFoto.innerHTML = `<img src="${PERFIL.foto_url}" alt="foto">`;
+  else heroFoto.textContent = ini(USER.nome);
 
-  const aulaSort = [...aulas].sort((a,b) => b.data.localeCompare(a.data));
-  const ultima = aulaSort[0];
-  document.getElementById('ds-visit').textContent = ultima ? (ultima.visitantes||[]).length : 0;
-
+  // Última aula — novo visual
   const box = document.getElementById('dash-ultima');
   if (ultima) {
     const dt = new Date(ultima.data + 'T12:00:00');
-    box.innerHTML = `<div style="display:flex;gap:10px;align-items:center">
-      <div class="hist-d"><div class="hist-day">${dt.getDate()}</div><div class="hist-mo">${dt.toLocaleDateString('pt-BR',{month:'short'})}</div></div>
+    const cor = ultima.turma==='criancas'?'#1a6b4a':ultima.turma==='jovens'?'#4a7eb8':'#7a6010';
+    box.innerHTML = `<div class="dash-aula">
+      <div class="dash-aula-cal" style="background:${cor}">
+        <div class="dash-aula-day">${dt.getDate()}</div>
+        <div class="dash-aula-mo">${dt.toLocaleDateString('pt-BR',{month:'short'})}</div>
+      </div>
       <div>
-        <div style="font-size:11px;color:var(--ink-soft);margin-bottom:2px">${TN[ultima.turma]}</div>
-        <div style="font-size:14px;font-weight:500;margin-bottom:2px">Assistência: ${ultima.total_assistencia}</div>
-        <div style="font-size:11px;color:var(--ink-soft)">${ultima.presentes_matric} matriculados · ${(ultima.visitantes||[]).length} visitante(s)${ultima.licao?' · '+ultima.licao:''}</div>
+        <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:${cor};margin-bottom:3px">${TN[ultima.turma]||ultima.turma}</div>
+        <div style="font-size:14px;font-weight:600;color:#fff;margin-bottom:2px">${ultima.total_assistencia} presentes</div>
+        <div style="font-size:11px;color:rgba(255,255,255,.3)">${ultima.presentes_matric} matr. · ${(ultima.visitantes||[]).length} visitante(s)${ultima.licao?' · '+ultima.licao:''}</div>
       </div>
     </div>`;
   } else {
-    box.innerHTML = '<div class="empty"><div class="empty-icon">📖</div><div class="empty-txt">Nenhuma aula registrada ainda</div></div>';
+    box.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.3);padding:8px 0">Nenhuma aula registrada ainda</div>';
   }
+
+  // Frequência por turma — novo visual
+  ['criancas','jovens','adultos'].forEach(function(t){
+    const aulasT = aulas.filter(a=>a.turma===t);
+    const alunosT = alunos.filter(a=>a.turma===t&&(a.status||'ativo')==='ativo');
+    if (!aulasT.length || !alunosT.length) return;
+    const ultima_t = [...aulasT].sort((a,b)=>b.data.localeCompare(a.data))[0];
+    const presentes = Object.values(ultima_t.presencas||{}).filter(v=>v==='presente').length;
+    const pct = alunosT.length ? Math.round((presentes/alunosT.length)*100) : 0;
+    const fill = document.getElementById('dash-freq-fill-'+t[0]);
+    const lbl = document.getElementById('dash-freq-lbl-'+t[0]);
+    if (fill) fill.style.width = pct+'%';
+    if (lbl) lbl.textContent = presentes+' · '+pct+'%';
+  });
+
+  // Countdown
+  iniciarCountdown();
+
+  // Gráfico semanal por turma
+  _renderDashGrafico(aulas);
+
+  // Oferta
+  _renderDashOferta(aulas);
+
+  // Ranking top 3
+  _renderDashRanking(alunos, aulas);
 
   // Meta
   await renderMeta(ultima);
   renderAniversariantes(alunos);
   renderAlertasAusencia(alunos, aulas);
   carregarChavePix();
-  renderGrafico(aulaSort.slice(0,8).reverse());
+  // renderGrafico removido — substituído por _renderDashGrafico (novo visual por turma)
   renderGraficoComparativoTurmas(alunos, aulas);
   renderMuralDash();
-  iniciarCountdown();
-  // Para aluno: renderProvasNotifAluno já foi chamado antes — não sobrescrever
-  if (!ehAluno) {
-    renderProvasNotifDash();
-    renderContestacoesDashNotif();
-    renderAprovacaoNotifDash();
-    renderAvisoProvasVencendo();
+  renderProvasNotifDash();
+  renderContestacoesDashNotif();
+  renderAprovacaoNotifDash();
+  renderAvisoProvasVencendo();
+}
+
+// ── GRÁFICO SEMANAL POR TURMA ──
+function _renderDashGrafico(aulas) {
+  const barsEl = document.getElementById('dash-chart-bars');
+  const lblsEl = document.getElementById('dash-chart-lbls');
+  if (!barsEl || !lblsEl) return;
+  barsEl.innerHTML = ''; lblsEl.innerHTML = '';
+
+  const turmas = ['criancas','jovens','adultos'];
+  const cores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#b8972a'};
+  const aulasSort = [...aulas].sort((a,b)=>a.data.localeCompare(b.data));
+
+  // Agrupar por semana (última aula de cada semana por turma)
+  const semanas = [];
+  const seen = new Set();
+  aulasSort.forEach(a => {
+    const d = new Date(a.data+'T12:00:00');
+    const wk = `${d.getFullYear()}-W${Math.ceil(d.getDate()/7)}`;
+    if (!seen.has(wk)) { seen.add(wk); semanas.push(wk); }
+  });
+  const ultimas8 = semanas.slice(-8);
+
+  const dados = ultimas8.map(wk => {
+    const d = {};
+    turmas.forEach(t => {
+      const aulasWk = aulasSort.filter(a => {
+        const dd = new Date(a.data+'T12:00:00');
+        return a.turma===t && `${dd.getFullYear()}-W${Math.ceil(dd.getDate()/7)}`===wk;
+      });
+      d[t] = aulasWk.length ? Math.max(...aulasWk.map(a=>a.total_assistencia||0)) : 0;
+      d.lbl = aulasWk.length ? new Date(aulasWk[0].data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : wk;
+    });
+    return d;
+  });
+
+  const maxV = Math.max(1, ...dados.flatMap(d => turmas.map(t => d[t]||0)));
+  dados.forEach((d, i) => {
+    const last = i === dados.length-1;
+    const wk = document.createElement('div');
+    wk.className = 'dash-week';
+    const ttRows = turmas.map(t => `
+      <div class="dash-tt-row">
+        <div class="dash-tt-dot" style="background:${cores[t]}"></div>
+        <div class="dash-tt-lbl">${TN[t]||t}</div>
+        <div class="dash-tt-val">${d[t]||0}</div>
+      </div>`).join('');
+    wk.innerHTML = `<div class="dash-tt"><div class="dash-tt-date">${d.lbl}</div>${ttRows}</div>
+      ${turmas.map(t=>`<div class="dash-bar" style="height:${Math.max(4,Math.round((d[t]||0)/maxV*100))}%;background:${cores[t]};opacity:${last?1:.65}"></div>`).join('')}`;
+    barsEl.appendChild(wk);
+    const lbl = document.createElement('div');
+    lbl.className = 'dash-chart-lbl';
+    lbl.style.cssText = `color:${last?'#b8972a':'rgba(255,255,255,.2)'};font-weight:${last?700:400}`;
+    lbl.textContent = d.lbl;
+    lblsEl.appendChild(lbl);
+  });
+}
+
+// ── OFERTA DASHBOARD ──
+function _renderDashOferta(aulas) {
+  const aulasSort = [...aulas].sort((a,b)=>a.data.localeCompare(b.data)).slice(-8);
+  const total = aulasSort.reduce((s,a)=>s+(parseFloat(a.ofertas)||0),0);
+  const avg = aulasSort.length ? Math.round(total/aulasSort.length) : 0;
+  const el = document.getElementById('dash-oferta-total');
+  const el2 = document.getElementById('dash-oferta-avg');
+  if (el) el.textContent = 'R$ '+total.toLocaleString('pt-BR');
+  if (el2) el2.textContent = 'R$ '+avg;
+
+  const maxV = Math.max(1, ...aulasSort.map(a=>parseFloat(a.ofertas)||0));
+  const barsEl = document.getElementById('dash-oferta-bars');
+  const lblsEl = document.getElementById('dash-oferta-lbls');
+  if (!barsEl) return;
+  barsEl.innerHTML=''; lblsEl.innerHTML='';
+  aulasSort.forEach((a,i)=>{
+    const v=parseFloat(a.ofertas)||0;
+    const last=i===aulasSort.length-1;
+    const dt=new Date(a.data+'T12:00:00');
+    const lbl=dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+    const wk=document.createElement('div'); wk.className='dash-mini-week';
+    wk.innerHTML=`<div class="dash-tt"><div class="dash-tt-date">${lbl}</div><div class="dash-tt-row"><div class="dash-tt-lbl">Oferta</div><div class="dash-tt-val">R$ ${v}</div></div></div>
+      <div class="dash-mini-bar" style="height:${Math.max(4,Math.round(v/maxV*100))}%;background:${last?'#b8972a':'rgba(184,151,42,.35)'}"></div>`;
+    barsEl.appendChild(wk);
+    const l=document.createElement('div'); l.className='dash-mini-lbl';
+    l.style.cssText=`color:${last?'#b8972a':'rgba(255,255,255,.15)'}`;
+    l.textContent=lbl; lblsEl.appendChild(l);
+  });
+
+  // Por turma
+  ['c','j','a'].forEach((k,idx)=>{
+    const turma=['criancas','jovens','adultos'][idx];
+    const cor=['#1a6b4a','#4a7eb8','#b8972a'][idx];
+    const aulasT=aulasSort.filter(a=>a.turma===turma);
+    const tot=aulasT.reduce((s,a)=>s+(parseFloat(a.ofertas)||0),0);
+    const avg2=aulasT.length?Math.round(tot/aulasT.length):0;
+    const elT=document.getElementById('dash-oferta-'+k+'-total');
+    const elA=document.getElementById('dash-oferta-'+k+'-avg');
+    if(elT) elT.textContent='R$ '+tot.toLocaleString('pt-BR');
+    if(elA) elA.textContent='Média R$ '+avg2+'/aula';
+    const bEl=document.getElementById('dash-oferta-bars-'+k);
+    const lEl=document.getElementById('dash-oferta-lbls-'+k);
+    if(!bEl) return;
+    bEl.innerHTML=''; lEl.innerHTML='';
+    const maxT=Math.max(1,...aulasT.map(a=>parseFloat(a.ofertas)||0));
+    aulasT.forEach((a,i)=>{
+      const v=parseFloat(a.ofertas)||0;
+      const last=i===aulasT.length-1;
+      const dt=new Date(a.data+'T12:00:00');
+      const lbl=dt.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+      const wk=document.createElement('div'); wk.className='dash-to-week';
+      wk.innerHTML=`<div class="dash-tt"><div class="dash-tt-date">${lbl}</div><div class="dash-tt-row"><div class="dash-tt-lbl">Oferta</div><div class="dash-tt-val">R$ ${v}</div></div></div>
+        <div class="dash-to-bar" style="height:${Math.max(4,Math.round(v/maxT*100))}%;background:${last?cor:cor+'66'}"></div>`;
+      bEl.appendChild(wk);
+      const l=document.createElement('div'); l.className='dash-to-lbl';
+      l.style.cssText=`color:${last?cor:'rgba(255,255,255,.15)'}`;
+      l.textContent=lbl; lEl.appendChild(l);
+    });
+  });
+}
+
+// ── RANKING TOP 3 — todas as turmas ──
+let _dashRankData = null; // cache para não rebuscar ao mudar aba
+let _dashRankTab = 'geral'; // 'geral' | 'criancas' | 'jovens' | 'adultos'
+
+async function _renderDashRanking(alunos, aulas) {
+  const box = document.getElementById('dash-ranking-top3');
+  if (!box) return;
+  box.innerHTML = '<div style="font-size:11px;color:rgba(255,255,255,.25);padding:8px 0">Carregando...</div>';
+  try {
+    // Buscar TODAS as aulas do banco — não depender do cache que pode estar filtrado
+    const [{ data: aulasDB }, ] = await Promise.all([
+      sbClient.from('aulas').select('*'),
+      carregarQuizScoresTodos(),
+      carregarProvas(),
+      carregarDesafioPontos()
+    ]);
+    const todasAulas = aulasDB || aulas; // fallback para cache se banco falhar
+
+    // Buscar bônus de todas as turmas
+    let bonusTodos = [];
+    try { const r = await sbClient.from('bonus_pontos').select('*'); bonusTodos = r.data||[]; } catch(e){}
+    let ajustesTodos = [];
+    try { const r = await sbClient.from('ajustes_pontuacao').select('*'); ajustesTodos = r.data||[]; } catch(e){}
+    const _bonus = (id, turma) => {
+      const b = bonusTodos.filter(b=>(!b.aluno_ids||b.aluno_ids.includes(id))&&(!b.turma||b.turma===turma)).reduce((s,b)=>s+(parseFloat(b.pontos)||0),0);
+      const a = ajustesTodos.filter(a=>(!a.aluno_ids||a.aluno_ids.includes(id))&&(!a.turma||a.turma===turma)).reduce((s,a)=>s+(parseFloat(a.pontos)||0),0);
+      return b+a;
+    };
+
+    // Calcular pontos de TODOS os alunos ativos de todas as turmas
+    const ativos = alunos.filter(a=>(a.status||'ativo')==='ativo');
+    const ranked = ativos.map(a=>{
+      const aulasT = todasAulas.filter(au=>au.turma===a.turma);
+      const sc = _quizScoresParaAluno(a.id);
+      const base = calcularPontosAluno(a.id, a.turma, aulasT, sc, PROVAS||[], _desafioPontos);
+      const pres = aulasT.filter(au=>(au.presencas||{})[a.id]==='presente').length;
+      const pct = aulasT.length ? Math.round((pres/aulasT.length)*100) : 0;
+      const total = (base.total||0) + _bonus(a.id, a.turma);
+      return { a, pts:total, pres, pct, base };
+    }).sort((x,y)=>{
+      if (y.pts!==x.pts) return y.pts-x.pts;
+      if (y.pres!==x.pres) return y.pres-x.pres;
+      return y.pct-x.pct;
+    });
+
+    _dashRankData = ranked;
+    _dashRankTab = 'geral';
+    _renderDashRankingBox(ranked);
+  } catch(e) { console.error('ranking dash',e); box.innerHTML=''; }
+}
+
+function _renderDashRankingBox(ranked) {
+  const box = document.getElementById('dash-ranking-top3');
+  if (!box) return;
+  const turmas = ['criancas','jovens','adultos'];
+  const corTurma = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+
+  // Filtrar por turma se não for geral
+  const lista = _dashRankTab==='geral'
+    ? ranked
+    : ranked.filter(r=>r.a.turma===_dashRankTab);
+
+  const top3 = lista.slice(0,3);
+
+  // Tabs de turma
+  const tabsHtml = `
+    <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px">
+      ${['geral','criancas','jovens','adultos'].map(t=>{
+        const on = _dashRankTab===t;
+        const cor = t==='geral'?'#b8972a':corTurma[t];
+        const lbl = t==='geral'?'Geral':TN[t]||t;
+        return `<button onclick="dashRankSetTab('${t}')" style="
+          flex-shrink:0;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;
+          font-family:'Outfit',sans-serif;cursor:pointer;transition:all .15s;
+          background:${on?'rgba('+_hexToRgb(cor)+',.2)':'rgba(255,255,255,.04)'};
+          border:1px solid ${on?cor:'rgba(255,255,255,.08)'};
+          color:${on?cor:'rgba(255,255,255,.35)'}
+        ">${lbl}</button>`;
+      }).join('')}
+    </div>`;
+
+  const avCores = ['#7a6010','#3a3520','#3a3520'];
+  const itensHtml = top3.length
+    ? top3.map((item,i)=>`
+      <div class="dash-rank-item ${i===0?'gold':''}" style="margin-bottom:${i<2?'5px':'0'}">
+        <div class="dash-rank-pos" style="color:${i===0?'#b8972a':'rgba(255,255,255,.25)'}">${i+1}</div>
+        <div class="dash-rank-av" style="background:${corTurma[item.a.turma]||avCores[i]}">${ini(item.a.nome)}</div>
+        <div style="flex:1;min-width:0">
+          <div class="dash-rank-name">${item.a.nome.split(' ').slice(0,2).join(' ')}</div>
+          <div class="dash-rank-turma">${TN[item.a.turma]||item.a.turma} · ${item.pres} pres.</div>
+        </div>
+        <div class="dash-rank-pts" style="color:${i===0?'#b8972a':'rgba(255,255,255,.4)'}">${Math.round(item.pts)} pts</div>
+      </div>`).join('')
+    : '<div style="font-size:12px;color:rgba(255,255,255,.25);padding:8px 0">Sem dados para esta turma</div>';
+
+  box.innerHTML = tabsHtml + itensHtml;
+}
+
+function dashRankSetTab(tab) {
+  _dashRankTab = tab;
+  if (_dashRankData) _renderDashRankingBox(_dashRankData);
+}
+
+function _hexToRgb(hex) {
+  const r=parseInt(hex.slice(1,3),16), g=parseInt(hex.slice(3,5),16), b=parseInt(hex.slice(5,7),16);
+  return `${r},${g},${b}`;
+}
+
+// ── PERSONALIZAÇÃO DO DASHBOARD ──
+function abrirDashCfg() { document.getElementById('dashCfgModal').classList.add('open'); }
+function fecharDashCfg() { document.getElementById('dashCfgModal').classList.remove('open'); }
+function dashToggleSec(sec) {
+  const sw = document.getElementById('dsw-'+sec);
+  const block = document.getElementById('dash-sec-'+sec);
+  if (!sw || !block) return;
+  const isOn = sw.classList.contains('on');
+  sw.classList.toggle('on', !isOn);
+  sw.classList.toggle('off', isOn);
+  block.classList.toggle('dash-hidden', isOn);
+}
+function dashToggle(contentId, arrowId) {
+  const el = document.getElementById(contentId);
+  const arr = document.getElementById(arrowId);
+  if (!el) return;
+  const open = el.style.display === 'none';
+  el.style.display = open ? 'block' : 'none';
+  if (arr) arr.classList.toggle('open', open);
+}
+
+// ── COUNTDOWN NOVO ──
+// ── TEMA CLARO / ESCURO ──
+function _aplicarTema(escuro) {
+  const btn = document.getElementById('tb-theme-btn');
+  if (escuro) {
+    document.body.classList.add('tema-escuro');
+    if (btn) btn.textContent = '☀️';
+    if (btn) btn.title = 'Mudar para tema claro';
+  } else {
+    document.body.classList.remove('tema-escuro');
+    if (btn) btn.textContent = '🌙';
+    if (btn) btn.title = 'Mudar para tema escuro';
   }
+}
+function toggleTema() {
+  const escuro = !document.body.classList.contains('tema-escuro');
+  localStorage.setItem('_ebd_tema', escuro ? 'escuro' : 'claro');
+  _aplicarTema(escuro);
+}
+// Aplicar tema salvo ao carregar
+window.addEventListener('DOMContentLoaded', function() {
+  const t = localStorage.getItem('_ebd_tema');
+  _aplicarTema(t === 'escuro');
+});
+
+let _dashCdInterval = null;
+function iniciarCountdown() {
+  const d=document.getElementById('dash-cd-d');
+  const h=document.getElementById('dash-cd-h');
+  const m=document.getElementById('dash-cd-m');
+  const s=document.getElementById('dash-cd-s');
+  const ev=document.getElementById('dash-cd-ev');
+  if (!d) return;
+  if (_dashCdInterval) clearInterval(_dashCdInterval);
+  const diaSemana = 0;
+  const horaEBD = 9;
+  function tick() {
+    const now=new Date();
+    const next=new Date(now);
+    const diasAte=(diaSemana+7-now.getDay())%7||7;
+    next.setDate(now.getDate()+diasAte);
+    next.setHours(horaEBD,0,0,0);
+    const diff=next-now;
+    if(diff<=0){if(d)d.textContent='00';return;}
+    const dd=Math.floor(diff/86400000),hh=Math.floor((diff%86400000)/3600000),mm=Math.floor((diff%3600000)/60000),ss=Math.floor((diff%60000)/1000);
+    if(d) d.textContent=String(dd).padStart(2,'0');
+    if(h) h.textContent=String(hh).padStart(2,'0');
+    if(m) m.textContent=String(mm).padStart(2,'0');
+    if(s) s.textContent=String(ss).padStart(2,'0');
+    if(ev) ev.textContent=`Segunda às ${String(horaEBD).padStart(2,'0')}h00`;
+  }
+  tick();
+  _dashCdInterval = setInterval(tick, 1000);
 }
 
 async function renderMeta(ultima) {
@@ -3462,54 +4385,48 @@ async function renderMuralDash() {
   const agora = _agora();
   const ehAluno = USER && (USER.perfil === 'aluno' || _modoAtual === 'aluno');
   const turmaAluno = ehAluno ? (USER.turma_aluno || USER.turma) : null;
-  const tipoConfig = {
-    info:      { icon:'📢', cor:'#1c3f6e', bg:'#f0f5ff', borda:'#b8d0f5' },
-    importante:{ icon:'⚠️', cor:'#7a2000', bg:'#fff5f0', borda:'#f5b8a0' },
-    evento:    { icon:'🎉', cor:'#1a6b4a', bg:'#f0fff5', borda:'#b8f5c8' },
-    mudanca:   { icon:'📅', cor:'#5c4000', bg:'#fffbf0', borda:'#f5e4a0' },
-    oracao:    { icon:'🙏', cor:'#4a1a6b', bg:'#faf0ff', borda:'#d8b8f5' }
-  };
+  const dotCores = { info:'#4a7eb8', importante:'#c46060', evento:'#1a6b4a', mudanca:'#b8972a', oracao:'#7a4ab8' };
   const visiveis = avisos.filter(a => {
-    // Verificar expiração
     if (a.expira_em && new Date(a.expira_em) < agora) return false;
     if (!a.expira_em && a.data_evento && a.data_evento < _hojeStr() && !a.fixado) return false;
-    // Filtrar por turma
     if (a.turma && a.turma !== 'todas' && turmaAluno && a.turma !== turmaAluno) return false;
     return true;
   }).slice(0, 3);
   if (!visiveis.length) { box.innerHTML = ''; return; }
-  box.innerHTML = '<div style="margin-bottom:12px">' + visiveis.map(a => {
-    const tc = tipoConfig[a.tipo] || tipoConfig.info;
+  box.innerHTML = visiveis.map(a => {
+    const cor = dotCores[a.tipo] || dotCores.info;
     const urgente = a.urgente;
-    return `<div class="aviso-item${a.fixado?' fixado':''}" onclick="navTo('mural')" style="border-color:${urgente?'var(--red)':tc.borda};background:${urgente?'#fff5f5':tc.bg};cursor:pointer;margin-bottom:8px">
-      <div class="aviso-titulo" style="color:${urgente?'var(--red)':tc.cor}">
-        ${urgente?'<span style="font-size:10px;background:var(--red);color:white;padding:1px 7px;border-radius:8px;margin-right:5px">🚨 URGENTE</span>':''}
-        ${a.fixado&&!urgente?'<span class="aviso-pin">📌</span>':''}
-        ${tc.icon} ${a.titulo}
+    const dt = a.created_at ? new Date(a.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}) : '';
+    return `<div class="dash-aviso" onclick="navTo('mural')" style="cursor:pointer">
+      <div class="dash-aviso-dot" style="background:${urgente?'#c46060':cor}"></div>
+      <div>
+        <div class="dash-aviso-title">${urgente?'🚨 ':a.fixado?'📌 ':''}${a.titulo}</div>
+        <div class="dash-aviso-txt">${a.conteudo.substring(0,80)}${a.conteudo.length>80?'...':''}</div>
+        ${dt?`<div class="dash-aviso-date">${dt}</div>`:''}
       </div>
-      <div class="aviso-corpo" style="display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;color:${urgente?'#555':'inherit'}">${a.conteudo}</div>
     </div>`;
-  }).join('') + '</div>';
+  }).join('');
 }
 
 function renderAniversariantes(alunos) {
   const hoje = new Date(); const mes = hoje.getMonth()+1; const diaH = hoje.getDate();
   const lista = alunos.filter(a => { if(!a.nasc) return false; const [,m] = a.nasc.split('-'); return parseInt(m)===mes; });
   const box = document.getElementById('dash-aniversariantes');
-  if (!lista.length) { box.innerHTML = ''; return; }
-  box.innerHTML = `<div class="aniv-section">
-    <div class="aniv-title">🎂 Aniversariantes de ${hoje.toLocaleDateString('pt-BR',{month:'long'})}</div>
-    ${lista.map(a => { const [,m,d] = a.nasc.split('-'); const isHoje = parseInt(d)===diaH&&parseInt(m)===mes;
-      return `<div class="aniv-item"><div class="av av-sm ${AVC[a.turma]}">${ini(a.nome)}</div>
-        <span class="aniv-nome">${a.nome}${isHoje?' 🎉':''}</span>
-        <span style="font-size:11px;color:#8d2050">${String(d).padStart(2,'0')}/${String(m).padStart(2,'0')}</span>
-      </div>`;
-    }).join('')}
-  </div>`;
+  if (!lista.length) { if(box) box.innerHTML = ''; return; }
+  const avCores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+  box.innerHTML = lista.map(a => {
+    const [,m,d] = a.nasc.split('-');
+    const isHoje = parseInt(d)===diaH&&parseInt(m)===mes;
+    const cor = avCores[a.turma]||'#555040';
+    return `<div class="dash-aniv">
+      <div class="dash-aniv-av" style="background:${cor}">${ini(a.nome)}</div>
+      <div class="dash-aniv-name">${a.nome}${isHoje?' 🎉':''}</div>
+      <span class="dash-aniv-tag">dia ${String(d).padStart(2,'0')}</span>
+    </div>`;
+  }).join('');
 }
 
 function renderAlertasAusencia(alunos, aulas) {
-  // Também renderiza aviso de 3 faltas seguidas
   renderAviso3FaltasSeguidas(alunos, aulas);
   const alertas = [];
   alunos.filter(a=>(a.status||'ativo')==='ativo').forEach(al => {
@@ -3519,14 +4436,22 @@ function renderAlertasAusencia(alunos, aulas) {
     if (faltas >= 3) alertas.push({ aluno:al, faltas });
   });
   const box = document.getElementById('dash-alertas');
+  if (!box) return;
   const lista = USER.perfil==='professor'&&USER.turma!=='todas' ? alertas.filter(x=>x.aluno.turma===USER.turma) : alertas;
   if (!lista.length) { box.innerHTML = ''; return; }
-  box.innerHTML = `<div class="alerta-ausencia">
-    <div class="alerta-title">⚠ Atenção — Ausências consecutivas</div>
-    ${lista.map(x => `<div class="alerta-item">
-      <div class="av av-sm ${AVC[x.aluno.turma]}" style="opacity:.5">${ini(x.aluno.nome)}</div>
-      <div class="alerta-nome">${x.aluno.nome} <span style="font-size:10px;color:var(--ink-soft)">${TN[x.aluno.turma]}</span></div>
-      <div class="alerta-faltas">${x.faltas} faltas seguidas</div>
+  const avCores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+  box.innerHTML = `<div class="dash-notif dash-notif-danger" style="flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:8px">
+    <div style="display:flex;align-items:center;gap:8px;width:100%">
+      <div class="dash-notif-icon">⚠️</div>
+      <div class="dash-notif-body">
+        <div class="dash-notif-title" style="color:rgba(255,100,100,.8)">Ausências consecutivas</div>
+        <div class="dash-notif-sub">${lista.length} aluno(s) com 3+ faltas seguidas</div>
+      </div>
+    </div>
+    ${lista.map(x=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:rgba(255,255,255,.04);border-radius:8px;width:100%">
+      <div style="width:24px;height:24px;border-radius:6px;background:${avCores[x.aluno.turma]||'#555'};display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;color:#fff;flex-shrink:0">${ini(x.aluno.nome)}</div>
+      <div style="flex:1;font-size:12px;color:rgba(255,255,255,.55)">${x.aluno.nome}</div>
+      <div style="font-size:10px;font-weight:700;color:#c46060">${x.faltas} faltas</div>
     </div>`).join('')}
   </div>`;
 }
@@ -6346,135 +7271,246 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
 
 async function _renderAlunoProgressoComDados(dados) {
   const { idAluno, turmaAluno, aulasAluno, quizScoresSnap, provasSnap, desafioSnap } = dados;
-  // Limpar COMPLETAMENTE e aplicar só os scores deste aluno
   Object.keys(quizScores).forEach(k => delete quizScores[k]);
   Object.assign(quizScores, quizScoresSnap);
 
-  // ─── Preencher hero IMEDIATAMENTE — sem await ───
   const nome = PERFIL?.nome_exibicao || USER.nome.split(' ')[0];
   const h = new Date().getHours();
   const saud = h < 12 ? 'Bom dia' : h < 18 ? 'Boa tarde' : 'Boa noite';
   const elSaud = document.getElementById('aluno-saud');
   const elTurma = document.getElementById('aluno-turma-txt');
-  const heroLabel = document.getElementById('aluno-hero-label');
-  if (elSaud) elSaud.textContent = `${saud}, ${nome}! ✦`;
-  if (elTurma) elTurma.textContent = `Turma de ${TN[turmaAluno] || turmaAluno}`;
+  if (elSaud) elSaud.innerHTML = `${saud},<br><strong>${nome}!</strong>`;
+  if (elTurma) elTurma.textContent = `Turma de ${TN[turmaAluno]||turmaAluno} · ADTC Ayrton Senna 1`;
 
-
-  // ─── Calcular pontos e estatísticas ───
-  console.log('DEBUG PONTOS:', { idAluno, turmaAluno, totalAulas: aulasAluno.length, totalProvas: (PROVAS||[]).length, quizKeys: Object.keys(quizScores) });
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
   const quizzesFeitos  = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
-  const provasFeitas   = (PROVAS || []).filter(p => p.turma === turmaAluno && p.tipo === 'prova' && p.resultados && p.resultados[idAluno]).length;
-  const desafiosFeitos = _desafioPontos.filter(d => d.aluno_id === idAluno).length;
+  const provasFeitas   = (PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).length;
+  const desafiosFeitos = _desafioPontos.filter(d=>d.aluno_id===idAluno).length;
   const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
-  const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos);
-  // Somar bônus manuais
-  const bonusTotal = (dados.bonusAluno || []).reduce((s, b) => s + (parseFloat(b.pontos)||0), 0);
-  const pts = { ...ptsBase, total: (ptsBase.total||0) + bonusTotal, bonus: bonusTotal };
+  const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS||[], _desafioPontos);
+  const bonusTotal = (dados.bonusAluno||[]).reduce((s,b)=>s+(parseFloat(b.pontos)||0),0);
+  const pts = { ...ptsBase, total:(ptsBase.total||0)+bonusTotal, bonus:bonusTotal };
+  const totalAulas = aulasAluno.length;
+  const pctFreq = totalAulas ? Math.round((presencasReais/totalAulas)*100) : 0;
+  const mediaQuiz = quizzesFeitos>0
+    ? Math.round(Object.keys(quizScores).filter(k=>k.startsWith(turmaAluno)).reduce((s,k)=>s+(quizScores[k].pct||0),0)/quizzesFeitos)
+    : 0;
+  const mediaProva = provasFeitas>0
+    ? Math.round((PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).reduce((s,p)=>{
+        const r=p.resultados[idAluno]; return s+(r.pct||0);
+      },0)/provasFeitas)
+    : 0;
 
-  // Painel de pontos — sempre visível
+  // Pontuação hero
   const ptsHero = document.getElementById('aluno-pts-hero');
   if (ptsHero) {
     ptsHero.style.display = 'block';
-    document.getElementById('aluno-pts-total').textContent = pts.total;
+    document.getElementById('aluno-pts-total').textContent = Math.round(pts.total);
     document.getElementById('pts-presencas').textContent = presencasReais;
     document.getElementById('pts-quizzes').textContent = quizzesFeitos;
     document.getElementById('pts-provas').textContent = provasFeitas;
   }
 
-  // Medalhas automáticas — verificar e exibir em background
-  verificarEAtribuirMedalhas(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS || [], _desafioPontos)
+  // Barras de progresso
+  const setBar = (barId,pctId,pct) => {
+    const b=document.getElementById(barId); const p=document.getElementById(pctId);
+    if(b) b.style.width=pct+'%';
+    if(p) p.textContent=pct+'%';
+  };
+  setBar('aluno-pbar-freq','aluno-ppct-freq',pctFreq);
+  setBar('aluno-pbar-quiz','aluno-ppct-quiz',mediaQuiz);
+  setBar('aluno-pbar-prova','aluno-ppct-prova',mediaProva);
+
+  // Faixa de ranking — preenche depois que ranking carregar
+  const strip = document.getElementById('aluno-pos-strip');
+  if (strip) strip.style.display = 'flex';
+
+  // Histórico completo — abas
+  _renderAlunoHistoricoCompleto(idAluno, turmaAluno, seq, presencasReais, totalAulas, pts, dados.bonusAluno||[]);
+
+  // Histórico de presenças no dropdown
+  const licEl = document.getElementById('aluno-licoes-prog');
+  if (licEl) {
+    const badge = document.getElementById('aluno-pres-badge');
+    if (badge) badge.textContent = presencasReais+' de '+totalAulas;
+    if (!aulasAluno.length) {
+      licEl.innerHTML='<div style="font-size:12px;color:rgba(255,255,255,.3);padding:8px 0">Nenhuma aula registrada ainda.</div>';
+    } else {
+      licEl.innerHTML = aulasAluno.map(au=>{
+        const presente=(au.presencas||{})[idAluno]==='presente';
+        const fj=(au.presencas||{})[idAluno]==='fj';
+        const dt=new Date(au.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
+        const numLic = au.licao ? au.licao.match(/\d+/) : null;
+        const numStr = numLic ? numLic[0] : '—';
+        const corNum = presente?'rgba(184,151,42,.15)':'rgba(255,255,255,.05)';
+        const corNumTxt = presente?'#b8972a':'rgba(255,255,255,.3)';
+        const tag = presente
+          ? '<span class="aluno-pres-tag" style="background:rgba(26,107,74,.15);color:#1a6b4a">✓ Presente</span>'
+          : fj ? '<span class="aluno-pres-tag" style="background:rgba(184,122,0,.12);color:#b87a00">FJ</span>'
+          : '<span class="aluno-pres-tag" style="background:rgba(184,74,74,.12);color:#c46060">✗ Falta</span>';
+        return `<div class="aluno-pres-item">
+          <div class="aluno-pres-num" style="background:${corNum};color:${corNumTxt}">${numStr}</div>
+          <div class="aluno-pres-info">
+            <div class="aluno-pres-title">${au.licao||'Aula'}</div>
+            <div class="aluno-pres-date">${dt}</div>
+          </div>
+          ${tag}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  // Medalhas
+  verificarEAtribuirMedalhas(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS||[], _desafioPontos)
     .then(async novas => {
       if (novas.length) novas.forEach(m => toast(`${m.icone} Nova medalha: ${m.titulo}!`, 'ok'));
       const todasMedalhas = await carregarMedalhasAluno(idAluno);
       renderMedalhasAluno(todasMedalhas);
-    }).catch(() => {});
-
-  // Estatísticas detalhadas
-  const statsEl = document.getElementById('aluno-quiz-stats');
-  if (statsEl) {
-    const totalAulas = aulasAluno.length;
-    const pctFreq = totalAulas ? Math.round((presencasReais / totalAulas) * 100) : 0;
-    const mediaAcertos = quizzesFeitos > 0
-      ? Math.round(Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).reduce((s, k) => s + (quizScores[k].pct || 0), 0) / quizzesFeitos)
-      : 0;
-    statsEl.innerHTML = `
-      <div class="stats" style="gap:8px;flex-wrap:wrap">
-        <div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n" style="color:var(--tc)">${presencasReais}<span style="font-size:14px;color:var(--ink-soft)">/${totalAulas}</span></div>
-          <div class="stat-l">Presenças</div>
-        </div>
-        <div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n" style="color:${pctFreq>=75?'var(--tc)':pctFreq>=50?'var(--warn)':'var(--red)'}">${pctFreq}%</div>
-          <div class="stat-l">Frequência</div>
-        </div>
-        <div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n">${quizzesFeitos}</div>
-          <div class="stat-l">Quizzes</div>
-        </div>
-        <div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n">${provasFeitas}</div>
-          <div class="stat-l">Provas</div>
-        </div>
-        <div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n">${desafiosFeitos}</div>
-          <div class="stat-l">Desafios</div>
-        </div>
-        ${mediaAcertos > 0 ? `<div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n">${mediaAcertos}%</div>
-          <div class="stat-l">Média quizzes</div>
-        </div>` : ''}
-        ${seq >= 2 ? `<div class="stat" style="flex:1;min-width:80px">
-          <div class="stat-n">🔥${seq}</div>
-          <div class="stat-l">Seguidas</div>
-        </div>` : ''}
-      </div>`;
-  }
-
-  // Histórico de presenças
-  const licEl = document.getElementById('aluno-licoes-prog');
-  if (licEl) {
-    if (!aulasAluno.length) {
-      licEl.innerHTML = '<div style="padding:12px 0;color:var(--ink-soft);font-size:13px">Nenhuma aula registrada ainda.</div>';
-    } else {
-      const totalAulasPres = aulasAluno.length;
-      const pctFreqPres = totalAulasPres ? Math.round((presencasReais / totalAulasPres) * 100) : 0;
-      const corFreq = pctFreqPres >= 75 ? 'var(--tc)' : pctFreqPres >= 50 ? 'var(--warn)' : 'var(--red)';
-      const linhasHTML = aulasAluno.slice(0, 10).map(au => {
-        const presente = (au.presencas||{})[idAluno] === 'presente';
-        const dt = new Date(au.data + 'T12:00:00').toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit' });
-        return '<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--cb)">'
-          + '<span style="font-size:18px">' + (presente ? '✅' : '❌') + '</span>'
-          + '<span style="font-size:13px;flex:1;color:var(--ink-mid)">' + dt + (au.licao ? ' — ' + au.licao : '') + '</span>'
-          + '<span style="font-size:11px;font-weight:700;color:' + (presente ? 'var(--tc)' : 'var(--red)') + '">' + (presente ? 'Presente' : 'Ausente') + '</span>'
-          + '</div>';
-      }).join('');
-      licEl.innerHTML = '<div style="display:flex;gap:12px;margin-bottom:12px;padding-bottom:10px;border-bottom:2px solid var(--cb)">'
-        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--tc)">' + presencasReais + '</div><div style="font-size:11px;color:var(--ink-soft)">presenças</div></div>'
-        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:' + corFreq + '">' + pctFreqPres + '%</div><div style="font-size:11px;color:var(--ink-soft)">frequência</div></div>'
-        + '<div style="flex:1;text-align:center"><div style="font-size:24px;font-weight:700;color:var(--red)">' + (totalAulasPres - presencasReais) + '</div><div style="font-size:11px;color:var(--ink-soft)">faltas</div></div>'
-        + '</div>' + linhasHTML;
-    }
-  }
+    }).catch(()=>{});
 
   // Certificado
-  const totalLicoes = (LICOES[turmaAluno]?.licoes || []).length;
-  const feitas = quizzesFeitos;
-  if (feitas >= totalLicoes && totalLicoes > 0 && !document.getElementById('btn-certificado')) {
+  const totalLicoes = (LICOES[turmaAluno]?.licoes||[]).length;
+  if (quizzesFeitos>=totalLicoes && totalLicoes>0 && !document.getElementById('btn-certificado')) {
     const certBtn = document.createElement('button');
-    certBtn.id = 'btn-certificado';
-    certBtn.className = 'btn btn-gold btn-full';
-    certBtn.style.marginTop = '10px';
-    certBtn.textContent = '🏆 Gerar Certificado de Conclusão';
-    certBtn.onclick = gerarCertificado;
-    if (statsEl) statsEl.after(certBtn);
+    certBtn.id='btn-certificado'; certBtn.className='btn btn-gold btn-full';
+    certBtn.style.marginTop='10px'; certBtn.textContent='🏆 Gerar Certificado de Conclusão';
+    certBtn.onclick=gerarCertificado;
+    const statsEl=document.getElementById('aluno-quiz-stats');
+    if(statsEl) statsEl.after(certBtn);
   }
 
-
-
-  // Ranking carrega em background sem bloquear a exibição
+  // Ranking
   renderRankingAluno(aulasAluno, idAluno, turmaAluno).catch(()=>{});
+}
+
+// ── HISTÓRICO COMPLETO COM ABAS ──
+function _renderAlunoHistoricoCompleto(idAluno, turmaAluno, seq, presencasReais, totalAulas, pts, bonusAluno) {
+  // Aba Quiz
+  const quizEl = document.getElementById('aluno-hist-quiz');
+  if (quizEl) {
+    const keys = Object.keys(quizScores).filter(k=>k.startsWith(turmaAluno));
+    const media = keys.length>0 ? Math.round(keys.reduce((s,k)=>s+(quizScores[k].pct||0),0)/keys.length) : 0;
+    quizEl.innerHTML = keys.length
+      ? `<div style="font-size:11px;color:rgba(255,255,255,.3);margin-bottom:12px">${keys.length} feitos · média ${media}%</div>`
+        + keys.sort((a,b)=>{
+            const numA=parseInt(a.split('-').pop()||0);
+            const numB=parseInt(b.split('-').pop()||0);
+            return numB-numA;
+          }).map(k=>{
+            const s=quizScores[k];
+            const pct=s.pct||0;
+            const cor=pct>=80?'rgba(26,107,74,.15)':pct>=60?'rgba(184,122,0,.15)':'rgba(184,74,74,.12)';
+            const corTxt=pct>=80?'#1a6b4a':pct>=60?'#b87a00':'#c46060';
+            const numLic=k.split('-').pop();
+            const licData = (LICOES[turmaAluno]?.licoes||[]).find(l=>String(l.num)===String(numLic));
+            const titulo=licData?licData.titulo.toUpperCase():`LIÇÃO ${numLic}`;
+            const dt=s.data?new Date(s.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+            return `<div class="aluno-hist-item">
+              <div class="aluno-hist-icon" style="background:rgba(184,151,42,.15);color:#b8972a">⚡</div>
+              <div class="aluno-hist-body">
+                <div class="aluno-hist-title">${titulo}</div>
+                <div class="aluno-hist-date">${dt}</div>
+                <span class="aluno-hist-tag" style="background:${cor};color:${corTxt}">${s.acertos||0}/${s.total||5} · ${pct}%</span>
+              </div>
+              <div class="aluno-hist-pts">+${s.pontos!=null?s.pontos:'-'} pts</div>
+            </div>`;
+          }).join('')
+      : '<div style="font-size:12px;color:rgba(255,255,255,.3);padding:8px 0">Nenhum quiz realizado ainda.</div>';
+  }
+
+  // Aba Provas
+  const provasEl = document.getElementById('aluno-hist-provas');
+  if (provasEl) {
+    const provasAluno = (PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.resultados&&p.resultados[idAluno]);
+    provasEl.innerHTML = provasAluno.length
+      ? provasAluno.map(p=>{
+          const r=p.resultados[idAluno];
+          const pct=r.pct||0;
+          const dt=r.data?new Date(r.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+          const cor=pct>=80?'rgba(26,107,74,.15)':pct>=60?'rgba(184,122,0,.15)':'rgba(184,74,74,.12)';
+          const corTxt=pct>=80?'#1a6b4a':pct>=60?'#b87a00':'#c46060';
+          const ptsPrv = r.pontos_corrigidos!=null?r.pontos_corrigidos:Math.round((pct/10)*10);
+          return `<div class="aluno-hist-item">
+            <div class="aluno-hist-icon" style="background:rgba(74,126,184,.15);color:#4a7eb8">📝</div>
+            <div class="aluno-hist-body">
+              <div class="aluno-hist-title">${(p.nome||'Prova').toUpperCase()}</div>
+              <div class="aluno-hist-date">${dt}</div>
+              <span class="aluno-hist-tag" style="background:${cor};color:${corTxt}">${r.acertos||0}/${r.total||5} · ${pct}%</span>
+            </div>
+            <div class="aluno-hist-pts">+${ptsPrv} pts</div>
+          </div>`;
+        }).join('')
+      : '<div style="font-size:12px;color:rgba(255,255,255,.3);padding:8px 0">Nenhuma prova realizada ainda.</div>';
+  }
+
+  // Aba Desafios
+  const desafiosEl = document.getElementById('aluno-hist-desafios');
+  if (desafiosEl) {
+    const desafsAluno = _desafioPontos.filter(d=>d.aluno_id===idAluno);
+    desafiosEl.innerHTML = desafsAluno.length
+      ? desafsAluno.map(d=>{
+          const dt=d.data_cumprimento?new Date(d.data_cumprimento).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+          const desaf=(DESAFIOS||[]).find(x=>x.id===d.desafio_id);
+          return `<div class="aluno-hist-item">
+            <div class="aluno-hist-icon" style="background:rgba(184,151,42,.15);color:#b8972a">🏆</div>
+            <div class="aluno-hist-body">
+              <div class="aluno-hist-title">${(desaf?.nome||'Desafio').toUpperCase()}</div>
+              <div class="aluno-hist-date">${dt}</div>
+            </div>
+            <div class="aluno-hist-pts">+${d.pontos} pts</div>
+          </div>`;
+        }).join('')
+      : `<div style="text-align:center;padding:20px 0">
+          <div style="font-size:28px;margin-bottom:8px">🏆</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.2)">Complete desafios para ganhar pontos extras!</div>
+        </div>`;
+  }
+
+  // Aba Bônus
+  const bonusEl = document.getElementById('aluno-hist-bonus');
+  if (bonusEl) {
+    bonusEl.innerHTML = bonusAluno.length
+      ? bonusAluno.map(b=>{
+          const dt=b.created_at?new Date(b.created_at).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
+          const tipo=b.tipo==='desconto'?'Desconto':'Bônus';
+          const cor=b.tipo==='desconto'?'rgba(184,74,74,.12)':'rgba(184,151,42,.12)';
+          const corTxt=b.tipo==='desconto'?'#c46060':'#b8972a';
+          const sinal=b.tipo==='desconto'?'-':'+';
+          return `<div class="aluno-hist-item">
+            <div class="aluno-hist-icon" style="background:${cor};color:${corTxt}">⭐</div>
+            <div class="aluno-hist-body">
+              <div class="aluno-hist-title">${(b.motivo||b.motivo_texto||tipo).toUpperCase()}</div>
+              <div class="aluno-hist-date">${dt}</div>
+              <span class="aluno-hist-tag" style="background:${cor};color:${corTxt}">${tipo}</span>
+            </div>
+            <div class="aluno-hist-pts">${sinal}${b.pontos} pts</div>
+          </div>`;
+        }).join('')
+      : '<div style="font-size:12px;color:rgba(255,255,255,.3);padding:8px 0">Nenhum bônus recebido ainda.</div>';
+  }
+
+  // Painel de stats legado (hidden) — manter para compatibilidade
+  const statsEl = document.getElementById('aluno-quiz-stats');
+  if (statsEl) statsEl.innerHTML = '';
+}
+
+// ── FUNÇÕES DROPDOWN ALUNO ──
+function alunoToggle(contentId, arrowId) {
+  const el=document.getElementById(contentId);
+  const arr=document.getElementById(arrowId);
+  if(!el) return;
+  const open=el.style.display==='none';
+  el.style.display=open?'block':'none';
+  if(arr) arr.classList.toggle('open',open);
+}
+function setAlunoHistTab(tab, btn) {
+  ['quiz','provas','desafios','bonus'].forEach(t=>{
+    const el=document.getElementById('aluno-hist-'+t);
+    if(el) el.style.display=t===tab?'flex':'none';
+    if(el) el.style.flexDirection='column';
+  });
+  document.querySelectorAll('.aluno-hist-tab').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
 }
 
 // ══════════════════════════════════════════════
@@ -7146,15 +8182,13 @@ async function renderAprovacaoNotifDash() {
     if (desAg) sub.push(`${desAg} desafio(s) aguardando`);
     if (desRev) sub.push(`${desRev} desafio(s) em revisão`);
 
-    box.innerHTML = `<div style="background:linear-gradient(135deg,#7a2000,#a83200);border-radius:var(--r);padding:14px;margin-bottom:12px;cursor:pointer" onclick="navTo('provas')">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div style="font-size:24px">⏳</div>
-        <div>
-          <div style="font-size:14px;font-weight:700;color:white">${total} item(ns) para revisar</div>
-          <div style="font-size:12px;color:rgba(255,255,255,.7);margin-top:2px">${sub.join(' · ')} · Toque para revisar</div>
-        </div>
-        <div style="color:rgba(255,255,255,.5);font-size:20px;margin-left:auto">›</div>
+    box.innerHTML = `<div class="dash-notif dash-notif-warn" style="cursor:pointer;margin-bottom:8px" onclick="navTo('provas')">
+      <div class="dash-notif-icon">⏳</div>
+      <div class="dash-notif-body">
+        <div class="dash-notif-title" style="color:rgba(255,255,255,.7)">${total} item(ns) para revisar</div>
+        <div class="dash-notif-sub">${sub.join(' · ')}</div>
       </div>
+      <button class="dash-notif-btn dash-notif-btn-warn">Ver</button>
     </div>`;
   } catch(e) { box.innerHTML = ''; }
 }
@@ -8476,13 +9510,13 @@ async function renderContestacoesDashNotif() {
       .select('id').eq('status', 'pendente');
     const total = data ? data.length : 0;
     if (total === 0) { box.innerHTML = ''; return; }
-    box.innerHTML = `<div class="prova-notif" onclick="navTo('contestacoes')" style="background:linear-gradient(135deg,#7a4a00,#b87a00)">
-      <div class="prova-notif-icon">⚠️</div>
-      <div class="prova-notif-txt">
-        <div class="prova-notif-titulo">${total} contestação(ões) pendente(s)</div>
-        <div class="prova-notif-sub">Clique para revisar e liberar refazer</div>
+    box.innerHTML = `<div class="dash-notif dash-notif-warn" style="cursor:pointer;margin-bottom:8px" onclick="navTo('contestacoes')">
+      <div class="dash-notif-icon">⚠️</div>
+      <div class="dash-notif-body">
+        <div class="dash-notif-title" style="color:rgba(255,200,80,.8)">${total} contestação(ões) pendente(s)</div>
+        <div class="dash-notif-sub">Clique para revisar e liberar refazer</div>
       </div>
-      <div class="prova-notif-arrow">›</div>
+      <button class="dash-notif-btn dash-notif-btn-warn">Ver</button>
     </div>`;
   } catch(e) {}
 }
@@ -8522,13 +9556,13 @@ async function renderProvasNotifDash() {
 
     if (!ativas.length) { box.innerHTML = ''; return; }
     box.innerHTML = ativas.map(p => `
-      <div class="prova-notif" onclick="navTo('provas')">
-        <div class="prova-notif-icon">📝</div>
-        <div class="prova-notif-txt">
-          <div class="prova-notif-titulo">${p.nome}</div>
-          <div class="prova-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} disponível${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+      <div class="dash-notif dash-notif-warn" style="cursor:pointer;margin-bottom:8px" onclick="navTo('provas')">
+        <div class="dash-notif-icon">📝</div>
+        <div class="dash-notif-body">
+          <div class="dash-notif-title" style="color:rgba(255,255,255,.7)">${p.nome}</div>
+          <div class="dash-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} disponível${p.data_limite?' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR'):''}</div>
         </div>
-        <div class="prova-notif-arrow">›</div>
+        <button class="dash-notif-btn dash-notif-btn-warn">Ver</button>
       </div>`).join('');
   } catch(e) { box.innerHTML = ''; }
 }
@@ -8956,9 +9990,9 @@ function renderMedalhasAluno(medalhas) {
   if (!medalhas.length) { card.style.display = 'none'; return; }
   card.style.display = 'block';
   box.innerHTML = medalhas.map(m =>
-    `<div title="${m.descricao}" style="display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 10px;background:var(--gold-pale);border:1px solid var(--gold);border-radius:10px;min-width:60px;text-align:center">
-      <span style="font-size:22px">${m.icone}</span>
-      <span style="font-size:10px;font-weight:700;color:var(--gold-deep);line-height:1.2">${m.titulo}</span>
+    `<div class="aluno-medal" title="${m.descricao}">
+      <div class="aluno-medal-icon">${m.icone}</div>
+      <div class="aluno-medal-txt">${m.titulo}</div>
     </div>`
   ).join('');
 }
@@ -9898,87 +10932,69 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
       return bonus + ajustes;
     };
 
-    if (!alunos.length) { box.innerHTML = '<div style="color:var(--ink-soft);font-size:13px;text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
+    if (!alunos.length) { box.innerHTML = '<div style="font-size:13px;color:rgba(255,255,255,.3);text-align:center;padding:12px">Nenhum aluno na turma</div>'; return; }
 
-    // Ranking PRESENÇA: presença → % → pts → idade (mais velho sobe)
-    const rankingPres = alunos.map(a => {
-      const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
-      const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
-      const sc = _quizScoresParaAluno(a.id);
-      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
-      const totalPts = (ptsBase.total||0) + _bonusAluno(a.id);
-      const idade = _idadeParaDesempate(a.nasc);
-      return { id: a.id, nome: a.nome, pres, pct, pts: totalPts, idade };
-    }).sort((a, b) => {
-      if (b.pres !== a.pres) return b.pres - a.pres;
-      if (b.pct !== a.pct) return b.pct - a.pct;
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      return a.idade - b.idade;
-    });
-
-    // Ranking PONTOS: pts → presenças → % → idade (mais velho sobe)
+    // Ranking PONTOS
     const rankingGeral = alunos.map(a => {
       const sc = _quizScoresParaAluno(a.id);
-      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS || [], _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS||[], _desafioPontos);
       const totalPts = (ptsBase.total||0) + _bonusAluno(a.id);
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
-      const pct = aulas.length ? Math.round((pres / aulas.length) * 100) : 0;
+      const pct = aulas.length ? Math.round((pres/aulas.length)*100) : 0;
       const idade = _idadeParaDesempate(a.nasc);
-      return { id: a.id, nome: a.nome, pts: totalPts, pres, pct, quizzes: ptsBase.quizzes, provas: ptsBase.provas, idade };
-    }).sort((a, b) => {
-      if (b.pts !== a.pts) return b.pts - a.pts;
-      if (b.pres !== a.pres) return b.pres - a.pres;
-      if (b.pct !== a.pct) return b.pct - a.pct;
-      return a.idade - b.idade; // timestamp menor = mais velho = frente
+      return { id:a.id, nome:a.nome, pts:totalPts, pres, pct, quizzes:ptsBase.quizzes, provas:ptsBase.provas, idade };
+    }).sort((a,b)=>{
+      if (b.pts!==a.pts) return b.pts-a.pts;
+      if (b.pres!==a.pres) return b.pres-a.pres;
+      if (b.pct!==a.pct) return b.pct-a.pct;
+      return a.idade-b.idade;
     });
 
-    const minhaPosP = rankingPres.findIndex(r => r.id === idUsar) + 1;
-    const minhaPosG = rankingGeral.findIndex(r => r.id === idUsar) + 1;
-    const euPres = rankingPres.find(r => r.id === idUsar);
-    const euGeral = rankingGeral.find(r => r.id === idUsar);
+    const minhaPosG = rankingGeral.findIndex(r=>r.id===idUsar)+1;
+    const euGeral = rankingGeral.find(r=>r.id===idUsar);
 
-    const MEDALHAS_POS = ['🥇', '🥈', '🥉'];
+    // Atualizar faixa de posição no hero
+    const stripNum = document.getElementById('aluno-pos-num');
+    const stripDetail = document.getElementById('aluno-pos-detail');
+    const stripTurma = document.getElementById('aluno-pos-turma');
+    if (stripNum) stripNum.textContent = minhaPosG+'ª';
+    if (stripDetail) stripDetail.textContent = `entre ${alunos.length} alunos da turma`;
+    if (stripTurma) stripTurma.textContent = TN[turmaUsar]||turmaUsar;
 
-    box.innerHTML = `
-      <!-- Cards de posição -->
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
-        <div style="background:var(--gold-pale);border:1px solid var(--gold);border-radius:var(--r);padding:12px;text-align:center">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);font-weight:700;margin-bottom:4px">Presença</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-deep);line-height:1">${minhaPosP > 0 ? minhaPosP + 'º' : '—'}</div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">${euPres ? euPres.pres + ' presença(s) · ' + euPres.pct + '%' : 'sem presenças'}</div>
-        </div>
-        <div style="background:linear-gradient(135deg,#1a2744,#2c3e6b);border-radius:var(--r);padding:12px;text-align:center">
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-l);font-weight:700;margin-bottom:4px">Pontuação</div>
-          <div style="font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:600;color:var(--gold-l);line-height:1">${minhaPosG > 0 ? minhaPosG + 'º' : '—'}</div>
-          <div style="font-size:11px;color:rgba(255,255,255,.5);margin-top:3px">${euGeral ? euGeral.pts + ' pts' : '0 pts'}</div>
-        </div>
-      </div>
-
-      <!-- Detalhamento dos meus pontos -->
-      ${euGeral ? `<div style="background:var(--cream);border:1px solid var(--cb);border-radius:var(--r);padding:10px 13px;margin-bottom:14px;font-size:12px;color:var(--ink-mid);display:flex;gap:14px;flex-wrap:wrap">
-        <span>🏫 <strong>${euPres ? euPres.pres : 0}</strong> presença(s) = <strong>${(euPres ? euPres.pres : 0) * 10} pts</strong></span>
-        ${euGeral.quizzes > 0 ? `<span>⚡ quizzes = <strong>${euGeral.quizzes} pts</strong></span>` : ''}
-        ${euGeral.provas > 0 ? `<span>📝 provas = <strong>${euGeral.provas} pts</strong></span>` : ''}
-        <span style="margin-left:auto;font-weight:700;color:var(--gold-deep)">Total: ${euGeral.pts} pts</span>
-      </div>` : ''}
-
-      <!-- Ranking da turma -->
-      <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--ink-soft);margin-bottom:10px;padding-bottom:8px;border-bottom:1px solid var(--cb)">
-        🏆 Ranking — ${TN[turmaUsar] || turmaUsar}
-      </div>
-      ${rankingGeral.map((r, i) => {
-        const isEu = r.id === idUsar;
-        const isTop = i < 3;
-        const medal = isTop ? MEDALHAS_POS[i] : '';
-        return `<div style="display:flex;align-items:center;gap:10px;padding:9px ${isEu?'10px':'4px'};margin-bottom:4px;border-radius:8px;background:${isEu?'var(--gold-pale)':'transparent'};border:${isEu?'1px solid var(--gold)':'1px solid transparent'}">
-          <div style="font-size:${isTop?'20px':'13px'};min-width:28px;text-align:center;font-family:'Cormorant Garamond',serif;font-weight:600;color:${isTop?'var(--gold)':'var(--ink-soft)'}">${medal || (i+1)}</div>
-          <div style="flex:1;min-width:0">
-            <div style="font-size:13px;font-weight:${isEu?'700':'500'};color:${isEu?'var(--gold-deep)':'var(--ink)'}">${isEu ? '✦ Você' : r.nome}</div>
-            <div style="font-size:10px;color:var(--ink-soft);margin-top:1px">${r.pres} presença(s)${r.quizzes > 0 ? ' · ' + r.quizzes + ' pts quiz' : ''}</div>
+    // Card da posição do aluno
+    const mineHtml = euGeral ? `
+      <div class="aluno-rank-mine">
+        <div style="display:flex;align-items:center;gap:8px">
+          <div style="font-size:22px;font-weight:700;color:#b8972a;line-height:1">${minhaPosG}ª</div>
+          <div>
+            <div style="font-size:12px;color:rgba(255,255,255,.6);font-weight:500">${euGeral.nome.split(' ').slice(0,2).join(' ')} · você</div>
+            <div style="font-size:10px;color:rgba(255,255,255,.25);margin-top:1px">${euGeral.pts} pts · ${euGeral.pres} presença(s)</div>
           </div>
-          <div style="font-size:12px;font-weight:700;color:${isTop?'var(--gold-deep)':'var(--ink-soft)'};background:${isTop?'var(--gold-pale)':'transparent'};padding:3px 10px;border-radius:10px;white-space:nowrap">${r.pts} pts</div>
-        </div>`;
-      }).join('')}`;
+        </div>
+      </div>` : '';
+
+    // Botão ver todos
+    const toggleId = 'rankAllList_'+turmaUsar;
+    const arrowId = 'rankAllArr_'+turmaUsar;
+    box.innerHTML = mineHtml +
+      `<button class="aluno-drop-btn" style="margin-top:0" onclick="alunoToggle('${toggleId}','${arrowId}');this.querySelector('span:first-child').textContent=document.getElementById('${toggleId}').style.display==='block'?'Fechar ranking':'Ver todos da turma'">
+        <span class="aluno-drop-lbl">Ver todos da turma</span>
+        <span class="aluno-arr" id="${arrowId}">▼</span>
+      </button>
+      <div id="${toggleId}" style="display:none;margin-top:10px">
+        <div class="aluno-rank-list">
+          ${rankingGeral.map((r,i)=>{
+            const isEu=r.id===idUsar;
+            const avCor = ['#7a6010','#444030','#444030'][i] || '#333020';
+            return `<div class="aluno-rank-item ${isEu?'me':''}">
+              <div class="aluno-rank-pos" style="color:${i===0?'#b8972a':'rgba(255,255,255,.25)'}">${i+1}</div>
+              <div class="aluno-rank-av" style="background:${isEu?'#7a6010':avCor}">${ini(r.nome)}</div>
+              <div class="aluno-rank-name" style="color:${isEu?'#e8d48a':'rgba(255,255,255,.6)'};font-weight:${isEu?600:400}">${r.nome.split(' ').slice(0,2).join(' ')}${isEu?' ← você':''}</div>
+              <div class="aluno-rank-pts" style="color:${i===0?'#b8972a':'rgba(255,255,255,.4)'}">${r.pts}</div>
+            </div>`;
+          }).join('')}
+        </div>
+      </div>`;
 
   } catch(e) {
     console.error('Erro ao carregar ranking do aluno:', e);
