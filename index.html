@@ -12622,8 +12622,8 @@ async function renderQuizzesLicao() {
         const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
         const pts = r.pontos != null ? parseFloat(r.pontos) : null;
         const dt = r.data_resposta ? new Date(r.data_resposta).toLocaleDateString('pt-BR', {timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'}) : '';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid ${escuro?'rgba(255,255,255,.06)':'var(--cb)'};flex-wrap:wrap">
-          <div style="flex:1;font-size:13px;font-weight:500;min-width:100px;color:${escuro?'rgba(255,255,255,.8)':'var(--ink)'}">${nome}</div>
+        return `<div style="display:flex;align-items:center;gap:8px;padding:9px 0;border-bottom:1px solid var(--cb);flex-wrap:wrap">
+          <div style="flex:1;font-size:13px;font-weight:500;min-width:100px;color:var(--text-main)">${nome}</div>
           <div style="display:flex;gap:6px;align-items:center;flex-wrap:wrap">
             <span style="font-size:11px;color:var(--ink-soft)">${dt}</span>
             <span style="font-size:12px;font-weight:700;color:${cor}">${r.acertos}/${r.total} · ${pct}%</span>
