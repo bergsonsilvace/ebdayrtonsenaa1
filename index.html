@@ -2720,6 +2720,31 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             </div>
             <button onclick="salvarBonusManual()" class="btn btn-gold btn-full">⭐ Aplicar Bônus</button>
             <div id="bonus-historico" style="margin-top:14px"></div>
+
+            <!-- Excluir do Ranking -->
+            <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--red);margin:14px 0 8px">🚫 Excluir do Ranking</div>
+            <div style="font-size:12px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">Alunos excluídos continuam fazendo quizzes e acumulando pontos — apenas não aparecem no ranking.</div>
+
+            <!-- Cards de turma -->
+            <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
+              <div id="excl-card-criancas" onclick="abrirDrawerExclusao('criancas')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
+                <div style="font-size:22px;margin-bottom:3px">👶</div>
+                <div style="font-size:12px;font-weight:700;color:var(--ink)">Crianças</div>
+                <div id="excl-badge-criancas" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
+              </div>
+              <div id="excl-card-jovens" onclick="abrirDrawerExclusao('jovens')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
+                <div style="font-size:22px;margin-bottom:3px">🧑</div>
+                <div style="font-size:12px;font-weight:700;color:var(--ink)">Jovens</div>
+                <div id="excl-badge-jovens" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
+              </div>
+              <div id="excl-card-adultos" onclick="abrirDrawerExclusao('adultos')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
+                <div style="font-size:22px;margin-bottom:3px">👤</div>
+                <div style="font-size:12px;font-weight:700;color:var(--ink)">Adultos</div>
+                <div id="excl-badge-adultos" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
+              </div>
+            </div>
+
+            <!-- Modal de exclusão (fora do fluxo, fixo na tela) -->
           </div>
         </div>
 
@@ -3860,7 +3885,7 @@ async function doLogin() {
     }
 
     document.getElementById('lerr').style.display = 'block';
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
   btn.disabled = false; btn.textContent = 'Entrar';
 }
 
@@ -5387,7 +5412,7 @@ async function salvarAluno() {
       toast(editId ? 'Aluno atualizado! ✦' : 'Aluno cadastrado! ✦', 'ok');
     }
   } catch(e) {
-    toast('Erro ao salvar: ' + e.message, 'er');
+    toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 function editAluno(id) { abrirModalAluno(id); }
@@ -5548,7 +5573,7 @@ async function salvarProf() {
       cacheAlunos = await sbGet('alunos');
     }
   } catch(e) {
-    toast('Erro ao salvar: ' + e.message, 'er');
+    toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 function editProf(id) { abrirModalProf(id); }
@@ -5588,7 +5613,7 @@ async function sincronizarProfComoAluno(profData, editId) {
     }
   } catch(e) {
     console.error('Erro ao sincronizar prof como aluno:', e);
-    toast('Professor salvo, mas erro ao criar aluno: ' + e.message, 'er');
+    toast('Professor salvo, mas erro ao criar aluno: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 
@@ -6002,6 +6027,116 @@ function _nascParaDesempate(nasc) {
 // Mantido por compatibilidade — usa a nova lógica internamente
 function _idadeParaDesempate(nasc) { return _nascParaDesempate(nasc); }
 
+let _exclTurmaAtual = null;
+let _exclAlunos = [];
+let _exclIds = [];
+
+async function abrirDrawerExclusao(turma) {
+  _exclTurmaAtual = turma;
+  document.getElementById('excl-busca').value = '';
+  ['criancas','jovens','adultos'].forEach(t => {
+    const card = document.getElementById('excl-card-' + t);
+    if (card) {
+      card.style.borderColor = t === turma ? 'var(--red)' : 'var(--cb)';
+      card.style.background = t === turma ? 'rgba(184,42,42,.05)' : 'var(--cream)';
+    }
+  });
+  const TN = { criancas:'👶 Crianças', jovens:'🧑 Jovens', adultos:'👤 Adultos' };
+  document.getElementById('excl-drawer-titulo').textContent = TN[turma] + ' — Exclusões';
+
+  // Abrir modal
+  const overlay = document.getElementById('excl-modal-overlay');
+  overlay.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  const lista = document.getElementById('excl-drawer-lista');
+  lista.innerHTML = '<div style="padding:20px;text-align:center;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+
+  try {
+    const { data, error } = await sbClient.from('alunos').select('id,nome').eq('turma', turma).eq('status','ativo').order('nome');
+    if (error) throw error;
+    _exclAlunos = data || [];
+  } catch(e) {
+    _exclAlunos = (cacheAlunos||[]).filter(a => a.turma === turma && (a.status||'ativo') === 'ativo')
+      .sort((a,b) => a.nome.localeCompare(b.nome));
+  }
+  try { _exclIds = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turma) || '[]'); } catch(e) { _exclIds = []; }
+  _renderListaExclusao(_exclAlunos);
+}
+
+function _renderListaExclusao(alunos) {
+  const lista = document.getElementById('excl-drawer-lista');
+  const count = document.getElementById('excl-drawer-count');
+  if (!alunos.length) {
+    lista.innerHTML = '<div style="padding:14px;text-align:center;color:var(--ink-soft);font-size:12px">Nenhum aluno encontrado</div>';
+    return;
+  }
+  const excl = _exclIds.length;
+  count.innerHTML = `<strong style="color:var(--red)">${excl}</strong> excluído${excl!==1?'s':''} de ${_exclAlunos.length}`;
+  lista.innerHTML = alunos.map(a => {
+    const isExcl = _exclIds.includes(a.id);
+    const ini = a.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    const bgRow = isExcl ? 'rgba(184,42,42,.03)' : 'white';
+    return `<div onclick="_toggleExclusao('${a.id}')" style="display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid rgba(228,217,192,.4);cursor:pointer;background:${bgRow}" onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background='${bgRow}'">
+      <div style="width:34px;height:34px;border-radius:50%;background:var(--ink);color:var(--gold-l);font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+      <div style="flex:1;min-width:0">
+        <div style="font-size:13px;font-weight:600;color:${isExcl?'var(--red)':'var(--ink)'};${isExcl?'text-decoration:line-through;opacity:.7':''};white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${a.nome}</div>
+        <div style="font-size:10px;color:var(--ink-soft);margin-top:1px">${isExcl?'Excluído do ranking':'No ranking'}</div>
+      </div>
+      <div style="width:38px;height:22px;border-radius:11px;background:${isExcl?'var(--red)':'#e0d9cc'};position:relative;flex-shrink:0;transition:background .2s">
+        <div style="position:absolute;top:3px;${isExcl?'left:19px':'left:3px'};width:16px;height:16px;border-radius:50%;background:white;box-shadow:0 1px 3px rgba(0,0,0,.2);transition:left .2s"></div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function _toggleExclusao(id) {
+  if (_exclIds.includes(id)) { _exclIds = _exclIds.filter(x => x !== id); }
+  else { _exclIds.push(id); }
+  const busca = document.getElementById('excl-busca').value.toLowerCase();
+  const filtrados = busca ? _exclAlunos.filter(a => a.nome.toLowerCase().includes(busca)) : _exclAlunos;
+  _renderListaExclusao(filtrados);
+}
+
+function filtrarListaExclusao() {
+  const busca = document.getElementById('excl-busca').value.toLowerCase();
+  _renderListaExclusao(busca ? _exclAlunos.filter(a => a.nome.toLowerCase().includes(busca)) : _exclAlunos);
+}
+
+function _atualizarBadgeExclusao(turma) {
+  try {
+    const ids = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turma) || '[]');
+    const badge = document.getElementById('excl-badge-' + turma);
+    if (!badge) return;
+    badge.textContent = ids.length;
+    badge.style.display = ids.length > 0 ? 'flex' : 'none';
+  } catch(e) {}
+}
+
+function fecharDrawerExclusao() {
+  const overlay = document.getElementById('excl-modal-overlay');
+  if (overlay) overlay.style.display = 'none';
+  document.body.style.overflow = '';
+  ['criancas','jovens','adultos'].forEach(t => {
+    const card = document.getElementById('excl-card-' + t);
+    if (card) { card.style.borderColor = 'var(--cb)'; card.style.background = 'var(--cream)'; }
+  });
+  _exclTurmaAtual = null;
+}
+
+function salvarExclusaoRanking() {
+  if (!_exclTurmaAtual) return;
+  localStorage.setItem('ranking_exclusoes_' + _exclTurmaAtual, JSON.stringify(_exclIds));
+  _atualizarBadgeExclusao(_exclTurmaAtual);
+  toast(`✓ ${_exclIds.length} aluno(s) excluído(s) do ranking!`, 'ok');
+  fecharDrawerExclusao();
+  renderRanking();
+}
+
+async function carregarAlunosExclusaoRanking() {
+  ['criancas','jovens','adultos'].forEach(t => _atualizarBadgeExclusao(t));
+}
+
 async function renderRanking() {
   const box = document.getElementById('lista-ranking');
   box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">Carregando ranking...</div>';
@@ -6027,6 +6162,15 @@ async function renderRanking() {
     box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
     return;
   }
+
+  // Filtrar alunos excluídos do ranking
+  try {
+    const exclStr = localStorage.getItem('ranking_exclusoes_' + curTurmaRank);
+    if (exclStr) {
+      const excluidos = JSON.parse(exclStr);
+      alunos = alunos.filter(a => !excluidos.includes(a.id));
+    }
+  } catch(e) {}
 
   // Carregar quizzes, provas, desafios e bônus juntos
   await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
@@ -6232,7 +6376,7 @@ function toggleCfgAcc(key, itemEl) {
     arrow.classList.add('open');
     itemEl.classList.add('open');
     // Carregar dados ao abrir
-    if (key === 'ranking') { carregarRegraRanking(); carregarLiberacoes(); carregarHistoricoBonus(); carregarAulasFJ(); }
+    if (key === 'ranking') { carregarRegraRanking(); carregarLiberacoes(); carregarHistoricoBonus(); carregarAulasFJ(); carregarAlunosExclusaoRanking(); }
     if (key === 'sistema') carregarLogAcessos();
     if (key === 'igreja' || key === 'ebd' || key === 'trimestre' || key === 'whatsapp') carregarPaginaConfig();
   }
@@ -6318,7 +6462,7 @@ async function salvarConfig() {
     }
     toast('Configurações salvas! ✦', 'ok');
     await carregarConfigs();
-  } catch(e) { toast('Erro ao salvar: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 function abrirModalCalendario(dataPreSelecionada) {
   document.getElementById('mo-cal-titulo').textContent = 'Novo Evento';
@@ -7405,7 +7549,7 @@ async function mostrarResultado() {
         // Invalidar cache para atualizar ranking
         _cacheAlunoProgresso = null;
       }
-    } catch(e) { toast('⚠️ Não foi possível salvar: ' + e.message, 'er'); }
+    } catch(e) { toast('⚠️ Não foi possível salvar: ' + (e?.message||e?.details||String(e)), 'er'); }
   }
 
   // Tela de resultado
@@ -7547,7 +7691,7 @@ async function renderContestacoes(status) {
       </div>`;
     }).join('');
   } catch(e) {
-    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e?.message || e?.details || JSON.stringify(e)}</div>`;
   }
 }
 
@@ -7601,7 +7745,7 @@ async function confirmarRespostaContestacao(contId, alunoId, turma, licaoNum, ac
     toast(acao === 'aprovar' ? 'Aprovado! Aluno pode refazer o quiz ✦' : 'Contestação rejeitada', 'ok');
     renderContestacoes(_contStatusAtual);
   } catch(e) {
-    toast('Erro: ' + e.message, 'er');
+    toast('Erro: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 
@@ -7671,7 +7815,7 @@ async function enviarContestacaoQuiz() {
     document.getElementById('mo-contestacao')?.remove();
     toast('Contestação enviada! Seu professor irá revisar. ✦', 'ok');
   } catch(e) {
-    toast('Erro ao enviar: ' + e.message, 'er');
+    toast('Erro ao enviar: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 
@@ -8652,7 +8796,7 @@ async function salvarProva() {
     fecharModal('mo-prova');
     await renderProvasProf();
   } catch(e) {
-    toast('Erro ao salvar: ' + e.message, 'er');
+    toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er');
     console.error('salvarProva erro:', e);
   }
 }
@@ -8987,7 +9131,7 @@ async function confirmarCorrecaoPontos(alunoId, turma, provaId) {
       toast(`Pontos do desafio corrigidos para ${novos} pts! ❖`, 'ok');
     }
     document.getElementById('modal-correcao-pts')?.remove();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 
@@ -9683,7 +9827,7 @@ async function excluirLicaoBanco(id, titulo, num) {
       if (error) throw error;
       toast(`Lição ${num} excluída! ✦`, 'ok');
       renderBancoQuestoes();
-    } catch(e) { toast('Erro ao excluir: ' + e.message, 'er'); }
+    } catch(e) { toast('Erro ao excluir: ' + (e?.message||e?.details||String(e)), 'er'); }
   }, 'red');
 }
 
@@ -9833,7 +9977,7 @@ async function bancoPergSalvarInline(i) {
       const licaoLocal = _bancoLicoes.find(x => x.id === licaoId);
       if (licaoLocal) licaoLocal.perguntas = todasPerguntas;
       toast('Questão salva! ✦', 'ok');
-    } catch(e) { toast('Erro: ' + e.message, 'er'); return; }
+    } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); return; }
   }
 
   bancoPergCancelarInline(i);
@@ -9958,7 +10102,7 @@ async function salvarLicaoBanco() {
     }
     fecharModal('mo-banco-licao');
     renderBancoQuestoes();
-  } catch(e) { toast('Erro ao salvar: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 function sincronizarLicaoEmMemoria(l) {
@@ -10312,7 +10456,7 @@ async function salvarLiberacao() {
     }, { onConflict: 'turma,licao_num' });
     toast(`Lição ${licao} liberada por ${dias} dia(s) com ${pts} pts ✦`, 'ok');
     await carregarLiberacoes();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function removerLiberacao(id) {
@@ -10320,7 +10464,7 @@ async function removerLiberacao(id) {
     await sbClient.from('quiz_liberacoes').delete().eq('id', id);
     toast('Liberação removida', 'ok');
     await carregarLiberacoes();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 // Retorna liberação ativa para uma lição, ou null
@@ -10377,7 +10521,7 @@ async function salvarPtsPresenca() {
     await sbClient.from('ranking_config').update({ pts_presenca: pts }).eq('id', 1);
     RANKING_CONFIG.pts_presenca = pts;
     toast('✦ Pontos de presença salvos!', 'ok');
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function salvarPtsRecuperacao() {
@@ -10386,7 +10530,7 @@ async function salvarPtsRecuperacao() {
     await sbClient.from('ranking_config').update({ pts_recuperacao_presenca: pts }).eq('id', 1);
     RANKING_CONFIG.pts_recuperacao_presenca = pts;
     toast('✦ Pontos de recuperação salvos!', 'ok');
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 // Salvar apenas quiz
@@ -10401,7 +10545,7 @@ async function salvarRegraQuiz() {
     await sbClient.from('ranking_config').update(upd).eq('id', 1);
     Object.assign(RANKING_CONFIG, upd);
     toast('✦ Regras do quiz salvas!', 'ok');
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 // Salvar apenas provas
@@ -10411,7 +10555,7 @@ async function salvarRegraProva() {
     await sbClient.from('ranking_config').update({ pts_prova_fator: fator }).eq('id', 1);
     RANKING_CONFIG.pts_prova_fator = fator;
     toast('✦ Regras de provas salvas!', 'ok');
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function salvarRegraRanking() {
@@ -10429,7 +10573,7 @@ async function salvarRegraRanking() {
     await sbClient.from('ranking_config').upsert({ id: 1, ...cfg }, { onConflict: 'id' });
     RANKING_CONFIG = cfg;
     toast('Regras salvas! ✦', 'ok');
-  } catch(e) { toast('Erro ao salvar: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro ao salvar: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function recalcularRanking() {
@@ -10462,7 +10606,7 @@ async function recalcularRanking() {
           atualizados++;
         }
         toast(`${atualizados} resultados recalculados! ✦`, 'ok');
-      } catch(e) { toast('Erro: ' + e.message, 'er'); }
+      } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
     }, ''
   );
 }
@@ -11310,7 +11454,7 @@ async function salvarEscalaPeloCal() {
         document.getElementById('pg-calendario').classList.contains('on')) {
       renderCalendario();
     }
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 
@@ -11868,7 +12012,7 @@ async function salvarDesafio() {
     }
     fecharModal('mo-desafio');
     await renderDesafiosProf();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); console.error('salvarDesafio:', e); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); console.error('salvarDesafio:', e); }
 }
 
 async function renderDesafiosProf() {
@@ -12657,7 +12801,7 @@ async function renderQuizzesLicao() {
     }).join('');
 
   } catch(e) {
-    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e?.message || e?.details || JSON.stringify(e)}</div>`;
   }
 }
 
@@ -13989,7 +14133,7 @@ async function criarLoginResponsavel(login, senha, nomeAluno, alunoId) {
       return null;
     }
   } catch(e) {
-    toast('Erro ao vincular responsável: ' + e.message, 'er');
+    toast('Erro ao vincular responsável: ' + (e?.message||e?.details||String(e)), 'er');
     return null;
   }
 }
@@ -14549,7 +14693,7 @@ async function carregarHistoricoCompleto() {
     </div>` : ''}
     `;
   } catch(e) {
-    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e.message}</div>`;
+    box.innerHTML = `<div style="color:var(--red);padding:12px">Erro ao carregar: ${e?.message || e?.details || JSON.stringify(e)}</div>`;
   }
 }
 
@@ -14790,7 +14934,7 @@ async function verificarEAplicarFJ() {
     document.getElementById('fj-preview').style.display = 'none';
     carregarHistoricoBonus();
   } catch(e) {
-    toast('Erro: ' + e.message, 'er');
+    toast('Erro: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 
@@ -14929,7 +15073,7 @@ async function salvarBonusManual() {
     _cacheAlunoProgresso = null;
     carregarHistoricoBonus();
   } catch(e) {
-    toast('Erro ao salvar bônus: ' + e.message, 'er');
+    toast('Erro ao salvar bônus: ' + (e?.message||e?.details||String(e)), 'er');
   }
 }
 
@@ -15109,7 +15253,7 @@ async function confirmarPromocao(alunoId, nomeAluno, modal) {
     toast(nomeAluno + ' promovido(a)! \u2756', 'ok');
     cacheAlunos = await sbGet('alunos');
     renderAlunos();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 
@@ -15324,7 +15468,7 @@ async function salvarEscala() {
     fecharModalEscala();
     toast((editId ? 'Escala atualizada' : 'Escala salva') + '! ✦', 'ok');
     renderEscalas();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function sincronizarEscalaCalendario(escala, tipo) {
@@ -15347,7 +15491,7 @@ async function excluirEscala(id) {
       window._escalasCache = await sbGet('escalas');
       toast('Escala excluída! ✦', 'ok');
       renderEscalas();
-    } catch(e) { toast('Erro: ' + e.message, 'er'); }
+    } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
   }, 'red');
 }
 
@@ -15738,7 +15882,7 @@ async function salvarAjuste() {
     toast(`✓ Ajuste aplicado para ${dest}!`, 'ok');
     fecharModalAjuste();
     carregarHistoricoAjustes();
-  } catch(e) { toast('Erro: ' + e.message, 'er'); }
+  } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
 
 async function carregarHistoricoAjustes() {
@@ -16586,5 +16730,30 @@ window.addEventListener('load', () => {
   obs.observe(document.body, { childList: true, subtree: true });
 });
 </script>
+<!-- MODAL EXCLUSÃO RANKING -->
+<div id="excl-modal-overlay" onclick="if(event.target===this)fecharDrawerExclusao()" style="display:none;position:fixed;inset:0;z-index:800;background:rgba(0,0,0,.55);backdrop-filter:blur(2px);align-items:flex-end;justify-content:center;padding:0">
+  <div style="width:100%;max-width:520px;border-radius:20px 20px 0 0;overflow:hidden;background:white;max-height:85vh;display:flex;flex-direction:column;animation:fadeUp .25s ease">
+    <!-- Header -->
+    <div style="padding:16px 18px;background:var(--ink);display:flex;align-items:center;justify-content:space-between;flex-shrink:0">
+      <div>
+        <div id="excl-drawer-titulo" style="font-family:'Cormorant Garamond',serif;font-size:19px;color:var(--gold-l);font-weight:600"></div>
+        <div style="font-size:11px;color:rgba(255,255,255,.4);margin-top:2px">Alunos excluídos continuam pontuando normalmente</div>
+      </div>
+      <button onclick="fecharDrawerExclusao()" style="width:32px;height:32px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:rgba(255,255,255,.7);font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <!-- Busca -->
+    <div style="padding:10px 14px;border-bottom:1px solid var(--cb);display:flex;align-items:center;gap:10px;background:var(--cream);flex-shrink:0">
+      <span style="font-size:16px">🔍</span>
+      <input id="excl-busca" oninput="filtrarListaExclusao()" placeholder="Buscar por nome..." style="border:none;background:none;font-family:'Outfit',sans-serif;font-size:14px;color:var(--ink);outline:none;width:100%">
+    </div>
+    <!-- Lista -->
+    <div id="excl-drawer-lista" style="overflow-y:auto;flex:1"></div>
+    <!-- Footer -->
+    <div style="padding:12px 16px;border-top:1px solid var(--cb);display:flex;align-items:center;justify-content:space-between;background:var(--cream);flex-shrink:0">
+      <div id="excl-drawer-count" style="font-size:13px;color:var(--ink-soft)"></div>
+      <button onclick="salvarExclusaoRanking()" style="padding:10px 22px;border-radius:var(--rsm);background:var(--ink);border:none;font-family:'Outfit',sans-serif;font-size:13px;font-weight:700;color:var(--gold-l);cursor:pointer">✓ Salvar</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
