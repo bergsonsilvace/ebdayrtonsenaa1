@@ -5608,22 +5608,51 @@ async function buscarAlunoParaProf(valor) {
 function selecionarAlunoComoProf(id) {
   const a = (cacheAlunos || []).find(x => x.id === id);
   if (!a) return;
+
+  // Nome
   document.getElementById('pe-nome').value = a.nome;
   document.getElementById('pe-nome-sugestoes').style.display = 'none';
-  // Preencher login se o aluno tiver
+
+  // Sexo — detectar pelo nome
+  const sexoEl = document.getElementById('pe-sexo');
+  if (sexoEl && !a.sexo) {
+    const terminacoesF = ['a','ana','lia','ria','ina','ela','isa','osa'];
+    const primeiroNome = a.nome.split(' ')[0].toLowerCase();
+    sexoEl.value = terminacoesF.some(t => primeiroNome.endsWith(t)) ? 'F' : 'M';
+  } else if (sexoEl && a.sexo) {
+    sexoEl.value = a.sexo;
+  }
+
+  // Data de nascimento
+  if (a.nasc) {
+    const nascEl = document.getElementById('pe-nasc');
+    if (nascEl) nascEl.value = dataDeISO(a.nasc);
+  }
+
+  // Telefone
+  if (a.tel) document.getElementById('pe-tel').value = a.tel;
+
+  // Email
+  const emailEl = document.getElementById('pe-email');
+  if (emailEl && a.email) emailEl.value = a.email;
+
+  // Endereço
+  const endEl = document.getElementById('pe-endereco');
+  if (endEl && a.endereco) endEl.value = a.endereco;
+
+  // Login
   if (a.login) document.getElementById('pe-login').value = a.login;
-  // Preencher tel se tiver
-  if (a.tel) document.getElementById('pe-tel').value = a.tel || '';
-  // Marcar também aluno e turma
+
+  // Marcar também aluno com turma correta
   const chk = document.getElementById('pe-tambem-aluno');
   if (chk) {
     chk.checked = true;
     document.getElementById('pe-turma-aluno-wrap').style.display = 'block';
     document.getElementById('pe-turma-aluno').value = a.turma || 'jovens';
   }
-  // Focar no próximo campo
+
   document.getElementById('pe-login').focus();
-  toast(`✓ ${a.nome} encontrado como aluno!`, 'ok');
+  toast(`✓ ${a.nome} encontrado! Dados preenchidos automaticamente.`, 'ok');
 }
 
 // Fechar sugestões ao clicar fora
