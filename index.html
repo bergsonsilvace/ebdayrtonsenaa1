@@ -23,7 +23,7 @@
   /* Dourado */
   --gold:#b8972a;--gold-l:#e8d48a;--gold-deep:#7a6010;
   /* Turmas */
-  --tc:#1a6b4a;--tj:#1c3f6e;--ta:#7a2e1a;
+  --tc:#1a6b4a;--tm:#c47c1a;--tjr:#7a1a6b;--tj:#1c3f6e;--ta:#7a2e1a;
   --red:#b82a2a;--warn:#b87a00;
   /* Cor escura da marca — SEMPRE escura, usada em fundos */
   --ink:#111008;--ink-mid:#3d3520;--ink-soft:#7a6e55;
@@ -31,7 +31,7 @@
   --cream:#fdf8ef;--cb:#e4d9c0;
   --gold-pale:#faf5e4;
   --bg-page:#fdf8ef;--bg-card:white;--bg-deep:#f5efe0;
-  --tc-bg:#e8f5ef;--tj-bg:#e4edf7;--ta-bg:#f7ece8;
+  --tc-bg:#e8f5ef;--tm-bg:#fdf0e0;--tjr-bg:#f5e8f5;--tj-bg:#e4edf7;--ta-bg:#f7ece8;
   --red-bg:#f7e8e8;--warn-bg:#fff8e0;
   --border:var(--cb);
   /* Texto — modo claro */
@@ -43,7 +43,7 @@ html[data-theme="dark"], body[data-theme="dark"]{
   --cream:#111008;--cb:rgba(255,255,255,.1);
   --gold-pale:rgba(200,144,10,.1);
   --bg-page:#111008;--bg-card:#1a1810;--bg-deep:#0c0b07;
-  --tc-bg:rgba(26,107,74,.15);--tj-bg:rgba(28,63,110,.15);--ta-bg:rgba(122,46,26,.15);
+  --tc-bg:rgba(26,107,74,.15);--tm-bg:rgba(196,124,26,.15);--tjr-bg:rgba(122,26,107,.15);--tj-bg:rgba(28,63,110,.15);--ta-bg:rgba(122,46,26,.15);
   --red-bg:rgba(184,42,42,.15);--warn-bg:rgba(184,122,0,.15);
   --border:rgba(255,255,255,.1);
   /* Texto — modo escuro (variáveis separadas de --ink) */
@@ -408,8 +408,8 @@ input,select,textarea{font-family:'Outfit',sans-serif}
 #provas-aluno-tabs::-webkit-scrollbar,#provas-prof-tabs::-webkit-scrollbar{display:none}
 .ttab{flex:1;padding:8px 7px;border:1.5px solid var(--cb);border-radius:var(--rsm);background:var(--bg-card);font-size:12px;font-weight:600;color:var(--text-soft);transition:all .2s;display:flex;align-items:center;justify-content:center;gap:5px}
 .ttab:hover{border-color:var(--gold)}.ttab .dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
-.dot-c{background:var(--tc)}.dot-j{background:var(--tj)}.dot-a{background:var(--ta)}
-.ttab.on{color:white;border-color:transparent}.ttab.on.tc{background:var(--tc)}.ttab.on.tj{background:var(--tj)}.ttab.on.ta{background:var(--ta)}
+.dot-c{background:var(--tc)}.dot-m{background:var(--tm)}.dot-jr{background:var(--tjr)}.dot-j{background:var(--tj)}.dot-a{background:var(--ta)}
+.ttab.on{color:white;border-color:transparent}.ttab.on.tc{background:var(--tc)}.ttab.on.tm{background:var(--tm)}.ttab.on.tjr{background:var(--tjr)}.ttab.on.tj{background:var(--tj)}.ttab.on.ta{background:var(--ta)}
 #provas-aluno-tabs .ttab,#provas-prof-tabs .ttab{font-size:11px;white-space:nowrap}
 #provas-aluno-tabs .ttab.on,#provas-prof-tabs .ttab.on{background:var(--gold);color:var(--text-main);border-color:var(--gold);font-weight:700}
 
@@ -1797,7 +1797,8 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div class="dash-sec-block" id="dash-sec-freq">
           <div class="dash-sec-lbl">Frequência por turma</div>
           <div class="dash-turmas">
-            <div class="dash-turma"><div class="dash-turma-dot" style="background:#1a6b4a"></div><div class="dash-turma-name" style="color:#1a6b4a">Crianças</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-c" style="background:#1a6b4a;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-c" style="color:#1a6b4a">—</div></div>
+            <div class="dash-turma"><div class="dash-turma-dot" style="background:#c47c1a"></div><div class="dash-turma-name" style="color:#c47c1a">Maternal</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-m" style="background:#c47c1a;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-m" style="color:#c47c1a">—</div></div>
+            <div class="dash-turma"><div class="dash-turma-dot" style="background:#7a1a6b"></div><div class="dash-turma-name" style="color:#7a1a6b">Juniores</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-jr" style="background:#7a1a6b;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-jr" style="color:#7a1a6b">—</div></div>
             <div class="dash-turma"><div class="dash-turma-dot" style="background:#4a7eb8"></div><div class="dash-turma-name" style="color:#4a7eb8">Jovens</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-j" style="background:#4a7eb8;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-j" style="color:#4a7eb8">—</div></div>
             <div class="dash-turma"><div class="dash-turma-dot" style="background:#b8972a"></div><div class="dash-turma-name" style="color:#b8972a">Adultos</div><div class="dash-turma-track"><div class="dash-turma-fill" id="dash-freq-fill-a" style="background:#b8972a;width:0%"></div></div><div class="dash-turma-count" id="dash-freq-lbl-a" style="color:#b8972a">—</div></div>
           </div>
@@ -1807,7 +1808,8 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div class="dash-sec-block" id="dash-sec-grafico">
           <div class="dash-sec-lbl">Histórico semanal por turma</div>
           <div class="dash-chart-legend">
-            <div class="dash-leg"><div class="dash-leg-dot" style="background:#1a6b4a"></div>Crianças</div>
+            <div class="dash-leg"><div class="dash-leg-dot" style="background:#c47c1a"></div>Maternal</div>
+            <div class="dash-leg"><div class="dash-leg-dot" style="background:#7a1a6b"></div>Juniores</div>
             <div class="dash-leg"><div class="dash-leg-dot" style="background:#4a7eb8"></div>Jovens</div>
             <div class="dash-leg"><div class="dash-leg-dot" style="background:#b8972a"></div>Adultos</div>
           </div>
@@ -1831,9 +1833,15 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             </button>
             <div id="oferta-turmas" style="display:none" class="dash-drop-content">
               <div class="dash-turma-oferta">
-                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#1a6b4a"></div><span style="color:#1a6b4a">Crianças</span></div><div><div class="dash-to-total" id="dash-oferta-c-total">—</div><div class="dash-to-avg" id="dash-oferta-c-avg">—</div></div></div>
-                <div class="dash-to-bars" id="dash-oferta-bars-c"></div>
-                <div class="dash-to-lbls" id="dash-oferta-lbls-c"></div>
+                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#c47c1a"></div><span style="color:#c47c1a">Maternal</span></div><div><div class="dash-to-total" id="dash-oferta-m-total">—</div><div class="dash-to-avg" id="dash-oferta-m-avg">—</div></div></div>
+                <div class="dash-to-bars" id="dash-oferta-bars-m"></div>
+                <div class="dash-to-lbls" id="dash-oferta-lbls-m"></div>
+              </div>
+              <div class="dash-divider-turma"></div>
+              <div class="dash-turma-oferta">
+                <div class="dash-to-header"><div class="dash-to-name"><div class="dash-to-dot" style="background:#7a1a6b"></div><span style="color:#7a1a6b">Juniores</span></div><div><div class="dash-to-total" id="dash-oferta-jr-total">—</div><div class="dash-to-avg" id="dash-oferta-jr-avg">—</div></div></div>
+                <div class="dash-to-bars" id="dash-oferta-bars-jr"></div>
+                <div class="dash-to-lbls" id="dash-oferta-lbls-jr"></div>
               </div>
               <div class="dash-divider-turma"></div>
               <div class="dash-turma-oferta">
@@ -1923,12 +1931,18 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
       <!-- ── MENU PRINCIPAL: cards de turma ── -->
       <div id="banco-menu-turmas">
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:4px">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:4px">
 
-          <!-- Crianças -->
-          <div onclick="abrirBancoTurma('criancas')" style="background:var(--tc);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+          <!-- Maternal -->
+          <div onclick="abrirBancoTurma('maternal')" style="background:var(--tm);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            <div style="font-size:26px;margin-bottom:6px">🍼</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:white;font-weight:600">Maternal</div>
+          </div>
+
+          <!-- Juniores -->
+          <div onclick="abrirBancoTurma('juniores')" style="background:var(--tjr);border-radius:var(--r);padding:16px 12px;cursor:pointer;transition:all .2s;text-align:center" onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
             <div style="font-size:26px;margin-bottom:6px">🧒</div>
-            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:white;font-weight:600">Crianças</div>
+            <div style="font-family:'Cormorant Garamond',serif;font-size:15px;color:white;font-weight:600">Juniores</div>
           </div>
 
           <!-- Jovens -->
@@ -2055,7 +2069,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <button class="status-filter-btn" onclick="setStatusFilter('todos',this)">Todos</button>
       </div>
       <div class="ttabs" id="alunos-ttabs">
-        <button class="ttab tc on" onclick="selTurmaAlunos('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+        <button class="ttab tm on" onclick="selTurmaAlunos('maternal',this)"><span class="dot dot-m"></span>Maternal</button><button class="ttab tjr" onclick="selTurmaAlunos('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
         <button class="ttab tj" onclick="selTurmaAlunos('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaAlunos('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
@@ -2085,7 +2099,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="ph"><h2>Registro de <em>Frequência</em></h2><p>Faça a chamada da aula</p></div>
       <div id="unsaved-banner" class="unsaved-banner" style="display:none"><span>⚠</span><span><strong>Dados não salvos.</strong> Salve antes de sair.</span></div>
       <div class="ttabs" id="freq-ttabs">
-        <button class="ttab tc on" onclick="selTurmaFreq('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+        <button class="ttab tm on" onclick="selTurmaFreq('maternal',this)"><span class="dot dot-m"></span>Maternal</button><button class="ttab tjr" onclick="selTurmaFreq('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
         <button class="ttab tj" onclick="selTurmaFreq('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaFreq('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
@@ -2154,7 +2168,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
     <div id="pg-historico" class="page">
       <div class="ph"><h2><em>Histórico</em> de Aulas</h2><p>Consulte registros anteriores</p></div>
       <div class="filtros">
-        <div><label class="fl">Turma</label><select class="fc" id="hf-turma" onchange="renderHist();popularFiltroLicao()"><option value="">Todas</option><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+        <div><label class="fl">Turma</label><select class="fc" id="hf-turma" onchange="renderHist();popularFiltroLicao()"><option value="">Todas</option><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
         <div><label class="fl">Mês</label><input type="month" class="fc" id="hf-mes" onchange="renderHist()"></div>
         <div><label class="fl">Lição</label><select class="fc" id="hf-licao" onchange="renderHist()"><option value="">Todas as lições</option></select></div>
       </div>
@@ -2172,7 +2186,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="card">
         <div class="frow">
           <div class="fg" style="margin:0"><label class="fl">Mês</label><input type="month" class="fc" id="men-mes" onchange="renderMensal()"></div>
-          <div class="fg" style="margin:0"><label class="fl">Turma</label><select class="fc" id="men-turma" onchange="renderMensal()"><option value="">Todas</option><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+          <div class="fg" style="margin:0"><label class="fl">Turma</label><select class="fc" id="men-turma" onchange="renderMensal()"><option value="">Todas</option><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
         </div>
       </div>
       <div id="mensal-conteudo"></div>
@@ -2311,7 +2325,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
     <div id="pg-ranking" class="page">
       <div class="ph"><h2>Ranking da <em>Escola Bíblica</em></h2><p>Classificação dos alunos por presença e desempenho</p></div>
       <div class="ttabs" id="rank-ttabs">
-        <button class="ttab tc on" onclick="selTurmaRanking('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+        <button class="ttab tm on" onclick="selTurmaRanking('maternal',this)"><span class="dot dot-m"></span>Maternal</button><button class="ttab tjr" onclick="selTurmaRanking('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
         <button class="ttab tj" onclick="selTurmaRanking('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaRanking('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
@@ -2368,7 +2382,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
       <!-- Filtros -->
       <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
-        <button class="ttab tc on" id="esc-tab-criancas" onclick="filtrarEscalaTab('criancas',this)"><span class="dot dot-c"></span> Crianças</button>
+        <button class="ttab tm" id="esc-tab-maternal" onclick="filtrarEscalaTab('maternal',this)"><span class="dot dot-m"></span> Maternal</button><button class="ttab tjr on" id="esc-tab-juniores" onclick="filtrarEscalaTab('juniores',this)"><span class="dot dot-jr"></span> Juniores</button>
         <button class="ttab tj" id="esc-tab-jovens" onclick="filtrarEscalaTab('jovens',this)"><span class="dot dot-j"></span> Jovens</button>
         <button class="ttab ta" id="esc-tab-adultos" onclick="filtrarEscalaTab('adultos',this)"><span class="dot dot-a"></span> Adultos</button>
         <div style="flex:1;min-width:130px;max-width:180px">
@@ -2403,11 +2417,11 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
           <div style="margin-bottom:16px">
             <label class="fl" style="margin-bottom:8px">Turma</label>
             <div style="display:flex;gap:8px">
-              <button type="button" class="esc-turma-btn esc-tb-on" data-turma="criancas" onclick="selecionarTurmaEscala('criancas')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--tc);background:var(--tc-bg);font-weight:700;font-size:13px;cursor:pointer;color:var(--tc)">🟢 Crianças</button>
+              <button type="button" class="esc-turma-btn esc-tb-on" data-turma="maternal" onclick="selecionarTurmaEscala('maternal')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--tm);background:var(--tm-bg);font-weight:700;font-size:13px;cursor:pointer;color:var(--tm)">🍼 Maternal</button><button type="button" class="esc-turma-btn" data-turma="juniores" onclick="selecionarTurmaEscala('juniores')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--tjr);background:var(--tjr-bg);font-weight:700;font-size:13px;cursor:pointer;color:var(--tjr)">🧒 Juniores</button>
               <button type="button" class="esc-turma-btn" data-turma="jovens" onclick="selecionarTurmaEscala('jovens')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--cb);background:white;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink-soft)">🔵 Jovens</button>
               <button type="button" class="esc-turma-btn" data-turma="adultos" onclick="selecionarTurmaEscala('adultos')" style="flex:1;padding:10px;border-radius:8px;border:2px solid var(--cb);background:white;font-weight:600;font-size:13px;cursor:pointer;color:var(--ink-soft)">🔴 Adultos</button>
             </div>
-            <input type="hidden" id="esc-turma-sel" value="criancas">
+            <input type="hidden" id="esc-turma-sel" value="juniores">
           </div>
 
           <!-- Linha: Data + Lição -->
@@ -2472,12 +2486,12 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
         <!-- Crianças -->
         <div class="card" style="margin-bottom:12px;border-left:4px solid var(--tc)">
-          <div class="ct" style="color:var(--tc)">🧒 Pix — Crianças</div>
+          <div class="ct" style="color:var(--tjr)">🧒 Pix — Juniores</div>
           <div class="fg"><label class="fl">Nome do titular</label><input class="fc" id="pix-cfg-nome-criancas" placeholder="Nome completo"></div>
           <div class="fg"><label class="fl">Banco</label><input class="fc" id="pix-cfg-banco-criancas" placeholder="Ex: Nubank, Caixa..."></div>
           <div class="fg"><label class="fl">Chave Pix</label><input class="fc" id="pix-cfg-chave-criancas" placeholder="CPF, e-mail, telefone ou aleatória"></div>
           <div class="fg" style="margin-bottom:8px"><label class="fl">URL do QR Code (opcional)</label><input class="fc" id="pix-cfg-qr-criancas" placeholder="https://..."></div>
-          <button class="btn btn-sm" style="background:var(--tc);color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('criancas')">✓ Salvar Pix Crianças</button>
+          <button class="btn btn-sm" style="background:var(--tm);color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%" onclick="salvarPixTurma('maternal')">✓ Salvar Pix Maternal</button><button class="btn btn-sm" style="background:var(--tjr);color:white;border:none;border-radius:8px;padding:10px 16px;font-weight:700;cursor:pointer;width:100%;margin-top:6px" onclick="salvarPixTurma('juniores')">✓ Salvar Pix Juniores</button>
         </div>
 
         <!-- Jovens -->
@@ -2642,7 +2656,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             <div style="font-size:12px;color:var(--ink-soft);margin-bottom:10px;line-height:1.5">Selecione a turma e a aula para aplicar pontos a quem tem FJ.</div>
             <div class="fg"><label class="fl">Turma</label>
               <select class="fc" id="fj-turma" onchange="carregarAulasFJ()">
-                <option value="criancas">🟢 Crianças</option>
+                <option value="maternal">🍼 Maternal</option><option value="juniores">🧒 Juniores</option>
                 <option value="jovens">🔵 Jovens</option>
                 <option value="adultos">🔴 Adultos</option>
               </select>
@@ -2685,7 +2699,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             <!-- Liberações -->
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🔓 Liberações de Quiz</div>
             <div class="frow">
-              <div class="fg"><label class="fl">Turma</label><select class="fc" id="lib-turma"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+              <div class="fg"><label class="fl">Turma</label><select class="fc" id="lib-turma"><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
               <div class="fg" style="margin:0"><label class="fl">Lição nº</label><input class="fc" type="number" id="lib-licao" min="1" max="13" placeholder="Ex: 1"></div>
             </div>
             <div class="frow">
@@ -2697,7 +2711,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
             <!-- Bônus Manual -->
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">⭐ Pontuação Bônus Manual</div>
-            <div class="fg"><label class="fl">Turma</label><select class="fc" id="bonus-turma" onchange="atualizarDestBonus()"><option value="criancas">🟢 Crianças</option><option value="jovens">🔵 Jovens</option><option value="adultos">🔴 Adultos</option></select></div>
+            <div class="fg"><label class="fl">Turma</label><select class="fc" id="bonus-turma" onchange="atualizarDestBonus()"><option value="maternal">🍼 Maternal</option><option value="juniores">🧒 Juniores</option><option value="jovens">🔵 Jovens</option><option value="adultos">🔴 Adultos</option></select></div>
             <div class="fg" style="margin-bottom:10px">
               <label class="fl">Destinatário</label>
               <div style="display:flex;gap:8px">
@@ -2727,10 +2741,15 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
             <!-- Cards de turma -->
             <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:12px">
-              <div id="excl-card-criancas" onclick="abrirDrawerExclusao('criancas')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
-                <div style="font-size:22px;margin-bottom:3px">👶</div>
-                <div style="font-size:12px;font-weight:700;color:var(--ink)">Crianças</div>
-                <div id="excl-badge-criancas" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
+              <div id="excl-card-maternal" onclick="abrirDrawerExclusao('maternal')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
+                <div style="font-size:22px;margin-bottom:3px">🍼</div>
+                <div style="font-size:12px;font-weight:700;color:var(--ink)">Maternal</div>
+                <div id="excl-badge-maternal" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
+              </div>
+              <div id="excl-card-juniores" onclick="abrirDrawerExclusao('juniores')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
+                <div style="font-size:22px;margin-bottom:3px">🧒</div>
+                <div style="font-size:12px;font-weight:700;color:var(--ink)">Juniores</div>
+                <div id="excl-badge-juniores" style="display:none;position:absolute;top:-6px;right:-6px;width:20px;height:20px;border-radius:50%;background:var(--red);color:white;font-size:10px;font-weight:700;align-items:center;justify-content:center">0</div>
               </div>
               <div id="excl-card-jovens" onclick="abrirDrawerExclusao('jovens')" style="padding:12px 8px;border-radius:var(--r);border:1.5px solid var(--cb);background:var(--cream);cursor:pointer;text-align:center;transition:all .15s;position:relative">
                 <div style="font-size:22px;margin-bottom:3px">🧑</div>
@@ -2745,6 +2764,28 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             </div>
 
             <!-- Modal de exclusão (fora do fluxo, fixo na tela) -->
+          </div>
+        </div>
+
+        <div class="cfg-acc-div"></div>
+
+        <!-- ITEM: MIGRAÇÃO DE TURMAS -->
+        <div class="cfg-acc-item" onclick="toggleCfgAcc('migracao',this)">
+          <div class="cfg-acc-icon">🔀</div>
+          <div class="cfg-acc-info"><b>Migração de Turmas</b><span>Separar Crianças em Maternal e Juniores</span></div>
+          <div class="cfg-acc-arr">›</div>
+        </div>
+        <div class="cfg-acc-body" id="cfg-body-migracao">
+          <div class="cfg-acc-content">
+            <div style="background:rgba(184,151,42,.08);border:1px solid rgba(184,151,42,.25);border-radius:var(--r);padding:12px;margin-bottom:14px">
+              <div style="font-size:12px;font-weight:700;color:var(--gold-deep);margin-bottom:4px">⚠️ Atenção antes de migrar</div>
+              <div style="font-size:12px;color:var(--ink-soft);line-height:1.6">Classifique cada aluno como Maternal ou Juniores. Depois clique em "Migrar". As aulas antigas de Crianças serão duplicadas para cada subturma automaticamente. Esta operação não pode ser desfeita.</div>
+            </div>
+            <div id="migracao-status" style="margin-bottom:10px"></div>
+            <button onclick="carregarAlunosMigracao()" class="btn btn-ou btn-full" style="margin-bottom:8px">📋 Carregar alunos de Crianças</button>
+            <button onclick="limparAulasCriancas()" class="btn btn-full" style="background:var(--red);color:white;border:none;margin-bottom:12px">🗑️ Limpar aulas antigas de Crianças</button>
+            <div id="migracao-lista" style="margin-bottom:12px"></div>
+            <button id="btn-migrar" onclick="executarMigracao()" class="btn btn-gold btn-full" style="display:none">🔀 Confirmar migração</button>
           </div>
         </div>
 
@@ -2773,7 +2814,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div id="pg-licoes" class="page">
       <div class="ph"><h2>Lições <em>Bíblicas</em></h2><p id="licoes-sub">2º Trimestre 2026</p></div>
       <div class="ttabs" id="licoes-ttabs">
-        <button class="ttab tc on" onclick="selTurmaLicoes('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+        <button class="ttab tm" onclick="selTurmaLicoes('maternal',this)"><span class="dot dot-m"></span>Maternal</button><button class="ttab tjr on" onclick="selTurmaLicoes('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
         <button class="ttab tj" onclick="selTurmaLicoes('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaLicoes('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
@@ -2852,7 +2893,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div id="cal-turma-filtro" style="display:none">
         <div class="ttabs" style="margin-bottom:12px">
           <button class="ttab tc on" onclick="setCalTurma('',this)">Todas</button>
-          <button class="ttab tc" onclick="setCalTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+          <button class="ttab tm" onclick="setCalTurma('maternal',this)"><span class="dot dot-m"></span>Maternal</button><button class="ttab tjr" onclick="setCalTurma('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
           <button class="ttab tj" onclick="setCalTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
           <button class="ttab ta" onclick="setCalTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
         </div>
@@ -3151,7 +3192,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="frow">
         <div class="fg"><label class="fl">Turma</label>
           <select class="fc" id="ds-turma">
-            <option value="criancas">Crianças</option>
+            <option value="maternal">Maternal</option><option value="juniores">Juniores</option>
             <option value="jovens">Jovens</option>
             <option value="adultos">Adultos</option>
           </select>
@@ -3216,7 +3257,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="fg"><label class="fl">Nome</label><input class="fc" id="pv-nome" placeholder="Ex: Prova Bimestral, Simulado Lições 1-5"></div>
       <div class="frow">
         <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="recuperacao">🔁 Recuperação de Presença</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
-        <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal();onTurmaProvaChange();atualizarSelectAlunoProva()"><option value="criancas">Crianças</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+        <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal();onTurmaProvaChange();atualizarSelectAlunoProva()"><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       </div>
       <div class="fg" style="margin-bottom:10px">
         <label class="fl">👥 Destinatário</label>
@@ -3311,7 +3352,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <input type="file" id="ae-foto-input" accept="image/*" style="display:none" onchange="previewFotoAluno(this)">
       </div>
       <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="ae-nome" placeholder="Nome do aluno"></div>
-      <div class="fg"><label class="fl">Turma</label><select class="fc" id="ae-turma"><option value="criancas">Crian&ccedil;as</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+      <div class="fg"><label class="fl">Turma</label><select class="fc" id="ae-turma"><option value="juniores">Crian&ccedil;as</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       <div class="frow">
         <div class="fg"><label class="fl">Data de nascimento</label><input class="fc date-mask-input" type="text" id="ae-nasc" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="mascaraData(this)"></div>
         <div class="fg"><label class="fl">Telefone</label><input class="fc" id="ae-tel" placeholder="(00) 00000-0000"></div>
@@ -3368,7 +3409,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="fg">
         <label class="fl">Turmas que leciona</label>
         <div class="turmas-check-wrap">
-          <label class="turma-check-label"><input type="checkbox" id="pe-turma-criancas" value="criancas" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-c"></span> Crianças</label>
+          <label class="turma-check-label"><input type="checkbox" id="pe-turma-criancas" value="juniores" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-c"></span> Crianças</label>
           <label class="turma-check-label"><input type="checkbox" id="pe-turma-jovens" value="jovens" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-j"></span> Jovens</label>
           <label class="turma-check-label"><input type="checkbox" id="pe-turma-adultos" value="adultos" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-a"></span> Adultos</label>
         </div>
@@ -3400,7 +3441,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div id="pe-turma-aluno-wrap" style="display:none;margin-top:10px">
           <label class="fl">Turma como aluno</label>
           <select class="fc" id="pe-turma-aluno" style="margin-top:4px">
-            <option value="criancas">Crian&#231;as</option>
+            <option value="juniores">Crian&#231;as</option>
             <option value="jovens">Jovens</option>
             <option value="adultos">Adultos</option>
           </select>
@@ -3432,7 +3473,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div class="fg"><label class="fl">Turma</label>
           <select class="fc" id="av-turma">
             <option value="todas">Todas</option>
-            <option value="criancas">Crianças</option>
+            <option value="maternal">Maternal</option><option value="juniores">Juniores</option>
             <option value="jovens">Jovens</option>
             <option value="adultos">Adultos</option>
           </select>
@@ -3501,7 +3542,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="fg"><label class="fl">Turma</label>
         <select class="fc" id="cal-turma-evento">
           <option value="todas">Todas as turmas</option>
-          <option value="criancas">Crianças</option>
+          <option value="maternal">Maternal</option><option value="juniores">Juniores</option>
           <option value="jovens">Jovens</option>
           <option value="adultos">Adultos</option>
         </select>
@@ -3736,8 +3777,8 @@ function podeGerenciar() {
   if (_modo('aluno')) return false;
   return USER && ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil);
 }
-let curTurmaAlunos = 'criancas', curTurmaFreq = 'criancas', curTurmaRank = 'criancas';
-let curTurmaLicoes = 'criancas';
+let curTurmaAlunos = 'maternal', curTurmaFreq = 'maternal', curTurmaRank = 'maternal';
+let curTurmaLicoes = 'juniores';
 let quizAtual = null;
 let freqPresencas = {}, freqVisitantes = [], isDirty = false, aulaAtualId = null;
 let cacheAlunos = [], cacheAulas = [], chartFreq = null;
@@ -3753,8 +3794,8 @@ let cfgBoasVindasAtivo = true;
 let cfgBoasVindasMsg = 'Bem-vindo à EBD! Que Deus abençoe seu estudo da Palavra. ✦';
 let cfgVersiculo = '';
 var _lbAberta = {}; // estado de leitura bíblica expandida por lição
-const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos', todas:'Todas as turmas' };
-const AVC = { criancas:'av-c', jovens:'av-j', adultos:'av-a' };
+const TN = { criancas:'Crianças', maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos', todas:'Todas as turmas' };
+const AVC = { maternal:'av-m', juniores:'av-jr', jovens:'av-j', adultos:'av-a' };
 const ini = n => n.split(' ').map(x=>x[0]).join('').substring(0,2).toUpperCase();
 
 
@@ -3847,7 +3888,7 @@ async function doLogin() {
     const { data: profs } = await sbClient.from('professores').select('*').eq('login', lu).eq('senha', lp);
     if (profs && profs.length > 0) {
       const pd = profs[0];
-      if (!pd.turmas) pd.turmas = pd.turma==='todas'?['criancas','jovens','adultos']:[pd.turma||'adultos'];
+      if (!pd.turmas) pd.turmas = pd.turma==='todas'?['maternal','juniores','jovens','adultos']:[pd.turma||'adultos'];
       // Verificar se este professor também é responsável
       // O vínculo usa o id da tabela alunos, então buscamos pelo login
       let ehResp = false;
@@ -3957,7 +3998,7 @@ async function finalizarLogin() {
   // Admin/Pastor/Super: acesso TOTAL — nunca filtrar por turma
   if (isAdmin()) {
     USER.turma = 'todas';
-    USER.turmas = ['criancas', 'jovens', 'adultos'];
+    USER.turmas = ['maternal', 'juniores', 'jovens', 'adultos'];
     USER.tambem_aluno = true;
     // Buscar turma real na tabela alunos pelo login — para modo aluno correto
     try {
@@ -4206,7 +4247,7 @@ async function iniciarApp() {
   sincronizarBancoComMemoria();
 
   if (_ehPerfilAluno) {
-    curTurmaLicoes = USER.turma_aluno || USER.turma || 'criancas';
+    curTurmaLicoes = USER.turma_aluno || USER.turma || 'juniores';
     const turmaAl = USER.turma_aluno || USER.turma;
     registrarAcesso();
 
@@ -4430,7 +4471,7 @@ async function renderDash() {
   document.getElementById('ds-visit').textContent = ultima ? (ultima.visitantes||[]).length : 0;
 
   // Legado (hidden divs)
-  document.getElementById('ds-cri').textContent = alunos.filter(a=>a.turma==='criancas'&&(a.status||'ativo')==='ativo').length+' ativos';
+  document.getElementById('ds-cri').textContent = alunos.filter(a=>(a.turma==='maternal'||a.turma==='juniores')&&(a.status||'ativo')==='ativo').length+' ativos';
   document.getElementById('ds-jov').textContent = alunos.filter(a=>a.turma==='jovens'&&(a.status||'ativo')==='ativo').length+' ativos';
   document.getElementById('ds-adu').textContent = alunos.filter(a=>a.turma==='adultos'&&(a.status||'ativo')==='ativo').length+' ativos';
 
@@ -4469,7 +4510,7 @@ async function renderDash() {
   const box = document.getElementById('dash-ultima');
   if (ultima) {
     const dt = new Date(ultima.data + 'T12:00:00');
-    const cor = ultima.turma==='criancas'?'#1a6b4a':ultima.turma==='jovens'?'#4a7eb8':'#7a6010';
+    const cor = ultima.turma==='maternal'?'#c47c1a':ultima.turma==='juniores'?'#7a1a6b':ultima.turma==='jovens'?'#4a7eb8':'#7a6010';
     box.innerHTML = `<div class="dash-aula">
       <div class="dash-aula-cal" style="background:${cor}">
         <div class="dash-aula-day">${dt.getDate()}</div>
@@ -4486,15 +4527,16 @@ async function renderDash() {
   }
 
   // Frequência por turma — novo visual
-  ['criancas','jovens','adultos'].forEach(function(t){
+  ['maternal','juniores','jovens','adultos'].forEach(function(t){
     const aulasT = aulas.filter(a=>a.turma===t);
     const alunosT = alunos.filter(a=>a.turma===t&&(a.status||'ativo')==='ativo');
     if (!aulasT.length || !alunosT.length) return;
     const ultima_t = [...aulasT].sort((a,b)=>b.data.localeCompare(a.data))[0];
     const presentes = Object.values(ultima_t.presencas||{}).filter(v=>v==='presente').length;
     const pct = alunosT.length ? Math.round((presentes/alunosT.length)*100) : 0;
-    const fill = document.getElementById('dash-freq-fill-'+t[0]);
-    const lbl = document.getElementById('dash-freq-lbl-'+t[0]);
+    const tKey = t==='maternal'?'m':t==='juniores'?'jr':t==='jovens'?'j':'a';
+    const fill = document.getElementById('dash-freq-fill-'+tKey);
+    const lbl = document.getElementById('dash-freq-lbl-'+tKey);
     if (fill) fill.style.width = pct+'%';
     if (lbl) lbl.textContent = presentes+' · '+pct+'%';
   });
@@ -4532,8 +4574,8 @@ function _renderDashGrafico(aulas) {
   if (!barsEl || !lblsEl) return;
   barsEl.innerHTML = ''; lblsEl.innerHTML = '';
 
-  const turmas = ['criancas','jovens','adultos'];
-  const cores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#b8972a'};
+  const turmas = ['maternal','juniores','jovens','adultos'];
+  const cores = {'maternal':'#c47c1a','juniores':'#7a1a6b','jovens':'#4a7eb8','adultos':'#b8972a'};
   const aulasSort = [...aulas].sort((a,b)=>a.data.localeCompare(b.data));
 
   // Agrupar por semana (última aula de cada semana por turma)
@@ -4611,9 +4653,7 @@ function _renderDashOferta(aulas) {
   });
 
   // Por turma
-  ['c','j','a'].forEach((k,idx)=>{
-    const turma=['criancas','jovens','adultos'][idx];
-    const cor=['#1a6b4a','#4a7eb8','#b8972a'][idx];
+  [['m','maternal','#c47c1a'],['jr','juniores','#7a1a6b'],['j','jovens','#4a7eb8'],['a','adultos','#b8972a']].forEach(([k,turma,cor])=>{
     const aulasT=aulasSort.filter(a=>a.turma===turma);
     const tot=aulasT.reduce((s,a)=>s+(parseFloat(a.ofertas)||0),0);
     const avg2=aulasT.length?Math.round(tot/aulasT.length):0;
@@ -4696,10 +4736,10 @@ async function _renderDashRanking(alunos, aulas) {
 function _renderDashRankingBox(ranked) {
   const box = document.getElementById('dash-ranking-top3');
   if (!box) return;
-  const corTurma = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+  const corTurma = {'maternal':'#c47c1a','juniores':'#7a1a6b','jovens':'#4a7eb8','adultos':'#7a6010'};
 
   // Só turmas — sem Geral
-  if (_dashRankTab === 'geral') _dashRankTab = 'criancas';
+  if (_dashRankTab === 'geral') _dashRankTab = 'maternal';
 
   const lista = ranked.filter(r=>r.a.turma===_dashRankTab);
   const top3 = lista.slice(0,3);
@@ -4715,7 +4755,7 @@ function _renderDashRankingBox(ranked) {
   // Tabs — só 3 turmas
   const tabsHtml = `
     <div style="display:flex;gap:6px;margin-bottom:12px;overflow-x:auto;padding-bottom:2px">
-      ${['criancas','jovens','adultos'].map(t=>{
+      ${['maternal','juniores','jovens','adultos'].map(t=>{
         const on = _dashRankTab===t;
         const cor = corTurma[t];
         return `<button onclick="dashRankSetTab('${t}')" style="
@@ -4997,7 +5037,7 @@ function renderAniversariantes(alunos) {
   const lista = alunos.filter(a => { if(!a.nasc) return false; const [,m] = a.nasc.split('-'); return parseInt(m)===mes; });
   const box = document.getElementById('dash-aniversariantes');
   if (!lista.length) { if(box) box.innerHTML = ''; return; }
-  const avCores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+  const avCores = {'maternal':'#c47c1a','juniores':'#7a1a6b','jovens':'#4a7eb8','adultos':'#7a6010'};
   box.innerHTML = lista.map(a => {
     const [,m,d] = a.nasc.split('-');
     const isHoje = parseInt(d)===diaH&&parseInt(m)===mes;
@@ -5023,7 +5063,7 @@ function renderAlertasAusencia(alunos, aulas) {
   if (!box) return;
   const lista = USER.perfil==='professor'&&USER.turma!=='todas' ? alertas.filter(x=>x.aluno.turma===USER.turma) : alertas;
   if (!lista.length) { box.innerHTML = ''; return; }
-  const avCores = {'criancas':'#1a6b4a','jovens':'#4a7eb8','adultos':'#7a6010'};
+  const avCores = {'maternal':'#c47c1a','juniores':'#7a1a6b','jovens':'#4a7eb8','adultos':'#7a6010'};
   box.innerHTML = `<div class="dash-notif dash-notif-danger" style="flex-direction:column;align-items:flex-start;gap:8px;margin-bottom:8px">
     <div style="display:flex;align-items:center;gap:8px;width:100%">
       <div class="dash-notif-icon">⚠️</div>
@@ -5529,7 +5569,7 @@ async function salvarProf() {
   if (!editId && login && !senha) { toast('Digite uma senha para o login', 'er'); return; }
   const sexo = document.getElementById('pe-sexo') ? document.getElementById('pe-sexo').value : 'M';
   // Ler turmas selecionadas via checkboxes
-  const turmasSel = ['criancas','jovens','adultos'].filter(function(t) {
+  const turmasSel = ['maternal','juniores','jovens','adultos'].filter(function(t) {
     const el = document.getElementById('pe-turma-' + t);
     return el && el.checked;
   });
@@ -5886,7 +5926,7 @@ function renderMensal() {
   const totalR=aulas.reduce((s,a)=>s+(a.revistas||0),0);
   const [ano,m]=mes.split('-');
   const nomeMes=new Date(parseInt(ano),parseInt(m)-1,1).toLocaleDateString('pt-BR',{month:'long',year:'numeric'});
-  const turmas=['criancas','jovens','adultos'];
+  const turmas=['maternal','juniores','jovens','adultos'];
   const aulasSort=[...aulas].sort((a,b)=>a.data.localeCompare(b.data));
   box.innerHTML=`
     <div class="card" style="background:var(--ink);border-color:var(--ink)">
@@ -5906,7 +5946,7 @@ function renderMensal() {
       <thead><tr><th>Turma</th><th style="text-align:right">Aulas</th><th style="text-align:right">Assist.</th><th style="text-align:right">Média</th><th style="text-align:right">Visitantes</th><th style="text-align:right">Ofertas</th></tr></thead>
       <tbody>${turmas.map(t=>{ const at=aulas.filter(a=>a.turma===t); if(!at.length)return`<tr><td>${TN[t]}</td><td class="num" colspan="5" style="color:var(--ink-soft)">—</td></tr>`;
         const tot=at.reduce((s,a)=>s+a.total_assistencia,0); const of=at.reduce((s,a)=>s+parseFloat(a.ofertas||0),0); const vis=at.reduce((s,a)=>s+(a.visitantes||[]).length,0);
-        return`<tr><td style="display:flex;align-items:center;gap:6px"><span class="dot dot-${t[0]}" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>${TN[t]}</td>
+        return`<tr><td style="display:flex;align-items:center;gap:6px"><span class="dot dot-${t==='maternal'?'m':t==='juniores'?'jr':t==='jovens'?'j':'a'}" style="width:8px;height:8px;border-radius:50%;display:inline-block"></span>${TN[t]}</td>
           <td class="num">${at.length}</td><td class="num">${tot}</td><td class="num">${Math.round(tot/at.length)}</td><td class="num">${vis}</td><td class="num">R$ ${of.toFixed(2)}</td></tr>`;
       }).join('')}</tbody></table></div></div>`:''}
     <div class="card"><div class="ct">Semana a semana</div><div style="overflow-x:auto"><table class="comp-table">
@@ -6034,14 +6074,14 @@ let _exclIds = [];
 async function abrirDrawerExclusao(turma) {
   _exclTurmaAtual = turma;
   document.getElementById('excl-busca').value = '';
-  ['criancas','jovens','adultos'].forEach(t => {
+  ['maternal','juniores','jovens','adultos'].forEach(t => {
     const card = document.getElementById('excl-card-' + t);
     if (card) {
       card.style.borderColor = t === turma ? 'var(--red)' : 'var(--cb)';
       card.style.background = t === turma ? 'rgba(184,42,42,.05)' : 'var(--cream)';
     }
   });
-  const TN = { criancas:'👶 Crianças', jovens:'🧑 Jovens', adultos:'👤 Adultos' };
+  const TN = { criancas:'👶 Crianças', maternal:'🍼 Maternal', juniores:'🧒 Juniores', jovens:'🧑 Jovens', adultos:'👤 Adultos' };
   document.getElementById('excl-drawer-titulo').textContent = TN[turma] + ' — Exclusões';
 
   // Abrir modal
@@ -6117,7 +6157,7 @@ function fecharDrawerExclusao() {
   const overlay = document.getElementById('excl-modal-overlay');
   if (overlay) overlay.style.display = 'none';
   document.body.style.overflow = '';
-  ['criancas','jovens','adultos'].forEach(t => {
+  ['maternal','juniores','jovens','adultos'].forEach(t => {
     const card = document.getElementById('excl-card-' + t);
     if (card) { card.style.borderColor = 'var(--cb)'; card.style.background = 'var(--cream)'; }
   });
@@ -6134,7 +6174,169 @@ function salvarExclusaoRanking() {
 }
 
 async function carregarAlunosExclusaoRanking() {
-  ['criancas','jovens','adultos'].forEach(t => _atualizarBadgeExclusao(t));
+  ['maternal','juniores','jovens','adultos'].forEach(t => _atualizarBadgeExclusao(t));
+}
+
+// ── MIGRAÇÃO DE TURMAS ──
+let _migAlunos = [];
+let _migClassificacao = {};
+
+async function limparAulasCriancas() {
+  if (!confirm('Isso vai deletar TODAS as aulas com turma=criancas do banco. Confirma?')) return;
+  try {
+    // Buscar aulas de criancas
+    const { data: aulasCri, error } = await sbClient.from('aulas').select('id').eq('turma','criancas');
+    if (error) throw error;
+    if (!aulasCri || aulasCri.length === 0) {
+      toast('✅ Nenhuma aula de Crianças encontrada — já está limpo!', 'ok');
+      return;
+    }
+    // Deletar uma por uma
+    for (const a of aulasCri) {
+      await sbClient.from('aulas').delete().eq('id', a.id);
+    }
+    // Limpar cache
+    if (cacheAulas) cacheAulas = cacheAulas.filter(a => a.turma !== 'criancas');
+    toast(`✅ ${aulasCri.length} aula(s) de Crianças removidas com sucesso!`, 'ok');
+    // Recarregar histórico se estiver na aba
+    if (document.getElementById('pg-historico')?.classList.contains('on')) {
+      cacheAulas = await sbGet('aulas',{},'data',false);
+      renderHist();
+    }
+  } catch(e) {
+    toast('Erro: ' + (e?.message||String(e)), 'er');
+  }
+}
+
+async function carregarAlunosMigracao() {
+  const lista = document.getElementById('migracao-lista');
+  const status = document.getElementById('migracao-status');
+  lista.innerHTML = '<div style="text-align:center;padding:14px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+
+  try {
+    const { data, error } = await sbClient.from('alunos').select('id,nome,turma').eq('turma','criancas').order('nome');
+    if (error) throw error;
+    _migAlunos = data || [];
+  } catch(e) {
+    _migAlunos = (cacheAlunos||[]).filter(a => a.turma === 'criancas').sort((a,b) => a.nome.localeCompare(b.nome));
+  }
+
+  if (!_migAlunos.length) {
+    lista.innerHTML = '<div style="text-align:center;padding:14px;color:var(--tc);font-size:13px">✅ Nenhum aluno em Crianças — migração já foi feita!</div>';
+    return;
+  }
+
+  status.innerHTML = `<div style="font-size:12px;color:var(--ink-soft);margin-bottom:8px">${_migAlunos.length} aluno(s) encontrado(s) em Crianças. Classifique cada um:</div>`;
+
+  lista.innerHTML = _migAlunos.map(a => {
+    const ini = a.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase();
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border:1px solid var(--cb);border-radius:var(--rsm);margin-bottom:6px;background:var(--cream)">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--ink);color:var(--gold-l);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">${ini}</div>
+      <div style="flex:1;font-size:13px;font-weight:600;color:var(--ink);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${a.nome}</div>
+      <div style="display:flex;gap:4px;flex-shrink:0">
+        <button onclick="_migSelecionar('${a.id}','maternal',this)" style="padding:5px 10px;border-radius:6px;border:1.5px solid var(--tm);background:${_migClassificacao[a.id]==='maternal'?'var(--tm)':'transparent'};color:${_migClassificacao[a.id]==='maternal'?'white':'var(--tm)'};font-size:11px;font-weight:700;cursor:pointer" id="mig-m-${a.id}">🍼 Mat</button>
+        <button onclick="_migSelecionar('${a.id}','juniores',this)" style="padding:5px 10px;border-radius:6px;border:1.5px solid var(--tjr);background:${_migClassificacao[a.id]==='juniores'?'var(--tjr)':'transparent'};color:${_migClassificacao[a.id]==='juniores'?'white':'var(--tjr)'};font-size:11px;font-weight:700;cursor:pointer" id="mig-j-${a.id}">🧒 Jun</button>
+      </div>
+    </div>`;
+  }).join('');
+
+  document.getElementById('btn-migrar').style.display = 'none';
+}
+
+function _migSelecionar(id, turma, btn) {
+  _migClassificacao[id] = turma;
+  // Atualizar visual dos botões
+  const mBtn = document.getElementById('mig-m-' + id);
+  const jBtn = document.getElementById('mig-j-' + id);
+  if (mBtn) {
+    mBtn.style.background = turma==='maternal' ? 'var(--tm)' : 'transparent';
+    mBtn.style.color = turma==='maternal' ? 'white' : 'var(--tm)';
+  }
+  if (jBtn) {
+    jBtn.style.background = turma==='juniores' ? 'var(--tjr)' : 'transparent';
+    jBtn.style.color = turma==='juniores' ? 'white' : 'var(--tjr)';
+  }
+  // Mostrar botão migrar se todos classificados
+  const total = _migAlunos.length;
+  const classificados = Object.keys(_migClassificacao).length;
+  const btnMig = document.getElementById('btn-migrar');
+  if (classificados >= total) {
+    btnMig.style.display = 'block';
+    btnMig.textContent = `🔀 Migrar ${total} aluno(s)`;
+  }
+}
+
+async function executarMigracao() {
+  const total = _migAlunos.length;
+  const classificados = Object.keys(_migClassificacao).length;
+  if (classificados < total) {
+    toast('Classifique todos os alunos antes de migrar!', 'er'); return;
+  }
+  if (!confirm(`Confirma a migração de ${total} aluno(s)? As aulas antigas serão duplicadas para Maternal e Juniores.`)) return;
+
+  const btnMig = document.getElementById('btn-migrar');
+  btnMig.textContent = '⏳ Migrando...';
+  btnMig.disabled = true;
+
+  try {
+    // 1. Atualizar turma de cada aluno
+    for (const aluno of _migAlunos) {
+      const novaTurma = _migClassificacao[aluno.id];
+      if (!novaTurma) continue;
+      await sbClient.from('alunos').update({ turma: novaTurma }).eq('id', aluno.id);
+    }
+
+    // 2. Buscar aulas antigas de criancas
+    const { data: aulasAntigas } = await sbClient.from('aulas').select('*').eq('turma','criancas');
+    const aulas = aulasAntigas || [];
+
+    // 3. Duplicar cada aula para maternal e juniores
+    const maternalIds = _migAlunos.filter(a => _migClassificacao[a.id]==='maternal').map(a => a.id);
+    const junioresIds = _migAlunos.filter(a => _migClassificacao[a.id]==='juniores').map(a => a.id);
+
+    for (const aula of aulas) {
+      // Aula maternal — só com presenças dos alunos do maternal
+      const presencasMaternal = {};
+      const presencasJuniores = {};
+      const presOriginal = aula.presencas || {};
+
+      maternalIds.forEach(id => { if (presOriginal[id]) presencasMaternal[id] = presOriginal[id]; });
+      junioresIds.forEach(id => { if (presOriginal[id]) presencasJuniores[id] = presOriginal[id]; });
+
+      const { id, ...aulaBase } = aula;
+
+      await sbClient.from('aulas').insert({ ...aulaBase, turma: 'maternal', presencas: presencasMaternal });
+      await sbClient.from('aulas').insert({ ...aulaBase, turma: 'juniores', presencas: presencasJuniores });
+    }
+
+    // 4. Deletar aulas antigas de criancas (já foram duplicadas)
+    for (const aula of aulas) {
+      await sbClient.from('aulas').delete().eq('id', aula.id);
+    }
+
+    // 5. Atualizar cache local
+    if (cacheAlunos) {
+      _migAlunos.forEach(a => {
+        const idx = cacheAlunos.findIndex(c => c.id === a.id);
+        if (idx >= 0) cacheAlunos[idx].turma = _migClassificacao[a.id];
+      });
+    }
+    // Remover aulas antigas de criancas do cache
+    if (cacheAulas) {
+      cacheAulas = cacheAulas.filter(a => a.turma !== 'criancas');
+    }
+
+    toast(`✅ Migração concluída! ${total} aluno(s) e ${aulas.length} aula(s) migradas.`, 'ok');
+    document.getElementById('migracao-lista').innerHTML = '<div style="text-align:center;padding:14px;color:var(--tc);font-size:13px">✅ Migração concluída com sucesso!</div>';
+    document.getElementById('btn-migrar').style.display = 'none';
+    _migAlunos = [];
+    _migClassificacao = {};
+
+  } catch(e) {
+    toast('Erro na migração: ' + (e?.message||String(e)), 'er');
+    btnMig.textContent = '🔀 Tentar novamente';
+    btnMig.disabled = false;
+  }
 }
 
 async function renderRanking() {
@@ -6406,7 +6608,7 @@ async function salvarConfigIgreja() {
   if (nomeIgreja) await sbSetConfig('nome_igreja', nomeIgreja);
   if (nomeEBD) await sbSetConfig('nome_ebd', nomeEBD);
   if (vers) { await sbSetConfig('versículo_semestre', vers); cfgVersiculo = vers; }
-  if (mc) await upsertMeta('criancas', parseInt(mc));
+  if (mc) { await upsertMeta('maternal', parseInt(mc)); await upsertMeta('juniores', parseInt(mc)); }
   if (mj) await upsertMeta('jovens', parseInt(mj));
   if (ma) await upsertMeta('adultos', parseInt(ma));
   cfgNomeIgreja = nomeIgreja || cfgNomeIgreja;
@@ -6442,7 +6644,7 @@ async function carregarPaginaConfig() {
   document.getElementById('cfg-bv-ativo').checked = cfgBoasVindasAtivo;
   document.getElementById('cfg-bv-msg').value = cfgBoasVindasMsg;
   const metas = await sbGet('metas');
-  ['criancas','jovens','adultos'].forEach(t => {
+  ['maternal','juniores','jovens','adultos'].forEach(t => {
     const m = metas.find(x=>x.turma===t);
     document.getElementById('cfg-meta-'+t[0]).value = m ? m.meta_assistencia : '';
   });
@@ -6456,7 +6658,7 @@ async function salvarConfig() {
     const nomeEBD = document.getElementById('cfg-nome-ebd').value.trim();
     if (nomeIgreja) await sbSetConfig('nome_igreja', nomeIgreja);
     if (nomeEBD) await sbSetConfig('nome_ebd', nomeEBD);
-    for (const t of ['criancas','jovens','adultos']) {
+    for (const t of ['maternal','juniores','jovens','adultos']) {
       const val = parseInt(document.getElementById('cfg-meta-'+t[0]).value);
       if (val > 0) await sbClient.from('metas').upsert({ turma:t, meta_assistencia:val }, { onConflict:'turma' });
     }
@@ -6552,6 +6754,132 @@ function toast(msg, tipo) {
 
 // ── LIÇÕES DATA ──
 const LICOES = {
+  maternal: { nome:'Maternal', licoes:[] },
+  juniores: {
+    tema: 'Israel e a Terra Prometida',
+    subtema: 'A jornada do povo de Deus — do Egito à Terra Prometida',
+    comentarista: 'Comentarista: Brunna Farias',
+    periodo: '2º Trimestre 2026 — Abril a Junho',
+    licoes: [
+      { num:1, data:'06/04', titulo:'O Nascimento de Moisés',
+        texto:'Êx 2.1-10',
+        textoAureo:'O Senhor é a minha rocha, a minha fortaleza e o meu libertador. (Salmos 18.2a)',
+        verdade:'O Senhor é a minha rocha, a minha fortaleza e o meu libertador. (Salmos 18.2a)',
+        resumo:'O Senhor é a minha rocha, a minha fortaleza e o meu libertador. (Salmos 18.2a)',
+        leituraBiblica:'Êx 2.1-10',
+        memorizando:'O Senhor é a minha rocha, a minha fortaleza e o meu libertador. (Salmos 18.2a)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 18.3',tema:'O Senhor salva dos inimigos'},{dia:'Terça',ref:'1 Jo 5.18',tema:'Deus nos guarda'},{dia:'Quarta',ref:'Sl 91.7',tema:'Deus é o nosso Protetor'},{dia:'Quinta',ref:'1 Cr 16.35',tema:'O Senhor liberta o seu povo'},{dia:'Sexta',ref:'Pv 2.8',tema:'Deus é Justo'},{dia:'Sábado',ref:'Êx 22.23',tema:'O Senhor ouve o nosso clamor'}],
+        perguntas:[{q:'Onde Moisés foi colocado para ser protegido?',a:'Em um cesto no rio Nilo',correta:1,op:['Em uma caverna no deserto','Em um cesto no rio Nilo','Na casa de um vizinho hebreu','Dentro de uma tenda no campo']},{q:'Quem encontrou o bebê Moisés?',a:'A filha do faraó',correta:2,op:['A esposa do faraó','Uma escrava egípcia','A filha do faraó','A irmã de Moisés']},{q:'Quem foi chamada para amamentar Moisés?',a:'A própria mãe de Moisés',correta:0,op:['A própria mãe de Moisés','A irmã de Moisés','A filha do faraó','Uma escrava egípcia']},{q:'Por que a mãe de Moisés colocou ele no rio?',a:'Para protegê-lo do decreto do faraó que mandava matar os meninos hebreus',correta:3,op:['Porque não tinha comida para ele','Porque ele chorava muito','Porque o faraó ordenou que devolvessem os bebês','Para protegê-lo do decreto do faraó que mandava matar os meninos hebreus']},{q:'O que o nome Moisés significa?',a:'Tirado das águas',correta:2,op:['Filho das águas','Escolhido de Deus','Tirado das águas','Servo do Nilo']}]},
+      { num:2, data:'13/04', titulo:'Deus Chama um Libertador',
+        texto:'Êx 2.11-25; 3.1-6',
+        textoAureo:'Antes do seu nascimento, quando você ainda estava na barriga da sua mãe, eu o escolhi e separei para que você fosse um profeta para as nações. (Jeremias 1.5)',
+        verdade:'Antes do seu nascimento, quando você ainda estava na barriga da sua mãe, eu o escolhi e separei para que você fosse um profeta para as nações. (Jeremias 1.5)',
+        resumo:'Antes do seu nascimento, quando você ainda estava na barriga da sua mãe, eu o escolhi e separei para que você fosse um profeta para as nações. (Jeremias 1.5)',
+        leituraBiblica:'Êx 2.11-25; 3.1-6',
+        memorizando:'Antes do seu nascimento, quando você ainda estava na barriga da sua mãe, eu o escolhi e separei para que você fosse um profeta para as nações. (Jeremias 1.5)',
+        leituraDiaria:[{dia:'Segunda',ref:'Is 41.13',tema:'Deus é o meu ajudador'},{dia:'Terça',ref:'Fp 4.13',tema:'Deus te dá forças'},{dia:'Quarta',ref:'Hb 3.1',tema:'Somos chamados por Deus'},{dia:'Quinta',ref:'2 Tm 1.9',tema:'Chamados para sermos seu povo'},{dia:'Sexta',ref:'Sl 27.14',tema:'Confie no Senhor'},{dia:'Sábado',ref:'Sl 27.1',tema:'Não tenha medo'}],
+        perguntas:[{q:'O que Moisés viu que chamou sua atenção no deserto?',a:'Uma sarça que ardia em fogo mas não se consumia',correta:0,op:['Uma sarça que ardia em fogo mas não se consumia','Uma coluna de fumaça no céu','Um anjo com espada de fogo','Uma fonte de água no deserto']},{q:'Quem falou com Moisés na sarça ardente?',a:'O próprio Deus',correta:2,op:['Um anjo enviado por Deus','Um profeta hebreu','O próprio Deus','O chefe da tribo de Israel']},{q:'O que Deus pediu que Moisés fizesse ao se aproximar da sarça?',a:'Que tirasse as sandálias dos pés',correta:1,op:['Que cobrisse o rosto com o manto','Que tirasse as sandálias dos pés','Que se ajoelhasse e orasse','Que levantasse os braços ao céu']},{q:'Para onde Moisés fugiu depois de matar o egípcio?',a:'Para a terra de Midiã',correta:3,op:['Para a terra de Canaã','Para o Egito profundo','Para a margem do mar Vermelho','Para a terra de Midiã']},{q:'Qual era a missão que Deus deu a Moisés?',a:'Libertar o povo de Israel da escravidão no Egito',correta:2,op:['Construir um templo no deserto','Escrever as leis do povo hebreu','Libertar o povo de Israel da escravidão no Egito','Governar o povo de Midiã']}]},
+      { num:3, data:'20/04', titulo:'A Aflição dos Hebreus e a Promessa de Liberdade',
+        texto:'Êx 3.7-14; 4.1-17',
+        textoAureo:'Mas o Senhor Deus diz: \'Agora eu vou agir porque os necessitados estão sendo oprimidos, e os perseguidos gemem de dor. Eu lhes darei a segurança que tanto esperam.\' (Salmos 12.5)',
+        verdade:'Mas o Senhor Deus diz: \'Agora eu vou agir porque os necessitados estão sendo oprimidos, e os perseguidos gemem de dor. Eu lhes darei a segurança que tanto esperam.\' (Salmos 12.5)',
+        resumo:'Mas o Senhor Deus diz: \'Agora eu vou agir porque os necessitados estão sendo oprimidos, e os perseguidos gemem de dor. Eu lhes darei a segurança que tanto esperam.\' (Salmos 12.5)',
+        leituraBiblica:'Êx 3.7-14; 4.1-17',
+        memorizando:'Mas o Senhor Deus diz: \'Agora eu vou agir porque os necessitados estão sendo oprimidos, e os perseguidos gemem de dor. Eu lhes darei a segurança que tanto esperam.\' (Salmos 12.5)',
+        leituraDiaria:[{dia:'Segunda',ref:'Tg 1.12',tema:'Nas aflições seja fiel'},{dia:'Terça',ref:'Rm 12.12',tema:'A esperança traz alegrias'},{dia:'Quarta',ref:'Gl 5.1',tema:'Cristo nos libertou'},{dia:'Quinta',ref:'Fp 1.28',tema:'Não tenham medo de seus inimigos'},{dia:'Sexta',ref:'Js 21.45',tema:'O Senhor cumpre com suas promessas'},{dia:'Sábado',ref:'Hb 10.23',tema:'Guarde a fé'}],
+        perguntas:[{q:'O que Deus disse que tinha visto e ouvido?',a:'O sofrimento e os clamores do seu povo no Egito',correta:1,op:['A rebeldia do faraó contra os hebreus','O sofrimento e os clamores do seu povo no Egito','A construção das pirâmides pelos escravos','Os pedidos de ajuda dos líderes hebreus']},{q:'Que nome Deus revelou a Moisés quando perguntou como se chamava?',a:'EU SOU O QUE SOU',correta:3,op:['Elohim, Deus Todo-Poderoso','Adonai, o Senhor dos Exércitos','Javé, o Deus de Abraão','EU SOU O QUE SOU']},{q:'Que sinal Deus deu a Moisés para provar que Ele havia aparecido?',a:'O cajado se transformou em cobra',correta:0,op:['O cajado se transformou em cobra','Uma nuvem desceu sobre o deserto','Uma chuva caiu no deserto seco','O mar se dividiu ao meio']},{q:'Quem Deus enviou para ajudar Moisés a falar ao povo?',a:'Arão, irmão de Moisés',correta:2,op:['Josué, filho de Num','Calebe, filho de Jefoné','Arão, irmão de Moisés','Jetro, sogro de Moisés']},{q:'O que Moisés disse que era ao responder ao chamado de Deus?',a:'Que não sabia falar bem — era lento de língua',correta:3,op:['Que era muito jovem e inexperiente','Que era um fugitivo sem direitos','Que não conhecia as leis do Egito','Que não sabia falar bem — era lento de língua']}]},
+      { num:4, data:'27/04', titulo:'Deus Envia as Pragas',
+        texto:'Êx 5.1-3; 7-10',
+        textoAureo:'Os maus certamente serão castigados, mas os bons escaparão do castigo. (Provérbios 11.21)',
+        verdade:'Os maus certamente serão castigados, mas os bons escaparão do castigo. (Provérbios 11.21)',
+        resumo:'Os maus certamente serão castigados, mas os bons escaparão do castigo. (Provérbios 11.21)',
+        leituraBiblica:'Êx 5.1-3; 7-10',
+        memorizando:'Os maus certamente serão castigados, mas os bons escaparão do castigo. (Provérbios 11.21)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 19.7',tema:'A lei do Senhor é perfeita'},{dia:'Terça',ref:'Sl 33.20',tema:'A esperança em Deus'},{dia:'Quarta',ref:'Pv 19.29',tema:'Castigo para os que zombam'},{dia:'Quinta',ref:'Sl 16.1',tema:'Seguros com Deus'},{dia:'Sexta',ref:'Ap 16.7',tema:'O julgamento do Senhor é justo'},{dia:'Sábado',ref:'2 Ts 3.3',tema:'O Senhor livra do Maligno'}],
+        perguntas:[{q:'Quantas pragas Deus enviou ao Egito?',a:'Dez pragas',correta:2,op:['Sete pragas','Cinco pragas','Dez pragas','Doze pragas']},{q:'Qual foi a primeira praga enviada por Deus?',a:'As águas do Nilo se transformaram em sangue',correta:0,op:['As águas do Nilo se transformaram em sangue','Uma grande escuridão cobriu o Egito','Rãs cobriram toda a terra','Uma multidão de gafanhotos devorou as plantações']},{q:'Por que Deus enviou as pragas ao Egito?',a:'Para mostrar que Ele é o único Deus verdadeiro e liberar Seu povo',correta:3,op:['Para mostrar que Moisés era poderoso','Para punir o povo hebreu por seus pecados','Para destruir a economia do Egito','Para mostrar que Ele é o único Deus verdadeiro e liberar Seu povo']},{q:'O que o faraó fez depois de cada praga?',a:'Endurecia o coração e não deixava o povo ir',correta:1,op:['Ordenava que os hebreus fossem libertados imediatamente','Endurecia o coração e não deixava o povo ir','Chamava os sábios para interpretar os sinais','Fugia do palácio com medo das pragas']},{q:'Qual praga afetou os animais do Egito mas não os do povo de Israel?',a:'A praga das doenças no gado',correta:2,op:['A praga dos gafanhotos','A praga das trevas','A praga das doenças no gado','A praga dos piolhos']}]},
+      { num:5, data:'04/05', titulo:'A Morte dos Primogênitos',
+        texto:'Êx 12.21-33',
+        textoAureo:'O nosso Deus está no céu; Ele faz tudo o que quer. (Salmos 115.3)',
+        verdade:'O nosso Deus está no céu; Ele faz tudo o que quer. (Salmos 115.3)',
+        resumo:'O nosso Deus está no céu; Ele faz tudo o que quer. (Salmos 115.3)',
+        leituraBiblica:'Êx 12.21-33',
+        memorizando:'O nosso Deus está no céu; Ele faz tudo o que quer. (Salmos 115.3)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 34.17,18',tema:'O Senhor salva os que perderam a esperança'},{dia:'Terça',ref:'Rm 10.13',tema:'O Senhor ajuda a todos'},{dia:'Quarta',ref:'Sl 32.10,11',tema:'Protegidos por seu amor'},{dia:'Quinta',ref:'Sl 56.13',tema:'Salvaste da morte'},{dia:'Sexta',ref:'Ef 5.6',tema:'O castigo de Deus para aqueles que não obedecem'},{dia:'Sábado',ref:'Sl 68.20',tema:'O Senhor salva e livra'}],
+        perguntas:[{q:'O que as famílias israelitas deveriam passar nas ombreiras das portas?',a:'O sangue do cordeiro',correta:1,op:['Azeite de oliva consagrado','O sangue do cordeiro','Água do rio Nilo','Cinzas do altar de sacrifício']},{q:'O que aconteceu na décima praga?',a:'Morreu o primogênito de cada família egípcia que não tinha o sinal do sangue',correta:3,op:['Trevas cobriram o Egito por três dias','Uma tempestade de granizo destruiu as colheitas','Rãs invadiram os palácios e casas do Egito','Morreu o primogênito de cada família egípcia que não tinha o sinal do sangue']},{q:'O que Deus prometeu às famílias que obedecessem ao sinal do sangue?',a:'Que o anjo passaria por cima e não os atingiria',correta:0,op:['Que o anjo passaria por cima e não os atingiria','Que ganhariam muitas riquezas dos egípcios','Que seriam transportados miraculosamente para Canaã','Que seus filhos se tornariam príncipes no Egito']},{q:'O que o faraó fez depois da décima praga?',a:'Mandou chamar Moisés e ordenou que o povo de Israel fosse embora',correta:2,op:['Enviou soldados para capturar Moisés','Pediu mais um prazo antes de libertar os hebreus','Mandou chamar Moisés e ordenou que o povo de Israel fosse embora','Declarou guerra às tribos de Israel']},{q:'Para os cristãos, o cordeiro da Páscoa representa quem?',a:'Jesus Cristo que morreu para nos salvar do pecado',correta:3,op:['O profeta Moisés que libertou Israel','O arcanjo Miguel que protegeu o povo','O rei Davi que venceu todos os inimigos','Jesus Cristo que morreu para nos salvar do pecado']}]},
+      { num:6, data:'11/05', titulo:'A Primeira Páscoa',
+        texto:'Êx 12.1-11',
+        textoAureo:'Cristo, o nosso Cordeiro da Páscoa, já foi oferecido em sacrifício. (1 Coríntios 5.7)',
+        verdade:'Cristo, o nosso Cordeiro da Páscoa, já foi oferecido em sacrifício. (1 Coríntios 5.7)',
+        resumo:'Cristo, o nosso Cordeiro da Páscoa, já foi oferecido em sacrifício. (1 Coríntios 5.7)',
+        leituraBiblica:'Êx 12.1-11',
+        memorizando:'Cristo, o nosso Cordeiro da Páscoa, já foi oferecido em sacrifício. (1 Coríntios 5.7)',
+        leituraDiaria:[{dia:'Segunda',ref:'1 Pe 1.3',tema:'Uma vida nova'},{dia:'Terça',ref:'Jo 1.29',tema:'O Cordeiro que tira todo o pecado'},{dia:'Quarta',ref:'1 Jo 2.25',tema:'Promessa de Vida Eterna'},{dia:'Quinta',ref:'Gl 2.20',tema:'Cristo vive em mim'},{dia:'Sexta',ref:'1 Pe 1.19',tema:'Resgatados por seu sangue'},{dia:'Sábado',ref:'Is 53.5-7',tema:'Ele foi como Cordeiro'}],
+        perguntas:[{q:'Que tipo de animal deveria ser sacrificado na Páscoa?',a:'Um cordeiro sem defeito, macho e de um ano',correta:0,op:['Um cordeiro sem defeito, macho e de um ano','Um boi jovem e sem mancha','Uma cabra fêmea escolhida pelo sacerdote','Um pombo branco trazido do templo']},{q:'Como os israelitas deveriam comer a refeição da Páscoa?',a:'De pé, com sandálias nos pés e bordão na mão, prontos para partir',correta:2,op:['Sentados e descalços à beira do rio','Deitados no chão como sinal de humildade','De pé, com sandálias nos pés e bordão na mão, prontos para partir','Em círculo, cantando salmos de louvor']},{q:'O que deveriam comer junto ao cordeiro na noite da Páscoa?',a:'Pão sem fermento e ervas amargas',correta:1,op:['Mel e frutas secas trazidas do campo','Pão sem fermento e ervas amargas','Lentilhas e grãos torrados no fogo','Trigo e cevada colhidos naquele mesmo dia']},{q:'O que a Páscoa celebra até hoje?',a:'A libertação do povo de Deus da escravidão no Egito',correta:3,op:['A chegada dos israelitas à terra prometida','A vitória de Moisés sobre o faraó','A construção do Tabernáculo no deserto','A libertação do povo de Deus da escravidão no Egito']},{q:'Quem o cordeiro da Páscoa representa para os cristãos?',a:'Jesus Cristo, o Cordeiro de Deus que tirou o pecado do mundo',correta:2,op:['O profeta Elias que voltará antes do fim','O rei Salomão que construiu o templo','Jesus Cristo, o Cordeiro de Deus que tirou o pecado do mundo','O anjo protetor do povo de Israel']}]},
+      { num:7, data:'18/05', titulo:'A Travessia pelo Mar Vermelho',
+        texto:'Êx 13.17-22; 14.1-31',
+        textoAureo:'O Senhor é o meu forte defensor; foi ele quem me salvou. Ele é o meu Deus, e eu o louvarei. Ele é o Deus do meu pai, e eu cantarei a sua grandeza. (Êxodo 15.2)',
+        verdade:'O Senhor é o meu forte defensor; foi ele quem me salvou. Ele é o meu Deus, e eu o louvarei. Ele é o Deus do meu pai, e eu cantarei a sua grandeza. (Êxodo 15.2)',
+        resumo:'O Senhor é o meu forte defensor; foi ele quem me salvou. Ele é o meu Deus, e eu o louvarei. Ele é o Deus do meu pai, e eu cantarei a sua grandeza. (Êxodo 15.2)',
+        leituraBiblica:'Êx 13.17-22; 14.1-31',
+        memorizando:'O Senhor é o meu forte defensor; foi ele quem me salvou. Ele é o meu Deus, e eu o louvarei. Ele é o Deus do meu pai, e eu cantarei a sua grandeza. (Êxodo 15.2)',
+        leituraDiaria:[{dia:'Segunda',ref:'Hb 11.29',tema:'Pela fé'},{dia:'Terça',ref:'1 Co 10.1',tema:'Todos foram protegidos'},{dia:'Quarta',ref:'Sl 74.13',tema:'Grande é o teu poder'},{dia:'Quinta',ref:'Mt 28.18',tema:'Ele tem todo o poder'},{dia:'Sexta',ref:'Jr 31.35',tema:'O seu nome é Senhor'},{dia:'Sábado',ref:'Pv 21.31',tema:'O Senhor dá a Vitória'}],
+        perguntas:[{q:'O que guiava o povo de Israel pelo deserto de dia?',a:'Uma coluna de nuvem',correta:0,op:['Uma coluna de nuvem','Uma coluna de fogo','O cajado de Moisés apontando o caminho','Um anjo visível que ia à frente do povo']},{q:'O que Moisés fez para o mar se abrir?',a:'Estendeu a mão sobre o mar como Deus ordenou',correta:3,op:['Bateu no mar três vezes com o cajado','Gritou em voz alta o nome de Deus','Mergulhou o cajado nas águas e orou','Estendeu a mão sobre o mar como Deus ordenou']},{q:'O que aconteceu com o exército do faraó que entrou no mar?',a:'As águas voltaram e os cobriram, afogando todos',correta:2,op:['Foram capturados e levados como prisioneiros','Voltaram para o Egito com medo das ondas','As águas voltaram e os cobriram, afogando todos','Ficaram presos na lama e foram abandonados']},{q:'Como o povo de Israel reagiu após atravessar o mar?',a:'Cantaram e louvaram a Deus pela vitória',correta:1,op:['Reclamaram de Moisés por ter trazido perigo','Cantaram e louvaram a Deus pela vitória','Pediram para voltar ao Egito com medo do deserto','Construíram um altar de pedras à beira do mar']},{q:'O que a travessia do Mar Vermelho nos ensina sobre Deus?',a:'Que Deus tem poder sobre toda a natureza e salva os que confiam nEle',correta:3,op:['Que Deus só age quando o povo ora por muito tempo','Que Deus precisa de ajuda humana para realizar milagres','Que Deus salva apenas os que são perfeitos e sem pecado','Que Deus tem poder sobre toda a natureza e salva os que confiam nEle']}]},
+      { num:8, data:'25/05', titulo:'Deus Manda o Alimento',
+        texto:'Êx 16.1-20',
+        textoAureo:'Eu sou o pão vivo que desceu do céu. Se alguém comer desse pão, viverá para sempre. (João 6.51)',
+        verdade:'Eu sou o pão vivo que desceu do céu. Se alguém comer desse pão, viverá para sempre. (João 6.51)',
+        resumo:'Eu sou o pão vivo que desceu do céu. Se alguém comer desse pão, viverá para sempre. (João 6.51)',
+        leituraBiblica:'Êx 16.1-20',
+        memorizando:'Eu sou o pão vivo que desceu do céu. Se alguém comer desse pão, viverá para sempre. (João 6.51)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 37.25',tema:'Deus não desampara'},{dia:'Terça',ref:'Mt 5.6',tema:'O Senhor nos deixará satisfeitos'},{dia:'Quarta',ref:'Rm 14.6',tema:'Agradeça pelo alimento'},{dia:'Quinta',ref:'Jo 6.27',tema:'Deus supre o que precisamos'},{dia:'Sexta',ref:'Mt 6.25',tema:'Não se preocupe com a comida'},{dia:'Sábado',ref:'Ap 3.20',tema:'Teremos alimento eterno'}],
+        perguntas:[{q:'Como se chamava o alimento que Deus enviou do céu?',a:'Maná',correta:1,op:['Pão dos anjos','Maná','Pão de mel','Trigo do céu']},{q:'O que o povo de Israel reclamou no deserto?',a:'Que tinham fome e queriam comida como no Egito',correta:3,op:['Que o caminho era muito longo e cansativo','Que não tinham água suficiente para beber','Que Moisés não os ouvia quando precisavam de ajuda','Que tinham fome e queriam comida como no Egito']},{q:'O que acontecia com o maná que ficava guardado para o dia seguinte?',a:'Criava bichos e ficava fedendo',correta:0,op:['Criava bichos e ficava fedendo','Multiplicava-se durante a noite','Endurecia e virava pão duro','Desaparecia misteriosamente']},{q:'Que alimento Deus enviou à tarde para o povo comer?',a:'Codornizes para comer carne',correta:2,op:['Peixes do mar','Mel silvestre das rochas','Codornizes para comer carne','Frutas trazidas por pássaros']},{q:'Para os cristãos, o maná representa quem?',a:'Jesus Cristo, o pão vivo que desceu do céu',correta:3,op:['A Bíblia, que alimenta nossa mente','A oração, que alimenta nossa fé','A igreja, que alimenta nossa comunhão','Jesus Cristo, o pão vivo que desceu do céu']}]},
+      { num:9, data:'01/06', titulo:'A Família de Moisés',
+        texto:'Êx 18.1-12',
+        textoAureo:'Porém eu e a minha família serviremos a Deus, o Senhor. (Josué 24.15b)',
+        verdade:'Porém eu e a minha família serviremos a Deus, o Senhor. (Josué 24.15b)',
+        resumo:'Porém eu e a minha família serviremos a Deus, o Senhor. (Josué 24.15b)',
+        leituraBiblica:'Êx 18.1-12',
+        memorizando:'Porém eu e a minha família serviremos a Deus, o Senhor. (Josué 24.15b)',
+        leituraDiaria:[{dia:'Segunda',ref:'Jó 42.2',tema:'Ensine a seus filhos a lei do Senhor'},{dia:'Terça',ref:'Pv 22.6',tema:'Conduza seus filhos nos caminhos de Deus'},{dia:'Quarta',ref:'Ef 6.1',tema:'Obedeçam aos pais'},{dia:'Quinta',ref:'Sl 127.3',tema:'Os filhos são presentes'},{dia:'Sexta',ref:'Ef 6.4',tema:'Os pais devem ensinar a Palavra de Deus aos filhos'},{dia:'Sábado',ref:'1 Tm 5.8',tema:'Cuide de sua família'}],
+        perguntas:[{q:'Quem era Jetro?',a:'O sogro de Moisés, sacerdote de Midiã',correta:2,op:['O chefe dos anciãos de Israel','O conselheiro do faraó no Egito','O sogro de Moisés, sacerdote de Midiã','O irmão mais velho de Moisés']},{q:'O que Jetro fez ao ouvir tudo o que Deus havia feito por Israel?',a:'Louvoua Deus e reconheceu que Ele é maior que todos os deuses',correta:0,op:['Louvoua Deus e reconheceu que Ele é maior que todos os deuses','Pediu que Moisés voltasse para Midiã com a família','Ficou com medo e não quis encontrar Moisés','Enviou presentes para o povo de Israel']},{q:'Como se chamava a esposa de Moisés?',a:'Zípora',correta:1,op:['Miriã','Zípora','Débora','Raquel']},{q:'O que Moisés contou a Jetro?',a:'Tudo o que Deus havia feito ao faraó e ao Egito para libertar Israel',correta:3,op:['Os planos para entrar na terra prometida','As regras que o povo deveria seguir no deserto','As riquezas que trouxeram do Egito','Tudo o que Deus havia feito ao faraó e ao Egito para libertar Israel']},{q:'O que a família de Moisés nos ensina sobre a vida cristã?',a:'Que a família deve servir a Deus juntos e ensinar os filhos nos caminhos do Senhor',correta:2,op:['Que devemos trabalhar muito para sustentar a família','Que o pai deve tomar todas as decisões sozinho','Que a família deve servir a Deus juntos e ensinar os filhos nos caminhos do Senhor','Que as crianças devem aprender a Bíblia apenas na escola dominical']}]},
+      { num:10, data:'08/06', titulo:'Os Dez Mandamentos',
+        texto:'Êx 20.1-17',
+        textoAureo:'Guardo a tua palavra no meu coração para não pecar contra ti. (Salmos 119.11)',
+        verdade:'Guardo a tua palavra no meu coração para não pecar contra ti. (Salmos 119.11)',
+        resumo:'Guardo a tua palavra no meu coração para não pecar contra ti. (Salmos 119.11)',
+        leituraBiblica:'Êx 20.1-17',
+        memorizando:'Guardo a tua palavra no meu coração para não pecar contra ti. (Salmos 119.11)',
+        leituraDiaria:[{dia:'Segunda',ref:'Hb 4.12',tema:'A Palavra de Deus é viva'},{dia:'Terça',ref:'Sl 119.98',tema:'A tua lei me dá sabedoria'},{dia:'Quarta',ref:'Jo 14.15',tema:'Ame e obedeça aos mandamentos'},{dia:'Quinta',ref:'Pv 19.16',tema:'Não despreze os ensinamentos do Senhor'},{dia:'Sexta',ref:'Tg 1.25',tema:'Ponha em prática a palavra'},{dia:'Sábado',ref:'Js 1.8',tema:'Estude a Palavra dia e noite'}],
+        perguntas:[{q:'Quantos mandamentos Deus deu ao povo de Israel no Monte Sinai?',a:'Dez mandamentos',correta:3,op:['Cinco mandamentos','Sete mandamentos','Oito mandamentos','Dez mandamentos']},{q:'Qual é o primeiro mandamento?',a:'Não ter outros deuses além do Senhor',correta:0,op:['Não ter outros deuses além do Senhor','Não pronunciar o nome de Deus em vão','Honrar pai e mãe','Guardar o dia do Sábado como sagrado']},{q:'O que os mandamentos nos ensinam?',a:'Como amar a Deus e ao próximo vivendo de forma justa',correta:2,op:['Como ganhar o favor de Deus por obras','Como se tornar um líder religioso respeitado','Como amar a Deus e ao próximo vivendo de forma justa','Como evitar todo tipo de sofrimento na vida']},{q:'Onde Deus entregou os Dez Mandamentos a Moisés?',a:'No Monte Sinai, no meio de trovões e raios',correta:1,op:['Na margem do Rio Jordão','No Monte Sinai, no meio de trovões e raios','No deserto de Sur, perto do Mar Vermelho','Na tenda do encontro, no meio do acampamento']},{q:'Qual mandamento fala sobre honrar os pais?',a:'O quinto mandamento',correta:3,op:['O segundo mandamento','O quarto mandamento','O sétimo mandamento','O quinto mandamento']}]},
+      { num:11, data:'15/06', titulo:'O Tabernáculo de Deus',
+        texto:'Êx 25.1-9',
+        textoAureo:'Alegrei-me quando me disseram: Vamos à Casa do Senhor. (Salmos 122.1)',
+        verdade:'Alegrei-me quando me disseram: Vamos à Casa do Senhor. (Salmos 122.1)',
+        resumo:'Alegrei-me quando me disseram: Vamos à Casa do Senhor. (Salmos 122.1)',
+        leituraBiblica:'Êx 25.1-9',
+        memorizando:'Alegrei-me quando me disseram: Vamos à Casa do Senhor. (Salmos 122.1)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 84.1',tema:'Como amo a Tua Casa'},{dia:'Terça',ref:'Sl 132.7',tema:'Vamos adorar ao Senhor'},{dia:'Quarta',ref:'Sl 15.1',tema:'Viver em Seu Templo'},{dia:'Quinta',ref:'Hb 3.6',tema:'A casa dirigida por Jesus'},{dia:'Sexta',ref:'Sl 61.4',tema:'Na tua Casa estou seguro'},{dia:'Sábado',ref:'Ap 21.3',tema:'Morar com Deus'}],
+        perguntas:[{q:'O que era o Tabernáculo?',a:'Um lugar sagrado e portátil onde Deus habitava com o povo',correta:1,op:['Um palácio construído no meio do deserto','Um lugar sagrado e portátil onde Deus habitava com o povo','Uma escola para ensinar as leis de Moisés','Um armazém para guardar os mantimentos do povo']},{q:'Como o povo contribuiu para a construção do Tabernáculo?',a:'Trazendo ofertas voluntárias de ouro, prata, tecidos e outros materiais',correta:0,op:['Trazendo ofertas voluntárias de ouro, prata, tecidos e outros materiais','Trabalhando como escravos para os sacerdotes','Pagando impostos mensais ao sumo sacerdote','Doando parte dos animais que criavam no deserto']},{q:'O que ficava dentro da parte mais sagrada do Tabernáculo?',a:'A Arca da Aliança com as tábuas da lei',correta:3,op:['O altar de incenso de ouro puro','A mesa dos pães da proposição','O candelabro de sete braços','A Arca da Aliança com as tábuas da lei']},{q:'O que o Tabernáculo representa para nós hoje?',a:'A presença de Deus que habita com o Seu povo e nos convida à adoração',correta:2,op:['A necessidade de construir igrejas bonitas e grandes','A importância de guardar objetos sagrados antigos','A presença de Deus que habita com o Seu povo e nos convida à adoração','A obrigação de fazer ofertas financeiras para a igreja']},{q:'O que a nuvem sobre o Tabernáculo representava?',a:'A presença e a glória de Deus habitando com o povo',correta:3,op:['Uma tempestade enviada por Deus como aviso','A proteção dos anjos ao redor do acampamento','O fumo dos sacrifícios subindo aos céus','A presença e a glória de Deus habitando com o povo']}]},
+      { num:12, data:'22/06', titulo:'As Pedras da Lei e o Bezerro de Ouro',
+        texto:'Êx 24.12-18; 32.1-35',
+        textoAureo:'Eu sou o Senhor: este é o meu nome, e não permito que as imagens recebam o louvor que somente eu mereço. (Isaías 42.8)',
+        verdade:'Eu sou o Senhor: este é o meu nome, e não permito que as imagens recebam o louvor que somente eu mereço. (Isaías 42.8)',
+        resumo:'Eu sou o Senhor: este é o meu nome, e não permito que as imagens recebam o louvor que somente eu mereço. (Isaías 42.8)',
+        leituraBiblica:'Êx 24.12-18; 32.1-35',
+        memorizando:'Eu sou o Senhor: este é o meu nome, e não permito que as imagens recebam o louvor que somente eu mereço. (Isaías 42.8)',
+        leituraDiaria:[{dia:'Segunda',ref:'Lv 19.4',tema:'Não adorar outros deuses'},{dia:'Terça',ref:'1 Co 10.14',tema:'Fujam dos ídolos'},{dia:'Quarta',ref:'1 Jo 5.20-21',tema:'Deus é verdadeiro, cuidado com os falsos'},{dia:'Quinta',ref:'Mt 3.8',tema:'Arrepender-se dos pecados'},{dia:'Sexta',ref:'2 Cr 7.14',tema:'O Senhor perdoa o povo que se arrepende'},{dia:'Sábado',ref:'Sl 33.12',tema:'Deus é o Senhor da nação'}],
+        perguntas:[{q:'O que o povo fez enquanto Moisés estava no Monte Sinai?',a:'Fizeram um bezerro de ouro para adorar como deus',correta:2,op:['Construíram tendas melhores para se proteger','Guardaram todo o maná que sobrara nos dias anteriores','Fizeram um bezerro de ouro para adorar como deus','Estudaram as leis que Moisés havia ensinado']},{q:'O que Moisés fez com as tábuas da lei ao ver o pecado do povo?',a:'Quebrou as tábuas de pedra no pé do monte',correta:0,op:['Quebrou as tábuas de pedra no pé do monte','Escondeu as tábuas dentro da Arca da Aliança','Devolveu as tábuas a Deus e pediu misericórdia','Leu as tábuas em voz alta para o povo ouvir']},{q:'O que Deus disse sobre o pecado do bezerro de ouro?',a:'Que era um pecado grave e que os culpados seriam punidos',correta:3,op:['Que perdoaria o povo sem necessidade de punição','Que o povo deveria jeju por quarenta dias','Que Moisés deveria construir um novo ídolo de prata','Que era um pecado grave e que os culpados seriam punidos']},{q:'O que o bezerro de ouro nos ensina?',a:'Que não devemos colocar nada nem ninguém no lugar de Deus',correta:1,op:['Que o ouro é sempre tentação e deve ser evitado','Que não devemos colocar nada nem ninguém no lugar de Deus','Que o povo de Israel era muito rebelde e sem solução','Que adorar imagens é permitido se o povo estiver com medo']},{q:'Quantas vezes Moisés subiu ao Monte Sinai para receber a lei?',a:'Duas vezes — a primeira vez as tábuas foram quebradas; na segunda, Deus deu novas tábuas',correta:2,op:['Uma vez — as tábuas quebradas foram refeitas pelo próprio povo','Três vezes — na primeira, segunda e terceira tentativa','Duas vezes — a primeira vez as tábuas foram quebradas; na segunda, Deus deu novas tábuas','Quatro vezes — pois o povo pecou repetidamente']}]},
+      { num:13, data:'29/06', titulo:'Moisés, a Glória de Deus e a Terra Prometida',
+        texto:'Êx 33.1-23; Dt 34',
+        textoAureo:'Nunca mais apareceu em Israel um profeta como Moisés, com quem o Senhor falava face a face. (Deuteronômio 34.10)',
+        verdade:'Nunca mais apareceu em Israel um profeta como Moisés, com quem o Senhor falava face a face. (Deuteronômio 34.10)',
+        resumo:'Nunca mais apareceu em Israel um profeta como Moisés, com quem o Senhor falava face a face. (Deuteronômio 34.10)',
+        leituraBiblica:'Êx 33.1-23; Dt 34',
+        memorizando:'Nunca mais apareceu em Israel um profeta como Moisés, com quem o Senhor falava face a face. (Deuteronômio 34.10)',
+        leituraDiaria:[{dia:'Segunda',ref:'Sl 77.20',tema:'Moisés conduziu o seu povo'},{dia:'Terça',ref:'Nm 12.3',tema:'A mansidão de Moisés'},{dia:'Quarta',ref:'At 7.22',tema:'Moisés sábio e poderoso'},{dia:'Quinta',ref:'Hb 11.24,25',tema:'A fé de Moisés'},{dia:'Sexta',ref:'Js 1.2',tema:'Deus chama Josué para continuar a obra'},{dia:'Sábado',ref:'Jo 5.46',tema:'Moisés escreveu sobre Jesus'}],
+        perguntas:[{q:'O que Moisés pediu para ver quando falou com Deus?',a:'A glória de Deus face a face',correta:1,op:['As tábuas da lei escritas por Deus','A glória de Deus face a face','O local exato da terra prometida','Os anjos que guardavam o Monte Sinai']},{q:'Por que Moisés não pôde entrar na Terra Prometida?',a:'Porque desobedeceu a Deus ao ferir a rocha em vez de falar com ela',correta:3,op:['Porque era muito velho e fraco para a jornada','Porque o povo não queria que ele os acompanhasse','Porque Josué era mais capaz de liderar o povo','Porque desobedeceu a Deus ao ferir a rocha em vez de falar com ela']},{q:'Onde Moisés morreu?',a:'No Monte Nebo, no país de Moabe',correta:0,op:['No Monte Nebo, no país de Moabe','Na margem do Rio Jordão','No deserto de Paran','No topo do Monte Sinai']},{q:'Quem Deus escolheu para continuar a obra de Moisés?',a:'Josué, filho de Num',correta:2,op:['Calebe, filho de Jefoné','Arão, irmão de Moisés','Josué, filho de Num','Gideão, da tribo de Manassés']},{q:'O que o legado de Moisés nos ensina?',a:'Que Deus usa pessoas simples e obedientes para realizar grandes coisas',correta:3,op:['Que apenas líderes perfeitos e sem pecado podem servir a Deus','Que os grandes feitos valem mais do que a fé e a obediência','Que Deus abandona os líderes quando eles cometem erros','Que Deus usa pessoas simples e obedientes para realizar grandes coisas']}]},
+    ]
+  },
   criancas: {
     tema: 'Israel e a Terra Prometida',
     subtema: 'A jornada do povo de Deus — do Egito à Terra Prometida',
@@ -7656,7 +7984,7 @@ async function renderContestacoes(status) {
       return;
     }
 
-    const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+    const TN = { criancas:'Crianças', maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
     box.innerHTML = data.map(c => {
       const data_fmt = new Date(c.created_at).toLocaleDateString('pt-BR', { day:'2-digit', month:'2-digit', year:'2-digit', hour:'2-digit', minute:'2-digit' });
       const statusBadge = c.status === 'pendente'
@@ -7889,20 +8217,49 @@ let _cacheAlunoTs = 0; // timestamp do cache
 // Adicione trimestres anteriores aqui
 // ═══════════════════════════════════════════════════════
 const LICOES_TRIMESTRES = {
-  criancas: [
+  maternal: [
+    { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
+      dados: { tema: 'Maternal', subtema: 'Conteúdo em breve', comentarista: '', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
     { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
-      dados: LICOES.criancas },
-    // Exemplo de trimestre anterior — descomente e preencha para adicionar:
-    // { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
-    //   dados: { tema: 'Nome do Tema', subtema: '...', comentarista: '...', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
+      dados: { tema: 'Maternal', subtema: 'Conteúdo em breve', comentarista: '', periodo: '2º Trimestre 2026 — Abril a Junho', licoes: [] } },
+    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: false,
+      dados: { tema: 'Maternal', subtema: 'Conteúdo em breve', comentarista: '', periodo: '3º Trimestre 2026 — Julho a Setembro', licoes: [] } },
+    { id: '4t2026', label: '4º Trimestre 2026', periodo: 'Outubro a Dezembro 2026', atual: false,
+      dados: { tema: 'Maternal', subtema: 'Conteúdo em breve', comentarista: '', periodo: '4º Trimestre 2026 — Outubro a Dezembro', licoes: [] } },
+  ],
+  juniores: [
+    { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
+      dados: { tema: 'Juniores', subtema: 'Conteúdo em breve', comentarista: '', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
+      dados: LICOES.juniores },
+    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: false,
+      dados: { tema: 'Juniores', subtema: 'Conteúdo em breve', comentarista: '', periodo: '3º Trimestre 2026 — Julho a Setembro', licoes: [] } },
+    { id: '4t2026', label: '4º Trimestre 2026', periodo: 'Outubro a Dezembro 2026', atual: false,
+      dados: { tema: 'Juniores', subtema: 'Conteúdo em breve', comentarista: '', periodo: '4º Trimestre 2026 — Outubro a Dezembro', licoes: [] } },
   ],
   jovens: [
+    { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
+      dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
     { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
       dados: LICOES.jovens },
+    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: false,
+      dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '3º Trimestre 2026 — Julho a Setembro', licoes: [] } },
+    { id: '4t2026', label: '4º Trimestre 2026', periodo: 'Outubro a Dezembro 2026', atual: false,
+      dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '4º Trimestre 2026 — Outubro a Dezembro', licoes: [] } },
   ],
   adultos: [
+    { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
+      dados: { tema: 'Adultos', subtema: 'Conteúdo em breve', comentarista: '', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
     { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
       dados: LICOES.adultos },
+    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: false,
+      dados: { tema: 'Adultos', subtema: 'Conteúdo em breve', comentarista: '', periodo: '3º Trimestre 2026 — Julho a Setembro', licoes: [] } },
+    { id: '4t2026', label: '4º Trimestre 2026', periodo: 'Outubro a Dezembro 2026', atual: false,
+      dados: { tema: 'Adultos', subtema: 'Conteúdo em breve', comentarista: '', periodo: '4º Trimestre 2026 — Outubro a Dezembro', licoes: [] } },
+  ],
+  criancas: [
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: false,
+      dados: LICOES.criancas },
   ],
 };
 
@@ -8587,7 +8944,7 @@ async function carregarBancoNoModal(tipo) {
       return;
     }
 
-    const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+    const TN = { criancas:'Crianças', maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
     box.innerHTML = data.map(function(g) {
       var nQ = (g.perguntas || []).length;
       var tipoNome = tipo === 'quiz' ? 'Quiz' : 'Simulado';
@@ -9602,7 +9959,7 @@ function verMeuResultado(id) {
 
 // ── ABAS DO BANCO ──
 let _bancoTipoAtual = 'licao';
-let _bancoTurmaAtual = 'criancas';
+let _bancoTurmaAtual = 'juniores';
 let _bancoLicoes = [];
 
 // ── BANCO DE QUESTÕES — navegação por cards ──
@@ -9612,7 +9969,7 @@ function abrirBancoTurma(turma) {
   document.getElementById('banco-menu-turmas').style.display = 'none';
   document.getElementById('banco-conteudo').style.display = 'block';
   // Atualizar título
-  const labels = { criancas:'🧒 Crianças', jovens:'🧑 Jovens', adultos:'👨 Adultos' };
+  const labels = { maternal:'🍼 Maternal', juniores:'🧒 Juniores', jovens:'🧑 Jovens', adultos:'👨 Adultos' };
   const titulo = document.getElementById('banco-turma-titulo');
   if (titulo) titulo.textContent = labels[turma] || turma;
   // Selecionar tipo padrão (lição)
@@ -9662,7 +10019,7 @@ function selBancoTipo(tipo, el) {
 function novoGrupoBanco(tipo) {
   const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
   const tipoLabel = { quiz:'QUIZ', simulado:'SIMULADO' }[tipo];
-  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+  const turmaLabel = { maternal:'MATERNAL', juniores:'JUNIORES', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
   const tipoNome = { quiz:'Quiz', simulado:'Simulado' }[tipo];
 
   document.getElementById('banco-licao-id').value = '';
@@ -9689,7 +10046,7 @@ function novoGrupoBanco(tipo) {
 function novaQuestaoAvulsa() {
   // Abre o modal de nova lição com tipo 'avulsa' e título sugestivo
   const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
-  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+  const turmaLabel = { maternal:'MATERNAL', juniores:'JUNIORES', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
 
   document.getElementById('banco-licao-id').value = '';
   document.getElementById('mo-banco-subtitulo').textContent = `QUESTÃO AVULSA · ${turmaLabel}`;
@@ -9756,7 +10113,7 @@ async function renderBancoQuestoes() {
   }
 
   const tipoPrefix = { licao:'Lição', quiz:'Quiz', simulado:'Simulado', avulsa:'Avulsa' }[_bancoTipoAtual] || 'Item';
-  const corBadge = { criancas:'var(--tc-bg);color:var(--tc)', jovens:'var(--tj-bg);color:var(--tj)', adultos:'var(--ta-bg);color:var(--ta)' }[_bancoTurmaAtual] || 'var(--tc-bg);color:var(--tc)';
+  const corBadge = { maternal:'var(--tm-bg);color:var(--tm)', juniores:'var(--tjr-bg);color:var(--tjr)', jovens:'var(--tj-bg);color:var(--tj)', adultos:'var(--ta-bg);color:var(--ta)' }[_bancoTurmaAtual] || 'var(--tjr-bg);color:var(--tjr)';
 
   box.innerHTML = _bancoLicoes.map(l => {
     const pergs = l.perguntas || [];
@@ -9794,7 +10151,7 @@ function selBancoTurma(turma, el) {
 function novaLicaoBanco() {
   // Calcular próximo número de lição
   const proxNum = _bancoLicoes.length ? Math.max(..._bancoLicoes.map(l => l.num || 0)) + 1 : 1;
-  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
+  const turmaLabel = { maternal:'MATERNAL', juniores:'JUNIORES', jovens:'JOVENS', adultos:'ADULTOS' }[_bancoTurmaAtual];
 
   document.getElementById('banco-licao-id').value = ''; // vazio = nova lição
   document.getElementById('mo-banco-subtitulo').textContent = `NOVA LIÇÃO · ${turmaLabel}`;
@@ -9846,7 +10203,7 @@ function abrirEditarLicao(id) {
   document.getElementById('banco-campos-grupo').style.display = ehLicao ? 'none' : 'block';
   const tituloLabel = { licao:'Título', quiz:'Nome do Quiz', simulado:'Nome do Simulado', avulsa:'Tema / Assunto' };
   document.getElementById('banco-titulo-label').textContent = tituloLabel[l.tipo || 'licao'] || 'Título';
-  const turmaLabel = { criancas:'CRIANÇAS', jovens:'JOVENS', adultos:'ADULTOS' }[l.turma] || l.turma.toUpperCase();
+  const turmaLabel = { maternal:'MATERNAL', juniores:'JUNIORES', jovens:'JOVENS', adultos:'ADULTOS' }[l.turma] || l.turma.toUpperCase();
   document.getElementById('mo-banco-subtitulo').textContent = `L${l.num} · ${turmaLabel} · ${l.data_licao || ''}`;
   document.getElementById('mo-banco-titulo').textContent = l.titulo;
   document.getElementById('banco-titulo').value = l.titulo || '';
@@ -10422,7 +10779,7 @@ function renderLiberacoes() {
     box.innerHTML = '<div style="text-align:center;padding:10px;color:var(--ink-soft);font-size:12px">Nenhuma liberação cadastrada</div>';
     return;
   }
-  const TN = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+  const TN = { criancas:'Crianças', maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
   const hoje = new Date();
   box.innerHTML = _liberacoes.map(l => {
     const expira = new Date(l.expira_em);
@@ -10724,8 +11081,9 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     const statusPres = (a.presencas||{})[alunoId];
     if (statusPres === 'presente') { pts += ptsPorPresenca; ptsPres += ptsPorPresenca; }
     else if (statusPres === 'fj') {
-      const fjVale = turma === 'criancas' ? RANKING_CONFIG.fj_vale_criancas : turma === 'jovens' ? RANKING_CONFIG.fj_vale_jovens : RANKING_CONFIG.fj_vale_adultos;
-      const ptsFj = turma === 'criancas' ? (RANKING_CONFIG.pts_fj_criancas||0) : turma === 'jovens' ? (RANKING_CONFIG.pts_fj_jovens||0) : (RANKING_CONFIG.pts_fj_adultos||0);
+      const ehCriancas = turma === 'criancas' || turma === 'maternal' || turma === 'juniores';
+      const fjVale = ehCriancas ? RANKING_CONFIG.fj_vale_criancas : turma === 'jovens' ? RANKING_CONFIG.fj_vale_jovens : RANKING_CONFIG.fj_vale_adultos;
+      const ptsFj = ehCriancas ? (RANKING_CONFIG.pts_fj_criancas||0) : turma === 'jovens' ? (RANKING_CONFIG.pts_fj_jovens||0) : (RANKING_CONFIG.pts_fj_adultos||0);
       if (fjVale && ptsFj > 0) { pts += ptsFj; ptsPres += ptsFj; }
     }
   });
@@ -10955,8 +11313,8 @@ async function renderCalendario() {
 
   // Montar lições do trimestre indexadas por data
   const licoesMap = {};
-  ['criancas','jovens','adultos'].forEach(turma => {
-    const dados = LICOES[turma];
+  ['maternal','juniores','jovens','adultos'].forEach(turma => {
+    const dados = LICOES[turma] || (turma === 'juniores' ? LICOES['criancas'] : null);
     if (!dados) return;
     dados.licoes.forEach(l => {
       const [d, m] = l.data.split('/');
@@ -11062,7 +11420,7 @@ async function selecionarDiaCalendario(dataStr, el) {
 
   // Lições programadas
   const licoesNoDia = [];
-  ['criancas','jovens','adultos'].forEach(turma => {
+  ['juniores','jovens','adultos'].forEach(turma => {
     const dados = LICOES[turma];
     if (!dados) return;
     dados.licoes.forEach(l => {
@@ -11085,7 +11443,8 @@ async function selecionarDiaCalendario(dataStr, el) {
   // Aulas registradas
   aulasNoDia.forEach(a => {
     if (turmaFiltro && a.turma !== turmaFiltro) return;
-    bodyHtml += `<div class="cal-ev-card tem-aula" style="border-left:4px solid var(--tc);padding-left:14px;margin-bottom:7px">
+    const _aCor = a.turma==='maternal'?'var(--tm)':a.turma==='juniores'?'var(--tjr)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
+    bodyHtml += `<div class="cal-ev-card tem-aula" style="border-left:4px solid ${_aCor};padding-left:14px;margin-bottom:7px">
       <div class="cal-ev-card-titulo">📊 Aula — ${TN[a.turma]}</div>
       <div class="cal-ev-card-meta"><span>${a.total_assistencia} presentes</span>${a.licao?`<span>${a.licao}</span>`:''}</div>
       <button class="btn btn-ou btn-sm" style="margin-top:6px;font-size:11px" onclick="fecharPopupCal();mostrarRelatorio('${a.id}')">Ver relatório →</button>
@@ -11094,14 +11453,15 @@ async function selecionarDiaCalendario(dataStr, el) {
 
   // Lições programadas
   licoesFiltradas.forEach(l => {
-    // Verificar se tem escala cadastrada para esta lição
     const escalaLicao = (window._escalasCache||[]).find(function(e){
       return e.turma===l.turma && parseInt(e.num_licao)===parseInt(l.num);
     });
+    const _cor = l.turma==='maternal'?'var(--tm)':l.turma==='juniores'?'var(--tjr)':l.turma==='jovens'?'var(--tj)':'var(--ta)';
+    const _bg = l.turma==='maternal'?'var(--tm-bg)':l.turma==='juniores'?'var(--tjr-bg)':l.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
     const profBadge = escalaLicao && escalaLicao.professor_nome
-      ? `<span style="background:var(--tc-bg);color:var(--tc);border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">👤 ${escalaLicao.professor_nome}</span>`
+      ? `<span style="background:${_bg};color:${_cor};border-radius:10px;padding:1px 6px;font-size:10px;font-weight:700">👤 ${escalaLicao.professor_nome}</span>`
       : `<span style="color:var(--gold-deep);font-weight:600;font-size:11px">› Atribuir professor</span>`;
-    bodyHtml += `<div class="cal-ev-card" style="border-left:4px solid var(--tj);padding-left:14px;margin-bottom:7px;cursor:pointer;transition:all .15s"
+    bodyHtml += `<div class="cal-ev-card" style="border-left:4px solid ${_cor};padding-left:14px;margin-bottom:7px;cursor:pointer;transition:all .15s"
       onclick="abrirDetalheLicao(${JSON.stringify(l).replace(/"/g,'&quot;')})"
       onmouseover="this.style.transform='translateY(-1px)';this.style.boxShadow='0 3px 12px rgba(0,0,0,.1)'"
       onmouseout="this.style.transform='';this.style.boxShadow=''">
@@ -11614,7 +11974,15 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Buscar dados frescos do banco — incluir nasc para desempate por idade
     const { data: alunosData } = await sbClient.from('alunos')
       .select('id,nome,status,nasc').eq('turma', turmaUsar);
-    const alunos = (alunosData || []).filter(a => (a.status||'ativo') === 'ativo');
+    const alunos = (alunosData || []).filter(a => {
+      if ((a.status||'ativo') !== 'ativo') return false;
+      // Filtrar excluídos do ranking
+      try {
+        const excl = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turmaUsar) || '[]');
+        if (excl.includes(a.id)) return false;
+      } catch(e) {}
+      return true;
+    });
 
     const { data: aulasData } = await sbClient.from('aulas')
       .select('*').eq('turma', turmaUsar);
@@ -12612,7 +12980,7 @@ async function selProvasProfTab(tab, el) {
 // ══════════════════════════════════════════════════════
 // RELATÓRIO DE QUIZZES DE LIÇÃO
 // ══════════════════════════════════════════════════════
-let _qlTurmaAtual = 'criancas';
+let _qlTurmaAtual = 'juniores';
 
 function toggleQLicao(uid) {
   const body = document.getElementById(uid);
@@ -13156,7 +13524,7 @@ async function exportarRelatorioMensal() {
       <tr><th>Data</th><th>Turma</th><th>Presentes</th><th>Ausentes</th><th>Visitantes</th><th>Ofertas</th><th>Lição</th></tr>
       ${aulas.sort((a,b)=>a.data.localeCompare(b.data)).map(a => {
         const dt = new Date(a.data+'T12:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'});
-        const tc = a.turma==='criancas'?'tc':a.turma==='jovens'?'tj':'ta';
+        const tc = a.turma==='maternal'?'tm':a.turma==='juniores'?'tjr':a.turma==='jovens'?'tj':'ta';
         return `<tr>
           <td>${dt}</td>
           <td><span class="turma-badge ${tc}-badge">${TN[a.turma]||a.turma}</span></td>
@@ -13352,7 +13720,7 @@ function renderGraficoComparativoTurmas(alunos, aulas) {
   }
   const canvasEl = document.getElementById('chartTurmas');
   if (!canvasEl) return;
-  const turmas = ['criancas', 'jovens', 'adultos'];
+  const turmas = ['maternal','juniores', 'jovens', 'adultos'];
   const labels = turmas.map(t => TN[t]);
   const data = turmas.map(t => {
     const aulasT = aulas.filter(a => a.turma === t);
@@ -13610,7 +13978,7 @@ function dataDeISO(iso) {
 // MULTI-TURMA PROFESSOR
 // ═══════════════════════════════════════════════════════════
 function sincronizarTurmaPrincipal() {
-  var turmas = ['criancas','jovens','adultos'].filter(function(t) {
+  var turmas = ['maternal','juniores','jovens','adultos'].filter(function(t) {
     var el = document.getElementById('pe-turma-'+t);
     return el && el.checked;
   });
@@ -13621,8 +13989,8 @@ function sincronizarTurmaPrincipal() {
   if (j) j.value = JSON.stringify(turmas.length > 0 ? turmas : ['adultos']);
 }
 function carregarTurmasProf(turma, turmasArr) {
-  var arr = turmasArr || (turma === 'todas' ? ['criancas','jovens','adultos'] : turma ? [turma] : ['adultos']);
-  ['criancas','jovens','adultos'].forEach(function(t) {
+  var arr = turmasArr || (turma === 'todas' ? ['maternal','juniores','jovens','adultos'] : turma ? [turma] : ['adultos']);
+  ['maternal','juniores','jovens','adultos'].forEach(function(t) {
     var el = document.getElementById('pe-turma-'+t);
     if (el) el.checked = arr.indexOf(t) >= 0;
   });
@@ -14363,8 +14731,8 @@ async function renderFilhosResponsavel() {
     var aulas = [];
     try { var { data: a } = await sbClient.from('aulas').select('data,turma,presencas').order('data',{ascending:false}).limit(100); aulas = a||[]; } catch(e){}
     box.innerHTML = alunos.map(function(a) {
-      var avBg = a.turma==='criancas'?'var(--tc-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
-      var avCor = a.turma==='criancas'?'var(--tc)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
+      var avBg = a.turma==='maternal'?'var(--tm-bg)':a.turma==='juniores'?'var(--tjr-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
+      var avCor = a.turma==='maternal'?'var(--tm)':a.turma==='juniores'?'var(--tjr)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
       var aulasT = aulas.filter(function(x){ return x.turma===a.turma; });
       var pres = aulasT.filter(function(x){ return (x.presencas||{})[a.id]==='presente'; }).length;
       var pct = aulasT.length ? Math.round(pres/aulasT.length*100) : null;
@@ -14398,8 +14766,8 @@ async function abrirFilhoResponsavel(alunoId) {
     if (!a) { toast('Aluno não encontrado','er'); return; }
     _respFilhoAtual = a;
     // Hero
-    var avBg = a.turma==='criancas'?'var(--tc-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
-    var avCor = a.turma==='criancas'?'var(--tc)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
+    var avBg = a.turma==='maternal'?'var(--tm-bg)':a.turma==='juniores'?'var(--tjr-bg)':a.turma==='jovens'?'var(--tj-bg)':'var(--ta-bg)';
+    var avCor = a.turma==='maternal'?'var(--tm)':a.turma==='juniores'?'var(--tjr)':a.turma==='jovens'?'var(--tj)':'var(--ta)';
     heroCard.innerHTML = '<div class="resp-filho-hero-av" style="background:' + avBg + ';color:' + avCor + '">'
       + (a.foto_url ? '<img src="' + a.foto_url + '">' : ini(a.nome))
       + '</div><div class="resp-filho-hero-info">'
@@ -14494,7 +14862,7 @@ async function renderPix() {
 
   // Carregar dados nos campos de config
   if (podeConfig) {
-    var turmas = ['criancas', 'jovens', 'adultos'];
+    var turmas = ['maternal','juniores', 'jovens', 'adultos'];
     for (var ti = 0; ti < turmas.length; ti++) {
       var t = turmas[ti];
       var n = (await sbGetConfig('pix_nome_' + t)) || '';
@@ -14522,7 +14890,7 @@ async function salvarPixTurma(turma) {
   await sbSetConfig('pix_banco_' + turma,  banco.trim());
   await sbSetConfig('pix_chave_' + turma,  chave.trim());
   await sbSetConfig('pix_qrcode_' + turma, qr.trim());
-  var labels = { criancas:'Crianças', jovens:'Jovens', adultos:'Adultos' };
+  var labels = { maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
   toast('Pix ' + (labels[turma]||turma) + ' salvo! ❖', 'ok');
   renderPix();
 }
@@ -14995,7 +15363,7 @@ let _modalAlunosContexto = 'prova'; // 'prova' ou 'bonus'
 let _modalAlunosTurmaOverride = null;
 
 function _renderListaAlunosModal(turmaForca, filtro) {
-  const turma = turmaForca || document.getElementById('pv-turma')?.value || 'criancas';
+  const turma = turmaForca || document.getElementById('pv-turma')?.value || 'juniores';
   const box = document.getElementById('sel-alunos-lista');
   const countEl = document.getElementById('sel-alunos-count');
   let alunos = cacheAlunos.filter(a => a.turma === turma && (a.status||'ativo') === 'ativo');
@@ -15034,7 +15402,7 @@ function confirmarSelecaoAlunos() {
 // Sobrescrever filtrarListaAlunos para usar turma correta
 function filtrarListaAlunos() {
   const filtro = document.getElementById('sel-alunos-busca').value;
-  const turma = _modalAlunosTurmaOverride || document.getElementById('pv-turma')?.value || 'criancas';
+  const turma = _modalAlunosTurmaOverride || document.getElementById('pv-turma')?.value || 'juniores';
   _renderListaAlunosModal(turma, filtro);
 }
 
@@ -15261,7 +15629,7 @@ async function confirmarPromocao(alunoId, nomeAluno, modal) {
 // ══════════════════════════════════════════════
 // ESCALAS DE PROFESSORES
 // ══════════════════════════════════════════════
-var escalaTabAtual = 'criancas';
+var escalaTabAtual = 'juniores';
 
 function filtrarEscalaTab(turma, el) {
   escalaTabAtual = turma;
@@ -15373,8 +15741,8 @@ function fecharModalEscala() {
 
 function selecionarTurmaEscala(turma) {
   document.getElementById('esc-turma-sel').value = turma;
-  var cores = { criancas:'var(--tc)', jovens:'var(--primary)', adultos:'var(--red)' };
-  var bgs = { criancas:'var(--tc-bg)', jovens:'#e8f0ff', adultos:'var(--warn-bg)' };
+  var cores = { maternal:'var(--tm)', juniores:'var(--tjr)', jovens:'var(--tj)', adultos:'var(--ta)' };
+  var bgs = { maternal:'var(--tm-bg)', juniores:'var(--tjr-bg)', jovens:'var(--tj-bg)', adultos:'var(--ta-bg)' };
   document.querySelectorAll('.esc-turma-btn').forEach(function(btn) {
     var t = btn.getAttribute('data-turma');
     if (t === turma) {
@@ -16312,7 +16680,7 @@ if ('serviceWorker' in navigator) {
         <!-- Turma -->
         <div class="fg"><label class="fl">Turma</label>
           <select class="fc" id="aj-turma" onchange="ajTurmaChange()">
-            <option value="criancas">🟢 Crianças</option>
+            <option value="maternal">🍼 Maternal</option><option value="juniores">🧒 Juniores</option>
             <option value="jovens">🔵 Jovens</option>
             <option value="adultos">🔴 Adultos</option>
           </select>
@@ -16594,7 +16962,7 @@ const _csIcones = {
   'prova':'📝','recuperacao':'🔄','simulado':'↩️','quiz':'⚡','desafio':'🏆',
   'recuperação de presença':'🔄','recuperação':'🔄',
   // Turmas
-  'criancas':'👶','jovens':'🧑','adultos':'👤','crianças':'👶',
+  'maternal':'🍼','juniores':'🧒','jovens':'🧑','adultos':'👤',
   // Categorias
   'aviso':'📢','evento':'📅','lição':'📖','licao':'📖','outro':'📌',
   // Professores — usa iniciais
