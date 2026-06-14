@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<meta name="app-version" content="2.1.0">
 <title>EBD — ADTC Ayrton Senna 1</title>
 <meta name="theme-color" content="#111008">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -1562,9 +1566,18 @@ body.tema-escuro .cal-day.tem-aula { background: #0d1f15 !important; border-colo
 body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </style>
 <script>
-// Aplicar tema ANTES do render para evitar flash de tela branca
+// Controle de versão — força reload se versão antiga
 (function(){
+  var V = '2.1.0';
   try {
+    var stored = localStorage.getItem('_ebd_version');
+    if (stored && stored !== V) {
+      localStorage.setItem('_ebd_version', V);
+      window.location.reload(true);
+      return;
+    }
+    localStorage.setItem('_ebd_version', V);
+    // Aplicar tema antes do render
     if (localStorage.getItem('_ebd_tema') === 'escuro') {
       document.documentElement.setAttribute('data-theme','dark');
     }
