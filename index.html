@@ -5613,14 +5613,17 @@ function selecionarAlunoComoProf(id) {
   document.getElementById('pe-nome').value = a.nome;
   document.getElementById('pe-nome-sugestoes').style.display = 'none';
 
-  // Sexo — detectar pelo nome
+  // Sexo — usar o valor do banco, só detectar se não tiver
   const sexoEl = document.getElementById('pe-sexo');
-  if (sexoEl && !a.sexo) {
-    const terminacoesF = ['a','ana','lia','ria','ina','ela','isa','osa'];
-    const primeiroNome = a.nome.split(' ')[0].toLowerCase();
-    sexoEl.value = terminacoesF.some(t => primeiroNome.endsWith(t)) ? 'F' : 'M';
-  } else if (sexoEl && a.sexo) {
-    sexoEl.value = a.sexo;
+  if (sexoEl) {
+    if (a.sexo && (a.sexo === 'M' || a.sexo === 'F')) {
+      sexoEl.value = a.sexo;
+    } else {
+      // Detectar pelo primeiro nome como fallback
+      const terminacoesF = ['a','e','i','ana','lia','ria','ina','ela','isa','ile','ane','ine'];
+      const primeiroNome = a.nome.split(' ')[0].toLowerCase();
+      sexoEl.value = terminacoesF.some(t => primeiroNome.endsWith(t)) ? 'F' : 'M';
+    }
   }
 
   // Data de nascimento
@@ -5647,8 +5650,13 @@ function selecionarAlunoComoProf(id) {
   const chk = document.getElementById('pe-tambem-aluno');
   if (chk) {
     chk.checked = true;
-    document.getElementById('pe-turma-aluno-wrap').style.display = 'block';
-    document.getElementById('pe-turma-aluno').value = a.turma || 'jovens';
+    const wrap = document.getElementById('pe-turma-aluno-wrap');
+    if (wrap) wrap.style.display = 'block';
+    // Setar valor após display:block para garantir que select está visível
+    setTimeout(() => {
+      const sel = document.getElementById('pe-turma-aluno');
+      if (sel) sel.value = a.turma || 'jovens';
+    }, 50);
   }
 
   document.getElementById('pe-login').focus();
