@@ -3416,7 +3416,11 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
     <div class="modal" onclick="event.stopPropagation()">
       <div class="mhdr"><h3 class="mtitle" id="mo-prof-titulo">Novo professor</h3><button class="mclose" onclick="fecharModal('mo-prof')">&#x2715;</button></div>
       <input type="hidden" id="pe-id">
-      <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="pe-nome" placeholder="Nome do professor/professora"></div>
+      <div class="fg" style="position:relative">
+        <label class="fl">Nome completo</label>
+        <input class="fc" id="pe-nome" placeholder="Nome do professor/professora" autocomplete="off" oninput="buscarAlunoParaProf(this.value)">
+        <div id="pe-nome-sugestoes" style="display:none;position:absolute;top:100%;left:0;right:0;background:var(--bg-card);border:1.5px solid var(--gold);border-radius:var(--rsm);box-shadow:0 4px 16px rgba(0,0,0,.15);z-index:200;max-height:200px;overflow-y:auto"></div>
+      </div>
       <div class="fg"><label class="fl">Sexo</label><select class="fc" id="pe-sexo"><option value="M">Masculino (Professor)</option><option value="F">Feminino (Professora)</option></select></div>
       <div class="frow">
         <div class="fg"><label class="fl">Data de nascimento</label><input class="fc date-mask-input" type="text" id="pe-nasc" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="mascaraData(this)"></div>
@@ -4238,13 +4242,15 @@ async function iniciarApp() {
   // Admin/Pastor/Super: SEMPRE carregar todos os alunos, sem filtro de turma
   // Modo professor de um admin: filtra pelas turmas do professor vinculado
   if (_modo('professor') && isAdmin() && USER._turmas_prof && USER._turmas_prof.length) {
+    const profTurmasAdmin = USER._turmas_prof.map(t => t === 'criancas' ? 'juniores' : t);
     const arrays = await Promise.all(
-      USER._turmas_prof.map(function(t){ return sbGet('alunos', { turma: t }); })
+      profTurmasAdmin.map(function(t){ return sbGet('alunos', { turma: t }); })
     );
     cacheAlunos = arrays.reduce(function(acc, arr){ return acc.concat(arr); }, []);
   } else if (isProfessor() && !isAdmin()) {
-    const profTurmas = Array.isArray(USER.turmas) && USER.turmas.length
-      ? USER.turmas : [USER.turma];
+    const profTurmas = (Array.isArray(USER.turmas) && USER.turmas.length
+      ? USER.turmas : [USER.turma])
+      .map(t => t === 'criancas' ? 'juniores' : t); // migração automática
     const alunosArrays = await Promise.all(
       profTurmas.map(function(t){ return sbGet('alunos', { turma: t }); })
     );
@@ -5571,6 +5577,63 @@ async function abrirModalProf(id) {
   document.getElementById('mo-prof').style.display = 'block';
   setTimeout(() => document.getElementById('pe-nome').focus(), 100);
 }
+async function buscarAlunoParaProf(valor) {
+  const box = document.getElementById('pe-nome-sugestoes');
+  if (!box) return;
+  const q = valor.trim().toLowerCase();
+  if (q.length < 2) { box.style.display = 'none'; return; }
+
+  const resultados = (cacheAlunos || []).filter(a =>
+    a.nome.toLowerCase().includes(q) && (a.status || 'ativo') === 'ativo'
+  ).slice(0, 6);
+
+  if (!resultados.length) { box.style.display = 'none'; return; }
+
+  const TUR = { maternal:'🍼 Maternal', juniores:'🧒 Juniores', jovens:'🔵 Jovens', adultos:'🔴 Adultos' };
+  box.innerHTML = resultados.map(a => `
+    <div onclick="selecionarAlunoComoProf('${a.id}')"
+      style="padding:10px 14px;cursor:pointer;border-bottom:1px solid var(--cb);display:flex;align-items:center;gap:10px"
+      onmouseover="this.style.background='var(--cream)'" onmouseout="this.style.background=''">
+      <div style="width:30px;height:30px;border-radius:50%;background:var(--ink);color:var(--gold-l);font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${a.nome.split(' ').slice(0,2).map(n=>n[0]).join('').toUpperCase()}
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:600;color:var(--text-main)">${a.nome}</div>
+        <div style="font-size:11px;color:var(--ink-soft)">${TUR[a.turma]||a.turma} · Aluno cadastrado</div>
+      </div>
+    </div>`).join('');
+  box.style.display = 'block';
+}
+
+function selecionarAlunoComoProf(id) {
+  const a = (cacheAlunos || []).find(x => x.id === id);
+  if (!a) return;
+  document.getElementById('pe-nome').value = a.nome;
+  document.getElementById('pe-nome-sugestoes').style.display = 'none';
+  // Preencher login se o aluno tiver
+  if (a.login) document.getElementById('pe-login').value = a.login;
+  // Preencher tel se tiver
+  if (a.tel) document.getElementById('pe-tel').value = a.tel || '';
+  // Marcar também aluno e turma
+  const chk = document.getElementById('pe-tambem-aluno');
+  if (chk) {
+    chk.checked = true;
+    document.getElementById('pe-turma-aluno-wrap').style.display = 'block';
+    document.getElementById('pe-turma-aluno').value = a.turma || 'jovens';
+  }
+  // Focar no próximo campo
+  document.getElementById('pe-login').focus();
+  toast(`✓ ${a.nome} encontrado como aluno!`, 'ok');
+}
+
+// Fechar sugestões ao clicar fora
+document.addEventListener('click', function(e) {
+  const box = document.getElementById('pe-nome-sugestoes');
+  if (box && !box.contains(e.target) && e.target.id !== 'pe-nome') {
+    box.style.display = 'none';
+  }
+});
+
 async function salvarProf() {
   const nome = document.getElementById('pe-nome').value.trim();
   if (!nome) { toast('Preencha o nome', 'er'); return; }
