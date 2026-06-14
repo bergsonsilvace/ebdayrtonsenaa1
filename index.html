@@ -1566,17 +1566,20 @@ body.tema-escuro .cal-day.tem-aula { background: #0d1f15 !important; border-colo
 body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </style>
 <script>
-// Controle de versão — força reload se versão antiga
+// Controle de versão — força reload e limpa cache se versão antiga
 (function(){
-  var V = '2.1.0';
+  var V = '2.2.0';
   try {
     var stored = localStorage.getItem('_ebd_version');
-    if (stored && stored !== V) {
+    if (stored !== V) {
+      // Limpar caches antigos
       localStorage.setItem('_ebd_version', V);
-      window.location.reload(true);
-      return;
+      // Forçar reload completo sem cache
+      if (stored) {
+        window.location.href = window.location.href.split('?')[0] + '?v=' + V;
+        return;
+      }
     }
-    localStorage.setItem('_ebd_version', V);
     // Aplicar tema antes do render
     if (localStorage.getItem('_ebd_tema') === 'escuro') {
       document.documentElement.setAttribute('data-theme','dark');
@@ -3365,7 +3368,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <input type="file" id="ae-foto-input" accept="image/*" style="display:none" onchange="previewFotoAluno(this)">
       </div>
       <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="ae-nome" placeholder="Nome do aluno"></div>
-      <div class="fg"><label class="fl">Turma</label><select class="fc" id="ae-turma"><option value="juniores">Crian&ccedil;as</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
+      <div class="fg"><label class="fl">Turma</label><select class="fc" id="ae-turma"><option value="maternal">🍼 Maternal</option><option value="juniores">🧒 Juniores</option><option value="jovens">🔵 Jovens</option><option value="adultos">🔴 Adultos</option></select></div>
       <div class="frow">
         <div class="fg"><label class="fl">Data de nascimento</label><input class="fc date-mask-input" type="text" id="ae-nasc" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="mascaraData(this)"></div>
         <div class="fg"><label class="fl">Telefone</label><input class="fc" id="ae-tel" placeholder="(00) 00000-0000"></div>
@@ -3422,7 +3425,8 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="fg">
         <label class="fl">Turmas que leciona</label>
         <div class="turmas-check-wrap">
-          <label class="turma-check-label"><input type="checkbox" id="pe-turma-criancas" value="juniores" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-c"></span> Crianças</label>
+          <label class="turma-check-label"><input type="checkbox" id="pe-turma-maternal" value="maternal" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-m"></span> Maternal</label>
+          <label class="turma-check-label"><input type="checkbox" id="pe-turma-juniores" value="juniores" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-jr"></span> Juniores</label>
           <label class="turma-check-label"><input type="checkbox" id="pe-turma-jovens" value="jovens" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-j"></span> Jovens</label>
           <label class="turma-check-label"><input type="checkbox" id="pe-turma-adultos" value="adultos" onchange="sincronizarTurmaPrincipal()"><span class="dot dot-a"></span> Adultos</label>
         </div>
@@ -3454,9 +3458,10 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div id="pe-turma-aluno-wrap" style="display:none;margin-top:10px">
           <label class="fl">Turma como aluno</label>
           <select class="fc" id="pe-turma-aluno" style="margin-top:4px">
-            <option value="juniores">Crian&#231;as</option>
-            <option value="jovens">Jovens</option>
-            <option value="adultos">Adultos</option>
+            <option value="maternal">🍼 Maternal</option>
+            <option value="juniores">🧒 Juniores</option>
+            <option value="jovens">🔵 Jovens</option>
+            <option value="adultos">🔴 Adultos</option>
           </select>
         </div>
       </div>
