@@ -6584,18 +6584,32 @@ async function renderRanking() {
     // Atualizar caches
     cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
 
-    // Montar _quizScoresTodos local para esta turma
+    // Filtrar quiz_resultados pelo período do trimestre
     if (qRes.data) {
-      qRes.data.forEach(r => {
-        if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
-        _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
-          acertos: r.acertos, total: r.total, pct: r.pct,
-          pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null
-        };
-      });
+      // Limpar scores desta turma antes de repopular
+      alunos.forEach(a => { if (_quizScoresTodos[a.id]) { Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); } });
+      qRes.data
+        .filter(r => {
+          if (!trim) return true;
+          const data = r.created_at ? r.created_at.substring(0,10) : null;
+          return !data || (data >= trim.inicio && data <= trim.fim);
+        })
+        .forEach(r => {
+          if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
+          _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
+            acertos: r.acertos, total: r.total, pct: r.pct,
+            pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null
+          };
+        });
     }
-    if (pRes.data) PROVAS = pRes.data;
-    if (dRes.data) _desafioPontos = dRes.data;
+    // Filtrar provas e desafios pelo período
+    if (pRes.data) PROVAS = trim ? pRes.data.filter(p => !p.data || (p.data >= trim.inicio && p.data <= trim.fim)) : pRes.data;
+    if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data || (d.data >= trim.inicio && d.data <= trim.fim)) : dRes.data;
+    // Filtrar bônus pelo período
+    if (trim) {
+      bonusTurma = bonusTurma.filter(b => !b.data || (b.data >= trim.inicio && b.data <= trim.fim));
+      ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data || (a.data >= trim.inicio && a.data <= trim.fim));
+    }
 
   } catch(e) {
     // Fallback para cache
@@ -6618,6 +6632,24 @@ async function renderRanking() {
 
   if (!alunos.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
+    return;
+  }
+
+  // Trimestre sem aulas — mostrar zerado
+  if (!aulasT.length) {
+    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    box.innerHTML = `<div style="text-align:center;padding:24px 16px">
+      <div style="font-size:36px;margin-bottom:12px">📋</div>
+      <div style="font-size:15px;font-weight:700;color:var(--text-main);margin-bottom:6px">${trim?.label || 'Trimestre'}</div>
+      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6">Nenhuma aula registrada neste período.<br>O ranking começará quando as aulas forem lançadas.</div>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
+        ${alunos.map((a,i) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rsm);background:var(--cream);border:1px solid var(--cb);opacity:.5">
+          <div style="font-size:13px;font-weight:700;color:var(--ink-soft);width:20px">${i+1}º</div>
+          <div style="font-size:13px;font-weight:600;color:var(--ink);flex:1">${a.nome}</div>
+          <div style="font-size:12px;color:var(--ink-soft)">0 pts · 0%</div>
+        </div>`).join('')}
+      </div>
+    </div>`;
     return;
   }
 
