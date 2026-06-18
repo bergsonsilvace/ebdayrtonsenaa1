@@ -4319,7 +4319,7 @@ async function _recarregarDados() {
     const pgAtual = document.querySelector('.page.on');
     if (pgAtual) {
       const id = pgAtual.id.replace('pg-', '');
-      if (id === 'ranking') { renderRankTrimAcc(); await renderRanking(); }
+      if (id === 'ranking') { renderRankTrimAcc(); if (curRankTrimestre) await renderRanking(); }
       else if (id === 'freq') { /* não recarrega freq para não perder chamada em andamento */ }
       else if (id === 'dash') await renderDash();
       else if (id === 'historico') renderHist();
@@ -6540,6 +6540,12 @@ function renderRankTrimAcc() {
 }
 
 function selRankTrimestre(id) {
+  // Se clicar no mesmo trimestre aberto, fecha
+  if (curRankTrimestre === id) {
+    curRankTrimestre = null;
+    renderRankTrimAcc();
+    return;
+  }
   curRankTrimestre = id;
   renderRankTrimAcc();
   renderRanking();
@@ -6550,7 +6556,7 @@ async function renderRanking() {
   const box = document.getElementById('lista-ranking-' + curRankTrimestre) 
             || document.getElementById('lista-ranking');
   if (!box) return;
-  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+  box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
 
   // Buscar TUDO em paralelo de uma vez
   let alunos = [], aulasT = [], bonusTurma = [], ajustesTurmaRank = [];
