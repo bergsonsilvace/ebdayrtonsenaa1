@@ -16863,8 +16863,26 @@ async function pwaBtnInstalarLogin() {
 if ('serviceWorker' in navigator) {
   window.addEventListener('load', () => {
     navigator.serviceWorker.register('/sw.js').then(reg => {
-      console.log('SW registrado');
+      // Forçar verificação de atualização imediata
+      reg.update();
+      // Quando novo SW estiver pronto, recarregar automaticamente
+      reg.addEventListener('updatefound', () => {
+        const newWorker = reg.installing;
+        if (newWorker) {
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Novo SW instalado — recarregar para aplicar
+              window.location.reload();
+            }
+          });
+        }
+      });
     }).catch(()=>{});
+
+    // Detectar quando SW toma controle (primeira instalação)
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+      window.location.reload();
+    });
   });
 }
 </script>

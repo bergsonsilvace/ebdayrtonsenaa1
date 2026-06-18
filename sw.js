@@ -1,87 +1,36 @@
-// EBD Frequência — Service Worker v2.0
 const CACHE = 'ebd-v2';
+const OFFLINE_URL = '/';
 
-// Instalação — cachear a página principal
-self.addEventListener('install', function(e) {
+self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(function(cache) {
-      return cache.addAll(['/']);
-    }).then(function() {
-      return self.skipWaiting();
-    })
+    caches.open(CACHE).then(cache => cache.add(OFFLINE_URL))
   );
+  self.skipWaiting();
 });
 
-// Ativação — limpar caches antigos
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', e => {
+  // Deletar TODOS os caches antigos
   e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE; })
-          .map(function(k) { return caches.delete(k); })
-      );
-    }).then(function() {
-      return self.clients.claim();
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-// Fetch — cache first para HTML, network first para Supabase
-self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
-
-  // Supabase — sempre online, nunca cachear
-  if (url.includes('supabase.co')) return;
-
-  // Só GET
+self.addEventListener('fetch', e => {
   if (e.request.method !== 'GET') return;
-
+  const url = new URL(e.request.url);
+  // index.html: SEMPRE busca da rede, nunca do cache
+  if (url.pathname === '/' || url.pathname.endsWith('index.html')) {
+    e.respondWith(
+      fetch(e.request, { cache: 'no-store' })
+        .catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+  // Outros recursos: network first
   e.respondWith(
-    // Tentar rede primeiro
-    fetch(e.request).then(function(response) {
-      // Se deu certo, cachear e retornar
-      if (response && response.status === 200) {
-        var clone = response.clone();
-        caches.open(CACHE).then(function(cache) {
-          cache.put(e.request, clone);
-        });
-      }
-      return response;
-    }).catch(function() {
-      // Sem internet — retornar do cache
-      return caches.match(e.request).then(function(cached) {
-        if (cached) return cached;
-        // Fallback para a página principal
-        return caches.match('/');
-      });
-    })
-  );
-});
-
-// Push notification
-self.addEventListener('push', function(e) {
-  var data = { title: 'EBD Frequência', body: 'Nova notificação' };
-  try { if (e.data) data = Object.assign(data, e.data.json()); } catch(err) {}
-  e.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-      icon: '/icon-192.png',
-      badge: '/icon-192.png',
-      vibrate: [200, 100, 200],
-      tag: 'ebd-notif'
-    })
-  );
-});
-
-// Clique na notificação
-self.addEventListener('notificationclick', function(e) {
-  e.notification.close();
-  e.waitUntil(
-    clients.matchAll({ type: 'window' }).then(function(list) {
-      for (var c of list) {
-        if ('focus' in c) return c.focus();
-      }
-      if (clients.openWindow) return clients.openWindow('/');
-    })
+    fetch(e.request).catch(() => caches.match(e.request))
   );
 });
