@@ -4432,9 +4432,11 @@ async function _navTo(id) {
     const rankTabs = document.getElementById('rank-ttabs');
     if (rankTabs) rankTabs.style.display = ehAluno ? 'none' : '';
     if (ehAluno && rankTurmaAl) curTurmaRank = rankTurmaAl;
-    // Renderizar accordion PRIMEIRO — cria os containers lista-ranking-X no DOM
+    // Carregar exclusões do Supabase PRIMEIRO
+    await Promise.all(['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t)));
+    // Renderizar accordion — cria os containers lista-ranking-X no DOM
     renderRankTrimAcc();
-    // Depois renderizar ranking (já usa cache-first internamente)
+    // Renderizar ranking
     await renderRanking();
   }
   else if (id === 'config') carregarPaginaConfig();
@@ -6683,7 +6685,6 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
     const excluidos = _rankExclusoesCache[curTurmaRank] || [];
     if (excluidos.length) alunos = alunos.filter(a => !excluidos.includes(a.id));
   } catch(e) {}
-
   const MEDALHAS = ['🥇', '🥈', '🥉'];
   const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
   const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
@@ -12307,13 +12308,15 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Buscar dados frescos do banco — incluir nasc para desempate por idade
     const { data: alunosData } = await sbClient.from('alunos')
       .select('id,nome,status,nasc').eq('turma', turmaUsar);
+    // Garantir que exclusões estão carregadas do Supabase
+    if (!_rankExclusoesCache[turmaUsar]) {
+      await _carregarExclusoesTurma(turmaUsar);
+    }
     const alunos = (alunosData || []).filter(a => {
       if ((a.status||'ativo') !== 'ativo') return false;
-      // Filtrar excluídos do ranking
-      try {
-        const excl = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turmaUsar) || '[]');
-        if (excl.includes(a.id)) return false;
-      } catch(e) {}
+      // Filtrar excluídos do ranking — do Supabase
+      const excl = _rankExclusoesCache[turmaUsar] || [];
+      if (excl.includes(a.id)) return false;
       return true;
     });
 
