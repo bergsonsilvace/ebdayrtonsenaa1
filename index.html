@@ -4427,14 +4427,12 @@ async function _navTo(id) {
   else if (id === 'ranking') {
     const ehAluno = USER && (USER.perfil === 'aluno' || _modo('aluno'));
     const rankTurmaAl = ehAluno ? (USER.turma_aluno || USER.turma) : null;
-    // Ocultar abas de turma para aluno
     const rankTabs = document.getElementById('rank-ttabs');
     if (rankTabs) rankTabs.style.display = ehAluno ? 'none' : '';
-    cacheAlunos = await sbGet('alunos');
-    cacheAulas = await sbGet('aulas',{},'data',false);
-    if (ehAluno && rankTurmaAl) {
-      curTurmaRank = rankTurmaAl;
-    }
+    if (ehAluno && rankTurmaAl) curTurmaRank = rankTurmaAl;
+    // Renderizar accordion PRIMEIRO — cria os containers lista-ranking-X no DOM
+    renderRankTrimAcc();
+    // Depois renderizar ranking (já usa cache-first internamente)
     await renderRanking();
   }
   else if (id === 'config') carregarPaginaConfig();
