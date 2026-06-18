@@ -2346,16 +2346,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <button class="ttab ta" onclick="selTurmaRanking('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
       <!-- Seletor de trimestre estilo lições -->
-      <div id="rank-trim-accordion" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
-      <div class="card">
-        <div class="chdr"><div class="ct" id="rank-subtitulo">2º Trimestre 2026</div>
-          <div style="display:flex;gap:5px">
-            <button class="btn btn-sm" id="rank-tipo-freq" onclick="setRankTipo('freq',this)" style="background:var(--ink);color:white;padding:5px 10px;font-size:11px;border-radius:6px">Presença</button>
-            <button class="btn btn-ou btn-sm" id="rank-tipo-pts" onclick="setRankTipo('pts',this)" style="padding:5px 10px;font-size:11px;border-radius:6px">Pontos</button>
-          </div>
-        </div>
-        <div id="lista-ranking"></div>
-      </div>
+      <div id="rank-trim-accordion" style="display:flex;flex-direction:column;gap:4px;margin-bottom:4px"></div>
     </div>
 
     <!-- PERFIL -->
@@ -6524,94 +6515,89 @@ function renderRankTrimAcc() {
   acc.innerHTML = trs.map(([id, tr]) => {
     const aberto = id === curRankTrimestre;
     return `<div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);margin-bottom:4px">
-      <div onclick="selRankTrimestre('${id}',this)" style="background:${aberto?'var(--ink)':'var(--gold-pale)'};padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+      <!-- Header -->
+      <div onclick="selRankTrimestre('${id}')" style="background:${aberto?'var(--ink)':'var(--gold-pale)'};padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .25s">
         <div>
           <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto?'var(--gold-l)':'var(--gold-deep)'};margin-bottom:4px">${tr.label}</div>
           <div style="font-size:12px;color:${aberto?'rgba(255,255,255,.45)':'var(--ink-soft)'}">
-            ${id==='2t2026'?'Trimestre atual':'Conteúdo em breve'}
+            ${id==='2t2026'?'Trimestre atual — Abril a Junho 2026':'Conteúdo em breve'}
           </div>
         </div>
         <div style="font-size:20px;color:${aberto?'var(--gold)':'var(--gold-deep)'};transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
+      </div>
+      <!-- Conteúdo inline -->
+      <div style="max-height:${aberto?'9999px':'0'};overflow:hidden;transition:max-height .4s ease">
+        <div style="padding:10px 0">
+          <div style="display:flex;gap:5px;padding:0 12px 10px">
+            <button class="btn btn-sm" id="rank-tipo-freq-${id}" onclick="setRankTipo('freq',this)" style="background:var(--ink);color:white;padding:5px 10px;font-size:11px;border-radius:6px">Presença</button>
+            <button class="btn btn-ou btn-sm" id="rank-tipo-pts-${id}" onclick="setRankTipo('pts',this)" style="padding:5px 10px;font-size:11px;border-radius:6px">Pontos</button>
+          </div>
+          <div id="lista-ranking-${id}" style="padding:0 4px"></div>
+        </div>
       </div>
     </div>`;
   }).join('');
 }
 
-function selRankTrimestre(id, headerEl) {
+function selRankTrimestre(id) {
   curRankTrimestre = id;
   renderRankTrimAcc();
-  const sub = document.getElementById('rank-subtitulo');
-  if (sub) sub.textContent = RANK_TRIMESTRES[id]?.label || '';
   renderRanking();
 }
 
 async function renderRanking() {
-  const box = document.getElementById('lista-ranking');
-  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">Carregando ranking...</div>';
+  // Usar container do trimestre atual dentro do accordion
+  const box = document.getElementById('lista-ranking-' + curRankTrimestre) 
+            || document.getElementById('lista-ranking');
+  if (!box) return;
+  box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
 
-  // Buscar SEMPRE do banco — turma filtrada — dados frescos
-  let alunos = [], aulasT = [];
-  try {
-    const { data: al } = await sbClient.from('alunos')
-      .select('*').eq('turma', curTurmaRank).eq('status', 'ativo');
-    alunos = al || [];
-  } catch(e) { alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo'); }
+  // Buscar TUDO em paralelo de uma vez
+  let alunos = [], aulasT = [], bonusTurma = [], ajustesTurmaRank = [];
 
   try {
-    const { data: au } = await sbClient.from('aulas')
-      .select('*').eq('turma', curTurmaRank);
-    const todasAulas = au || [];
-    // Filtrar pelo trimestre selecionado
-    const trim = RANK_TRIMESTRES[curRankTrimestre];
-    aulasT = trim
-      ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim)
-      : todasAulas;
-    // Atualizar cache
-    const outrasAulas = cacheAulas.filter(a => a.turma !== curTurmaRank);
-    cacheAulas = [...outrasAulas, ...todasAulas];
-  } catch(e) {
-    const todasCache = cacheAulas.filter(a => a.turma === curTurmaRank);
-    const trim = RANK_TRIMESTRES[curRankTrimestre];
-    aulasT = trim
-      ? todasCache.filter(a => a.data >= trim.inicio && a.data <= trim.fim)
-      : todasCache;
-  }
-
-  if (!alunos.length) {
-    box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
-    return;
-  }
-
-  // Mostrar info do trimestre
-  const trimAtual = RANK_TRIMESTRES[curRankTrimestre];
-  if (trimAtual) {
-    const rankSub = document.getElementById('rank-subtitulo');
-    if (rankSub) rankSub.textContent = trimAtual.label;
-  }
-
-  // Filtrar alunos excluídos do ranking
-  try {
-    const exclStr = localStorage.getItem('ranking_exclusoes_' + curTurmaRank);
-    if (exclStr) {
-      const excluidos = JSON.parse(exclStr);
-      alunos = alunos.filter(a => !excluidos.includes(a.id));
-    }
-  } catch(e) {}
-
-  // Carregar quizzes, provas, desafios e bônus juntos
-  await Promise.all([carregarQuizScoresTodos(), carregarProvas(), carregarDesafioPontos()]);
-
-  // Buscar bônus manuais E ajustes da turma
-  let bonusTurma = [];
-  let ajustesTurmaRank = [];
-  try {
-    const [bRes, aRes] = await Promise.all([
+    const [alRes, auRes, bRes, aRes, qRes, pRes, dRes] = await Promise.all([
+      sbClient.from('alunos').select('*').eq('turma', curTurmaRank).eq('status', 'ativo'),
+      sbClient.from('aulas').select('*').eq('turma', curTurmaRank),
       sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank),
-      sbClient.from('ajustes_pontuacao').select('*').eq('turma', curTurmaRank)
+      sbClient.from('ajustes_pontuacao').select('*').eq('turma', curTurmaRank),
+      sbClient.from('quiz_resultados').select('*').eq('turma', curTurmaRank),
+      sbClient.from('provas').select('*').eq('turma', curTurmaRank),
+      sbClient.from('desafio_pontos').select('*').eq('turma', curTurmaRank),
     ]);
+
+    alunos = alRes.data || [];
+    const todasAulas = auRes.data || [];
     bonusTurma = bRes.data || [];
     ajustesTurmaRank = aRes.data || [];
-  } catch(e) {}
+
+    // Filtrar aulas pelo trimestre
+    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    aulasT = trim ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasAulas;
+
+    // Atualizar caches
+    cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
+
+    // Montar _quizScoresTodos local para esta turma
+    if (qRes.data) {
+      qRes.data.forEach(r => {
+        if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
+        _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
+          acertos: r.acertos, total: r.total, pct: r.pct,
+          pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null
+        };
+      });
+    }
+    if (pRes.data) PROVAS = pRes.data;
+    if (dRes.data) _desafioPontos = dRes.data;
+
+  } catch(e) {
+    // Fallback para cache
+    alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo');
+    const todasCache = cacheAulas.filter(a => a.turma === curTurmaRank);
+    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    aulasT = trim ? todasCache.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasCache;
+  }
 
   // Função auxiliar: calcular bônus + ajustes de um aluno (nunca abaixo de 0)
   function _bonusDoAluno(alunoId) {
@@ -6623,6 +6609,20 @@ async function renderRanking() {
       .reduce((s, a) => s + (parseFloat(a.pontos)||0), 0);
     return bonus + ajustes;
   }
+
+  if (!alunos.length) {
+    box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
+    return;
+  }
+
+  // Filtrar alunos excluídos do ranking
+  try {
+    const exclStr = localStorage.getItem('ranking_exclusoes_' + curTurmaRank);
+    if (exclStr) {
+      const excluidos = JSON.parse(exclStr);
+      alunos = alunos.filter(a => !excluidos.includes(a.id));
+    }
+  } catch(e) {}
 
   let ranking;
 
@@ -11435,14 +11435,11 @@ _Sistema EBD — ADTC Ayrton Senna 1_`;
 let rankTipo = 'freq';
 async function setRankTipo(tipo, el) {
   rankTipo = tipo;
-  const btnFreq = document.getElementById('rank-tipo-freq');
-  const btnPts = document.getElementById('rank-tipo-pts');
-  const subtitulo = document.getElementById('rank-subtitulo');
-  btnFreq.style.background = tipo === 'freq' ? 'var(--ink)' : '';
-  btnFreq.style.color = tipo === 'freq' ? 'white' : '';
-  btnPts.style.background = tipo === 'pts' ? 'var(--ink)' : '';
-  btnPts.style.color = tipo === 'pts' ? 'white' : '';
-  if (subtitulo) subtitulo.textContent = tipo === 'freq' ? 'Frequência' : 'Pontuação Geral';
+  // Atualizar botões do trimestre atual
+  const btnFreq = document.getElementById('rank-tipo-freq-' + curRankTrimestre);
+  const btnPts = document.getElementById('rank-tipo-pts-' + curRankTrimestre);
+  if (btnFreq) { btnFreq.style.background = tipo==='freq'?'var(--ink)':''; btnFreq.style.color = tipo==='freq'?'white':''; }
+  if (btnPts) { btnPts.style.background = tipo==='pts'?'var(--ink)':''; btnPts.style.color = tipo==='pts'?'white':''; }
   await renderRanking();
 }
 
