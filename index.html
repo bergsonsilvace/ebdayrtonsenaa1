@@ -6153,7 +6153,11 @@ async function selTurmaRanking(turma, el) {
   curTurmaRank = turma;
   document.querySelectorAll('#rank-ttabs .ttab').forEach(t=>t.classList.remove('on'));
   if (el) el.classList.add('on');
-  await renderRanking();
+  // Invalidar cache da turma para buscar dados frescos
+  delete _rankCache[turma];
+  // Re-renderizar accordion com nova turma
+  renderRankTrimAcc();
+  if (curRankTrimestre) await renderRanking();
 }
 
 // Calcula a idade em anos a partir de data de nascimento (YYYY-MM-DD)
@@ -6515,22 +6519,20 @@ function renderRankTrimAcc() {
   acc.innerHTML = trs.map(([id, tr]) => {
     const aberto = id === curRankTrimestre;
     return `<div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);margin-bottom:4px">
-      <!-- Header -->
-      <div onclick="selRankTrimestre('${id}')" style="background:${aberto?'var(--ink)':'var(--gold-pale)'};padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .25s">
+      <div data-rank-trim="${id}" onclick="selRankTrimestre('${id}')" style="background:${aberto?'var(--ink)':'var(--gold-pale)'};padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between;transition:background .25s">
         <div>
-          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto?'var(--gold-l)':'var(--gold-deep)'};margin-bottom:4px">${tr.label}</div>
-          <div style="font-size:12px;color:${aberto?'rgba(255,255,255,.45)':'var(--ink-soft)'}">
+          <div class="rank-trim-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto?'var(--gold-l)':'var(--gold-deep)'};margin-bottom:4px">${tr.label}</div>
+          <div class="rank-trim-sub" style="font-size:12px;color:${aberto?'rgba(255,255,255,.45)':'var(--ink-soft)'}">
             ${id==='2t2026'?'Trimestre atual — Abril a Junho 2026':'Conteúdo em breve'}
           </div>
         </div>
-        <div style="font-size:20px;color:${aberto?'var(--gold)':'var(--gold-deep)'};transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
+        <div class="rank-trim-arrow" style="font-size:20px;color:${aberto?'var(--gold)':'var(--gold-deep)'};transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
       </div>
-      <!-- Conteúdo inline -->
-      <div style="max-height:${aberto?'9999px':'0'};overflow:hidden;transition:max-height .4s ease">
+      <div id="rank-trim-body-${id}" style="max-height:${aberto?'9999px':'0'};overflow:hidden;transition:max-height .4s ease">
         <div style="padding:10px 0">
           <div style="display:flex;gap:5px;padding:0 12px 10px">
-            <button class="btn btn-sm" id="rank-tipo-freq-${id}" onclick="setRankTipo('freq',this)" style="background:var(--ink);color:white;padding:5px 10px;font-size:11px;border-radius:6px">Presença</button>
-            <button class="btn btn-ou btn-sm" id="rank-tipo-pts-${id}" onclick="setRankTipo('pts',this)" style="padding:5px 10px;font-size:11px;border-radius:6px">Pontos</button>
+            <button id="rank-tipo-freq-${id}" onclick="setRankTipo('freq',this)" style="padding:6px 12px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid var(--cb);cursor:pointer;font-family:inherit;background:${rankTipo!=='pts'?'var(--ink)':'var(--cream)'};color:${rankTipo!=='pts'?'white':'var(--ink-soft)'}">Presença</button>
+            <button id="rank-tipo-pts-${id}" onclick="setRankTipo('pts',this)" style="padding:6px 12px;font-size:11px;font-weight:700;border-radius:6px;border:1px solid var(--cb);cursor:pointer;font-family:inherit;background:${rankTipo==='pts'?'var(--ink)':'var(--cream)'};color:${rankTipo==='pts'?'white':'var(--ink-soft)'}">Pontos</button>
           </div>
           <div id="lista-ranking-${id}" style="padding:0 4px"></div>
         </div>
@@ -6540,30 +6542,69 @@ function renderRankTrimAcc() {
 }
 
 function selRankTrimestre(id) {
-  // Se clicar no mesmo trimestre aberto, fecha
   if (curRankTrimestre === id) {
+    // Fechar — colapsar visualmente sem recriar o accordion
     curRankTrimestre = null;
-    renderRankTrimAcc();
+    // Fechar todos os bodies
+    document.querySelectorAll('[id^="rank-trim-body-"]').forEach(b => { b.style.maxHeight = '0'; });
+    // Resetar headers
+    document.querySelectorAll('[data-rank-trim]').forEach(h => {
+      const isThis = false;
+      h.style.background = 'var(--gold-pale)';
+      h.querySelector('.rank-trim-arrow').style.transform = 'none';
+    });
     return;
   }
+  const prev = curRankTrimestre;
   curRankTrimestre = id;
-  renderRankTrimAcc();
+
+  // Fechar anterior
+  if (prev) {
+    const prevBody = document.getElementById('rank-trim-body-' + prev);
+    const prevHdr = document.querySelector(`[data-rank-trim="${prev}"]`);
+    if (prevBody) prevBody.style.maxHeight = '0';
+    if (prevHdr) { prevHdr.style.background = 'var(--gold-pale)'; prevHdr.querySelector('.rank-trim-arrow').style.transform = 'none'; prevHdr.querySelector('.rank-trim-label').style.color = 'var(--gold-deep)'; prevHdr.querySelector('.rank-trim-sub').style.color = 'var(--ink-soft)'; }
+  }
+
+  // Abrir novo
+  const body = document.getElementById('rank-trim-body-' + id);
+  const hdr = document.querySelector(`[data-rank-trim="${id}"]`);
+  if (body) body.style.maxHeight = '9999px';
+  if (hdr) { hdr.style.background = 'var(--ink)'; hdr.querySelector('.rank-trim-arrow').style.transform = 'rotate(90deg)'; hdr.querySelector('.rank-trim-label').style.color = 'var(--gold-l)'; hdr.querySelector('.rank-trim-sub').style.color = 'rgba(255,255,255,.45)'; }
+
   renderRanking();
 }
 
+// Cache de dados do ranking por turma — busca só uma vez por sessão
+const _rankCache = {};
+
 async function renderRanking() {
-  // Usar container do trimestre atual dentro do accordion
-  const box = document.getElementById('lista-ranking-' + curRankTrimestre) 
+  if (!curRankTrimestre) return;
+  const box = document.getElementById('lista-ranking-' + curRankTrimestre)
             || document.getElementById('lista-ranking');
   if (!box) return;
-  box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+  const trim = RANK_TRIMESTRES[curRankTrimestre];
 
-  // Buscar TUDO em paralelo de uma vez
-  let alunos = [], aulasT = [], bonusTurma = [], ajustesTurmaRank = [];
+  // ── 1. RENDERIZAR DO CACHE IMEDIATAMENTE ──
+  let alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo');
+  let aulasT = trim
+    ? cacheAulas.filter(a => a.turma === curTurmaRank && a.data >= trim.inicio && a.data <= trim.fim)
+    : cacheAulas.filter(a => a.turma === curTurmaRank);
+  const cached = _rankCache[curTurmaRank] || {};
 
+  if (alunos.length) {
+    _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || []);
+  } else {
+    box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+  }
+
+  // ── 2. SE JÁ TEM CACHE DA TURMA, NÃO REBUSCA ──
+  if (_rankCache[curTurmaRank]) return;
+
+  // ── 3. BUSCAR DO BANCO APENAS UMA VEZ POR TURMA ──
   try {
     const [alRes, auRes, bRes, aRes, qRes, pRes, dRes] = await Promise.all([
-      sbClient.from('alunos').select('*').eq('turma', curTurmaRank).eq('status', 'ativo'),
+      sbClient.from('alunos').select('*').eq('turma', curTurmaRank).eq('status','ativo'),
       sbClient.from('aulas').select('*').eq('turma', curTurmaRank),
       sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank),
       sbClient.from('ajustes_pontuacao').select('*').eq('turma', curTurmaRank),
@@ -6571,53 +6612,29 @@ async function renderRanking() {
       sbClient.from('provas').select('*').eq('turma', curTurmaRank),
       sbClient.from('desafio_pontos').select('*').eq('turma', curTurmaRank),
     ]);
-
     alunos = alRes.data || [];
     const todasAulas = auRes.data || [];
-    bonusTurma = bRes.data || [];
-    ajustesTurmaRank = aRes.data || [];
-
-    // Filtrar aulas pelo trimestre
-    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    let bonusTurma = bRes.data || [];
+    let ajustesTurmaRank = aRes.data || [];
     aulasT = trim ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasAulas;
-
-    // Atualizar caches
+    _rankCache[curTurmaRank] = { bonus: bonusTurma, ajustes: ajustesTurmaRank };
     cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
-
-    // Filtrar quiz_resultados pelo período do trimestre
+    cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunos];
     if (qRes.data) {
-      // Limpar scores desta turma antes de repopular
-      alunos.forEach(a => { if (_quizScoresTodos[a.id]) { Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); } });
-      qRes.data
-        .filter(r => {
-          if (!trim) return true;
-          const data = r.created_at ? r.created_at.substring(0,10) : null;
-          return !data || (data >= trim.inicio && data <= trim.fim);
-        })
-        .forEach(r => {
-          if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {};
-          _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
-            acertos: r.acertos, total: r.total, pct: r.pct,
-            pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null
-          };
-        });
+      alunos.forEach(a => { if (_quizScoresTodos[a.id]) Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); });
+      qRes.data.filter(r => !trim || !r.created_at || (r.created_at.substring(0,10) >= trim.inicio && r.created_at.substring(0,10) <= trim.fim))
+        .forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null }; });
     }
-    // Filtrar provas e desafios pelo período
     if (pRes.data) PROVAS = trim ? pRes.data.filter(p => !p.data || (p.data >= trim.inicio && p.data <= trim.fim)) : pRes.data;
     if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data || (d.data >= trim.inicio && d.data <= trim.fim)) : dRes.data;
-    // Filtrar bônus pelo período
-    if (trim) {
-      bonusTurma = bonusTurma.filter(b => !b.data || (b.data >= trim.inicio && b.data <= trim.fim));
-      ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data || (a.data >= trim.inicio && a.data <= trim.fim));
-    }
+    if (trim) { bonusTurma = bonusTurma.filter(b => !b.data || (b.data >= trim.inicio && b.data <= trim.fim)); ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data || (a.data >= trim.inicio && a.data <= trim.fim)); }
+    _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank);
+  } catch(e) {}
+}
 
-  } catch(e) {
-    // Fallback para cache
-    alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo');
-    const todasCache = cacheAulas.filter(a => a.turma === curTurmaRank);
-    const trim = RANK_TRIMESTRES[curRankTrimestre];
-    aulasT = trim ? todasCache.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasCache;
-  }
+function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
+  bonusTurma = bonusTurma || [];
+  ajustesTurmaRank = ajustesTurmaRank || [];
 
   // Função auxiliar: calcular bônus + ajustes de um aluno (nunca abaixo de 0)
   function _bonusDoAluno(alunoId) {
@@ -6635,24 +6652,6 @@ async function renderRanking() {
     return;
   }
 
-  // Trimestre sem aulas — mostrar zerado
-  if (!aulasT.length) {
-    const trim = RANK_TRIMESTRES[curRankTrimestre];
-    box.innerHTML = `<div style="text-align:center;padding:24px 16px">
-      <div style="font-size:36px;margin-bottom:12px">📋</div>
-      <div style="font-size:15px;font-weight:700;color:var(--text-main);margin-bottom:6px">${trim?.label || 'Trimestre'}</div>
-      <div style="font-size:13px;color:var(--ink-soft);line-height:1.6">Nenhuma aula registrada neste período.<br>O ranking começará quando as aulas forem lançadas.</div>
-      <div style="margin-top:16px;display:flex;flex-direction:column;gap:8px">
-        ${alunos.map((a,i) => `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rsm);background:var(--cream);border:1px solid var(--cb);opacity:.5">
-          <div style="font-size:13px;font-weight:700;color:var(--ink-soft);width:20px">${i+1}º</div>
-          <div style="font-size:13px;font-weight:600;color:var(--ink);flex:1">${a.nome}</div>
-          <div style="font-size:12px;color:var(--ink-soft)">0 pts · 0%</div>
-        </div>`).join('')}
-      </div>
-    </div>`;
-    return;
-  }
-
   // Filtrar alunos excluídos do ranking
   try {
     const exclStr = localStorage.getItem('ranking_exclusoes_' + curTurmaRank);
@@ -6661,6 +6660,32 @@ async function renderRanking() {
       alunos = alunos.filter(a => !excluidos.includes(a.id));
     }
   } catch(e) {}
+
+  const MEDALHAS = ['🥇', '🥈', '🥉'];
+  const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
+  const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
+
+  // Trimestre sem aulas — mesmo layout mas zerado e opaco
+  if (!aulasT.length) {
+    box.innerHTML = '<div style="opacity:.45;pointer-events:none">' +
+      alunos.map((a, i) => {
+        const isTop = i < 3;
+        const topClass = isTop ? TOP_CLASS[i] : '';
+        const fillClass = isTop ? FILL_CLASS[i] : FILL_CLASS[3];
+        const posHtml = isTop ? `<div class="rank-medalha">${MEDALHAS[i]}</div>` : `<div class="rank-pos">${i+1}</div>`;
+        return `<div class="rank-item ${topClass}">
+          ${posHtml}
+          <div class="rank-bar-wrap">
+            <div class="rank-nome">${a.nome}</div>
+            <div class="rank-info">0 de 0 aulas</div>
+            <div class="rank-bar"><div class="${fillClass}" style="width:0%"></div></div>
+          </div>
+          <div class="rank-pct">0%</div>
+        </div>`;
+      }).join('') +
+    '</div>';
+    return;
+  }
 
   let ranking;
 
@@ -6702,10 +6727,6 @@ async function renderRanking() {
     });
   }
 
-  const MEDALHAS = ['🥇', '🥈', '🥉'];
-  const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
-  const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
-
   box.innerHTML = ranking.map((r, i) => {
     const isTop = i < 3;
     const topClass = isTop ? TOP_CLASS[i] : '';
@@ -6727,6 +6748,7 @@ async function renderRanking() {
     </div>`;
   }).join('');
 }
+
 
 // ── PERFIL ──
 function preencherFormPerfil() {
@@ -11473,12 +11495,24 @@ _Sistema EBD — ADTC Ayrton Senna 1_`;
 let rankTipo = 'freq';
 async function setRankTipo(tipo, el) {
   rankTipo = tipo;
-  // Atualizar botões do trimestre atual
+  if (!curRankTrimestre) return;
+
+  // Atualizar visual dos dois botões diretamente no DOM
   const btnFreq = document.getElementById('rank-tipo-freq-' + curRankTrimestre);
-  const btnPts = document.getElementById('rank-tipo-pts-' + curRankTrimestre);
-  if (btnFreq) { btnFreq.style.background = tipo==='freq'?'var(--ink)':''; btnFreq.style.color = tipo==='freq'?'white':''; }
-  if (btnPts) { btnPts.style.background = tipo==='pts'?'var(--ink)':''; btnPts.style.color = tipo==='pts'?'white':''; }
-  await renderRanking();
+  const btnPts  = document.getElementById('rank-tipo-pts-'  + curRankTrimestre);
+  if (btnFreq) { btnFreq.style.background = tipo==='freq'?'var(--ink)':'var(--cream)'; btnFreq.style.color = tipo==='freq'?'white':'var(--ink-soft)'; }
+  if (btnPts)  { btnPts.style.background  = tipo==='pts'?'var(--ink)':'var(--cream)';  btnPts.style.color  = tipo==='pts'?'white':'var(--ink-soft)'; }
+
+  // Re-renderizar só o conteúdo da lista — do cache, sem buscar banco
+  const box = document.getElementById('lista-ranking-' + curRankTrimestre);
+  if (!box) return;
+  const trim = RANK_TRIMESTRES[curRankTrimestre];
+  const alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo');
+  const aulasT = trim
+    ? cacheAulas.filter(a => a.turma === curTurmaRank && a.data >= trim.inicio && a.data <= trim.fim)
+    : cacheAulas.filter(a => a.turma === curTurmaRank);
+  const cached = _rankCache[curTurmaRank] || {};
+  _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || []);
 }
 
 // ══════════════════════════════════════════════
