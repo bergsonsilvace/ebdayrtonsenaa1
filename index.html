@@ -2345,15 +2345,10 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <button class="ttab tj" onclick="selTurmaRanking('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaRanking('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
-      <!-- Seletor de trimestre -->
-      <div style="display:flex;gap:6px;padding:0 0 10px;overflow-x:auto" id="rank-trim-tabs">
-        <button onclick="selRankTrimestre('1t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">1º Tri 2026</button>
-        <button onclick="selRankTrimestre('2t2026',this)" class="rank-trim-btn on" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--gold);background:var(--ink);font-size:11px;font-weight:700;color:var(--gold-l);cursor:pointer;white-space:nowrap">2º Tri 2026 ✦</button>
-        <button onclick="selRankTrimestre('3t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">3º Tri 2026</button>
-        <button onclick="selRankTrimestre('4t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">4º Tri 2026</button>
-      </div>
+      <!-- Seletor de trimestre estilo lições -->
+      <div id="rank-trim-accordion" style="display:flex;flex-direction:column;gap:8px;margin-bottom:4px"></div>
       <div class="card">
-        <div class="chdr"><div class="ct" id="rank-subtitulo">Frequência</div>
+        <div class="chdr"><div class="ct" id="rank-subtitulo">2º Trimestre 2026</div>
           <div style="display:flex;gap:5px">
             <button class="btn btn-sm" id="rank-tipo-freq" onclick="setRankTipo('freq',this)" style="background:var(--ink);color:white;padding:5px 10px;font-size:11px;border-radius:6px">Presença</button>
             <button class="btn btn-ou btn-sm" id="rank-tipo-pts" onclick="setRankTipo('pts',this)" style="padding:5px 10px;font-size:11px;border-radius:6px">Pontos</button>
@@ -4333,7 +4328,7 @@ async function _recarregarDados() {
     const pgAtual = document.querySelector('.page.on');
     if (pgAtual) {
       const id = pgAtual.id.replace('pg-', '');
-      if (id === 'ranking') await renderRanking();
+      if (id === 'ranking') { renderRankTrimAcc(); await renderRanking(); }
       else if (id === 'freq') { /* não recarrega freq para não perder chamada em andamento */ }
       else if (id === 'dash') await renderDash();
       else if (id === 'historico') renderHist();
@@ -6522,19 +6517,31 @@ const RANK_TRIMESTRES = {
 };
 let curRankTrimestre = '2t2026';
 
-function selRankTrimestre(id, btn) {
+function renderRankTrimAcc() {
+  const acc = document.getElementById('rank-trim-accordion');
+  if (!acc) return;
+  const trs = Object.entries(RANK_TRIMESTRES);
+  acc.innerHTML = trs.map(([id, tr]) => {
+    const aberto = id === curRankTrimestre;
+    return `<div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);margin-bottom:4px">
+      <div onclick="selRankTrimestre('${id}',this)" style="background:${aberto?'var(--ink)':'var(--gold-pale)'};padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto?'var(--gold-l)':'var(--gold-deep)'};margin-bottom:4px">${tr.label}</div>
+          <div style="font-size:12px;color:${aberto?'rgba(255,255,255,.45)':'var(--ink-soft)'}">
+            ${id==='2t2026'?'Trimestre atual':'Conteúdo em breve'}
+          </div>
+        </div>
+        <div style="font-size:20px;color:${aberto?'var(--gold)':'var(--gold-deep)'};transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function selRankTrimestre(id, headerEl) {
   curRankTrimestre = id;
-  // Atualizar visual dos botões
-  document.querySelectorAll('.rank-trim-btn').forEach(b => {
-    b.style.background = 'var(--cream)';
-    b.style.borderColor = 'var(--cb)';
-    b.style.color = 'var(--ink-soft)';
-    b.textContent = b.textContent.replace(' ✦','');
-  });
-  btn.style.background = 'var(--ink)';
-  btn.style.borderColor = 'var(--gold)';
-  btn.style.color = 'var(--gold-l)';
-  btn.textContent = btn.textContent + ' ✦';
+  renderRankTrimAcc();
+  const sub = document.getElementById('rank-subtitulo');
+  if (sub) sub.textContent = RANK_TRIMESTRES[id]?.label || '';
   renderRanking();
 }
 
@@ -11293,7 +11300,12 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
   const fatorProva = RANKING_CONFIG.pts_prova_fator ?? 10;
   const ptsRecuperacao = RANKING_CONFIG.pts_recuperacao_presenca ?? 10;
 
-  // Presenças
+  // Datas do trimestre atual para filtrar
+  const trim = RANK_TRIMESTRES[curRankTrimestre];
+  const trimInicio = trim ? trim.inicio : null;
+  const trimFim = trim ? trim.fim : null;
+
+  // Presenças — já filtradas pelas aulas do período (passadas via param)
   aulas.filter(a => a.turma === turma).forEach(a => {
     const statusPres = (a.presencas||{})[alunoId];
     if (statusPres === 'presente') { pts += ptsPorPresenca; ptsPres += ptsPorPresenca; }
@@ -11305,21 +11317,27 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     }
   });
 
-  // Quizzes
+  // Quizzes — filtrar por data do trimestre
   Object.entries(quizScores).forEach(([key, val]) => {
     if (!key.startsWith(turma)) return;
+    // Filtrar pela data se tiver
+    if (trimInicio && trimFim && val.data) {
+      if (val.data < trimInicio || val.data > trimFim) return;
+    }
     const bonus = val.pontos != null ? val.pontos : (val.acertos * 2);
     pts += bonus; ptsQ += bonus;
   });
 
-  // Provas — separar recuperação de presença de provas normais
+  // Provas — filtrar por data do trimestre
   provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio').forEach(p => {
+    // Filtrar pela data
+    if (trimInicio && trimFim && p.data) {
+      if (p.data < trimInicio || p.data > trimFim) return;
+    }
     const res = p.resultados[alunoId];
     const nQ = (p.questoes || []).length;
     const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
     if (p.tipo === 'recuperacao') {
-      // Recuperação: proporcional ao acerto, teto = pts configurado
-      // Ex: 80% de 10pts = 8pts | 100% = 10pts | 60% = 6pts
       const ganhou = parseFloat(((pct / 100) * ptsRecuperacao).toFixed(1));
       pts += ganhou; ptsProv += ganhou;
     } else {
@@ -11329,9 +11347,15 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     }
   });
 
-  // Desafios — ler da tabela desafio_pontos
+  // Desafios — filtrar por data do trimestre
   if (desafioPontos && Array.isArray(desafioPontos)) {
-    desafioPontos.filter(d => d.aluno_id === alunoId && d.turma === turma).forEach(d => {
+    desafioPontos.filter(d => {
+      if (d.aluno_id !== alunoId || d.turma !== turma) return false;
+      if (trimInicio && trimFim && d.data) {
+        return d.data >= trimInicio && d.data <= trimFim;
+      }
+      return true;
+    }).forEach(d => {
       const bonus = parseFloat(d.pontos) || 0;
       pts += bonus; ptsDesafio += bonus;
     });
