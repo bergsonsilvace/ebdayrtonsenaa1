@@ -2345,6 +2345,13 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <button class="ttab tj" onclick="selTurmaRanking('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
         <button class="ttab ta" onclick="selTurmaRanking('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
       </div>
+      <!-- Seletor de trimestre -->
+      <div style="display:flex;gap:6px;padding:0 0 10px;overflow-x:auto" id="rank-trim-tabs">
+        <button onclick="selRankTrimestre('1t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">1º Tri 2026</button>
+        <button onclick="selRankTrimestre('2t2026',this)" class="rank-trim-btn on" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--gold);background:var(--ink);font-size:11px;font-weight:700;color:var(--gold-l);cursor:pointer;white-space:nowrap">2º Tri 2026 ✦</button>
+        <button onclick="selRankTrimestre('3t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">3º Tri 2026</button>
+        <button onclick="selRankTrimestre('4t2026',this)" class="rank-trim-btn" style="flex-shrink:0;padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer;white-space:nowrap">4º Tri 2026</button>
+      </div>
       <div class="card">
         <div class="chdr"><div class="ct" id="rank-subtitulo">Frequência</div>
           <div style="display:flex;gap:5px">
@@ -4302,6 +4309,55 @@ async function iniciarApp() {
   // Navegar para o dashboard e garantir que renderiza
   await _navTo('dash');
   await renderDash();
+
+  // ── AUTO-REFRESH: recarrega dados a cada 90s e quando volta para a aba ──
+  _iniciarAutoRefresh();
+}
+
+let _autoRefreshInterval = null;
+async function _recarregarDados() {
+  try {
+    // Recarregar caches principais
+    if (isAdmin() || isProfessor()) {
+      if (isAdmin()) {
+        cacheAlunos = await sbGet('alunos');
+      } else {
+        const profTurmas = (Array.isArray(USER.turmas) && USER.turmas.length ? USER.turmas : [USER.turma])
+          .map(t => t === 'criancas' ? 'juniores' : t);
+        const arrays = await Promise.all(profTurmas.map(t => sbGet('alunos', { turma: t })));
+        cacheAlunos = arrays.reduce((acc, arr) => acc.concat(arr), []);
+      }
+      cacheAulas = await sbGet('aulas', {}, 'data', false);
+    }
+    // Rerenderizar a página atual
+    const pgAtual = document.querySelector('.page.on');
+    if (pgAtual) {
+      const id = pgAtual.id.replace('pg-', '');
+      if (id === 'ranking') await renderRanking();
+      else if (id === 'freq') { /* não recarrega freq para não perder chamada em andamento */ }
+      else if (id === 'dash') await renderDash();
+      else if (id === 'historico') renderHist();
+      else if (id === 'mensal') renderMensal();
+    }
+  } catch(e) { /* silencioso */ }
+}
+
+function _iniciarAutoRefresh() {
+  // A cada 90 segundos
+  if (_autoRefreshInterval) clearInterval(_autoRefreshInterval);
+  _autoRefreshInterval = setInterval(_recarregarDados, 90000);
+
+  // Quando o usuário volta para a aba/app após ficar em outra aba
+  document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+      _recarregarDados();
+    }
+  });
+
+  // Quando o app volta ao foco (mobile)
+  window.addEventListener('focus', function() {
+    _recarregarDados();
+  });
 }
 
 function atualizarAvatarTopbar() {
@@ -6457,6 +6513,31 @@ async function executarMigracao() {
   }
 }
 
+// Trimestres do ranking
+const RANK_TRIMESTRES = {
+  '1t2026': { label:'1º Trimestre 2026', inicio:'2026-01-01', fim:'2026-03-31' },
+  '2t2026': { label:'2º Trimestre 2026', inicio:'2026-04-01', fim:'2026-06-30' },
+  '3t2026': { label:'3º Trimestre 2026', inicio:'2026-07-01', fim:'2026-09-30' },
+  '4t2026': { label:'4º Trimestre 2026', inicio:'2026-10-01', fim:'2026-12-31' },
+};
+let curRankTrimestre = '2t2026';
+
+function selRankTrimestre(id, btn) {
+  curRankTrimestre = id;
+  // Atualizar visual dos botões
+  document.querySelectorAll('.rank-trim-btn').forEach(b => {
+    b.style.background = 'var(--cream)';
+    b.style.borderColor = 'var(--cb)';
+    b.style.color = 'var(--ink-soft)';
+    b.textContent = b.textContent.replace(' ✦','');
+  });
+  btn.style.background = 'var(--ink)';
+  btn.style.borderColor = 'var(--gold)';
+  btn.style.color = 'var(--gold-l)';
+  btn.textContent = btn.textContent + ' ✦';
+  renderRanking();
+}
+
 async function renderRanking() {
   const box = document.getElementById('lista-ranking');
   box.innerHTML = '<div style="text-align:center;padding:20px;color:var(--ink-soft);font-size:13px">Carregando ranking...</div>';
@@ -6472,15 +6553,33 @@ async function renderRanking() {
   try {
     const { data: au } = await sbClient.from('aulas')
       .select('*').eq('turma', curTurmaRank);
-    aulasT = au || [];
+    const todasAulas = au || [];
+    // Filtrar pelo trimestre selecionado
+    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    aulasT = trim
+      ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim)
+      : todasAulas;
     // Atualizar cache
     const outrasAulas = cacheAulas.filter(a => a.turma !== curTurmaRank);
-    cacheAulas = [...outrasAulas, ...aulasT];
-  } catch(e) { aulasT = cacheAulas.filter(a => a.turma === curTurmaRank); }
+    cacheAulas = [...outrasAulas, ...todasAulas];
+  } catch(e) {
+    const todasCache = cacheAulas.filter(a => a.turma === curTurmaRank);
+    const trim = RANK_TRIMESTRES[curRankTrimestre];
+    aulasT = trim
+      ? todasCache.filter(a => a.data >= trim.inicio && a.data <= trim.fim)
+      : todasCache;
+  }
 
   if (!alunos.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
     return;
+  }
+
+  // Mostrar info do trimestre
+  const trimAtual = RANK_TRIMESTRES[curRankTrimestre];
+  if (trimAtual) {
+    const rankSub = document.getElementById('rank-subtitulo');
+    if (rankSub) rankSub.textContent = trimAtual.label;
   }
 
   // Filtrar alunos excluídos do ranking
