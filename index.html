@@ -4273,6 +4273,8 @@ async function iniciarApp() {
     if (!cacheAulas.length) cacheAulas = await sbGet('aulas',{},'data',false);
     await carregarDesafios();
     await carregarProvas();
+    // Carregar exclusões do ranking do Supabase
+    Promise.all(['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t))).catch(()=>{});
 
     // 2. SÓ AGORA mostrar a tela — já com dados prontos, sem piscar
     await _navTo('dash');
@@ -6262,7 +6264,7 @@ async function abrirDrawerExclusao(turma) {
     _exclAlunos = (cacheAlunos||[]).filter(a => a.turma === turma && (a.status||'ativo') === 'ativo')
       .sort((a,b) => a.nome.localeCompare(b.nome));
   }
-  try { _exclIds = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turma) || '[]'); } catch(e) { _exclIds = []; }
+  try { _exclIds = _rankExclusoesCache[turma] || await _carregarExclusoesTurma(turma); } catch(e) { _exclIds = []; }
   _renderListaExclusao(_exclAlunos);
 }
 
@@ -6305,14 +6307,23 @@ function filtrarListaExclusao() {
   _renderListaExclusao(busca ? _exclAlunos.filter(a => a.nome.toLowerCase().includes(busca)) : _exclAlunos);
 }
 
-function _atualizarBadgeExclusao(turma) {
+// Cache de exclusões em memória — carregado do Supabase
+let _rankExclusoesCache = {}; // { turma: [aluno_id, ...] }
+
+async function _carregarExclusoesTurma(turma) {
   try {
-    const ids = JSON.parse(localStorage.getItem('ranking_exclusoes_' + turma) || '[]');
-    const badge = document.getElementById('excl-badge-' + turma);
-    if (!badge) return;
-    badge.textContent = ids.length;
-    badge.style.display = ids.length > 0 ? 'flex' : 'none';
-  } catch(e) {}
+    const { data } = await sbClient.from('ranking_exclusoes').select('aluno_id').eq('turma', turma);
+    _rankExclusoesCache[turma] = (data || []).map(r => r.aluno_id);
+  } catch(e) { _rankExclusoesCache[turma] = []; }
+  return _rankExclusoesCache[turma];
+}
+
+async function _atualizarBadgeExclusao(turma) {
+  const ids = _rankExclusoesCache[turma] || await _carregarExclusoesTurma(turma);
+  const badge = document.getElementById('excl-badge-' + turma);
+  if (!badge) return;
+  badge.textContent = ids.length;
+  badge.style.display = ids.length > 0 ? 'flex' : 'none';
 }
 
 function fecharDrawerExclusao() {
@@ -6326,16 +6337,33 @@ function fecharDrawerExclusao() {
   _exclTurmaAtual = null;
 }
 
-function salvarExclusaoRanking() {
+async function salvarExclusaoRanking() {
   if (!_exclTurmaAtual) return;
-  localStorage.setItem('ranking_exclusoes_' + _exclTurmaAtual, JSON.stringify(_exclIds));
-  _atualizarBadgeExclusao(_exclTurmaAtual);
-  toast(`✓ ${_exclIds.length} aluno(s) excluído(s) do ranking!`, 'ok');
-  fecharDrawerExclusao();
-  renderRanking();
+  try {
+    // Deletar exclusões antigas da turma
+    await sbClient.from('ranking_exclusoes').delete().eq('turma', _exclTurmaAtual);
+    // Inserir novas
+    if (_exclIds.length) {
+      await sbClient.from('ranking_exclusoes').insert(
+        _exclIds.map(id => ({ turma: _exclTurmaAtual, aluno_id: id }))
+      );
+    }
+    // Atualizar cache
+    _rankExclusoesCache[_exclTurmaAtual] = [..._exclIds];
+    // Invalidar cache do ranking desta turma
+    if (_rankCache) delete _rankCache[_exclTurmaAtual];
+    _atualizarBadgeExclusao(_exclTurmaAtual);
+    toast(`✓ ${_exclIds.length} aluno(s) excluído(s) do ranking!`, 'ok');
+    fecharDrawerExclusao();
+    renderRanking();
+  } catch(e) {
+    toast('Erro ao salvar: ' + (e?.message||String(e)), 'er');
+  }
 }
 
 async function carregarAlunosExclusaoRanking() {
+  // Carregar exclusões de todas as turmas do Supabase
+  await Promise.all(['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t)));
   ['maternal','juniores','jovens','adultos'].forEach(t => _atualizarBadgeExclusao(t));
 }
 
@@ -6650,13 +6678,10 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
     return;
   }
 
-  // Filtrar alunos excluídos do ranking
+  // Filtrar alunos excluídos do ranking (do Supabase via cache)
   try {
-    const exclStr = localStorage.getItem('ranking_exclusoes_' + curTurmaRank);
-    if (exclStr) {
-      const excluidos = JSON.parse(exclStr);
-      alunos = alunos.filter(a => !excluidos.includes(a.id));
-    }
+    const excluidos = _rankExclusoesCache[curTurmaRank] || [];
+    if (excluidos.length) alunos = alunos.filter(a => !excluidos.includes(a.id));
   } catch(e) {}
 
   const MEDALHAS = ['🥇', '🥈', '🥉'];
