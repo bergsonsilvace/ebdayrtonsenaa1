@@ -4000,8 +4000,12 @@ function construirNav() {
 }
 async function finalizarLogin() {
   const uid = USER.id;
-  const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
-  PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
+  try {
+    const { data: p } = await sbClient.from('perfis').select('*').eq('usuario_id', uid).single();
+    PERFIL = p || { usuario_id: uid, usuario_tipo: USER.perfil };
+  } catch(e) {
+    PERFIL = { usuario_id: uid, usuario_tipo: USER.perfil };
+  }
 
   // Salvar sessão para restaurar ao recarregar
   try {
@@ -4768,6 +4772,9 @@ async function _renderDashRanking(alunos, aulas) {
     ]);
     const todasAulas = aulasDB || aulas; // fallback para cache se banco falhar
 
+    // Garantir exclusões carregadas do Supabase
+    await Promise.all(['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t)));
+
     // Buscar bônus de todas as turmas
     let bonusTodos = [];
     try { const r = await sbClient.from('bonus_pontos').select('*'); bonusTodos = r.data||[]; } catch(e){}
@@ -4779,8 +4786,12 @@ async function _renderDashRanking(alunos, aulas) {
       return b+a;
     };
 
-    // Calcular pontos de TODOS os alunos ativos de todas as turmas
-    const ativos = alunos.filter(a=>(a.status||'ativo')==='ativo');
+    // Calcular pontos de TODOS os alunos ativos de todas as turmas (exceto excluídos do ranking)
+    const ativos = alunos.filter(a => {
+      if ((a.status||'ativo') !== 'ativo') return false;
+      const excl = _rankExclusoesCache[a.turma] || [];
+      return !excl.includes(a.id);
+    });
     const ranked = ativos.map(a=>{
       const aulasT = todasAulas.filter(au=>au.turma===a.turma);
       const sc = _quizScoresParaAluno(a.id);
@@ -8995,8 +9006,10 @@ async function renderProvasProf() {
       acoes += `<button class="btn btn-red btn-sm" onclick="fecharProvaAcesso('${p.id}')">⏹ Fechar acesso</button>`;
     }
     if (statusAp === 'aprovada') {
-      acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>
-                <button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
+      acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>`;
+      if (podeAprovar) {
+        acoes += `<button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
+      }
     }
 
     const cardBg = statusAp === 'pendente' ? 'border-color:#ffc107;background:#fffdf0'
@@ -9407,6 +9420,8 @@ async function salvarProva() {
   const precisaAprovacao = tipo !== 'simulado';
   const aprovadaAuto = !precisaAprovacao || isAdmin() || ['pastor','super'].includes(USER.perfil);
   const statusInicial = aprovadaAuto ? 'aprovada' : 'pendente';
+  // Libera automaticamente só se for simulado (sem aprovação) — provas normais precisam ser liberadas pelo admin após aprovação
+  const liberadaAuto = !precisaAprovacao;
   const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado' }[tipo] || 'Avaliação';
 
   const espec = document.getElementById('pv-dest-espec') && document.getElementById('pv-dest-espec').checked;
@@ -9415,7 +9430,7 @@ async function salvarProva() {
   const dado = {
     nome, tipo, turma, tempo_minutos: tempo,
     data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel,
-    questoes, resultados: {}, liberada: false,
+    questoes, resultados: {}, liberada: liberadaAuto,
     aprovada: aprovadaAuto,
     status_aprovacao: statusInicial,
     criado_por: USER.nome,
@@ -9480,7 +9495,7 @@ async function aprovarProva(id) {
       msg: 'Prova aprovada. Você já pode liberá-la para os alunos.',
       data: _agoraISO()
     }];
-    await sbUpdate('provas', id, { aprovada: true, status_aprovacao: 'aprovada', obs_aprovacao: null, historico_aprovacao: hist });
+    await sbUpdate('provas', id, { aprovada: true, status_aprovacao: 'aprovada', obs_aprovacao: null, historico_aprovacao: hist, liberada: true });
     toast('Prova aprovada! O professor já pode liberá-la.', 'ok');
     await renderProvasProf();
     renderAprovacaoNotifDash();
@@ -9613,7 +9628,7 @@ async function verResultados(id) {
   const lista = Object.entries(resultados).map(([alunoId, res]) => {
     const aluno = alunos.find(a => a.id === alunoId);
     const nome = aluno ? aluno.nome : 'Aluno ' + alunoId.substring(0, 6);
-    const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
+    const pct = res.pct !== undefined ? res.pct : (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : 0);
     // Recuperação: pontos fixos. Prova normal: nota × fator
     // Recuperação: proporcional ao acerto com teto. Prova normal: nota × fator
     const notaNum = ehRecuperacao
@@ -9859,13 +9874,16 @@ async function renderProvasAluno() {
   const hoje = _hojeStr();
   // Usar turma e id corretos para modo aluno
   const turmaAluno = (_modo('aluno') && USER.turma_aluno) ? USER.turma_aluno : USER.turma;
-  const idAluno = USER.id;
+  const idAluno = USER._aluno_id || USER.id;
 
   // Filtrar só provas/simulados/quizzes — desafios têm aba própria
   const disponiveis = PROVAS.filter(p => {
-    if (p.turma !== turmaAluno) return false;
     if (p.tipo === 'desafio') return false;
     if (!p.liberada) return false;
+    // Verificar turma
+    if (p.turma !== turmaAluno) return false;
+    // Se prova tem aluno_ids específicos, verificar se o aluno está na lista
+    if (p.aluno_ids && p.aluno_ids.length > 0 && !p.aluno_ids.includes(idAluno)) return false;
     return _dentroJanela(p);
   });
   const box = document.getElementById('lista-provas-aluno');
@@ -10163,11 +10181,11 @@ async function entregarProva(automatico = false) {
     } catch(e) {}
   }
 
-  // Calcular resultado
+  // Calcular resultado — comparar índice selecionado com índice correto
   const p = provaAtiva;
   let acertos = 0;
   p.questoes.forEach((q, i) => {
-    if (provaRespostas[i] && provaRespostas[i].valor === q.a) acertos++;
+    if (provaRespostas[i] !== undefined && provaRespostas[i].idx === q.correta) acertos++;
   });
   const pct = Math.round((acertos / p.questoes.length) * 100);
 
@@ -10245,11 +10263,23 @@ function mostrarResultadoAluno(p, acertos, pct) {
   document.getElementById('rp-revisao').innerHTML = `<div class="ct">Revisão das respostas</div>` +
     p.questoes.map((q, i) => {
       const resp = provaRespostas[i];
-      const acertou = resp && resp.valor === q.a;
+      let acertou = false;
+      let respostaAluno = '—';
+      if (resp !== undefined) {
+        // Comparar por índice (mais confiável)
+        if (resp.idx !== undefined) {
+          acertou = resp.idx === q.correta;
+        } else if (resp.valor) {
+          // Fallback: comparar por texto
+          acertou = resp.valor.trim() === q.a.trim();
+        }
+        respostaAluno = resp.valor || (q.op && q.op[resp.idx]) || '—';
+      }
       return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
         <div style="font-size:13px;font-weight:500;margin-bottom:4px">${i+1}. ${q.q}</div>
+        <div style="font-size:12px;color:var(--ink-mid);margin-bottom:4px">Sua resposta: <strong>${respostaAluno}</strong></div>
         <div style="display:inline-block;padding:3px 9px;border-radius:6px;font-size:12px;background:${acertou?'var(--tc-bg)':'var(--red-bg)'};color:${acertou?'var(--tc)':'var(--red)'};font-weight:600">${acertou?'✓ Correto':'✗ Incorreto'}</div>
-        ${!acertou ? `<div style="font-size:12px;color:var(--tc);margin-top:4px;line-height:1.4">Resposta: ${q.a}</div>` : ''}
+        ${!acertou ? `<div style="font-size:12px;color:var(--tc);margin-top:4px;line-height:1.4">✓ Resposta correta: ${q.a}</div>` : ''}
       </div>`;
     }).join('');
   _navTo('resultado-prova');
@@ -10261,6 +10291,19 @@ function verMeuResultado(id) {
   const res = p.resultados[USER.id];
   provaAtiva = p;
   provaRespostas = {};
+
+  // Reconstruir provaRespostas a partir das respostas salvas no banco
+  if (res.respostas) {
+    Object.entries(res.respostas).forEach(([i, textoResposta]) => {
+      const q = p.questoes[parseInt(i)];
+      if (q && textoResposta) {
+        // Encontrar o índice da opção que o aluno escolheu
+        const idx = q.op.findIndex(op => op === textoResposta);
+        provaRespostas[parseInt(i)] = { idx, valor: textoResposta };
+      }
+    });
+  }
+
   mostrarResultadoAluno(p, res.acertos, res.pct);
 }
 
@@ -11420,7 +11463,7 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     }
     const res = p.resultados[alunoId];
     const nQ = (p.questoes || []).length;
-    const pct = nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0);
+    const pct = res.pct !== undefined ? res.pct : (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : 0);
     if (p.tipo === 'recuperacao') {
       const ganhou = parseFloat(((pct / 100) * ptsRecuperacao).toFixed(1));
       pts += ganhou; ptsProv += ganhou;
