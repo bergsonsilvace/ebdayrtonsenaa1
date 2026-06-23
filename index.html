@@ -3098,6 +3098,14 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 
     <!-- FAZER PROVA (aluno) -->
     <div id="pg-fazer-prova" class="page">
+      <!-- BANNER TESTE DE SISTEMA -->
+      <div id="fp-teste-banner" style="display:none;background:#e8f5e9;border:1.5px solid #388e3c;border-radius:10px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:20px">🧪</span>
+        <div>
+          <div style="font-size:12px;font-weight:700;color:#388e3c">Teste de Sistema</div>
+          <div style="font-size:11px;color:#2e7d32">Esta prova é apenas para teste — suas respostas serão salvas mas <strong>não contam no ranking</strong></div>
+        </div>
+      </div>
       <!-- CRONÔMETRO -->
       <div id="fp-crono" style="display:none">
         <div class="cronometro" id="fp-crono-display">00:00</div>
@@ -3265,7 +3273,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <input type="hidden" id="pv-id">
       <div class="fg"><label class="fl">Nome</label><input class="fc" id="pv-nome" placeholder="Ex: Prova Bimestral, Simulado Lições 1-5"></div>
       <div class="frow">
-        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="recuperacao">🔁 Recuperação de Presença</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option></select></div>
+        <div class="fg"><label class="fl">Tipo</label><select class="fc" id="pv-tipo" onchange="onTipoProvaChange()"><option value="prova">📝 Prova</option><option value="recuperacao">🔁 Recuperação de Presença</option><option value="simulado">🔄 Simulado</option><option value="quiz">⚡ Quiz</option><option value="desafio">🏆 Desafio</option><option value="teste">🧪 Teste de Sistema</option></select></div>
         <div class="fg"><label class="fl">Turma</label><select class="fc" id="pv-turma" onchange="atualizarLicoesModal();onTurmaProvaChange();atualizarSelectAlunoProva()"><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
       </div>
       <div class="fg" style="margin-bottom:10px">
@@ -3992,7 +4000,8 @@ function construirNav() {
   if (nav) {
     nav.innerHTML = items.map(function(i) {
       const isFirst = i === items[0];
-      return '<button class="tb-btn' + (isFirst ? ' on' : '') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + '</button>';
+      const badgeId = i.id === 'provas' ? ' <span id="provas-nav-badge" style="display:none;background:var(--red);color:white;font-size:9px;font-weight:700;padding:1px 5px;border-radius:8px;margin-left:3px;vertical-align:middle"></span>' : '';
+      return '<button class="tb-btn' + (isFirst ? ' on' : '') + '" data-pg="' + i.id + '" onclick="navTo(\'' + i.id + '\')">' + i.label + badgeId + '</button>';
     }).join('');
   }
   const activeId = (p === 'aluno' || modo === 'aluno') ? 'dash' : p === 'responsavel' ? 'responsavel' : 'dash';
@@ -4343,13 +4352,36 @@ function _iniciarAutoRefresh() {
   document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') {
       _recarregarDados();
+      _reenviarProvasPendentes();
     }
   });
 
   // Quando o app volta ao foco (mobile)
   window.addEventListener('focus', function() {
     _recarregarDados();
+    _reenviarProvasPendentes();
   });
+
+  // Quando reconecta internet
+  window.addEventListener('online', function() {
+    toast('✅ Conexão restaurada!', 'ok');
+    _reenviarProvasPendentes();
+  });
+}
+
+async function _reenviarProvasPendentes() {
+  try {
+    const pendentes = JSON.parse(localStorage.getItem('_provas_pendentes') || '[]');
+    if (!pendentes.length) return;
+    const novos = [];
+    for (const p of pendentes) {
+      try {
+        await sbUpdate('provas', p.provaId, { resultados: p.resultados });
+        toast('✅ Resultado da prova enviado com sucesso!', 'ok');
+      } catch(e) { novos.push(p); }
+    }
+    localStorage.setItem('_provas_pendentes', JSON.stringify(novos));
+  } catch(e) {}
 }
 
 function atualizarAvatarTopbar() {
@@ -4367,6 +4399,18 @@ function navTo(id) {
     showConfirm('Sair sem salvar?', 'Dados de frequência não salvos. Deseja sair?', () => {
       isDirty = false; document.getElementById('unsaved-banner').style.display = 'none'; _navTo(id);
     }, 'red');
+    return;
+  }
+  // Aviso ao tentar sair durante uma prova ativa
+  if (provaAtiva && id !== 'fazer-prova' && id !== 'resultado-prova') {
+    const respondidas = Object.keys(provaRespostas).length;
+    const total = (provaAtiva.questoes || []).length;
+    showConfirm(
+      '⚠️ Prova em andamento',
+      `Você respondeu ${respondidas} de ${total} questões. Se sair agora, suas respostas ficam salvas como rascunho e você pode continuar depois.`,
+      () => { _navTo(id); },
+      'warn'
+    );
     return;
   }
   _navTo(id);
@@ -6664,7 +6708,7 @@ async function renderRanking() {
       qRes.data.filter(r => !trim || !r.created_at || (r.created_at.substring(0,10) >= trim.inicio && r.created_at.substring(0,10) <= trim.fim))
         .forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null }; });
     }
-    if (pRes.data) PROVAS = trim ? pRes.data.filter(p => !p.data || (p.data >= trim.inicio && p.data <= trim.fim)) : pRes.data;
+    if (pRes.data) PROVAS = trim ? pRes.data.filter(p => { const d = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null); return !d || (d >= trim.inicio && d <= trim.fim); }) : pRes.data;
     if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data || (d.data >= trim.inicio && d.data <= trim.fim)) : dRes.data;
     if (trim) { bonusTurma = bonusTurma.filter(b => !b.data || (b.data >= trim.inicio && b.data <= trim.fim)); ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data || (a.data >= trim.inicio && a.data <= trim.fim)); }
     _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank);
@@ -8961,10 +9005,11 @@ async function renderProvasProf() {
 
     // Badge de status
     const badgeMap = {
-      pendente:  `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando aprovação</span>`,
-      rejeitada: `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitada</span>`,
-      revisao:   `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`,
-      aprovada:  encerrada ? `<span class="prova-badge badge-encerrada">Encerrada</span>`
+      pendente:   `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando aprovação</span>`,
+      rejeitada:  `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitada</span>`,
+      revisao:    `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`,
+      cancelada:  `<span class="prova-badge" style="background:#f0f0f0;color:#666;border:1px solid #ccc">🗑 Cancelada</span>`,
+      aprovada:   encerrada ? `<span class="prova-badge badge-encerrada">Encerrada</span>`
                  : p.liberada ? `<span class="prova-badge badge-liberada">Liberada ✓</span>`
                  : `<span class="prova-badge badge-fechada">Aprovada</span>`
     };
@@ -8974,7 +9019,7 @@ async function renderProvasProf() {
     const nQuestoes = (p.questoes || []).length;
     const nRespostas = Object.keys(p.resultados || {}).length;
     const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
-    const dataLim = p.data_limite ? `📅 Até ${new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR')}` : '';
+    const dataLim = p.data_limite ? `📅 Até ${_fmtDataProva(p.data_limite)}` : `<span style="color:var(--ink-soft);font-size:11px">⚠️ Sem prazo definido</span>`;
 
     // Histórico de mensagens
     const historicoHtml = historico.length ? `
@@ -9009,6 +9054,7 @@ async function renderProvasProf() {
       acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>`;
       if (podeAprovar) {
         acoes += `<button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
+        acoes += `<button class="btn btn-red btn-sm" onclick="cancelarProva('${p.id}')">🗑 Cancelar prova</button>`;
       }
     }
 
@@ -9417,12 +9463,12 @@ async function salvarProva() {
   const editId = document.getElementById('pv-id').value;
 
   // Simulado não precisa de aprovação (não conta no ranking)
-  const precisaAprovacao = tipo !== 'simulado';
+  const precisaAprovacao = tipo !== 'simulado' && tipo !== 'teste';
   const aprovadaAuto = !precisaAprovacao || isAdmin() || ['pastor','super'].includes(USER.perfil);
   const statusInicial = aprovadaAuto ? 'aprovada' : 'pendente';
   // Libera automaticamente só se for simulado (sem aprovação) — provas normais precisam ser liberadas pelo admin após aprovação
-  const liberadaAuto = !precisaAprovacao;
-  const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado' }[tipo] || 'Avaliação';
+  const liberadaAuto = !precisaAprovacao; // simulado e teste liberam automaticamente
+  const tipoLabel = { prova: 'Prova', quiz: 'Quiz', simulado: 'Simulado', teste: 'Teste de Sistema' }[tipo] || 'Avaliação';
 
   const espec = document.getElementById('pv-dest-espec') && document.getElementById('pv-dest-espec').checked;
   const alunoIds = espec && _alunosSelecionados.length ? _alunosSelecionados.map(a => a.id) : null;
@@ -9496,6 +9542,8 @@ async function aprovarProva(id) {
       data: _agoraISO()
     }];
     await sbUpdate('provas', id, { aprovada: true, status_aprovacao: 'aprovada', obs_aprovacao: null, historico_aprovacao: hist, liberada: true });
+    // Invalidar cache do ranking para recalcular pontuação
+    if (typeof _rankCache !== 'undefined') Object.keys(_rankCache).forEach(k => delete _rankCache[k]);
     toast('Prova aprovada! O professor já pode liberá-la.', 'ok');
     await renderProvasProf();
     renderAprovacaoNotifDash();
@@ -9616,6 +9664,14 @@ async function verResultados(id) {
   document.getElementById('res-prova-titulo').textContent = p.nome;
   const nQ = (p.questoes || []).length;
   document.getElementById('res-prova-meta').textContent = `${nQ} questões · ${Object.keys(p.resultados||{}).length} responderam`;
+
+  // Buscar total de alunos para mostrar quantos não fizeram
+  const totalAlunos = (await sbGet('alunos', { turma: p.turma })).filter(a => (a.status||'ativo') === 'ativo').length;
+  const fizeram = Object.keys(p.resultados||{}).length;
+  const naoFizeram = totalAlunos - fizeram;
+  if (naoFizeram > 0) {
+    document.getElementById('res-prova-meta').textContent = `${nQ} questões · ${fizeram} fizeram · ${naoFizeram} ainda não fizeram`;
+  }
   const box = document.getElementById('lista-resultados-alunos');
   const resultados = p.resultados || {};
   if (!Object.keys(resultados).length) {
@@ -9649,7 +9705,7 @@ async function verResultados(id) {
         </div>
         <div class="res-track"><div class="res-fill" style="width:${r.pct}%;background:${r.cor}"></div></div>
         <div style="display:flex;align-items:center;justify-content:space-between;margin-top:2px;gap:6px;flex-wrap:wrap">
-          <div style="font-size:10px;color:var(--ink-soft)">${r.acertos}/${nQ} questões · ${r.pct}% · ${r.data ? new Date(r.data).toLocaleDateString("pt-BR") : ""}</div>
+          <div style="font-size:10px;color:var(--ink-soft)">${r.acertos}/${nQ} questões · ${r.pct}% · ${r.data ? _fmtDataProva(r.data) : ""}</div>
           <div style="display:flex;gap:5px;flex-wrap:wrap">
             <button data-pid="${p.id}" data-aid="${r.alunoId}" data-nome="${r.nome.replace(/"/g,'&quot;')}" onclick="verRespostasAluno(this.dataset.pid,this.dataset.aid,this.dataset.nome)" style="font-size:10px;padding:2px 8px;border:1px solid var(--tj);border-radius:6px;background:#e8f0ff;color:var(--tj);cursor:pointer">👁 Respostas</button>
             <button data-aid="${r.alunoId}" data-turma="${p.turma}" data-nome="${r.nome.replace(/"/g,'&quot;')}" data-pid="${p.id}" onclick="abrirCorrecaoPontos(this.dataset.aid,this.dataset.turma,0,this.dataset.nome,this.dataset.pid)" style="font-size:10px;padding:2px 8px;border:1px solid var(--warn);border-radius:6px;background:#fff8e0;color:#7a5000;cursor:pointer">✏️ Pts</button>
@@ -9672,7 +9728,7 @@ async function verRespostasAluno(provaId, alunoId, nomeAluno) {
   modal.id = 'modal-respostas-aluno';
   modal.style.cssText = 'position:fixed;inset:0;z-index:600;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
   const nQ = (p.questoes || []).length;
-  const pct = res ? (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : (res.pct || 0)) : 0;
+  const pct = res ? (res.pct !== undefined ? res.pct : (nQ > 0 ? Math.round((res.acertos / nQ) * 100) : 0)) : 0;
   const cor = pct >= 70 ? 'var(--tc)' : pct >= 50 ? 'var(--warn)' : 'var(--red)';
   const questoesHtml = res ? p.questoes.map((q, i) => {
     // Respostas: campo novo (string) ou legado (objeto) ou ausente
@@ -9690,7 +9746,9 @@ async function verRespostasAluno(provaId, alunoId, nomeAluno) {
     }
     const respRaw = res.respostas[i];
     const marcou = typeof respRaw === 'string' ? respRaw : (respRaw?.valor || respRaw?.texto || null);
-    const acertou = marcou ? (marcou === q.a) : false;
+    // Comparar por índice quando possível, fallback por texto
+    const idxMarcado = marcou ? q.op.findIndex(op => op === marcou) : -1;
+    const acertou = idxMarcado >= 0 ? (idxMarcado === q.correta) : (marcou ? marcou.trim() === q.a.trim() : false);
     const marcouLabel = marcou || '— Sem resposta';
     return `<div style="padding:10px 0;border-bottom:1px solid var(--cb)">
       <div style="font-size:13px;font-weight:500;margin-bottom:6px;line-height:1.4">${i+1}. ${q.q}</div>
@@ -9880,37 +9938,69 @@ async function renderProvasAluno() {
   const disponiveis = PROVAS.filter(p => {
     if (p.tipo === 'desafio') return false;
     if (!p.liberada) return false;
-    // Verificar turma
+    if (p.status_aprovacao === 'cancelada') return false;
     if (p.turma !== turmaAluno) return false;
-    // Se prova tem aluno_ids específicos, verificar se o aluno está na lista
     if (p.aluno_ids && p.aluno_ids.length > 0 && !p.aluno_ids.includes(idAluno)) return false;
     return _dentroJanela(p);
   });
   const box = document.getElementById('lista-provas-aluno');
   let html = '';
-  if (disponiveis.length) {
-    html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);font-weight:600;margin-bottom:10px">Disponíveis para você</div>`;
-    html += disponiveis.map(p => {
-      const jaFez = p.resultados && p.resultados[idAluno];
-      const tipoClass = _tipoBadgeClass(p.tipo);
-      const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
-      const labelJanela = _labelJanela(p);
-      const nQ = (p.questoes || []).length;
-      return `<div class="prova-card" style="border-color:${jaFez?'#9ecfb7':'var(--gold)'}">
-        <div class="prova-titulo">${p.nome} ${jaFez?'✓':''}</div>
-        <div class="prova-meta" style="margin-bottom:8px">
-          <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
-          <span>${nQ} questões</span>
-          ${tempo ? `<span>${tempo}</span>` : ''}
-          ${labelJanela ? `<span style="font-weight:600;color:var(--gold-deep)">${labelJanela}</span>` : ''}
-        </div>
-        ${jaFez
-          ? `<div style="font-size:12px;color:var(--tc);font-weight:600">✓ Já respondida — ${Math.round((p.resultados[idAluno].acertos/nQ)*100)}% de acerto</div>
-             <button class="btn btn-ou btn-sm" style="margin-top:8px" onclick="verMeuResultado('${p.id}')">Ver meu resultado</button>`
-          : `<button class="btn btn-gold btn-full" onclick="iniciarProvaAluno('${p.id}')">▶ Fazer ${_tipoBtnLabel(p.tipo)}</button>`
-        }
-      </div>`;
-    }).join('');
+  // Provas canceladas — mostrar aviso ao aluno
+  const canceladas = PROVAS.filter(p => {
+    if (p.turma !== turmaAluno) return false;
+    if (p.status_aprovacao !== 'cancelada') return false;
+    // Só mostrar se o aluno tinha feito a prova antes
+    return p.resultados_cancelados?.[idAluno] || false;
+  });
+
+  if (disponiveis.length || canceladas.length) {
+    if (disponiveis.length) {
+      html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--ink-soft);font-weight:600;margin-bottom:10px">Disponíveis para você</div>`;
+      html += disponiveis.map(p => {
+        const jaFez = p.resultados && p.resultados[idAluno];
+        const tipoClass = _tipoBadgeClass(p.tipo);
+        const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
+        const labelJanela = _labelJanela(p);
+        const nQ = (p.questoes || []).length;
+        return `<div class="prova-card" style="border-color:${jaFez?'#9ecfb7':'var(--gold)'}">
+          <div class="prova-titulo">${p.nome} ${jaFez?'✓':''}</div>
+          <div class="prova-meta" style="margin-bottom:8px">
+            <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
+            <span>${nQ} questões</span>
+            ${p.tempo_minutos > 0 ? `<span>⏱ ${p.tempo_minutos} min</span>` : ''}
+            ${tempo ? `<span>${tempo}</span>` : ''}
+            ${labelJanela ? `<span style="font-weight:600;color:var(--gold-deep)">${labelJanela}</span>` : ''}
+          </div>
+          ${jaFez
+            ? `<div style="font-size:12px;color:var(--tc);font-weight:600">✓ Já respondida — ${Math.round((p.resultados[idAluno].acertos/nQ)*100)}% de acerto</div>
+               <button class="btn btn-ou btn-sm" style="margin-top:8px" onclick="verMeuResultado('${p.id}')">Ver meu resultado</button>`
+            : `${p.tipo === 'teste' ? `<div style="background:rgba(56,142,60,.1);border:1px solid #388e3c;border-radius:8px;padding:6px 10px;font-size:11px;color:#388e3c;font-weight:600;margin-bottom:8px">🧪 Teste de sistema — não conta no ranking</div>` : ''}
+               <button class="btn btn-gold btn-full" onclick="iniciarProvaAluno('${p.id}')">▶ Fazer ${_tipoBtnLabel(p.tipo)}</button>`
+          }
+        </div>`;
+      }).join('');
+    }
+
+    // Provas canceladas que o aluno tinha feito
+    if (canceladas.length) {
+      html += `<div style="font-size:11px;text-transform:uppercase;letter-spacing:.09em;color:var(--red);font-weight:600;margin:14px 0 10px">Provas canceladas</div>`;
+      html += canceladas.map(p => {
+        const motivo = p.motivo_cancelamento || 'Prova cancelada pelo administrador.';
+        const canceladaPor = p.cancelada_por ? ` por ${p.cancelada_por}` : '';
+        const canceladaEm = p.cancelada_em ? ` em ${_fmtDataProva(p.cancelada_em)}` : '';
+        return `<div class="prova-card" style="border-color:var(--red);background:var(--red-bg);opacity:.85">
+          <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+            <span style="font-size:18px">🗑</span>
+            <div style="font-size:14px;font-weight:700;color:var(--red)">${p.nome}</div>
+          </div>
+          <div style="font-size:11px;color:var(--red);opacity:.7;margin-bottom:8px">Cancelada${canceladaPor}${canceladaEm}</div>
+          <div style="background:white;border-radius:var(--rsm);padding:10px;border-left:3px solid var(--red)">
+            <div style="font-size:11px;font-weight:700;color:var(--ink-soft);margin-bottom:4px">MOTIVO</div>
+            <div style="font-size:13px;color:var(--ink);line-height:1.5">${motivo}</div>
+          </div>
+        </div>`;
+      }).join('');
+    }
   } else {
     html += '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova disponível no momento</div></div>';
   }
@@ -9920,6 +10010,14 @@ async function renderProvasAluno() {
 async function iniciarProvaAluno(id) {
   const p = PROVAS.find(x => x.id === id);
   if (!p) return;
+
+  // Bloquear se já fez a prova
+  const alunoId = USER._aluno_id || USER.id;
+  if (p.resultados && p.resultados[alunoId]) {
+    toast('Você já respondeu esta prova!', 'er');
+    verMeuResultado(id);
+    return;
+  }
 
   // Buscar questões atualizadas do banco para lições desta prova
   let questoesAtualizadas = [...(p.questoes || [])];
@@ -9941,7 +10039,7 @@ async function iniciarProvaAluno(id) {
             const numLic = parseInt(q.origem.substring(1));
             if (mapaDB[numLic]) {
               // Encontrar a questão correspondente no banco pela pergunta
-              const match = mapaDB[numLic].find(p => p.q === q.q || p.a === q.a);
+              const match = mapaDB[numLic].find(qq => qq.q === q.q || qq.a === q.a);
               if (match) return { ...q, q: match.q, a: match.a, op: match.op, correta: match.correta };
             }
           }
@@ -9953,12 +10051,31 @@ async function iniciarProvaAluno(id) {
 
   provaAtiva = { ...p, questoes: questoesAtualizadas };
   provaRespostas = {};
+
+  // Restaurar rascunho se existir (proteção contra crash/fechamento)
+  try {
+    const rascunho = localStorage.getItem('_prova_rascunho_' + p.id);
+    if (rascunho) {
+      const r = JSON.parse(rascunho);
+      // Só restaurar se for do mesmo dia (menos de 24h)
+      if (r.provaId === p.id && (Date.now() - r.ts) < 86400000) {
+        provaRespostas = r.respostas || {};
+        if (Object.keys(provaRespostas).length > 0) {
+          toast('📋 Rascunho restaurado — continue de onde parou!', 'ok');
+        }
+      }
+    }
+  } catch(e) {}
   fpQuestaoAtual = 0;
   document.getElementById('fp-tipo').textContent = `${_tipoLabel(p.tipo)} · ${TN[p.turma]}`;
   document.getElementById('fp-titulo').textContent = p.nome;
   const nQ = questoesAtualizadas.length;
   const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} minutos` : 'Sem limite de tempo';
   document.getElementById('fp-meta').textContent = `${nQ} questões · ${tempo}`;
+
+  // Banner de teste de sistema
+  const testeBanner = document.getElementById('fp-teste-banner');
+  if (testeBanner) testeBanner.style.display = p.tipo === 'teste' ? 'block' : 'none';
   // Esconder painel de revisão
   const rev = document.getElementById('fp-revisao-painel');
   if (rev) rev.style.display = 'none';
@@ -10002,6 +10119,16 @@ function marcarRespostaBtn(btn) {
 
 function marcarResposta(qIdx, opIdx, valor) {
   provaRespostas[qIdx] = { idx: opIdx, valor };
+  // Salvar rascunho no localStorage a cada resposta
+  if (provaAtiva) {
+    try {
+      localStorage.setItem('_prova_rascunho_' + provaAtiva.id, JSON.stringify({
+        provaId: provaAtiva.id,
+        respostas: provaRespostas,
+        ts: Date.now()
+      }));
+    } catch(e) {}
+  }
   // Atualizar visual
   if (provaAtiva && provaAtiva.questoes[qIdx]) {
     provaAtiva.questoes[qIdx].op.forEach((_, j) => {
@@ -10202,15 +10329,39 @@ async function entregarProva(automatico = false) {
     pontosCorrigidos = parseFloat(((pct / 100) * ptsMax).toFixed(1));
   }
 
-  // Salvar no Supabase com id correto
+  // Salvar no Supabase com retry automático
   const resultEntry = { acertos, total: p.questoes.length, pct, data: _agoraISO(), respostas: respostasMap };
   if (pontosCorrigidos !== null) resultEntry.pontos_corrigidos = pontosCorrigidos;
   const resultados = { ...(p.resultados || {}), [alunoId]: resultEntry };
-  await sbUpdate('provas', p.id, { resultados });
+
+  let salvou = false;
+  for (let tentativa = 1; tentativa <= 3; tentativa++) {
+    try {
+      await sbUpdate('provas', p.id, { resultados });
+      salvou = true;
+      break;
+    } catch(e) {
+      if (tentativa < 3) {
+        await new Promise(r => setTimeout(r, 1000 * tentativa));
+      }
+    }
+  }
+  if (!salvou) {
+    toast('⚠️ Sem conexão — resultado salvo localmente. Será enviado quando reconectar.', 'er');
+    // Guardar para reenvio posterior
+    try {
+      const pendentes = JSON.parse(localStorage.getItem('_provas_pendentes') || '[]');
+      pendentes.push({ provaId: p.id, resultados, ts: Date.now() });
+      localStorage.setItem('_provas_pendentes', JSON.stringify(pendentes));
+    } catch(e2) {}
+  }
 
   // Atualizar cache local
   const idx = PROVAS.findIndex(x => x.id === p.id);
   if (idx >= 0) PROVAS[idx].resultados = resultados;
+  provaAtiva = null;
+  // Limpar rascunho após entrega bem sucedida
+  try { localStorage.removeItem('_prova_rascunho_' + p.id); } catch(e) {}
 
   // Mostrar resultado
   mostrarResultadoAluno(p, acertos, pct);
@@ -10249,14 +10400,22 @@ function mostrarResultadoAluno(p, acertos, pct) {
   // Mostrar pontos ganhos — nota × fator configurado
   const pontosWrap = document.getElementById('rp-pontos-wrap');
   if (pontosWrap) {
-    const notaVal = pct / 10;
-    const fator = RANKING_CONFIG.pts_prova_fator ?? 10;
-    const totalPts = Math.round(notaVal * fator);
-    pontosWrap.innerHTML = `
-      <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">
-        <span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">nota ${notaVal.toFixed(1)} × ${fator}</span>
-        <span style="background:var(--gold);color:var(--ink);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:700">+${totalPts} pts ✦</span>
-      </div>`;
+    if (p.tipo === 'simulado') {
+      pontosWrap.innerHTML = `<div style="margin-top:6px"><span style="background:rgba(255,255,255,.1);color:rgba(255,255,255,.5);padding:3px 14px;border-radius:20px;font-size:12px">Simulado — não conta no ranking</span></div>`;
+    } else if (p.tipo === 'teste') {
+      pontosWrap.innerHTML = `<div style="margin-top:6px"><span style="background:rgba(56,142,60,.25);color:#a5d6a7;padding:4px 14px;border-radius:20px;font-size:12px;font-weight:700">🧪 Teste de Sistema — não conta no ranking</span></div>`;
+    } else {
+      const notaVal = pct / 10;
+      const fator = RANKING_CONFIG.pts_prova_fator ?? 10;
+      const totalPts = p.tipo === 'recuperacao'
+        ? parseFloat(((pct / 100) * (RANKING_CONFIG.pts_recuperacao_presenca ?? 10)).toFixed(1))
+        : Math.round(notaVal * fator);
+      pontosWrap.innerHTML = `
+        <div style="display:flex;gap:8px;justify-content:center;flex-wrap:wrap;margin-top:6px">
+          <span style="background:rgba(255,255,255,.15);color:var(--gold-l);padding:3px 12px;border-radius:20px;font-size:12px;font-weight:600">nota ${notaVal.toFixed(1)} × ${fator}</span>
+          <span style="background:var(--gold);color:var(--ink);padding:3px 14px;border-radius:20px;font-size:13px;font-weight:700">+${totalPts} pts ✦</span>
+        </div>`;
+    }
   }
 
   // Revisão das respostas
@@ -10287,8 +10446,9 @@ function mostrarResultadoAluno(p, acertos, pct) {
 
 function verMeuResultado(id) {
   const p = PROVAS.find(x => x.id === id);
-  if (!p || !p.resultados || !p.resultados[USER.id]) return;
-  const res = p.resultados[USER.id];
+  const alunoId = USER._aluno_id || USER.id;
+  if (!p || !p.resultados || !p.resultados[alunoId]) return;
+  const res = p.resultados[alunoId];
   provaAtiva = p;
   provaRespostas = {};
 
@@ -10297,7 +10457,6 @@ function verMeuResultado(id) {
     Object.entries(res.respostas).forEach(([i, textoResposta]) => {
       const q = p.questoes[parseInt(i)];
       if (q && textoResposta) {
-        // Encontrar o índice da opção que o aluno escolheu
         const idx = q.op.findIndex(op => op === textoResposta);
         provaRespostas[parseInt(i)] = { idx, valor: textoResposta };
       }
@@ -10339,6 +10498,7 @@ function selBancoTipo(tipo, el) {
     licao:    { bg:'var(--gold-pale)', border:'var(--gold)', color:'var(--gold-deep)' },
     quiz:     { bg:'#e8f0ff',          border:'var(--tj)',   color:'var(--tj)' },
     simulado: { bg:'#f0f0f5',          border:'var(--ink)',  color:'var(--ink)' },
+    teste:    { bg:'#e8f5e9',          border:'#388e3c',     color:'#388e3c' },
     avulsa:   { bg:'var(--tc-bg)',     border:'var(--tc)',   color:'var(--tc)' },
   };
   ['licao','quiz','simulado','avulsa'].forEach(t => {
@@ -10980,7 +11140,7 @@ async function renderProvasNotifDash() {
         <div class="dash-notif-icon">📝</div>
         <div class="dash-notif-body">
           <div class="dash-notif-title" style="color:rgba(255,255,255,.7)">${p.nome}</div>
-          <div class="dash-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} disponível${p.data_limite?' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR'):''}</div>
+          <div class="dash-notif-sub">${TN[p.turma]} · ${_tipoLabel(p.tipo)} disponível${p.data_limite?' · até '+_fmtDataProva(p.data_limite):''}</div>
         </div>
         <button class="dash-notif-btn dash-notif-btn-warn">Ver</button>
       </div>`).join('');
@@ -11098,17 +11258,58 @@ async function renderProvasNotifAluno(turmaArg, jaCarregouDesafios) {
           <div class="prova-notif-icon">📝</div>
           <div class="prova-notif-txt">
             <div class="prova-notif-titulo">${p.nome}</div>
-            <div class="prova-notif-sub">${_tipoLabel(p.tipo)} disponível · Toque para fazer${p.data_limite ? ' · até '+new Date(p.data_limite+'T12:00:00').toLocaleDateString('pt-BR') : ''}</div>
+            <div class="prova-notif-sub">${_tipoLabel(p.tipo)} disponível · Toque para fazer${p.data_limite ? ' · até '+_fmtDataProva(p.data_limite) : ''}</div>
           </div>
           <div class="prova-notif-arrow">›</div>
         </div>`).join('');
     }
+    // ── Provas canceladas — aviso ao aluno ──
+    const { data: canceladasData } = await sbClient.from('provas')
+      .select('id,nome,motivo_cancelamento,cancelada_em,cancelada_por,resultados_cancelados')
+      .eq('turma', turmaAluno)
+      .eq('status_aprovacao', 'cancelada');
+
+    const canceladasDoAluno = (canceladasData || []).filter(p =>
+      p.resultados_cancelados && p.resultados_cancelados[alunoId]
+    );
+
+    if (canceladasDoAluno.length) {
+      html += canceladasDoAluno.map(p => {
+        const motivo = p.motivo_cancelamento || 'Prova cancelada pelo administrador.';
+        const canceladaEm = _fmtDataProva(p.cancelada_em);
+        return `
+        <div onclick="navTo('provas')" style="background:rgba(184,42,42,.08);border:1px solid rgba(184,42,42,.25);border-left:4px solid var(--red);border-radius:var(--r);padding:14px;margin-bottom:8px;cursor:pointer;display:flex;align-items:flex-start;gap:12px">
+          <div style="font-size:22px;flex-shrink:0">🗑</div>
+          <div style="flex:1">
+            <div style="font-size:11px;font-weight:700;color:var(--red);text-transform:uppercase;letter-spacing:.07em;margin-bottom:3px">Prova cancelada${canceladaEm?' · '+canceladaEm:''}</div>
+            <div style="font-size:14px;font-weight:700;color:var(--ink);margin-bottom:4px">${p.nome}</div>
+            <div style="font-size:12px;color:var(--ink-soft);line-height:1.5">${motivo}</div>
+          </div>
+          <div style="color:var(--ink-soft);font-size:20px;flex-shrink:0">›</div>
+        </div>`;
+      }).join('');
+    }
+
   } catch(e) {
     console.warn('renderProvasNotifAluno erro:', e);
   }
   // Escrever nas duas áreas — dash e pg-aluno
   if (boxDash) boxDash.innerHTML = html;
   if (boxAluno) boxAluno.innerHTML = html;
+
+  // Atualizar badge no menu de provas
+  try {
+    const badge = document.getElementById('provas-nav-badge');
+    if (badge) {
+      const totalNovos = (canceladasDoAluno?.length || 0) + (ativas?.length || 0) + (desafiosNovos?.length || 0);
+      if (totalNovos > 0) {
+        badge.textContent = totalNovos;
+        badge.style.display = 'inline';
+      } else {
+        badge.style.display = 'none';
+      }
+    }
+  } catch(e) {}
 }
 // ══════════════════════════════════════════════
 // LIBERAÇÕES ESPECIAIS DE QUIZ
@@ -11456,10 +11657,12 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
   });
 
   // Provas — filtrar por data do trimestre
-  provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio').forEach(p => {
+  provas.filter(p => p.turma === turma && p.resultados && p.resultados[alunoId] && p.tipo !== 'simulado' && p.tipo !== 'desafio' && p.tipo !== 'teste' && p.status_aprovacao !== 'cancelada').forEach(p => {
     // Filtrar pela data
-    if (trimInicio && trimFim && p.data) {
-      if (p.data < trimInicio || p.data > trimFim) return;
+    // Filtrar pela data da prova (data_inicio ou created_at)
+    const dataProva = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null);
+    if (trimInicio && trimFim && dataProva) {
+      if (dataProva < trimInicio || dataProva > trimFim) return;
     }
     const res = p.resultados[alunoId];
     const nQ = (p.questoes || []).length;
@@ -11493,13 +11696,13 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
 
 // Helper: label e badge por tipo de avaliação
 function _tipoLabel(tipo) {
-  return { prova:'PROVA', simulado:'SIMULADO', quiz:'QUIZ', desafio:'DESAFIO' }[tipo] || tipo.toUpperCase();
+  return { prova:'PROVA', simulado:'SIMULADO', quiz:'QUIZ', desafio:'DESAFIO', teste:'TESTE' }[tipo] || tipo.toUpperCase();
 }
 function _tipoBadgeClass(tipo) {
   return { prova:'badge-prova', simulado:'badge-simulado', quiz:'badge-quiz', desafio:'badge-desafio' }[tipo] || 'badge-prova';
 }
 function _tipoBtnLabel(tipo) {
-  return { prova:'prova', simulado:'simulado', quiz:'quiz', desafio:'desafio' }[tipo] || tipo;
+  return { prova:'prova', simulado:'simulado', quiz:'quiz', desafio:'desafio', teste:'teste de sistema' }[tipo] || tipo;
 }
 
 function calcularMedalhas(pts, presencas, semanasSeguidas) {
@@ -12645,11 +12848,111 @@ async function salvarObsLicao(turma, num) {
 
 
 
+async function cancelarProva(id) {
+  const p = PROVAS.find(x => x.id === id);
+  if (!p) return;
+  const nRespostas = Object.keys(p.resultados || {}).length;
+
+  // Modal para digitar motivo
+  const prev = document.getElementById('modal-cancelar-prova');
+  if (prev) prev.remove();
+  const modal = document.createElement('div');
+  modal.id = 'modal-cancelar-prova';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:900;display:flex;align-items:center;justify-content:center;padding:16px;background:rgba(0,0,0,.6);backdrop-filter:blur(3px)';
+  modal.innerHTML = `
+    <div style="background:var(--cream);border-radius:var(--r);max-width:420px;width:100%;overflow:hidden;box-shadow:0 8px 32px rgba(0,0,0,.2)">
+      <div style="background:var(--red);padding:16px 18px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:22px">🗑</span>
+        <div>
+          <div style="font-size:15px;font-weight:700;color:white">Cancelar prova</div>
+          <div style="font-size:11px;color:rgba(255,255,255,.6)">${p.nome} · ${nRespostas} aluno(s) fizeram</div>
+        </div>
+      </div>
+      <div style="padding:16px">
+        <div style="font-size:13px;color:var(--ink-soft);margin-bottom:12px;line-height:1.5">
+          Os resultados serão removidos e os alunos verão a prova como cancelada com o motivo informado.
+        </div>
+        <label style="font-size:12px;font-weight:700;color:var(--ink);display:block;margin-bottom:6px">Motivo do cancelamento</label>
+        <textarea id="cancelar-prova-motivo" placeholder="Ex: A prova foi cancelada devido a um erro nas questões. Uma nova prova será aplicada em breve." 
+          style="width:100%;border:1.5px solid var(--cb);border-radius:var(--rsm);padding:10px;font-family:inherit;font-size:13px;resize:vertical;min-height:80px;outline:none;box-sizing:border-box"></textarea>
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button onclick="document.getElementById('modal-cancelar-prova').remove()" 
+            style="flex:1;padding:10px;border-radius:var(--rsm);border:1px solid var(--cb);background:white;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)">
+            Voltar
+          </button>
+          <button onclick="_confirmarCancelarProva('${id}')"
+            style="flex:2;padding:10px;border-radius:var(--rsm);border:none;background:var(--red);font-family:inherit;font-size:13px;font-weight:700;cursor:pointer;color:white">
+            🗑 Confirmar cancelamento
+          </button>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+  setTimeout(() => document.getElementById('cancelar-prova-motivo')?.focus(), 100);
+}
+
+async function _confirmarCancelarProva(id) {
+  const motivo = document.getElementById('cancelar-prova-motivo')?.value?.trim() || 'Prova cancelada pelo administrador.';
+  document.getElementById('modal-cancelar-prova')?.remove();
+
+  const p = PROVAS.find(x => x.id === id);
+  if (!p) return;
+
+  try {
+    await sbUpdate('provas', id, {
+      resultados: {},
+      resultados_cancelados: p.resultados || {},
+      liberada: false,
+      status_aprovacao: 'cancelada',
+      aprovada: false,
+      motivo_cancelamento: motivo,
+      cancelada_em: new Date().toISOString(),
+      cancelada_por: USER.nome
+    });
+
+    // Enviar notificação para cada aluno que fez a prova
+    const alunosQueFlzeram = Object.keys(p.resultados || {});
+    for (const alunoId of alunosQueFlzeram) {
+      try {
+        await sbClient.from('notificacoes_aluno').insert({
+          aluno_id: alunoId,
+          tipo: 'prova_cancelada',
+          titulo: `Prova cancelada: ${p.nome}`,
+          mensagem: motivo,
+          lida: false,
+          created_at: new Date().toISOString()
+        });
+      } catch(e) { /* notificação opcional */ }
+    }
+
+    // Atualizar cache local
+    const idx = PROVAS.findIndex(x => x.id === id);
+    if (idx >= 0) {
+      PROVAS[idx].resultados = {};
+      PROVAS[idx].liberada = false;
+      PROVAS[idx].status_aprovacao = 'cancelada';
+      PROVAS[idx].motivo_cancelamento = motivo;
+    }
+
+    // Invalidar cache do ranking
+    if (typeof _rankCache !== 'undefined') {
+      Object.keys(_rankCache).forEach(k => delete _rankCache[k]);
+    }
+
+    toast('✓ Prova cancelada! Alunos serão notificados.', 'ok');
+    await renderProvasProf();
+  } catch(e) {
+    toast('Erro ao cancelar: ' + (e?.message || String(e)), 'er');
+  }
+}
+
 async function permitirRefazer(id) {
-  showConfirm('Permitir refazer?', 'Os resultados atuais serão mantidos. Os alunos poderão responder novamente e o último resultado será salvo.', async () => {
+  showConfirm('Permitir refazer?', 'Os resultados anteriores serão apagados e os alunos poderão responder novamente.', async () => {
     const p = PROVAS.find(x => x.id === id);
     if (!p) return;
-    await sbUpdate('provas', id, { resultados: {} });
+    await sbUpdate('provas', id, { resultados: {}, liberada: true });
+    const idx = PROVAS.findIndex(x => x.id === id);
+    if (idx >= 0) { PROVAS[idx].resultados = {}; PROVAS[idx].liberada = true; }
     toast('Alunos podem refazer a prova!', 'ok');
     await renderProvasProf();
   }, 'warn');
@@ -15222,6 +15525,17 @@ function voltarListaFilhos() {
 function formatarDataLocal(iso) {
   if (!iso) return '—';
   return new Date(iso).toLocaleString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+}
+
+// Formata data de prova com segurança (evita Invalid Date)
+function _fmtDataProva(val) {
+  if (!val) return '';
+  try {
+    // Se for só data (YYYY-MM-DD), adiciona horário fixo para evitar fuso errado
+    const d = new Date(val.includes('T') ? val : val + 'T12:00:00-03:00');
+    if (isNaN(d)) return '';
+    return d.toLocaleDateString('pt-BR');
+  } catch(e) { return ''; }
 }
 
 
