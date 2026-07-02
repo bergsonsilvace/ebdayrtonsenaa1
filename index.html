@@ -2094,6 +2094,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
           <div class="ct">Lista de matriculados</div>
           <div style="display:flex;gap:5px">
             <button class="btn btn-ou btn-sm" onclick="exportarListaAlunos()" title="Exportar PDF">📄</button>
+            <button class="btn btn-ou btn-sm" onclick="matricularTodosNoTrimestre()" title="Matricular todos os ativos no trimestre atual">🗓️ Matricular todos</button>
             <button class="btn btn-dk btn-sm" id="btn-novo-aluno" onclick="abrirModalAluno()">+ Novo aluno</button>
           </div>
         </div>
@@ -4285,6 +4286,8 @@ async function iniciarApp() {
   // Configs
   await carregarConfigs();
   document.getElementById('dash-igreja-nome').textContent = cfgNomeEBD;
+  // Abrir o ranking já no trimestre atual configurado (não fixo em 2t2026)
+  curRankTrimestre = _trimestreIdAtual();
 
   // Sincronizar banco de questões com memória (sem bloquear)
   sincronizarBancoComMemoria();
@@ -4847,9 +4850,11 @@ async function _renderDashRanking(alunos, aulas) {
       return b+a;
     };
 
-    // Calcular pontos de TODOS os alunos ativos de todas as turmas (exceto excluídos do ranking)
+    // Calcular pontos de TODOS os alunos ativos e matriculados no trimestre atual (exceto excluídos do ranking)
+    const trimAtualId = _trimestreIdAtual();
     const ativos = alunos.filter(a => {
       if ((a.status||'ativo') !== 'ativo') return false;
+      if (a.trimestre_matricula !== trimAtualId) return false;
       const excl = _rankExclusoesCache[a.turma] || [];
       return !excl.includes(a.id);
     });
@@ -5451,6 +5456,28 @@ function toggleStatusAluno(id, statusAtual) {
     }, novoStatus === 'inativo' ? 'red' : ''
   );
 }
+// Matricula em massa todos os alunos ativos da turma atual no trimestre configurado como atual.
+// Só alunos matriculados no trimestre aparecem no ranking — essa é a forma rápida de marcar todos de uma vez.
+async function matricularTodosNoTrimestre() {
+  const trimId = _trimestreIdAtual();
+  const trimLabel = (RANK_TRIMESTRES[trimId] && RANK_TRIMESTRES[trimId].label) || cfgTrimestreNome || trimId;
+  const TN2 = { maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
+  const ativos = cacheAlunos.filter(a => a.turma === curTurmaAlunos && (a.status||'ativo') === 'ativo');
+  if (!ativos.length) { toast('Nenhum aluno ativo nesta turma', 'er'); return; }
+  const jaMatriculados = ativos.filter(a => a.trimestre_matricula === trimId).length;
+  const faltam = ativos.length - jaMatriculados;
+  if (faltam === 0) { toast('Todos os alunos ativos já estão matriculados no ' + trimLabel + '! ✦', 'ok'); return; }
+  if (!confirm(`Matricular ${faltam} aluno(s) ativo(s) de ${TN2[curTurmaAlunos]||curTurmaAlunos} no ${trimLabel}?\n\nIsso é o que faz eles aparecerem no ranking deste trimestre.`)) return;
+  try {
+    const ids = ativos.filter(a => a.trimestre_matricula !== trimId).map(a => a.id);
+    const { error } = await sbClient.from('alunos').update({ trimestre_matricula: trimId }).in('id', ids);
+    if (error) throw error;
+    cacheAlunos.forEach(a => { if (ids.includes(a.id)) a.trimestre_matricula = trimId; });
+    renderAlunos();
+    toast(`✦ ${ids.length} aluno(s) matriculado(s) no ${trimLabel}!`, 'ok');
+  } catch(e) { toast('Erro ao matricular: ' + (e?.message||String(e)), 'er'); }
+}
+
 function renderAlunos() {
   const lista = cacheAlunos.filter(a => {
     if (a.turma !== curTurmaAlunos) return false;
@@ -5511,7 +5538,7 @@ function abrirModalAluno(id) {
     document.getElementById('ae-login').value=a.login||'';
     document.getElementById('ae-senha').value='';
     const trimEl = document.getElementById('ae-trimestre-matricula');
-    if (trimEl) trimEl.value = a.trimestre_matricula || '2t2026';
+    if (trimEl) trimEl.value = a.trimestre_matricula || _trimestreIdAtual();
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value=a.responsavel||'';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value=a.tel_responsavel||'';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value=a.endereco||'';
@@ -5552,7 +5579,7 @@ async function salvarAluno() {
   const dado = {
     nome,
     turma: document.getElementById('ae-turma').value,
-    trimestre_matricula: document.getElementById('ae-trimestre-matricula')?.value || '3t2026',
+    trimestre_matricula: document.getElementById('ae-trimestre-matricula')?.value || _trimestreIdAtual(),
     nasc: dataParaISO(document.getElementById('ae-nasc').value) || null,
     tel: document.getElementById('ae-tel').value || null,
     status: document.getElementById('ae-status').value,
@@ -6616,6 +6643,12 @@ const RANK_TRIMESTRES = {
   '3t2026': { label:'3º Trimestre 2026', inicio:'2026-07-01', fim:'2026-09-30' },
   '4t2026': { label:'4º Trimestre 2026', inicio:'2026-10-01', fim:'2026-12-31' },
 };
+// Converte o nome do trimestre configurado (ex: "3º Trimestre 2026") no id interno (ex: "3t2026").
+// Funciona automaticamente para qualquer trimestre futuro, sem precisar mexer no código.
+function _trimestreIdAtual() {
+  const m = (typeof cfgTrimestreNome !== 'undefined' && cfgTrimestreNome || '').match(/(\d)\D*Trimestre\D*(\d{4})/i);
+  return m ? (m[1] + 't' + m[2]) : '2t2026';
+}
 let curRankTrimestre = '2t2026';
 
 function renderRankTrimAcc() {
@@ -6629,7 +6662,7 @@ function renderRankTrimAcc() {
         <div>
           <div class="rank-trim-label" style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:${aberto?'var(--gold-l)':'var(--gold-deep)'};margin-bottom:4px">${tr.label}</div>
           <div class="rank-trim-sub" style="font-size:12px;color:${aberto?'rgba(255,255,255,.45)':'var(--ink-soft)'}">
-            ${id==='2t2026'?'Trimestre atual — Abril a Junho 2026':'Conteúdo em breve'}
+            ${id===_trimestreIdAtual()?'Trimestre atual — '+tr.label:(tr.fim < _hojeStr() ? 'Trimestre encerrado' : 'Ainda não iniciado')}
           </div>
         </div>
         <div class="rank-trim-arrow" style="font-size:20px;color:${aberto?'var(--gold)':'var(--gold-deep)'};transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
@@ -6692,7 +6725,7 @@ async function renderRanking() {
   const trim = RANK_TRIMESTRES[curRankTrimestre];
 
   // ── 1. RENDERIZAR DO CACHE IMEDIATAMENTE ──
-  let alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo');
+  let alunos = cacheAlunos.filter(a => a.turma === curTurmaRank && (a.status||'ativo') === 'ativo' && a.trimestre_matricula === curRankTrimestre);
   let aulasT = trim
     ? cacheAulas.filter(a => a.turma === curTurmaRank && a.data >= trim.inicio && a.data <= trim.fim)
     : cacheAulas.filter(a => a.turma === curTurmaRank);
@@ -6718,14 +6751,17 @@ async function renderRanking() {
       sbClient.from('provas').select('*').eq('turma', curTurmaRank),
       sbClient.from('desafio_pontos').select('*').eq('turma', curTurmaRank),
     ]);
-    alunos = alRes.data || [];
+    const alunosTurma = alRes.data || [];
+    alunos = alunosTurma.filter(a => a.trimestre_matricula === curRankTrimestre);
     const todasAulas = auRes.data || [];
     let bonusTurma = bRes.data || [];
     let ajustesTurmaRank = aRes.data || [];
     aulasT = trim ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasAulas;
     _rankCache[curTurmaRank] = { bonus: bonusTurma, ajustes: ajustesTurmaRank };
     cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
-    cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunos];
+    // Cache global de alunos mantém TODOS (mesmo não matriculados no trimestre atual) —
+    // só a exibição do ranking (variável "alunos" acima) é filtrada pela matrícula.
+    cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunosTurma];
     if (qRes.data) {
       alunos.forEach(a => { if (_quizScoresTodos[a.id]) Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); });
       qRes.data.filter(r => !trim || !r.created_at || (r.created_at.substring(0,10) >= trim.inicio && r.created_at.substring(0,10) <= trim.fim))
@@ -6754,7 +6790,7 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
   }
 
   if (!alunos.length) {
-    box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno cadastrado</div></div>';
+    box.innerHTML = '<div class="empty"><div class="empty-icon">👥</div><div class="empty-txt">Nenhum aluno matriculado neste trimestre ainda</div><div style="font-size:12px;color:var(--ink-soft);margin-top:6px">Marque o trimestre de matrícula em cada aluno (aba Alunos) para que apareçam aqui.</div></div>';
     return;
   }
 
