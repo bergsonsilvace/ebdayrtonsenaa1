@@ -4587,6 +4587,10 @@ async function renderDash() {
 
   const alunos = cacheAlunos;
   let aulas = cacheAulas;
+  // Mostrar no dashboard apenas as aulas do trimestre atual (reseta a cada novo trimestre)
+  if (cfgTrimestreInicio && cfgTrimestrefim) {
+    aulas = aulas.filter(function(a){ return a.data >= cfgTrimestreInicio && a.data <= cfgTrimestrefim; });
+  }
   if (isProfessor() && !isAdmin()) {
     const profTs = Array.isArray(USER.turmas)&&USER.turmas.length?USER.turmas:[USER.turma];
     aulas = aulas.filter(function(a){ return profTs.includes(a.turma); });
@@ -16295,7 +16299,11 @@ async function salvarCfgTrimestre() {
     sbSetConfig('trimestre_fim', fim)
   ]);
   cfgTrimestreNome = nome; cfgTrimestreInicio = ini; cfgTrimestrefim = fim;
-  toast('✦ Trimestre salvo!', 'ok');
+  // Recarregar lições do novo trimestre e atualizar telas visíveis, sem precisar dar F5
+  await sincronizarBancoComMemoria();
+  if (typeof renderLicoes === 'function' && document.getElementById('lista-licoes')) renderLicoes();
+  if (typeof renderDash === 'function' && document.getElementById('pg-dash')?.classList.contains('on')) renderDash();
+  toast('✦ Trimestre salvo! Lições e dashboard atualizados.', 'ok');
 }
 
 async function salvarCfgWhatsNumero() {
