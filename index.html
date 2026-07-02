@@ -5233,18 +5233,20 @@ function renderGrafico(aulas) {
 
 // ── MURAL ──
 async function renderMural() {
+  const box = document.getElementById('lista-avisos');
+  const btnWrap = document.getElementById('mural-novo-btn-wrap');
+  // Se os elementos do mural não estão na tela atual (ex: ainda na tela de login), não há o que renderizar
+  if (!box) return;
   const avisos = await sbGet('avisos', {}, 'fixado', false);
   const hoje = _brasilia().split('T')[0];
   // Ordenar: fixados primeiro, depois por data de criação
   const sorted = [...avisos].sort((a,b) =>
     (b.fixado?1:0)-(a.fixado?1:0) || new Date(b.created_at)-new Date(a.created_at)
   );
-  const box = document.getElementById('lista-avisos');
-  const btnWrap = document.getElementById('mural-novo-btn-wrap');
-  const podeGerenciarAvisos = ['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil) || isAdmin();
+  const podeGerenciarAvisos = USER && (['adm','pastor','super','professor','professor_convidado'].includes(USER.perfil) || isAdmin());
   if (podeGerenciarAvisos) {
-    btnWrap.innerHTML = `<button class="btn btn-dk btn-sm" style="margin-bottom:14px" onclick="abrirModalAviso()">+ Novo aviso</button>`;
-  } else btnWrap.innerHTML = '';
+    if (btnWrap) btnWrap.innerHTML = `<button class="btn btn-dk btn-sm" style="margin-bottom:14px" onclick="abrirModalAviso()">+ Novo aviso</button>`;
+  } else if (btnWrap) btnWrap.innerHTML = '';
   if (!sorted.length) { box.innerHTML = '<div class="empty"><div class="empty-icon">📢</div><div class="empty-txt">Nenhum aviso publicado</div></div>'; return; }
 
   const tipoConfig = {
@@ -7665,12 +7667,20 @@ async function abrirLicao(turma, num) {
   // Buscar versão mais atualizada do Supabase
   let lic = licHard ? { ...licHard } : null;
   try {
-    const { data } = await sbClient.from('banco_questoes')
+    let qLic = sbClient.from('banco_questoes')
       .select('*')
       .eq('turma', turma)
       .eq('num', num)
-      .or('tipo.eq.licao,tipo.is.null')
-      .single();
+      .or('tipo.eq.licao,tipo.is.null');
+    // Filtra pelo trimestre atual — evita erro do .single() quando existem
+    // lições com o mesmo número em trimestres diferentes salvos no banco.
+    if (cfgTrimestreNome) {
+      qLic = qLic.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+    }
+    const { data } = await qLic
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
     if (data && data.perguntas && data.perguntas.length) {
       // Usar dados do banco — mais atualizados
       lic = {
@@ -9000,6 +9010,7 @@ async function renderProvasProf() {
   if (!minhas.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova criada ainda</div></div>';
     return;
+  }
   const hoje = _hojeStr();
   const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
   const ehProfSimples = isProfessor() && !isAdmin();
@@ -9447,10 +9458,14 @@ async function coletarQuestoes(turma, licoesSel) {
   const numsExclusivosDB = licoesSel.filter(n => !numsHard.includes(n));
   if (numsExclusivosDB.length) {
     try {
-      const { data } = await sbClient.from('banco_questoes')
+      let qColeta = sbClient.from('banco_questoes')
         .select('num,perguntas').eq('turma', turma)
         .or('tipo.eq.licao,tipo.is.null')
         .in('num', numsExclusivosDB);
+      if (cfgTrimestreNome) {
+        qColeta = qColeta.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+      }
+      const { data } = await qColeta;
       (data || []).forEach(l => {
         (l.perguntas || []).forEach(p => {
           questoes.push({ q: p.q, a: p.a, op: [...p.op].sort(() => Math.random() - 0.5), origem: `L${l.num}` });
@@ -10070,11 +10085,15 @@ async function iniciarProvaAluno(id) {
   try {
     const licoesSel = p.licoes_selecionadas || [];
     if (licoesSel.length) {
-      const { data } = await sbClient.from('banco_questoes')
+      let qProva = sbClient.from('banco_questoes')
         .select('num,perguntas')
         .eq('turma', p.turma)
         .or('tipo.eq.licao,tipo.is.null')
         .in('num', licoesSel);
+      if (cfgTrimestreNome) {
+        qProva = qProva.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+      }
+      const { data } = await qProva;
       if (data && data.length) {
         // Substituir questões de lição pelas versões atuais do banco
         const mapaDB = {};
@@ -10637,6 +10656,11 @@ async function carregarBancoQuestoes(turma) {
 
     if (_bancoTipoAtual === 'licao') {
       query = query.or('tipo.eq.licao,tipo.is.null');
+      // Lições são específicas de um trimestre — filtra pelo trimestre atual
+      // para não misturar, por exemplo, as lições do 2º e do 3º trimestre.
+      if (cfgTrimestreNome) {
+        query = query.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+      }
     } else {
       query = query.eq('tipo', _bancoTipoAtual);
     }
@@ -11009,6 +11033,7 @@ async function salvarLicaoBanco() {
       dado.turma = turma;
       dado.num = num;
       dado.tipo = tipo;
+      if (tipo === 'licao' && cfgTrimestreNome) dado.trimestre = cfgTrimestreNome;
       dado.created_at = new Date().toISOString();
       const { error } = await sbClient.from('banco_questoes').insert(dado);
       if (error) throw error;
@@ -11045,14 +11070,20 @@ function sincronizarLicaoEmMemoria(l) {
 // Carregar lições do banco e sincronizar com LICOES em memória ao iniciar
 async function sincronizarBancoComMemoria() {
   try {
-    const { data } = await sbClient.from('banco_questoes')
+    let query = sbClient.from('banco_questoes')
       .select('*')
       .or('tipo.eq.licao,tipo.is.null'); // só lições — não quizzes/simulados/avulsas
+    // Filtra pelo trimestre atual (Config > Trimestre) para não misturar lições
+    // de trimestres diferentes que estejam salvas no mesmo banco (ex: 2º e 3º trimestre).
+    if (cfgTrimestreNome) {
+      query = query.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+    }
+    const { data } = await query;
     if (!data || !data.length) return;
     for (const l of data) {
       sincronizarLicaoEmMemoria(l);
     }
-    console.log(`Banco sincronizado: ${data.length} lições`);
+    console.log(`Banco sincronizado: ${data.length} lições (trimestre: ${cfgTrimestreNome || 'todos'})`);
   } catch(e) {
     console.warn('Banco de questões não disponível, usando dados locais:', e.message);
   }
@@ -14765,11 +14796,15 @@ async function atualizarLicoesModal(editId) {
   // Buscar lições do Supabase (banco_questoes tipo licao ou null)
   var licoesDB = [];
   try {
-    var { data } = await sbClient.from('banco_questoes')
-      .select('num,titulo,data_licao,perguntas,tipo')
+    var qBusca = sbClient.from('banco_questoes')
+      .select('num,titulo,data_licao,perguntas,tipo,trimestre')
       .eq('turma', turma)
       .or('tipo.eq.licao,tipo.is.null')
       .order('num', { ascending: true });
+    if (cfgTrimestreNome) {
+      qBusca = qBusca.or(`trimestre.eq.${cfgTrimestreNome},trimestre.is.null`);
+    }
+    var { data } = await qBusca;
     licoesDB = data || [];
   } catch(e) {}
 
