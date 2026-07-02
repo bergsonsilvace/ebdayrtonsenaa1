@@ -3311,6 +3311,18 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
           <div style="font-size:11px;color:var(--ink-soft);margin-top:3px">Quando fecha definitivamente</div>
         </div>
       </div>
+      <!-- Trimestre -->
+      <div class="fg">
+        <label class="fl">📚 Trimestre</label>
+        <div style="display:flex;gap:6px;flex-wrap:wrap" id="pv-trimestre-wrap">
+          <button type="button" class="pv-trim-btn" data-trim="1t2026" onclick="selTrimProva('1t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">1º Tri 2026</button>
+          <button type="button" class="pv-trim-btn on" data-trim="2t2026" onclick="selTrimProva('2t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--gold);background:var(--ink);font-size:11px;font-weight:700;color:var(--gold-l);cursor:pointer">2º Tri 2026 ✦</button>
+          <button type="button" class="pv-trim-btn" data-trim="3t2026" onclick="selTrimProva('3t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">3º Tri 2026</button>
+          <button type="button" class="pv-trim-btn" data-trim="4t2026" onclick="selTrimProva('4t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">4º Tri 2026</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ao selecionar, as datas são preenchidas automaticamente</div>
+        <input type="hidden" id="pv-trimestre" value="2t2026">
+      </div>
       <!-- Banco de Questões (Quiz/Simulado) -->
       <div class="fg" id="pv-banco-wrap" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -3370,6 +3382,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       </div>
       <div class="fg"><label class="fl">Nome completo</label><input class="fc" id="ae-nome" placeholder="Nome do aluno"></div>
       <div class="fg"><label class="fl">Turma</label><select class="fc" id="ae-turma"><option value="maternal">🍼 Maternal</option><option value="juniores">🧒 Juniores</option><option value="jovens">🔵 Jovens</option><option value="adultos">🔴 Adultos</option></select></div>
+      <div class="fg"><label class="fl">📚 Trimestre de matrícula</label><select class="fc" id="ae-trimestre-matricula"><option value="1t2026">1º Trimestre 2026</option><option value="2t2026">2º Trimestre 2026</option><option value="3t2026" selected>3º Trimestre 2026</option><option value="4t2026">4º Trimestre 2026</option></select></div>
       <div class="frow">
         <div class="fg"><label class="fl">Data de nascimento</label><input class="fc date-mask-input" type="text" id="ae-nasc" placeholder="DD/MM/AAAA" maxlength="10" inputmode="numeric" oninput="mascaraData(this)"></div>
         <div class="fg"><label class="fl">Telefone</label><input class="fc" id="ae-tel" placeholder="(00) 00000-0000"></div>
@@ -5457,6 +5470,7 @@ function renderAlunos() {
         <div class="ai-nome">${a.nome}</div>
         <div class="ai-meta">
           <span class="badge badge-m">Matriculado</span>
+          ${a.trimestre_matricula ? `<span style="font-size:10px;color:var(--ink-soft);background:var(--cream);padding:1px 6px;border-radius:8px;border:1px solid var(--cb)">${{'1t2026':'1º Tri','2t2026':'2º Tri','3t2026':'3º Tri','4t2026':'4º Tri'}[a.trimestre_matricula]||a.trimestre_matricula} 2026</span>` : ''}
           ${idade!==null?`<span style="font-size:10px;color:var(--ink-soft)">${idade} anos</span>`:''}
           ${anivBadge}${faltaBadge}${statusBadge}
         </div>
@@ -5490,6 +5504,8 @@ function abrirModalAluno(id) {
     document.getElementById('ae-status').value=a.status||'ativo';
     document.getElementById('ae-login').value=a.login||'';
     document.getElementById('ae-senha').value='';
+    const trimEl = document.getElementById('ae-trimestre-matricula');
+    if (trimEl) trimEl.value = a.trimestre_matricula || '2t2026';
     if (document.getElementById('ae-responsavel')) document.getElementById('ae-responsavel').value=a.responsavel||'';
     if (document.getElementById('ae-tel-resp')) document.getElementById('ae-tel-resp').value=a.tel_responsavel||'';
     if (document.getElementById('ae-endereco')) document.getElementById('ae-endereco').value=a.endereco||'';
@@ -5530,6 +5546,7 @@ async function salvarAluno() {
   const dado = {
     nome,
     turma: document.getElementById('ae-turma').value,
+    trimestre_matricula: document.getElementById('ae-trimestre-matricula')?.value || '3t2026',
     nasc: dataParaISO(document.getElementById('ae-nasc').value) || null,
     tel: document.getElementById('ae-tel').value || null,
     status: document.getElementById('ae-status').value,
@@ -8983,107 +9000,94 @@ async function renderProvasProf() {
   if (!minhas.length) {
     box.innerHTML = '<div class="empty"><div class="empty-icon">📝</div><div class="empty-txt">Nenhuma prova criada ainda</div></div>';
     return;
-  }
   const hoje = _hojeStr();
   const podeAprovar = isAdmin() || ['pastor','super'].includes(USER.perfil);
   const ehProfSimples = isProfessor() && !isAdmin();
 
-  box.innerHTML = minhas.map(p => {
-    // Bug 3: alerta para provas sem questões
-    if (!p.questoes || p.questoes.length === 0) {
-      return `<div style="background:var(--red-bg);border:1.5px solid var(--red);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
-        <span style="font-size:20px">⚠️</span>
-        <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--red)">${p.nome}</div>
-        <div style="font-size:11px;color:var(--ink-soft)">Prova sem questões — edite para adicionar antes de liberar</div></div>
-        <button onclick="editarProva('${p.id}')" class="btn btn-ou btn-sm">✏️ Editar</button>
-      </div>`;
-    }
-    const encerrada = p.data_limite && p.data_limite < hoje;
-    // status_aprovacao: 'pendente' | 'rejeitada' | 'revisao' | 'aprovada' (default)
-    const statusAp = p.status_aprovacao || (p.aprovada === false ? 'pendente' : 'aprovada');
-    const historico = p.historico_aprovacao || [];
+  // Agrupar por trimestre
+  const TRIM_LABELS_PROF = { '1t2026':'1º Trimestre 2026', '2t2026':'2º Trimestre 2026', '3t2026':'3º Trimestre 2026', '4t2026':'4º Trimestre 2026', 'sem':'Sem trimestre' };
+  const grupos = {};
+  minhas.forEach(p => { const t = p.trimestre||'sem'; if(!grupos[t]) grupos[t]=[]; grupos[t].push(p); });
+  const ordemTrims = ['4t2026','3t2026','2t2026','1t2026','sem'];
+  const trimAtual = '2t2026';
 
-    // Badge de status
-    const badgeMap = {
-      pendente:   `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando aprovação</span>`,
-      rejeitada:  `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitada</span>`,
-      revisao:    `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`,
-      cancelada:  `<span class="prova-badge" style="background:#f0f0f0;color:#666;border:1px solid #ccc">🗑 Cancelada</span>`,
-      aprovada:   encerrada ? `<span class="prova-badge badge-encerrada">Encerrada</span>`
-                 : p.liberada ? `<span class="prova-badge badge-liberada">Liberada ✓</span>`
-                 : `<span class="prova-badge badge-fechada">Aprovada</span>`
-    };
-    const statusBadge = badgeMap[statusAp] || badgeMap.aprovada;
-
-    const tipoClass = _tipoBadgeClass(p.tipo);
-    const nQuestoes = (p.questoes || []).length;
-    const nRespostas = Object.keys(p.resultados || {}).length;
-    const tempo = p.tempo_minutos > 0 ? `⏱ ${p.tempo_minutos} min` : '';
-    const dataLim = p.data_limite ? `📅 Até ${_fmtDataProva(p.data_limite)}` : `<span style="color:var(--ink-soft);font-size:11px">⚠️ Sem prazo definido</span>`;
-
-    // Histórico de mensagens
-    const historicoHtml = historico.length ? `
-      <div style="margin-top:10px;border-top:1px solid var(--cb);padding-top:10px">
-        <div style="font-size:10px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-soft);font-weight:700;margin-bottom:8px">💬 Histórico</div>
-        ${historico.map(h => `
-          <div style="display:flex;gap:8px;margin-bottom:8px">
-            <div style="flex-shrink:0;width:28px;height:28px;border-radius:50%;background:${h.tipo==='aprovacao'?'var(--tc-bg)':h.tipo==='rejeicao'?'var(--red-bg)':h.tipo==='revisao'?'#e8f4fd':'var(--gold-pale)'};display:flex;align-items:center;justify-content:center;font-size:13px">${h.tipo==='aprovacao'?'✓':h.tipo==='rejeicao'?'✕':h.tipo==='revisao'?'🔄':'📝'}</div>
-            <div style="flex:1;min-width:0">
-              <div style="font-size:11px;font-weight:700;color:var(--ink-mid)">${h.autor} <span style="font-weight:400;color:var(--ink-soft)">· ${h.data ? new Date(h.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',hour:'2-digit',minute:'2-digit'}) : ''}</span></div>
-              <div style="font-size:12px;color:var(--ink);line-height:1.5;margin-top:2px">${h.msg}</div>
-            </div>
-          </div>`).join('')}
-      </div>` : '';
-
-    // Botões por perfil e status
-    let acoes = '';
-    if (podeAprovar && (statusAp === 'pendente' || statusAp === 'revisao')) {
-      acoes += `<button class="btn btn-green btn-sm" onclick="aprovarProva('${p.id}')">✓ Aprovar</button>
-                <button class="btn btn-red btn-sm" onclick="rejeitarProva('${p.id}')">✕ Rejeitar</button>`;
-    }
-    if (statusAp === 'rejeitada' && !podeAprovar) {
-      acoes += `<button class="btn btn-dk btn-sm" onclick="solicitarRevisao('${p.id}')">🔄 Solicitar revisão</button>`;
-    }
-    if (statusAp === 'aprovada' && !encerrada && !p.liberada) {
-      acoes += `<button class="btn btn-green btn-sm" onclick="liberarProva('${p.id}')">▶ Liberar para alunos</button>`;
-    }
-    if (statusAp === 'aprovada' && !encerrada && p.liberada) {
-      acoes += `<button class="btn btn-red btn-sm" onclick="fecharProvaAcesso('${p.id}')">⏹ Fechar acesso</button>`;
-    }
-    if (statusAp === 'aprovada') {
-      acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>`;
-      if (podeAprovar) {
-        acoes += `<button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
-        acoes += `<button class="btn btn-red btn-sm" onclick="cancelarProva('${p.id}')">🗑 Cancelar prova</button>`;
-      }
-    }
-
-    const cardBg = statusAp === 'pendente' ? 'border-color:#ffc107;background:#fffdf0'
-      : statusAp === 'rejeitada' ? 'border-color:var(--red);background:var(--red-bg)'
-      : statusAp === 'revisao' ? 'border-color:#90caf9;background:#f0f8ff' : '';
-
-    return `<div class="prova-card" style="${cardBg}">
-      <div class="prova-card-head">
-        <div style="flex:1;min-width:0">
-          <div class="prova-titulo">${p.nome}</div>
-          <div class="prova-meta">
-            <span class="prova-badge ${tipoClass}">${_tipoLabel(p.tipo)}</span>
-            ${statusBadge}
-            <span>${TN[p.turma]}</span>
-            ${tempo ? `<span>${tempo}</span>` : ''}
-            ${dataLim ? `<span>${dataLim}</span>` : ''}
-          </div>
-          <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">${nQuestoes} questões · ${nRespostas} responderam${p.criado_por ? ` · por ${p.criado_por}` : ''}</div>
+  box.innerHTML = ordemTrims.filter(t => grupos[t]?.length).map(t => {
+    const label = TRIM_LABELS_PROF[t] || t;
+    const provasTrim = grupos[t];
+    const aberto = t === trimAtual || !grupos[trimAtual]?.length;
+    const nL = provasTrim.filter(p => p.liberada && p.status_aprovacao !== 'cancelada').length;
+    return `<div style="border-radius:12px;overflow:hidden;border:1.5px solid var(--gold);margin-bottom:8px">
+      <div onclick="var b=this.nextElementSibling;b.style.maxHeight=b.style.maxHeight==='9999px'?'0':'9999px';this.querySelector('.pa').style.transform=b.style.maxHeight==='9999px'?'rotate(90deg)':'none'"
+        style="background:var(--ink);padding:14px 16px;cursor:pointer;display:flex;align-items:center;justify-content:space-between">
+        <div>
+          <div style="font-size:10px;text-transform:uppercase;letter-spacing:.1em;font-weight:700;color:var(--gold-l);margin-bottom:3px">${label}</div>
+          <div style="font-size:12px;color:rgba(255,255,255,.45)">${provasTrim.length} prova${provasTrim.length!==1?'s':''} · ${nL} liberada${nL!==1?'s':''}</div>
         </div>
-        <div style="display:flex;gap:5px;flex-shrink:0">
-          <button class="btn-ic" onclick="editarProva('${p.id}')" title="Editar">✎</button>
-          <button class="btn-ic danger" onclick="deletarProva('${p.id}')" title="Excluir">✕</button>
-        </div>
+        <div class="pa" style="font-size:20px;color:var(--gold);transition:transform .3s;transform:${aberto?'rotate(90deg)':'none'}">›</div>
       </div>
-      ${historicoHtml}
-      <div class="prova-actions" style="margin-top:10px">${acoes}</div>
+      <div style="max-height:${aberto?'9999px':'0'};overflow:hidden;transition:max-height .4s ease">
+        <div style="padding:10px">${provasTrim.map(pp => _renderProvaCard(pp, hoje, podeAprovar, ehProfSimples)).join('')}</div>
+      </div>
     </div>`;
   }).join('');
+}
+
+function _renderProvaCard(p, hoje, podeAprovar, ehProfSimples) {
+  if (!p.questoes || p.questoes.length === 0) {
+    return `<div style="background:var(--red-bg);border:1.5px solid var(--red);border-radius:var(--r);padding:12px 14px;margin-bottom:10px;display:flex;align-items:center;gap:10px">
+      <span style="font-size:20px">⚠️</span>
+      <div style="flex:1"><div style="font-size:13px;font-weight:700;color:var(--red)">${p.nome}</div>
+      <div style="font-size:11px;color:var(--ink-soft)">Prova sem questões — edite para adicionar antes de liberar</div></div>
+      <button onclick="editarProva('${p.id}')" class="btn btn-ou btn-sm">✏️ Editar</button>
+    </div>`;
+  }
+  const encerrada = p.data_limite && p.data_limite.slice(0,10) < hoje;
+  const statusAp = p.status_aprovacao || (p.aprovada === false ? 'pendente' : 'aprovada');
+  const badgeMap = {
+    pendente:  `<span class="prova-badge" style="background:#fff3cd;color:#856404;border:1px solid #ffc107">⏳ Aguardando</span>`,
+    rejeitada: `<span class="prova-badge" style="background:var(--red-bg);color:var(--red);border:1px solid var(--red)">✕ Rejeitada</span>`,
+    revisao:   `<span class="prova-badge" style="background:#e8f4fd;color:#1565c0;border:1px solid #90caf9">🔄 Em revisão</span>`,
+    cancelada: `<span class="prova-badge" style="background:#f0f0f0;color:#666;border:1px solid #ccc">🗑 Cancelada</span>`,
+    aprovada:  encerrada ? `<span class="prova-badge badge-encerrada">Encerrada</span>` : p.liberada ? `<span class="prova-badge badge-liberada">Liberada ✓</span>` : `<span class="prova-badge badge-fechada">Aprovada</span>`
+  };
+  const badge = badgeMap[statusAp] || badgeMap.aprovada;
+  const nQ = p.questoes.length;
+  const nR = Object.keys(p.resultados || {}).length;
+  const dataLim = p.data_limite ? `📅 Até ${_fmtDataProva(p.data_limite)}` : `<span style="color:var(--ink-soft);font-size:11px">⚠️ Sem prazo definido</span>`;
+  let acoes = '';
+  if (statusAp === 'pendente' || statusAp === 'revisao') {
+    acoes += `<button class="btn btn-ou btn-sm" onclick="editarProva('${p.id}')">✏️ Editar</button>`;
+    if (podeAprovar) {
+      acoes += `<button class="btn btn-sm" onclick="aprovarProva('${p.id}')" style="background:var(--tc);color:white">✓ Aprovar</button>`;
+      acoes += `<button class="btn btn-ou btn-sm" onclick="rejeitarProva('${p.id}')">✕ Rejeitar</button>`;
+    }
+  }
+  if (statusAp === 'rejeitada') acoes += `<button class="btn btn-ou btn-sm" onclick="editarProva('${p.id}')">✏️ Editar</button>`;
+  if (statusAp === 'aprovada') {
+    acoes += `<button class="btn btn-ou btn-sm" onclick="verResultados('${p.id}')">📊 Resultados</button>`;
+    if (podeAprovar) {
+      acoes += `<button class="btn btn-ou btn-sm" onclick="permitirRefazer('${p.id}')">↺ Refazer</button>`;
+      acoes += `<button class="btn btn-red btn-sm" onclick="cancelarProva('${p.id}')">🗑 Cancelar</button>`;
+    }
+  }
+  if (!ehProfSimples) acoes += `<button class="btn btn-ou btn-sm" onclick="deletarProva('${p.id}')" style="color:var(--red);border-color:var(--red)">✕ Excluir</button>`;
+  const historicoHtml = (statusAp === 'rejeitada' && p.obs_aprovacao) ? `<div style="background:var(--red-bg);border-radius:6px;padding:8px 10px;margin-top:8px;font-size:12px;color:var(--red)">✕ Motivo: ${p.obs_aprovacao}</div>` : '';
+  return `<div class="prova-card" style="margin-bottom:8px">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:8px;margin-bottom:6px">
+      <div style="flex:1">
+        <div style="font-size:14px;font-weight:700">${p.nome}</div>
+        <div class="prova-meta" style="margin-top:3px">
+          <span class="prova-badge" style="background:#f5f5f5;color:#555;border:1px solid #ddd">${_tipoLabel(p.tipo)}</span>
+          <span>${nQ} questões</span>
+          ${nR > 0 ? `<span style="color:var(--tc);font-weight:600">✓ ${nR} resp.</span>` : ''}
+          ${dataLim}
+        </div>
+      </div>
+      <div style="flex-shrink:0">${badge}</div>
+    </div>
+    ${historicoHtml}
+    <div class="prova-actions" style="margin-top:10px">${acoes}</div>
+  </div>`;
 }
 
 // ── Modal criar/editar prova ──
@@ -9195,6 +9199,35 @@ function confirmarSelecaoAlunos() {
   _atualizarChipsAlunos();
 }
 
+const TRIM_DATAS = {
+  '1t2026': { inicio: '2026-01-05T08:00', fim: '2026-03-29T21:00' },
+  '2t2026': { inicio: '2026-04-06T08:00', fim: '2026-06-28T21:00' },
+  '3t2026': { inicio: '2026-07-06T08:00', fim: '2026-09-27T21:00' },
+  '4t2026': { inicio: '2026-10-05T08:00', fim: '2026-12-13T21:00' },
+};
+
+function selTrimProva(id, btn) {
+  document.querySelectorAll('.pv-trim-btn').forEach(b => {
+    b.style.background = 'var(--cream)';
+    b.style.borderColor = 'var(--cb)';
+    b.style.color = 'var(--ink-soft)';
+    b.textContent = b.textContent.replace(' ✦','');
+  });
+  btn.style.background = 'var(--ink)';
+  btn.style.borderColor = 'var(--gold)';
+  btn.style.color = 'var(--gold-l)';
+  btn.textContent = btn.textContent + ' ✦';
+  document.getElementById('pv-trimestre').value = id;
+  // Preencher datas automaticamente se estiverem vazias
+  const datas = TRIM_DATAS[id];
+  if (datas) {
+    const inicio = document.getElementById('pv-data-inicio');
+    const fim = document.getElementById('pv-data-limite');
+    if (!inicio.value) inicio.value = datas.inicio;
+    if (!fim.value) fim.value = datas.fim;
+  }
+}
+
 async function abrirModalProva(id, tipoPresel) {
   const tipoLabels = { prova:'Nova Prova', simulado:'Novo Simulado', quiz:'Novo Quiz', desafio:'Novo Desafio' };
   document.getElementById('mo-prova-titulo').textContent = id ? 'Editar avaliação' : (tipoLabels[tipoPresel] || 'Nova Avaliação');
@@ -9223,6 +9256,17 @@ async function abrirModalProva(id, tipoPresel) {
       document.getElementById('pv-tempo').value = p.tempo_minutos || 0;
       document.getElementById('pv-data-limite').value = p.data_limite ? p.data_limite.slice(0,16) : '';
       document.getElementById('pv-data-inicio').value = p.data_inicio ? p.data_inicio.slice(0,16) : '';
+      // Restaurar trimestre
+      const trimEdit = p.trimestre || '2t2026';
+      document.getElementById('pv-trimestre').value = trimEdit;
+      document.querySelectorAll('.pv-trim-btn').forEach(b => {
+        const isThis = b.dataset.trim === trimEdit;
+        b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+        b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+        b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+        const label = b.textContent.replace(' ✦','');
+        b.textContent = isThis ? label + ' ✦' : label;
+      });
       // Bug 2: restaurar aluno_ids ao editar prova
       if (p.aluno_ids && p.aluno_ids.length) {
         document.getElementById('pv-dest-espec').checked = true;
@@ -9458,6 +9502,7 @@ async function salvarProva() {
   const tempo = parseInt(document.getElementById('pv-tempo').value) || 0;
   const dataLimite = document.getElementById('pv-data-limite').value || null;
   const dataInicio = document.getElementById('pv-data-inicio').value || null;
+  const trimestre = document.getElementById('pv-trimestre')?.value || '2t2026';
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
   const questoes = await coletarQuestoes(turma, licoesSel);
   const editId = document.getElementById('pv-id').value;
@@ -9482,14 +9527,15 @@ async function salvarProva() {
     criado_por: USER.nome,
     obs_aprovacao: null,
     historico_aprovacao: [],
-    aluno_ids: alunoIds
+    aluno_ids: alunoIds,
+    trimestre
   };
 
   try {
     if (editId) {
       // Diagnóstico: mostrar o id que será salvo
       console.log('Editando prova id:', editId, 'tipo:', typeof editId);
-      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes, aluno_ids: alunoIds };
+      const dadoEdicao = { nome, tipo, turma, tempo_minutos: tempo, data_inicio: dataInicio, data_limite: dataLimite, licoes_selecionadas: licoesSel, questoes, aluno_ids: alunoIds, trimestre };
 
       // Tentar update direto sem passar por sbUpdate para ver erro bruto
       const { data: dataUp, error: errUp } = await sbClient.from('provas').update(dadoEdicao).eq('id', editId).select();
