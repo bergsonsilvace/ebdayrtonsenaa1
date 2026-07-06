@@ -16921,9 +16921,16 @@ function selecionarTurmaEscala(turma) {
 
 function popularLicoesEscala(turma) {
   var sel = document.getElementById('esc-licao-sel');
-  if (!sel || !LICOES[turma]) return;
+  if (!sel) return;
+  // Buscar as lições do trimestre marcado como ATUAL (não sempre o 2º trimestre fixo)
+  var trimList = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turma] : null;
+  var trimObj = trimList ? (trimList.find(function(t){ return t.atual; }) || trimList[trimList.length - 1]) : null;
+  var licoes = (trimObj && trimObj.dados && trimObj.dados.licoes && trimObj.dados.licoes.length)
+    ? trimObj.dados.licoes
+    : (LICOES[turma] ? LICOES[turma].licoes : []);
+  if (!licoes || !licoes.length) { sel.innerHTML = '<option value="">— Nenhuma lição cadastrada neste trimestre —</option>'; return; }
   sel.innerHTML = '<option value="">— Selecionar lição —</option>'
-    + LICOES[turma].licoes.map(function(l){
+    + licoes.map(function(l){
         return '<option value="' + l.num + '" data-titulo="' + l.titulo + '">' + l.num + ' — ' + l.titulo + ' (' + l.data + ')</option>';
       }).join('');
   // Re-init custom select
