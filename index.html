@@ -12456,10 +12456,14 @@ async function selecionarDiaCalendario(dataStr, el) {
   // Aulas registradas
   const aulasNoDia = cacheAulas.filter(a => a.data === dataStr);
 
-  // Lições programadas
+  // Lições programadas (sempre do trimestre marcado como ATUAL, não do 2º trimestre fixo)
   const licoesNoDia = [];
   ['juniores','jovens','adultos'].forEach(turma => {
-    const dados = LICOES[turma];
+    const trimListPop = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turma] : null;
+    const trimObjPop = trimListPop ? (trimListPop.find(t => t.atual) || trimListPop[trimListPop.length - 1]) : null;
+    const dados = (trimObjPop && trimObjPop.dados && trimObjPop.dados.licoes && trimObjPop.dados.licoes.length)
+      ? trimObjPop.dados
+      : LICOES[turma];
     if (!dados) return;
     dados.licoes.forEach(l => {
       const [d, m] = l.data.split('/');
