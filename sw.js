@@ -1,103 +1,57 @@
-// EBD Frequência — Service Worker v4.0
-// Mudança principal em relação à v3: o HTML principal (o app em si) agora usa
-// estratégia "rede primeiro, cache como reserva" — assim, sempre que o aluno
-// abrir o app COM internet, ele recebe a versão mais recente na hora, sem
-// precisar fechar/abrir de novo. O cache só entra em ação quando não há conexão.
-const CACHE = 'ebd-v4';
+// EBD Frequência — Service Worker
+// Estratégia: index.html SEMPRE busca da rede (nunca cacheia), demais recursos network-first com fallback pro cache.
+const CACHE = 'ebd-v2';
+const OFFLINE_URL = '/';
 
-const CACHEAR = [
-  '/',
-  '/index.html',
-  '/manifest.json',
-  '/icon-192.png',
-  '/icon-512.png'
-];
-
-// Instalação — cachear arquivos essenciais e assumir controle imediatamente
-self.addEventListener('install', function(e) {
+self.addEventListener('install', e => {
   e.waitUntil(
-    caches.open(CACHE).then(function(cache) {
-      return cache.addAll(CACHEAR);
-    }).then(function() {
-      return self.skipWaiting();
-    }).catch(function(err) {
-      console.log('Cache install error:', err);
-    })
+    caches.open(CACHE).then(cache => cache.add(OFFLINE_URL))
   );
+  self.skipWaiting();
 });
 
-// Ativação — apagar QUALQUER cache de versão anterior (ebd-v1, ebd-v2, ebd-v3...)
-// e assumir controle de todas as abas já abertas sem precisar de F5 manual.
-self.addEventListener('activate', function(e) {
+self.addEventListener('activate', e => {
+  // Deletar TODOS os caches antigos (de versões anteriores do SW)
   e.waitUntil(
-    caches.keys().then(function(keys) {
-      return Promise.all(
-        keys.filter(function(k) { return k !== CACHE; })
-            .map(function(k) { return caches.delete(k); })
-      );
-    }).then(function() {
-      return self.clients.claim();
-    })
+    caches.keys().then(keys =>
+      Promise.all(keys.filter(k => k !== CACHE).map(k => caches.delete(k)))
+    )
   );
+  self.clients.claim();
 });
 
-// Fetch — estratégia por tipo de recurso
-self.addEventListener('fetch', function(e) {
-  var url = e.request.url;
-  var req = e.request;
+self.addEventListener('fetch', e => {
+  if (e.request.method !== 'GET') return;
+  const url = new URL(e.request.url);
 
-  // Supabase / Google APIs — NUNCA interceptar, sempre direto pra rede
-  if (url.includes('supabase.co') ||
-      url.includes('supabase.in') ||
-      url.includes('googleapis.com')) {
-    return;
-  }
+  // Supabase — sempre online, nunca interceptar/cachear
+  if (url.hostname.includes('supabase.co')) return;
 
-  // Só GET
-  if (req.method !== 'GET') return;
-
-  // Navegação (abrir/recarregar o app) e o próprio index.html:
-  // REDE PRIMEIRO. Se der certo, atualiza o cache e devolve a versão fresca.
-  // Só usa o cache se estiver realmente offline.
-  var ehNavegacao = req.mode === 'navigate' || url.endsWith('/') || url.endsWith('/index.html');
-  if (ehNavegacao) {
+  // index.html / raiz: SEMPRE busca da rede, nunca do cache (garante que a versão
+  // publicada mais recente chegue ao aluno/professor assim que ele abrir o app)
+  if (url.pathname === '/' || url.pathname.endsWith('index.html')) {
     e.respondWith(
-      fetch(req, { cache: 'no-store' }).then(function(response) {
-        if (response && response.status === 200) {
-          var clone = response.clone();
-          caches.open(CACHE).then(function(cache) { cache.put(req, clone); });
-        }
-        return response;
-      }).catch(function() {
-        // Sem internet — usa o que tiver no cache
-        return caches.match(req).then(function(cached) {
-          return cached || caches.match('/');
-        });
-      })
+      fetch(e.request, { cache: 'no-store' })
+        .catch(() => caches.match(OFFLINE_URL))
     );
     return;
   }
 
-  // Demais recursos estáticos (ícones, manifest etc.): cache primeiro,
-  // atualizando em segundo plano — não são o "miolo" do app, então não
-  // precisam ser sempre os mais recentes na hora.
+  // Outros recursos (ícones, fontes, etc.): network first, com fallback pro cache
   e.respondWith(
-    caches.match(req).then(function(cached) {
-      var fetchPromise = fetch(req).then(function(response) {
-        if (response && response.status === 200) {
-          var clone = response.clone();
-          caches.open(CACHE).then(function(cache) { cache.put(req, clone); });
-        }
-        return response;
-      }).catch(function() { return cached; });
-      return cached || fetchPromise;
-    })
+    fetch(e.request).then(response => {
+      if (response && response.status === 200) {
+        const clone = response.clone();
+        caches.open(CACHE).then(cache => cache.put(e.request, clone));
+      }
+      return response;
+    }).catch(() => caches.match(e.request))
   );
 });
 
 // Push notification
-self.addEventListener('push', function(e) {
-  var data = { title: 'EBD Frequência', body: 'Nova notificação' };
+self.addEventListener('push', e => {
+  let data = { title: 'EBD Frequência', body: 'Nova notificação' };
   try { if (e.data) data = Object.assign(data, e.data.json()); } catch(err) {}
   e.waitUntil(
     self.registration.showNotification(data.title, {
@@ -111,11 +65,11 @@ self.addEventListener('push', function(e) {
 });
 
 // Clique na notificação
-self.addEventListener('notificationclick', function(e) {
+self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(
-    clients.matchAll({ type: 'window' }).then(function(list) {
-      for (var c of list) {
+    clients.matchAll({ type: 'window' }).then(list => {
+      for (const c of list) {
         if ('focus' in c) return c.focus();
       }
       if (clients.openWindow) return clients.openWindow('/');

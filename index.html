@@ -6419,8 +6419,8 @@ async function selTurmaRanking(turma, el) {
   curTurmaRank = turma;
   document.querySelectorAll('#rank-ttabs .ttab').forEach(t=>t.classList.remove('on'));
   if (el) el.classList.add('on');
-  // Invalidar cache da turma para buscar dados frescos
-  delete _rankCache[turma];
+  // Invalidar cache da turma (todos os trimestres) para buscar dados frescos
+  _rankCacheInvalidarTurma(turma);
   // Re-renderizar accordion com nova turma
   renderRankTrimAcc();
   if (curRankTrimestre) await renderRanking();
@@ -6616,8 +6616,8 @@ async function salvarExclusaoRanking() {
     }
     // Atualizar cache
     _rankExclusoesCache[_exclTurmaAtual] = [..._exclIds];
-    // Invalidar cache do ranking desta turma
-    if (_rankCache) delete _rankCache[_exclTurmaAtual];
+    // Invalidar cache do ranking desta turma (todos os trimestres)
+    if (_rankCache) _rankCacheInvalidarTurma(_exclTurmaAtual);
     _atualizarBadgeExclusao(_exclTurmaAtual);
     toast(`✓ ${_exclIds.length} aluno(s) excluído(s) do ranking!`, 'ok');
     fecharDrawerExclusao();
@@ -6903,6 +6903,14 @@ function selRankTrimestre(id) {
 
 // Cache de dados do ranking por turma — busca só uma vez por sessão
 const _rankCache = {};
+// Chave de cache composta por turma + trimestre — nunca só turma. Antes, o cache era
+// por turma apenas, então trocar de aba de trimestre (ex: olhar o 2º Tri e depois voltar
+// pro 3º) fazia o sistema "achar" que já tinha os dados e pular a nova busca, reexibindo
+// por engano os números do outro trimestre (pontuação inflada, tipo "174 pontos").
+function _rankCacheKey(turma, trimestre) { return turma + '::' + (trimestre || _trimestreIdAtual()); }
+function _rankCacheInvalidarTurma(turma) {
+  Object.keys(_rankCache).filter(k => k === turma || k.startsWith(turma + '::')).forEach(k => delete _rankCache[k]);
+}
 
 async function renderRanking() {
   if (!curRankTrimestre) return;
@@ -6916,7 +6924,7 @@ async function renderRanking() {
   let aulasT = trim
     ? cacheAulas.filter(a => a.turma === curTurmaRank && a.data >= trim.inicio && a.data <= trim.fim)
     : cacheAulas.filter(a => a.turma === curTurmaRank);
-  const cached = _rankCache[curTurmaRank] || {};
+  const cached = _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] || {};
 
   if (alunos.length) {
     _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || []);
@@ -6924,8 +6932,8 @@ async function renderRanking() {
     box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
   }
 
-  // ── 2. SE JÁ TEM CACHE DA TURMA, NÃO REBUSCA ──
-  if (_rankCache[curTurmaRank]) return;
+  // ── 2. SE JÁ TEM CACHE DA TURMA+TRIMESTRE, NÃO REBUSCA ──
+  if (_rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)]) return;
 
   // ── 3. BUSCAR DO BANCO APENAS UMA VEZ POR TURMA ──
   try {
@@ -6944,14 +6952,14 @@ async function renderRanking() {
     let bonusTurma = bRes.data || [];
     let ajustesTurmaRank = aRes.data || [];
     aulasT = trim ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasAulas;
-    _rankCache[curTurmaRank] = { bonus: bonusTurma, ajustes: ajustesTurmaRank };
+    _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] = { bonus: bonusTurma, ajustes: ajustesTurmaRank };
     cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
     // Cache global de alunos mantém TODOS (mesmo não matriculados no trimestre atual) —
     // só a exibição do ranking (variável "alunos" acima) é filtrada pela matrícula.
     cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunosTurma];
     if (qRes.data) {
       alunos.forEach(a => { if (_quizScoresTodos[a.id]) Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); });
-      qRes.data.forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
+      qRes.data.forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos != null ? parseFloat(r.pontos) : null, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
     }
     if (pRes.data) PROVAS = trim ? pRes.data.filter(p => { const d = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null); return !d || (d >= trim.inicio && d <= trim.fim); }) : pRes.data;
     if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data_cumprimento || (d.data_cumprimento >= trim.inicio && d.data_cumprimento <= trim.fim)) : dRes.data;
@@ -12041,15 +12049,32 @@ async function carregarRegraRanking() {
   try {
     const { data } = await sbClient.from('ranking_config').select('*').limit(1).single();
     if (data) {
-      RANKING_CONFIG = { ...RANKING_CONFIG, ...data };
-      document.getElementById('rk-pts-presenca').value = data.pts_presenca ?? 10;
+      // IMPORTANTE: colunas 'numeric' do Postgres/Supabase vêm como STRING no JSON
+      // (ex: "10" em vez de 10). Se não convertermos aqui, o '+' do JavaScript faz
+      // concatenação de texto em vez de soma (0 + "10" vira "010", não 10), inflando
+      // e embaralhando a pontuação no ranking assim que qualquer presença/quiz entra
+      // na conta. Por isso, convertemos tudo explicitamente com parseFloat agora.
+      const dataNum = {
+        ...data,
+        pts_presenca: parseFloat(data.pts_presenca) || 0,
+        pts_quiz_dia0: parseFloat(data.pts_quiz_dia0) || 0,
+        pts_quiz_dec: parseFloat(data.pts_quiz_dec) || 0,
+        quiz_dias: parseFloat(data.quiz_dias) || 0,
+        pts_prova_fator: parseFloat(data.pts_prova_fator) || 0,
+        pts_recuperacao_presenca: parseFloat(data.pts_recuperacao_presenca) || 0,
+        pts_fj_criancas: parseFloat(data.pts_fj_criancas) || 0,
+        pts_fj_jovens: parseFloat(data.pts_fj_jovens) || 0,
+        pts_fj_adultos: parseFloat(data.pts_fj_adultos) || 0,
+      };
+      RANKING_CONFIG = { ...RANKING_CONFIG, ...dataNum };
+      document.getElementById('rk-pts-presenca').value = dataNum.pts_presenca ?? 10;
       if (document.getElementById('rk-pts-recuperacao'))
-        document.getElementById('rk-pts-recuperacao').value = data.pts_recuperacao_presenca ?? 10;
-      document.getElementById('rk-pts-quiz-dia0').value = data.pts_quiz_dia0 ?? 10;
-      document.getElementById('rk-pts-quiz-dec').value = data.pts_quiz_dec ?? 1;
+        document.getElementById('rk-pts-recuperacao').value = dataNum.pts_recuperacao_presenca ?? 10;
+      document.getElementById('rk-pts-quiz-dia0').value = dataNum.pts_quiz_dia0 ?? 10;
+      document.getElementById('rk-pts-quiz-dec').value = dataNum.pts_quiz_dec ?? 1;
       document.getElementById('rk-quiz-proporcional').checked = data.pts_quiz_proporcional ?? false;
-      document.getElementById('rk-quiz-dias').value = data.quiz_dias ?? 6;
-      document.getElementById('rk-pts-prova-fator').value = data.pts_prova_fator ?? 10;
+      document.getElementById('rk-quiz-dias').value = dataNum.quiz_dias ?? 6;
+      document.getElementById('rk-pts-prova-fator').value = dataNum.pts_prova_fator ?? 10;
     }
   } catch(e) { /* tabela não existe ainda, usar defaults */ }
 }
@@ -12255,9 +12280,9 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
   let pts = 0;
   let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
 
-  const ptsPorPresenca = RANKING_CONFIG.pts_presenca ?? 10;
-  const fatorProva = RANKING_CONFIG.pts_prova_fator ?? 10;
-  const ptsRecuperacao = RANKING_CONFIG.pts_recuperacao_presenca ?? 10;
+  const ptsPorPresenca = parseFloat(RANKING_CONFIG.pts_presenca) || 0;
+  const fatorProva = parseFloat(RANKING_CONFIG.pts_prova_fator) || 0;
+  const ptsRecuperacao = parseFloat(RANKING_CONFIG.pts_recuperacao_presenca) || 0;
 
   // Datas do trimestre para filtrar. Prioridade: trimestreId explícito (passado pelo
   // chamador) > curRankTrimestre (tela de Ranking) > trimestre atual real. Isso evita que
@@ -12275,7 +12300,7 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     else if (statusPres === 'fj') {
       const ehCriancas = turma === 'criancas' || turma === 'maternal' || turma === 'juniores';
       const fjVale = ehCriancas ? RANKING_CONFIG.fj_vale_criancas : turma === 'jovens' ? RANKING_CONFIG.fj_vale_jovens : RANKING_CONFIG.fj_vale_adultos;
-      const ptsFj = ehCriancas ? (RANKING_CONFIG.pts_fj_criancas||0) : turma === 'jovens' ? (RANKING_CONFIG.pts_fj_jovens||0) : (RANKING_CONFIG.pts_fj_adultos||0);
+      const ptsFj = parseFloat(ehCriancas ? RANKING_CONFIG.pts_fj_criancas : turma === 'jovens' ? RANKING_CONFIG.pts_fj_jovens : RANKING_CONFIG.pts_fj_adultos) || 0;
       if (fjVale && ptsFj > 0) { pts += ptsFj; ptsPres += ptsFj; }
     }
   });
@@ -12287,7 +12312,9 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
     if (trimInicio && trimFim && val.data) {
       if (val.data < trimInicio || val.data > trimFim) return;
     }
-    const bonus = val.pontos != null ? val.pontos : (val.acertos * 2);
+    // Números do Supabase (coluna 'numeric') chegam como STRING — sempre normalizar
+    // com parseFloat aqui para nunca virar concatenação de texto (ex: 0 + "10" = "010").
+    const bonus = val.pontos != null ? (parseFloat(val.pontos) || 0) : (val.acertos * 2);
     pts += bonus; ptsQ += bonus;
   });
 
@@ -12416,7 +12443,7 @@ async function setRankTipo(tipo, el) {
   const aulasT = trim
     ? cacheAulas.filter(a => a.turma === curTurmaRank && a.data >= trim.inicio && a.data <= trim.fim)
     : cacheAulas.filter(a => a.turma === curTurmaRank);
-  const cached = _rankCache[curTurmaRank] || {};
+  const cached = _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] || {};
   _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || []);
 }
 
