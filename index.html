@@ -1641,6 +1641,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
       <div class="lerr" id="lerr">Usuário ou senha incorretos.</div>
     </div>
     <div class="lhint">Professores e alunos — solicite o acesso ao superintendente.</div>
+    <div style="text-align:center;margin-top:10px;font-size:10px;color:rgba(255,255,255,.25);letter-spacing:.03em">build 2026-07-06-v9</div>
 
 
 
@@ -3066,6 +3067,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             <button class="ttab tj" onclick="selQuizLicaoTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
             <button class="ttab ta" onclick="selQuizLicaoTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
           </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px" id="ql-trim-tabs"></div>
           <div id="lista-quizzes-licao"></div>
         </div>
 
@@ -3634,7 +3636,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </div>
 
 <script>
-console.log('%c EBD App — build 2026-07-02-v6 (Juízes 3T + ranking por matrícula) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
+console.log('%c EBD App — build 2026-07-06-v9 (ranking pts sem aulas + config numeric fix) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
 const SUPABASE_URL = 'https://bhcubiannrivpndxphps.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoY3ViaWFubnJpdnBuZHhwaHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA2OTUsImV4cCI6MjA5MDY1NjY5NX0.9oCHIXJkWq4d4dgrRXyFwNSMPhAUW6so-GhWkaAbaOI';
 
@@ -4523,8 +4525,15 @@ async function _navTo(id) {
     const rankTabs = document.getElementById('rank-ttabs');
     if (rankTabs) rankTabs.style.display = ehAluno ? 'none' : '';
     if (ehAluno && rankTurmaAl) curTurmaRank = rankTurmaAl;
-    // Carregar exclusões do Supabase PRIMEIRO
-    await Promise.all(['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t)));
+    // Carregar exclusões do Supabase e os pontos de quiz do trimestre atual PRIMEIRO —
+    // sem isso, a primeira renderização do ranking de pontos mostra tudo zerado por
+    // uma fração de segundo (ou até ficar assim, se algo falhar silenciosamente depois).
+    await Promise.all([
+      ...['maternal','juniores','jovens','adultos'].map(t => _carregarExclusoesTurma(t)),
+      carregarQuizScoresTodos(),
+      carregarProvas(),
+      carregarDesafioPontos()
+    ]);
     // Renderizar accordion — cria os containers lista-ranking-X no DOM
     renderRankTrimAcc();
     // Renderizar ranking
@@ -6927,7 +6936,7 @@ async function renderRanking() {
   const cached = _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] || {};
 
   if (alunos.length) {
-    _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || []);
+    _renderRankingBox(box, alunos, aulasT, cached.bonus || [], cached.ajustes || [], cached.quizPorAluno || null);
   } else {
     box.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
   }
@@ -6952,25 +6961,45 @@ async function renderRanking() {
     let bonusTurma = bRes.data || [];
     let ajustesTurmaRank = aRes.data || [];
     aulasT = trim ? todasAulas.filter(a => a.data >= trim.inicio && a.data <= trim.fim) : todasAulas;
-    _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] = { bonus: bonusTurma, ajustes: ajustesTurmaRank };
     cacheAulas = [...cacheAulas.filter(a => a.turma !== curTurmaRank), ...todasAulas];
     // Cache global de alunos mantém TODOS (mesmo não matriculados no trimestre atual) —
     // só a exibição do ranking (variável "alunos" acima) é filtrada pela matrícula.
     cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunosTurma];
-    if (qRes.data) {
-      alunos.forEach(a => { if (_quizScoresTodos[a.id]) Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); });
-      qRes.data.forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos != null ? parseFloat(r.pontos) : null, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
-    }
+    // Mapa de pontos de quiz, construído SÓ com o que veio desta busca (já filtrada por
+    // turma + trimestre no próprio SQL). Não usa mais a variável global _quizScoresTodos
+    // aqui, justamente para nunca correr o risco de reaproveitar por engano dados de
+    // outro trimestre que possam ter ficado lá de uma visita anterior nesta sessão.
+    const quizPorAluno = {};
+    (qRes.data || []).forEach(r => {
+      if (!quizPorAluno[r.aluno_id]) quizPorAluno[r.aluno_id] = {};
+      quizPorAluno[r.aluno_id][`${r.turma}-${r.licao_num}`] = {
+        acertos: r.acertos, total: r.total, pct: r.pct,
+        pontos: r.pontos != null ? parseFloat(r.pontos) : null,
+        data: r.data_resposta ? r.data_resposta.substring(0,10) : null
+      };
+    });
     if (pRes.data) PROVAS = trim ? pRes.data.filter(p => { const d = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null); return !d || (d >= trim.inicio && d <= trim.fim); }) : pRes.data;
     if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data_cumprimento || (d.data_cumprimento >= trim.inicio && d.data_cumprimento <= trim.fim)) : dRes.data;
     if (trim) { bonusTurma = bonusTurma.filter(b => !b.data_referencia || (b.data_referencia >= trim.inicio && b.data_referencia <= trim.fim)); ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data_referencia || (a.data_referencia >= trim.inicio && a.data_referencia <= trim.fim)); }
-    _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank);
-  } catch(e) {}
+    _rankCache[_rankCacheKey(curTurmaRank, curRankTrimestre)] = { bonus: bonusTurma, ajustes: ajustesTurmaRank, quizPorAluno };
+    _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank, quizPorAluno);
+  } catch(e) {
+    console.error('Erro ao carregar ranking:', e);
+    if (box) box.innerHTML = `<div class="empty"><div class="empty-icon">⚠️</div><div class="empty-txt">Erro ao carregar dados do ranking</div><div style="font-size:11px;color:var(--ink-soft);margin-top:6px">${e?.message||e}</div></div>`;
+  }
 }
 
-function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
+function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank, quizPorAluno) {
   bonusTurma = bonusTurma || [];
   ajustesTurmaRank = ajustesTurmaRank || [];
+  // Se não veio um mapa de quiz específico deste turma+trimestre (ex: primeiríssimo
+  // paint antes da busca completar), cai para o cache global como aproximação inicial —
+  // mas assim que a busca real completar, _renderRankingBox é chamado de novo já com
+  // o quizPorAluno correto, então isso nunca fica "preso" num valor errado.
+  function _scoresDoAluno(alunoId) {
+    if (quizPorAluno) return quizPorAluno[alunoId] || {};
+    return _quizScoresParaAluno(alunoId);
+  }
 
   // Função auxiliar: calcular bônus + ajustes de um aluno (nunca abaixo de 0)
   function _bonusDoAluno(alunoId) {
@@ -6997,8 +7026,11 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
   const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
   const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
 
-  // Trimestre sem aulas — mesmo layout mas zerado e opaco
-  if (!aulasT.length) {
+  // Trimestre sem aulas ainda — só bloqueia o ranking de PRESENÇA (não faz sentido
+  // sem nenhuma aula registrada). O ranking de PONTOS continua normalmente, pois o
+  // aluno pode já ter ganhado pontos de quiz/prova mesmo antes do professor lançar
+  // a primeira frequência do trimestre.
+  if (!aulasT.length && rankTipo !== 'pts') {
     box.innerHTML = '<div style="opacity:.45;pointer-events:none">' +
       alunos.map((a, i) => {
         const isTop = i < 3;
@@ -7024,7 +7056,7 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
   if (rankTipo === 'pts') {
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
-      const scoresAluno = _quizScoresParaAluno(a.id);
+      const scoresAluno = _scoresDoAluno(a.id);
       const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos, curRankTrimestre);
       const bonus = _bonusDoAluno(a.id);
       const totalPts = (ptsBase.total||0) + bonus;
@@ -7046,7 +7078,7 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
     ranking = alunos.map(a => {
       const presencas = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
-      const scoresAluno = _quizScoresParaAluno(a.id);
+      const scoresAluno = _scoresDoAluno(a.id);
       const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos, curRankTrimestre);
       const bonus = _bonusDoAluno(a.id);
       const totalPts = (ptsBase.total||0) + bonus;
@@ -14315,6 +14347,7 @@ async function abrirSecaoProvas(secao) {
     await renderDesafiosProf();
   } else if (secao === 'resultados') {
     document.getElementById('tab-quizzes-licao-prof').style.display = '';
+    _renderQLTrimTabs();
     await renderQuizzesLicao();
   } else if (secao === 'ajustes') {
     document.getElementById('tab-ajustes-prof').style.display = '';
@@ -14342,6 +14375,32 @@ async function selProvasProfTab(tab, el) {
 // RELATÓRIO DE QUIZZES DE LIÇÃO
 // ══════════════════════════════════════════════════════
 let _qlTurmaAtual = 'maternal';
+// Trimestre selecionado na tela de Resultados (Provas e Avaliações). Antes esta tela só
+// mostrava o trimestre atual, "substituindo" o anterior — agora dá para escolher
+// qualquer trimestre, igual ao seletor usado no Ranking.
+let _qlTrimestreAtual = _trimestreIdAtual();
+
+function _renderQLTrimTabs() {
+  const box = document.getElementById('ql-trim-tabs');
+  if (!box) return;
+  box.innerHTML = Object.entries(RANK_TRIMESTRES).map(([id, tr]) => {
+    const on = id === _qlTrimestreAtual;
+    return `<button type="button" class="pv-trim-btn${on?' on':''}" data-trim="${id}" onclick="selQLTrimestre('${id}',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid ${on?'var(--gold)':'var(--cb)'};background:${on?'var(--ink)':'var(--cream)'};font-size:11px;font-weight:700;color:${on?'var(--gold-l)':'var(--ink-soft)'};cursor:pointer">${tr.label}${id===_trimestreIdAtual()?' ✦':''}</button>`;
+  }).join('');
+}
+
+function selQLTrimestre(id, btn) {
+  _qlTrimestreAtual = id;
+  document.querySelectorAll('#ql-trim-tabs button').forEach(b => {
+    const isThis = b === btn;
+    b.classList.toggle('on', isThis);
+    b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+    b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+    b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+  });
+  if (_qlSubAba === 'pendentes') renderQuemNaoFezQuiz();
+  else renderQuizzesLicao();
+}
 
 function toggleQLicao(uid) {
   const body = document.getElementById(uid);
@@ -14370,13 +14429,13 @@ async function renderQuemNaoFezQuiz() {
   try {
     // Buscar todos os resultados da turma
     const { data: resultados } = await sbClient.from('quiz_resultados')
-      .select('aluno_id,licao_num').eq('turma', _qlTurmaAtual).eq('trimestre', _trimestreIdAtual());
+      .select('aluno_id,licao_num').eq('turma', _qlTurmaAtual).eq('trimestre', _qlTrimestreAtual);
 
     // Buscar alunos ativos da turma
     const alunos = (await sbGet('alunos', { turma: _qlTurmaAtual })).filter(a => a.ativo !== false);
 
-    // Buscar lições da turma
-    const dados = _dadosTrimestreAtual(_qlTurmaAtual);
+    // Buscar lições da turma (do trimestre selecionado, não necessariamente o atual)
+    const dados = _dadosTrimestreAtual(_qlTurmaAtual, _qlTrimestreAtual);
     const licoes = dados ? dados.licoes : [];
     const hoje = _hojeFortaleza();
 
@@ -14447,13 +14506,13 @@ async function renderQuizzesLicao() {
   try {
     // Buscar todos os resultados de quiz da turma
     const { data: resultados } = await sbClient.from('quiz_resultados')
-      .select('*').eq('turma', _qlTurmaAtual).eq('trimestre', _trimestreIdAtual()).order('licao_num', { ascending: true });
+      .select('*').eq('turma', _qlTurmaAtual).eq('trimestre', _qlTrimestreAtual).order('licao_num', { ascending: true });
 
     // Buscar alunos da turma
     const alunos = await sbGet('alunos', { turma: _qlTurmaAtual });
 
-    // Buscar lições da turma
-    const dados = _dadosTrimestreAtual(_qlTurmaAtual);
+    // Buscar lições da turma (do trimestre selecionado, não necessariamente o atual)
+    const dados = _dadosTrimestreAtual(_qlTurmaAtual, _qlTrimestreAtual);
     const licoes = dados ? dados.licoes : [];
 
     if (!resultados || !resultados.length) {
