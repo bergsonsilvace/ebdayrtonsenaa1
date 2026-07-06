@@ -2319,6 +2319,19 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
           <div id="aluno-licoes-prog"></div>
         </div>
 
+        <div class="aluno-sep"></div>
+
+        <!-- TRIMESTRES ANTERIORES -->
+        <div class="aluno-sec-lbl">🗓️ Trimestres Anteriores</div>
+        <button class="aluno-drop-btn" style="margin-top:0" onclick="alunoToggleTrimAnteriores()">
+          <div class="aluno-drop-lbl">Ver progresso de outros trimestres</div>
+          <span class="aluno-arr" id="alunoTrimAntArr">▼</span>
+        </button>
+        <div id="aluno-trim-ant-content" style="display:none" class="aluno-drop-content">
+          <div id="aluno-trim-ant-tabs" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px"></div>
+          <div id="aluno-trim-ant-body"></div>
+        </div>
+
       </div>
     </div>
 
@@ -3048,7 +3061,8 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             <button id="ql-sub-pendentes" onclick="selSubAbaQL('pendentes',this)" class="btn btn-ou btn-sm" style="flex:1">⏳ Quem não fez</button>
           </div>
           <div class="ttabs" id="ql-turma-tabs" style="margin-bottom:14px">
-            <button class="ttab tc on" onclick="selQuizLicaoTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+            <button class="ttab tm on" onclick="selQuizLicaoTurma('maternal',this)"><span class="dot dot-m"></span>Maternal</button>
+            <button class="ttab tjr" onclick="selQuizLicaoTurma('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
             <button class="ttab tj" onclick="selQuizLicaoTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
             <button class="ttab ta" onclick="selQuizLicaoTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
           </div>
@@ -3059,7 +3073,8 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <div id="tab-ajustes-prof" style="display:none">
           <!-- Turma selector -->
           <div class="ttabs" style="margin-bottom:14px">
-            <button class="ttab tc on" onclick="selAjustesTurma('criancas',this)"><span class="dot dot-c"></span>Crianças</button>
+            <button class="ttab tm on" onclick="selAjustesTurma('maternal',this)"><span class="dot dot-m"></span>Maternal</button>
+            <button class="ttab tjr" onclick="selAjustesTurma('juniores',this)"><span class="dot dot-jr"></span>Juniores</button>
             <button class="ttab tj" onclick="selAjustesTurma('jovens',this)"><span class="dot dot-j"></span>Jovens</button>
             <button class="ttab ta" onclick="selAjustesTurma('adultos',this)"><span class="dot dot-a"></span>Adultos</button>
           </div>
@@ -3322,12 +3337,12 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         <label class="fl">📚 Trimestre</label>
         <div style="display:flex;gap:6px;flex-wrap:wrap" id="pv-trimestre-wrap">
           <button type="button" class="pv-trim-btn" data-trim="1t2026" onclick="selTrimProva('1t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">1º Tri 2026</button>
-          <button type="button" class="pv-trim-btn on" data-trim="2t2026" onclick="selTrimProva('2t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--gold);background:var(--ink);font-size:11px;font-weight:700;color:var(--gold-l);cursor:pointer">2º Tri 2026 ✦</button>
-          <button type="button" class="pv-trim-btn" data-trim="3t2026" onclick="selTrimProva('3t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">3º Tri 2026</button>
+          <button type="button" class="pv-trim-btn" data-trim="2t2026" onclick="selTrimProva('2t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">2º Tri 2026</button>
+          <button type="button" class="pv-trim-btn on" data-trim="3t2026" onclick="selTrimProva('3t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--gold);background:var(--ink);font-size:11px;font-weight:700;color:var(--gold-l);cursor:pointer">3º Tri 2026 ✦</button>
           <button type="button" class="pv-trim-btn" data-trim="4t2026" onclick="selTrimProva('4t2026',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid var(--cb);background:var(--cream);font-size:11px;font-weight:700;color:var(--ink-soft);cursor:pointer">4º Tri 2026</button>
         </div>
         <div style="font-size:11px;color:var(--ink-soft);margin-top:4px">Ao selecionar, as datas são preenchidas automaticamente</div>
-        <input type="hidden" id="pv-trimestre" value="2t2026">
+        <input type="hidden" id="pv-trimestre" value="3t2026">
       </div>
       <!-- Banco de Questões (Quiz/Simulado) -->
       <div class="fg" id="pv-banco-wrap" style="display:none">
@@ -4885,7 +4900,7 @@ async function _renderDashRanking(alunos, aulas) {
         ? todasAulas.filter(au=>au.turma===a.turma && au.data >= trimAtual.inicio && au.data <= trimAtual.fim)
         : todasAulas.filter(au=>au.turma===a.turma);
       const sc = _quizScoresParaAluno(a.id);
-      const base = calcularPontosAluno(a.id, a.turma, aulasT, sc, PROVAS||[], _desafioPontos);
+      const base = calcularPontosAluno(a.id, a.turma, aulasT, sc, PROVAS||[], _desafioPontos, trimAtualId);
       const pres = aulasT.filter(au=>(au.presencas||{})[a.id]==='presente').length;
       const pct = aulasT.length ? Math.round((pres/aulasT.length)*100) : 0;
       const total = (base.total||0) + _bonus(a.id, a.turma);
@@ -6071,7 +6086,7 @@ async function sincronizarProfComoAluno(profData, editId) {
 function popularDropdownLicao(turma) {
   const sel = document.getElementById('f-licao-sel');
   if (!sel) return;
-  const dados = LICOES[turma];
+  const dados = _dadosTrimestreAtual(turma);
   if (!dados) {
     sel.innerHTML = '<option value="">— Selecionar da grade do trimestre —</option>';
     return;
@@ -6793,6 +6808,17 @@ function _trimestreIdAtual() {
   const m = (typeof cfgTrimestreNome !== 'undefined' && cfgTrimestreNome || '').match(/(\d)\D*Trimestre\D*(\d{4})/i);
   return m ? (m[1] + 't' + m[2]) : '2t2026';
 }
+// Retorna os dados (tema/subtema/licoes) do trimestre ATUAL de uma turma,
+// usando LICOES_TRIMESTRES (fonte da verdade) em vez do objeto LICOES estático
+// (que representa sempre o 2º Trimestre 2026, fixo/hardcoded).
+// Prioridade: trimId explícito > id igual a _trimestreIdAtual() > trimestre marcado atual:true > fallback LICOES[turma].
+function _dadosTrimestreAtual(turma, trimId) {
+  const trimList = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turma] : null;
+  const trimObj = trimList
+    ? (trimId && trimList.find(t => t.id === trimId)) || trimList.find(t => t.id === _trimestreIdAtual()) || trimList.find(t => t.atual)
+    : null;
+  return (trimObj && trimObj.dados && trimObj.dados.licoes && trimObj.dados.licoes.length) ? trimObj.dados : (trimObj ? trimObj.dados : LICOES[turma]);
+}
 // Um aluno pode estar matriculado em vários trimestres (array). Também aceita o formato
 // antigo (texto único), pra não quebrar registros que ainda não foram migrados.
 function _matriculadoEm(aluno, trimId) {
@@ -6810,7 +6836,7 @@ function _aeTrimSyncTrigger() {
     ? _aeTrimMatricula.map(t => _TRIM_LABELS_CURTO[t] || t).join(', ')
     : '— Selecionar —';
 }
-let curRankTrimestre = '2t2026';
+let curRankTrimestre = _trimestreIdAtual();
 
 function renderRankTrimAcc() {
   const acc = document.getElementById('rank-trim-accordion');
@@ -6928,8 +6954,8 @@ async function renderRanking() {
       qRes.data.forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
     }
     if (pRes.data) PROVAS = trim ? pRes.data.filter(p => { const d = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null); return !d || (d >= trim.inicio && d <= trim.fim); }) : pRes.data;
-    if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data || (d.data >= trim.inicio && d.data <= trim.fim)) : dRes.data;
-    if (trim) { bonusTurma = bonusTurma.filter(b => !b.data || (b.data >= trim.inicio && b.data <= trim.fim)); ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data || (a.data >= trim.inicio && a.data <= trim.fim)); }
+    if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data_cumprimento || (d.data_cumprimento >= trim.inicio && d.data_cumprimento <= trim.fim)) : dRes.data;
+    if (trim) { bonusTurma = bonusTurma.filter(b => !b.data_referencia || (b.data_referencia >= trim.inicio && b.data_referencia <= trim.fim)); ajustesTurmaRank = ajustesTurmaRank.filter(a => !a.data_referencia || (a.data_referencia >= trim.inicio && a.data_referencia <= trim.fim)); }
     _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank);
   } catch(e) {}
 }
@@ -6991,7 +7017,7 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
     const maxPts = Math.max(1, aulasT.length * 10 + 150);
     ranking = alunos.map(a => {
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos, curRankTrimestre);
       const bonus = _bonusDoAluno(a.id);
       const totalPts = (ptsBase.total||0) + bonus;
       const presTotal = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
@@ -7013,7 +7039,7 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
       const presencas = aulasT.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulasT.length ? Math.round((presencas / aulasT.length) * 100) : 0;
       const scoresAluno = _quizScoresParaAluno(a.id);
-      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, curTurmaRank, aulasT, scoresAluno, PROVAS, _desafioPontos, curRankTrimestre);
       const bonus = _bonusDoAluno(a.id);
       const totalPts = (ptsBase.total||0) + bonus;
       return { aluno: a, valor: presencas, presencas, pct, total: aulasT.length, label: pct + '%', pts: totalPts, idade: _idadeParaDesempate(a.nasc) };
@@ -8512,7 +8538,7 @@ async function mostrarResultado() {
   }
 
   // Revisão das respostas — mostrar correto/errado AQUI (resultado final)
-  const lic = LICOES[q.turma]?.licoes?.find(l => l.num === q.licaoNum);
+  const lic = _dadosTrimestreAtual(q.turma)?.licoes?.find(l => l.num === q.licaoNum);
   document.getElementById('qr-revisao').innerHTML = `<div class="ct">Revisão das respostas</div>` +
     q.embaralhadas.map((p, i) => {
       const resp = q.respostas[i];
@@ -8864,10 +8890,12 @@ const LICOES_TRIMESTRES = {
   jovens: [
     { id: '1t2026', label: '1º Trimestre 2026', periodo: 'Janeiro a Março 2026', atual: false,
       dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '1º Trimestre 2026 — Janeiro a Março', licoes: [] } },
-    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: true,
+    { id: '2t2026', label: '2º Trimestre 2026', periodo: 'Abril a Junho 2026', atual: false,
       dados: JSON.parse(JSON.stringify(LICOES.jovens)) },
-    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: false,
-      dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '3º Trimestre 2026 — Julho a Setembro', licoes: [] } },
+    { id: '3t2026', label: '3º Trimestre 2026', periodo: 'Julho a Setembro 2026', atual: true,
+      dados: { tema: 'Fidelidade às Escrituras em Oposição à Apostasia', subtema: 'Lições Espirituais no Livro de Juízes', comentarista: 'Comentarista: Pr. Valmir Nascimento', periodo: '3º Trimestre 2026 — Julho a Setembro',
+      licoes: [{"num": 1, "data": "05/07", "titulo": "O Livro de Juízes: Quando Cada um Fazia o que Parecia Certo", "texto": "Js 24.26-30; Jz 1.1; 17.6", "textoAureo": "Naqueles dias, não havia rei em Israel; cada qual fazia o que parecia direito aos seus olhos. (Jz 17.6)", "verdade": "Deus cumpre seus propósitos por meio de instrumentos humanos, escolhidos e capacitados por Ele, apesar da fraqueza do homem.", "resumo": "Deus cumpre seus propósitos por meio de instrumentos humanos, escolhidos e capacitados por Ele, apesar da fraqueza do homem.", "leituraBiblica": "Josué 24.26-30; Juízes 1.1; 17.6", "memorizando": "Naqueles dias, não havia rei em Israel; cada qual fazia o que parecia direito aos seus olhos. (Jz 17.6)", "leituraDiaria": [{"dia": "Segunda", "ref": "Js 1.1-9", "tema": "Tende bom ânimo"}, {"dia": "Terça", "ref": "Js 3.1-17", "tema": "A travessia do Jordão"}, {"dia": "Quarta", "ref": "Js 23", "tema": "Um chamado à fidelidade exclusiva a Deus"}, {"dia": "Quinta", "ref": "Hb 11.32", "tema": "Juízes como heróis da Fé"}, {"dia": "Sexta", "ref": "Rm 13.1,2", "tema": "Toda autoridade é constituída por Deus"}, {"dia": "Sábado", "ref": "At 2.14-21", "tema": "Liderando no poder do Espírito"}], "perguntas": [{"q": "Quem é o comentarista responsável pelas lições deste trimestre sobre o livro de Juízes?", "a": "Pr. Valmir Nascimento, mestre em Teologia e doutor em Filosofia", "correta": 2, "op": ["Pr. Wagner Gaby, autor de diversas obras da CPAD", "Pr. Elinaldo Renovato, doutrinador da CPAD", "Pr. Valmir Nascimento, mestre em Teologia e doutor em Filosofia", "Pr. Silas Queiroz, especialista em liderança cristã"]}, {"q": "Segundo a Orientação Pedagógica, qual é o significado do título 'Juízes' nos documentos judaicos mais antigos?", "a": "Sepher sophetim, um livro de juízes ou governadores", "correta": 1, "op": ["Um livro de reis e sacerdotes", "Sepher sophetim, um livro de juízes ou governadores", "Um relato de guerras santas", "Uma coleção de salmos de libertação"]}, {"q": "Segundo a lição, quem o Talmude considera autor do livro de Juízes?", "a": "Samuel", "correta": 0, "op": ["Samuel", "Esdras", "Fineias", "Ezequias"]}, {"q": "Qual é o propósito didático do livro de Juízes, segundo a lição?", "a": "Ensinar a retribuição divina sobre um povo pecador, a misericórdia de Deus sobre o arrependimento e a futilidade de governos idólatras centrados no homem", "correta": 3, "op": ["Registrar genealogias das doze tribos de Israel", "Detalhar as leis cerimoniais dadas a Moisés", "Narrar apenas as guerras de conquista de Canaã", "Ensinar a retribuição divina sobre um povo pecador, a misericórdia de Deus sobre o arrependimento e a futilidade de governos idólatras centrados no homem"]}, {"q": "Com que idade Josué faleceu, segundo Josué 24.29?", "a": "Cento e dez anos", "correta": 1, "op": ["Cento e vinte anos", "Cento e dez anos", "Noventa e cinco anos", "Cento e trinta anos"]}, {"q": "Onde Josué foi sepultado, segundo o texto bíblico?", "a": "Em Timnate-Sera, no monte de Efraim", "correta": 2, "op": ["Em Hebrom, junto aos patriarcas", "Em Siquém, perto do santuário", "Em Timnate-Sera, no monte de Efraim", "Em Gilgal, à margem do Jordão"]}, {"q": "Quais juízes são classificados como 'juízes maiores' na lição?", "a": "Otniel, Eúde, Débora, Gideão, Jefté e Sansão", "correta": 0, "op": ["Otniel, Eúde, Débora, Gideão, Jefté e Sansão", "Sangar, Tola, Jair, Ibsã, Elom e Abdom", "Otniel, Sangar, Jefté, Elom, Abdom e Sansão", "Débora, Gideão, Tola, Jair, Ibsã e Jefté"]}, {"q": "Segundo a lição, qual foi o 'segredo do êxito' de Israel nas conquistas sob a liderança de Josué?", "a": "Ser obediente a Jeová e amá-lo (Js 23.11)", "correta": 1, "op": ["A força militar superior das tribos de Israel", "Ser obediente a Jeová e amá-lo (Js 23.11)", "As alianças feitas com os povos vizinhos", "A liderança carismática de cada tribo isoladamente"]}, {"q": "Qual versículo sintetiza a mensagem central do livro de Juízes, segundo a lição?", "a": "Juízes 21.25, sobre a ausência de rei em Israel e cada um fazendo o que parecia reto a seus olhos", "correta": 3, "op": ["Juízes 2.16, sobre o levantamento dos juízes", "Juízes 6.12, sobre a saudação do Anjo do Senhor a Gideão", "Juízes 16.28, sobre a última oração de Sansão", "Juízes 21.25, sobre a ausência de rei em Israel e cada um fazendo o que parecia reto a seus olhos"]}, {"q": "De acordo com o subsídio de Patterson e Kelley citado na lição, como o livro de Juízes está conectado ao livro de Josué?", "a": "Pela menção da morte de Josué logo na primeira sentença de Juízes", "correta": 1, "op": ["Pela repetição do cântico de Débora", "Pela menção da morte de Josué logo na primeira sentença de Juízes", "Por uma genealogia comum entre os dois livros", "Pela citação direta do nome de Josué em todos os capítulos"]}]}, {"num": 2, "data": "12/07", "titulo": "Fidelidade a Deus: Uma Questão de Escolha", "texto": "Jz 2.1-6,10-13", "textoAureo": "Então, fizeram os filhos de Israel o que parecia mal aos olhos do Senhor; e serviram aos baalins. (Jz 2.11)", "verdade": "A fidelidade a Deus exige um alto custo, mas tem uma grande recompensa.", "resumo": "A fidelidade a Deus exige um alto custo, mas tem uma grande recompensa.", "leituraBiblica": "Juízes 2.1-6,10-13", "memorizando": "Então, fizeram os filhos de Israel o que parecia mal aos olhos do Senhor; e serviram aos baalins. (Jz 2.11)", "leituraDiaria": [{"dia": "Segunda", "ref": "Dt 7.9", "tema": "Deus é fiel"}, {"dia": "Terça", "ref": "2 Tm 2.13", "tema": "O Senhor não pode negar a si mesmo"}, {"dia": "Quarta", "ref": "Ap 2.10", "tema": "A recompensa da fidelidade"}, {"dia": "Quinta", "ref": "Hb 12.6", "tema": "O Senhor corrige ao que ama"}, {"dia": "Sexta", "ref": "Mt 6.24", "tema": "Deus exige exclusividade"}, {"dia": "Sábado", "ref": "Êx 20.3-6", "tema": "O pecado da idolatria"}], "perguntas": [{"q": "Segundo a lição, qual foi o motivo do fracasso de Israel no avanço da posse da terra de Canaã?", "a": "O medo e a conivência com o pecado da idolatria presente na região", "correta": 2, "op": ["A ausência total de exército organizado", "A morte prematura de todos os líderes israelitas", "O medo e a conivência com o pecado da idolatria presente na região", "Uma seca que impediu o avanço das tropas"]}, {"q": "Quem é o Anjo do Senhor que aparece em Juízes 2.1, segundo a lição?", "a": "A teofania do próprio Deus", "correta": 1, "op": ["Um serafim enviado para testar o povo", "A teofania do próprio Deus", "O profeta Samuel em visão", "Um querubim guardião da Arca"]}, {"q": "Por que Deus decidiu não expelir os inimigos remanescentes da terra de Canaã, segundo Juízes 2.3?", "a": "Para que estivessem às costas de Israel e seus deuses fossem por laço, testando a fidelidade do povo", "correta": 0, "op": ["Para que estivessem às costas de Israel e seus deuses fossem por laço, testando a fidelidade do povo", "Porque Israel havia pedido clemência para os cananeus", "Porque os cananeus se converteram e passaram a servir a Jeová", "Porque não havia mais exército disponível para a guerra"]}, {"q": "Qual foi a reação do povo ao ouvir a repreensão do Anjo do Senhor em Boquim?", "a": "Levantaram a voz e choraram, oferecendo sacrifícios ao Senhor", "correta": 3, "op": ["Recusaram-se a ouvir e continuaram na idolatria", "Expulsaram o Anjo do Senhor da assembleia", "Pediram a Josué que intercedesse por eles", "Levantaram a voz e choraram, oferecendo sacrifícios ao Senhor"]}, {"q": "Segundo Juízes 2.10, o que caracterizava a nova geração que se levantou após a de Josué?", "a": "Não conhecia o Senhor, nem a obra que ele fizera a Israel", "correta": 1, "op": ["Era mais fiel do que a geração anterior", "Não conhecia o Senhor, nem a obra que ele fizera a Israel", "Havia sido treinada pelos próprios sacerdotes leviteos", "Recusou-se a habitar em Canaã e retornou ao Egito"]}, {"q": "Quem eram Baal e Astarote, segundo a lição?", "a": "Baal era associado à fertilidade, chuva e tempestade; Astarote, à fertilidade, ao amor e à guerra", "correta": 2, "op": ["Eram títulos dados aos reis cananeus", "Eram nomes alternativos para o Deus de Israel", "Baal era associado à fertilidade, chuva e tempestade; Astarote, à fertilidade, ao amor e à guerra", "Eram sacerdotes egípcios que se estabeleceram em Canaã"]}, {"q": "De acordo com a Orientação Pedagógica, o que a fidelidade a Deus significa em meio às dificuldades?", "a": "Confiar nEle e permanecer obediente aos seus ensinamentos, mesmo diante de pressões e desafios", "correta": 0, "op": ["Confiar nEle e permanecer obediente aos seus ensinamentos, mesmo diante de pressões e desafios", "Evitar todo tipo de contato com pessoas de outra fé", "Buscar apenas bênçãos materiais como prova de fidelidade", "Depender exclusivamente da tradição religiosa herdada dos pais"]}, {"q": "Segundo a lição, de que formas a idolatria pode se manifestar nos dias atuais?", "a": "Pela busca excessiva por bens, status ou aprovação social", "correta": 1, "op": ["Apenas pela adoração literal a ídolos de pedra ou madeira", "Pela busca excessiva por bens, status ou aprovação social", "Somente por meio de rituais de outras religiões organizadas", "Exclusivamente pela recusa em frequentar a igreja"]}, {"q": "O que Deus prometeu nunca fazer, segundo o Anjo do Senhor em Juízes 2.1?", "a": "Nunca invalidar o seu concerto com o povo", "correta": 2, "op": ["Nunca mais permitir que Israel fosse oprimido", "Nunca mais enviar juízes para libertar o povo", "Nunca invalidar o seu concerto com o povo", "Nunca mais habitar entre as tribos de Israel"]}, {"q": "Segundo a lição, o que a história do povo de Israel ensina sobre o afastamento espiritual?", "a": "Que a desunião e a falta de valores comuns surgem quando o povo se afasta da obediência a Deus", "correta": 3, "op": ["Que o afastamento espiritual só afeta os líderes religiosos", "Que Deus abandona definitivamente quem se afasta uma vez", "Que a prosperidade material é sinal de fidelidade espiritual", "Que a desunião e a falta de valores comuns surgem quando o povo se afasta da obediência a Deus"]}]}, {"num": 3, "data": "19/07", "titulo": "Clamor e Libertação: A Liderança de Otniel", "texto": "Jz 3.5-11", "textoAureo": "E os filhos de Israel clamaram ao Senhor, e o Senhor levantou aos filhos de Israel um libertador, e os libertou: Otniel, filho de Quenaz, irmão de Calebe, mais novo do que ele. (Jz 3.9)", "verdade": "A liderança servidora e abnegada é uma marca da vida cristã.", "resumo": "A liderança servidora e abnegada é uma marca da vida cristã.", "leituraBiblica": "Juízes 3.5-11", "memorizando": "E os filhos de Israel clamaram ao Senhor, e o Senhor levantou aos filhos de Israel um libertador, e os libertou: Otniel, filho de Quenaz, irmão de Calebe, mais novo do que ele. (Jz 3.9)", "leituraDiaria": [{"dia": "Segunda", "ref": "Rm 5.3,4", "tema": "Gloriando na tribulação"}, {"dia": "Terça", "ref": "Ef 6.10-17", "tema": "Preparados para a batalha"}, {"dia": "Quarta", "ref": "2 Co 6.14", "tema": "Cuidado com o jugo desigual"}, {"dia": "Quinta", "ref": "Gl 5.1", "tema": "Firmes na liberdade de Cristo"}, {"dia": "Sexta", "ref": "Mc 10.42-45", "tema": "O líder servidor"}, {"dia": "Sábado", "ref": "At 1.8", "tema": "Capacitados pelo Espírito"}], "perguntas": [{"q": "Segundo a lição, por que Deus permitiu que alguns inimigos permanecessem em Canaã, mencionado em Juízes 3.1-5?", "a": "Para que a nação israelita fosse provada e a nova geração fosse treinada na arte da guerra", "correta": 1, "op": ["Para punir apenas a tribo de Judá pela sua desobediência", "Para que a nação israelita fosse provada e a nova geração fosse treinada na arte da guerra", "Porque os israelitas pediram para conviver com os cananeus", "Porque Deus não tinha mais poder para expulsá-los"]}, {"q": "Com quem os filhos de Israel se casaram, desobedecendo à ordem divina, segundo Juízes 3.6?", "a": "Com as filhas dos cananeus, heteus, amorreus, ferezeus, heveus e jebuseus", "correta": 2, "op": ["Com as filhas dos filisteus e egípcios", "Com as filhas dos moabitas e midianitas", "Com as filhas dos cananeus, heteus, amorreus, ferezeus, heveus e jebuseus", "Com as filhas dos assírios e babilônios"]}, {"q": "Quem foi o rei que oprimiu Israel por oito anos antes da libertação por Otniel?", "a": "Cusã-Risataim, rei da Mesopotâmia", "correta": 0, "op": ["Cusã-Risataim, rei da Mesopotâmia", "Eglom, rei dos moabitas", "Jabim, rei de Canaã", "Sísera, capitão do exército cananeu"]}, {"q": "De quem Otniel era sobrinho, segundo a lição?", "a": "De Calebe", "correta": 3, "op": ["De Josué", "De Moisés", "De Arão", "De Calebe"]}, {"q": "O que aconteceu com Otniel quando o Espírito do Senhor veio sobre ele, segundo Juízes 3.10?", "a": "Ele julgou a Israel, saiu à peleja e o Senhor deu Cusã-Risataim em sua mão", "correta": 1, "op": ["Ele construiu um altar em Siquém", "Ele julgou a Israel, saiu à peleja e o Senhor deu Cusã-Risataim em sua mão", "Ele se tornou sacerdote no Tabernáculo", "Ele reuniu apenas trezentos homens para a batalha"]}, {"q": "Por quantos anos a terra sossegou após a vitória de Otniel, segundo Juízes 3.11?", "a": "Quarenta anos", "correta": 2, "op": ["Vinte anos", "Oitenta anos", "Quarenta anos", "Dez anos"]}, {"q": "Segundo a Orientação Pedagógica, onde a liderança cristã, na perspectiva bíblica, começa?", "a": "Começa com o serviço humilde", "correta": 0, "op": ["Começa com o serviço humilde", "Começa com o reconhecimento público", "Começa com a posse de um cargo formal", "Começa com a aprovação da maioria do povo"]}, {"q": "O que a lição destaca sobre Acsa, esposa de Otniel, ao pedir um campo com fontes de água a seu pai Calebe?", "a": "Sua confiança, iniciativa e a busca por bênçãos legítimas", "correta": 3, "op": ["Sua rebeldia contra a autoridade paterna", "Sua ganância por posses e riquezas", "Sua desobediência aos costumes da época", "Sua confiança, iniciativa e a busca por bênçãos legítimas"]}, {"q": "Segundo a lição, o que caracteriza os 'juízes de Israel' quanto à forma de escolha, diferentemente de reis e sacerdotes?", "a": "Não pertenciam a uma tribo específica nem seguiam sucessão hereditária; eram escolhidos pela vontade de Deus", "correta": 1, "op": ["Eram sempre escolhidos por votação popular entre as tribos", "Não pertenciam a uma tribo específica nem seguiam sucessão hereditária; eram escolhidos pela vontade de Deus", "Precisavam pertencer obrigatoriamente à tribo de Levi", "Eram indicados exclusivamente pelos sacerdotes do Tabernáculo"]}, {"q": "De acordo com a lição, antes de ser designado juiz, o que já se podia perceber em Otniel?", "a": "Que ele já vinha exercitando sua liderança no meio do povo, mesmo antes de ter um 'cargo'", "correta": 2, "op": ["Que ele planejava se tornar rei de Israel", "Que ele era o mais rico entre as tribos de Judá", "Que ele já vinha exercitando sua liderança no meio do povo, mesmo antes de ter um 'cargo'", "Que ele havia sido treinado no Egito como Moisés"]}]}, {"num": 4, "data": "26/07", "titulo": "Eúde e Sangar: Deus Usa os Improváveis", "texto": "Jz 3.12-21,29-31", "textoAureo": "Então, os filhos de Israel clamaram ao Senhor, e o Senhor lhes levantou um libertador: Eúde, filho de Gera, benjamita, homem canhoto. [...]. (Jz 3.15a)", "verdade": "Deus realiza seus propósitos por meio daqueles que o mundo considera incapazes.", "resumo": "Deus realiza seus propósitos por meio daqueles que o mundo considera incapazes.", "leituraBiblica": "Juízes 3.12-21,29-31", "memorizando": "Então, os filhos de Israel clamaram ao Senhor, e o Senhor lhes levantou um libertador: Eúde, filho de Gera, benjamita, homem canhoto. [...]. (Jz 3.15a)", "leituraDiaria": [{"dia": "Segunda", "ref": "1 Co 1.27-29", "tema": "Deus escolheu as coisas loucas e vis"}, {"dia": "Terça", "ref": "Ef 3.6", "tema": "A bênção estendida aos gentios"}, {"dia": "Quarta", "ref": "Fp 2.5-8", "tema": "Jesus humilhou-se a si mesmo"}, {"dia": "Quinta", "ref": "Mt 10.42", "tema": "O valor dos pequenos gestos"}, {"dia": "Sexta", "ref": "Lc 16.10", "tema": "Seja fiel no pouco"}, {"dia": "Sábado", "ref": "Zc 4.10", "tema": "Não despreze as pequenas coisas"}], "perguntas": [{"q": "Por quantos anos os filhos de Israel serviram a Eglom, rei dos moabitas, segundo Juízes 3.14?", "a": "Dezoito anos", "correta": 1, "op": ["Oito anos", "Dezoito anos", "Quarenta anos", "Oitenta anos"]}, {"q": "Qual detalhe físico de Eúde é destacado como significativo na lição?", "a": "Ele era canhoto, o que o tornava um libertador improvável fora dos moldes esperados", "correta": 3, "op": ["Ele era o homem mais alto de Israel", "Ele era cego, mas tinha grande força física", "Ele era muito jovem para ser líder", "Ele era canhoto, o que o tornava um libertador improvável fora dos moldes esperados"]}, {"q": "Onde Eúde escondeu a espada de dois fios que fabricara, segundo Juízes 3.16?", "a": "Debaixo das suas vestes, à sua coxa direita", "correta": 0, "op": ["Debaixo das suas vestes, à sua coxa direita", "Dentro do presente entregue a Eglom", "Em um alforje amarrado ao jumento", "Escondida no cenáculo do próprio rei"]}, {"q": "Que mensagem Eúde usou para conseguir ficar a sós com o rei Eglom?", "a": "Disse que tinha uma palavra secreta e depois uma palavra de Deus para o rei", "correta": 2, "op": ["Disse que trazia mais tributos dos ismaelitas", "Disse que era um mensageiro da tribo de Benjamim", "Disse que tinha uma palavra secreta e depois uma palavra de Deus para o rei", "Disse que vinha em nome do exército de Israel para negociar a paz"]}, {"q": "Quantos moabitas foram mortos na batalha que se seguiu ao assassinato de Eglom, segundo Juízes 3.29?", "a": "Uns dez mil homens, todos corpulentos e valorosos", "correta": 1, "op": ["Cerca de seiscentos homens", "Uns dez mil homens, todos corpulentos e valorosos", "Aproximadamente mil homens", "Cerca de trezentos homens"]}, {"q": "Com que arma Sangar matou seiscentos filisteus, segundo Juízes 3.31?", "a": "Com uma aguilhada de bois", "correta": 3, "op": ["Com uma queixada de jumento", "Com uma espada de dois fios", "Com uma funda e pedras", "Com uma aguilhada de bois"]}, {"q": "Segundo a lição, o que o fato de Sangar usar uma ferramenta de trabalho como arma nos ensina?", "a": "Que Deus nos usa com aquilo que temos à mão, mesmo que sejam meios simples", "correta": 0, "op": ["Que Deus nos usa com aquilo que temos à mão, mesmo que sejam meios simples", "Que apenas armas convencionais podem ser usadas por Deus", "Que Sangar era, na verdade, um general treinado por Israel", "Que ferramentas agrícolas eram proibidas na guerra"]}, {"q": "Segundo a lição, qual é a origem do nome 'Sangar', e o que isso pode sugerir sobre ele?", "a": "O nome não tem origem hebraica, e é provável que Sangar tenha se convertido à fé israelita", "correta": 1, "op": ["O nome é de origem egípcia, indicando que ele era um escravo liberto", "O nome não tem origem hebraica, e é provável que Sangar tenha se convertido à fé israelita", "O nome é derivado de Baal, indicando idolatria", "O nome significa 'filho de Josué' em hebraico antigo"]}, {"q": "Segundo o Ponto Importante da lição, o que a Bíblia traz sobre 'pequenos homens'?", "a": "O registro de algumas histórias de pequenos homens que Deus usou com grandeza", "correta": 2, "op": ["Nenhum exemplo relevante além de Eúde e Sangar", "Que apenas grandes guerreiros eram usados por Deus", "O registro de algumas histórias de pequenos homens que Deus usou com grandeza", "Que Deus prefere sempre usar reis e sacerdotes"]}, {"q": "De acordo com a lição, qual argumento é apresentado para justificar teologicamente a ação de Eúde contra Eglom, diante de críticas sobre violência no Antigo Testamento?", "a": "Foi um ato de guerra pelo mandamento direto de Deus, não um assassinato comum", "correta": 1, "op": ["Eúde agiu por vingança pessoal, sem aprovação divina", "Foi um ato de guerra pelo mandamento direto de Deus, não um assassinato comum", "A Bíblia não trata esse episódio como moralmente relevante", "Eglom havia autorizado sua própria morte antecipadamente"]}]}, {"num": 5, "data": "02/08", "titulo": "Débora e Baraque: União para Fazer a Obra de Deus", "texto": "Jz 4.1-9,14-21", "textoAureo": "Então, disse Débora a Baraque: Levanta-te, porque este é o dia em que o Senhor tem dado a Sísera na tua mão; porventura, o Senhor não saiu diante de ti? (Jz 4.14a)", "verdade": "A obra de Deus é feita em cooperação, cada pessoa contribuindo com os talentos que o Senhor lhe concedeu.", "resumo": "A obra de Deus é feita em cooperação, cada pessoa contribuindo com os talentos que o Senhor lhe concedeu.", "leituraBiblica": "Juízes 4.1-9,14-21", "memorizando": "Então, disse Débora a Baraque: Levanta-te, porque este é o dia em que o Senhor tem dado a Sísera na tua mão; porventura, o Senhor não saiu diante de ti? (Jz 4.14a)", "leituraDiaria": [{"dia": "Segunda", "ref": "Gl 6.2", "tema": "Levando as cargas uns dos outros"}, {"dia": "Terça", "ref": "Hb 10.23-25", "tema": "Encorajando uns aos outros"}, {"dia": "Quarta", "ref": "1 Co 3.6-9", "tema": "Cooperação na obra de Deus"}, {"dia": "Quinta", "ref": "1 Co 12.12-27", "tema": "Cada membro tem a sua função"}, {"dia": "Sexta", "ref": "1 Co 10.31", "tema": "Façam tudo para a glória de Deus"}, {"dia": "Sábado", "ref": "Gl 3.28", "tema": "Todos somos um em Cristo"}], "perguntas": [{"q": "Quem era Jabim e quem era o capitão do seu exército, segundo Juízes 4.2?", "a": "Jabim era rei de Canaã que reinava em Hazor; Sísera era o capitão do seu exército", "correta": 0, "op": ["Jabim era rei de Canaã que reinava em Hazor; Sísera era o capitão do seu exército", "Jabim era o capitão do exército; Sísera era o rei de Canaã", "Jabim era rei da Mesopotâmia; Sísera era rei de Moabe", "Jabim e Sísera eram sacerdotes do templo de Baal"]}, {"q": "Por quantos anos Jabim oprimiu violentamente os filhos de Israel, segundo Juízes 4.3?", "a": "Vinte anos", "correta": 2, "op": ["Oito anos", "Dezoito anos", "Vinte anos", "Quarenta anos"]}, {"q": "Quais eram as funções de Débora em Israel, segundo a lição?", "a": "Ela era profetisa e juíza, julgando as causas do povo debaixo das palmeiras entre Ramá e Betel", "correta": 1, "op": ["Ela era apenas uma conselheira sem função oficial", "Ela era profetisa e juíza, julgando as causas do povo debaixo das palmeiras entre Ramá e Betel", "Ela era sacerdotisa no Tabernáculo de Siló", "Ela era rainha consorte de Israel"]}, {"q": "O que Baraque exigiu de Débora antes de aceitar liderar o exército contra Sísera?", "a": "Que ela fosse com ele à batalha", "correta": 3, "op": ["Que ela lhe desse dez mil homens a mais", "Que ela consultasse primeiro o sumo sacerdote", "Que ela permanecesse em Quedes durante o combate", "Que ela fosse com ele à batalha"]}, {"q": "Segundo Juízes 4.9, qual consequência Débora anunciou a Baraque por causa de sua condição para ir à batalha?", "a": "Que a honra da vitória não seria dele, pois o Senhor venderia Sísera na mão de uma mulher", "correta": 0, "op": ["Que a honra da vitória não seria dele, pois o Senhor venderia Sísera na mão de uma mulher", "Que ele perderia o comando do exército para outro líder", "Que a vitória seria adiada por mais quarenta anos", "Que apenas a tribo de Efraim receberia a glória da vitória"]}, {"q": "Quem matou Sísera, e como isso aconteceu, segundo Juízes 4.17-21?", "a": "Jael, mulher de Héber, que lhe deu leite e depois cravou uma estaca em sua fonte enquanto ele dormia", "correta": 1, "op": ["Baraque, ao alcançá-lo em plena fuga", "Jael, mulher de Héber, que lhe deu leite e depois cravou uma estaca em sua fonte enquanto ele dormia", "Débora, pessoalmente, após a batalha", "Os próprios soldados de Sísera, por traição"]}, {"q": "Segundo a lição, o que a atitude de Débora de subir com Baraque ao campo de batalha demonstrou?", "a": "Que sua presença simbolizava a direção e a bênção de Deus naquela batalha", "correta": 2, "op": ["Que ela desconfiava da capacidade militar de Baraque", "Que as mulheres deveriam sempre liderar exércitos em Israel", "Que sua presença simbolizava a direção e a bênção de Deus naquela batalha", "Que ela pretendia assumir o trono de Israel"]}, {"q": "De acordo com a lição, o que o convite de Débora a Baraque e a atuação de Jael revelam sobre a obra de Deus?", "a": "Que ela é realizada em cooperação, com diferentes dons e vocações se complementando", "correta": 0, "op": ["Que ela é realizada em cooperação, com diferentes dons e vocações se complementando", "Que apenas líderes com títulos oficiais podem ser usados por Deus", "Que mulheres não deveriam exercer papéis de liderança espiritual", "Que a vitória militar depende exclusivamente da estratégia humana"]}, {"q": "Segundo o Subsídio, por que era considerado incomum uma mulher exercer o papel de juíza como Débora?", "a": "Porque já era raro uma mulher ser profetisa, e mais incomum ainda atuar como juíza julgando causas do povo", "correta": 3, "op": ["Porque a lei de Moisés proibia expressamente mulheres em qualquer função pública", "Porque nenhuma mulher israelita sabia ler ou escrever", "Porque Débora não pertencia a nenhuma das doze tribos de Israel", "Porque já era raro uma mulher ser profetisa, e mais incomum ainda atuar como juíza julgando causas do povo"]}, {"q": "Segundo a lição, o que Paulo ensina em 1 Coríntios 3.6-9 sobre a cooperação na obra de Deus, aplicado ao episódio de Débora e Baraque?", "a": "Que ninguém realiza a obra de Deus sozinho e que cada membro exerce sua função para o bem comum", "correta": 1, "op": ["Que apenas o apóstolo tem autoridade para plantar e regar", "Que ninguém realiza a obra de Deus sozinho e que cada membro exerce sua função para o bem comum", "Que a igreja deve depender de um único líder providencial", "Que a cooperação humana substitui a necessidade da graça de Deus"]}]}, {"num": 6, "data": "09/08", "titulo": "Gideão: Deus Transforma a Insegurança em Coragem", "texto": "Jz 6.1-5,11-16", "textoAureo": "Então, o Anjo do Senhor lhe apareceu e lhe disse: O Senhor é contigo, varão valoroso. (Jz 6.12)", "verdade": "Mesmo diante das limitações, Deus capacita e conduz à vitória aqueles que confiam nEle.", "resumo": "Mesmo diante das limitações, Deus capacita e conduz à vitória aqueles que confiam nEle.", "leituraBiblica": "Juízes 6.1-5,11-16", "memorizando": "Então, o Anjo do Senhor lhe apareceu e lhe disse: O Senhor é contigo, varão valoroso. (Jz 6.12)", "leituraDiaria": [{"dia": "Segunda", "ref": "1 Tm 4.2", "tema": "O perigo da mente cauterizada"}, {"dia": "Terça", "ref": "Jo 10.10", "tema": "As ações do ladrão"}, {"dia": "Quarta", "ref": "Is 40.31", "tema": "Renovando as forças"}, {"dia": "Quinta", "ref": "Rm 8.35-39", "tema": "Quem nos afastará do amor de Cristo?"}, {"dia": "Sexta", "ref": "1 Jo 2.14b", "tema": "Jovens, sois fortes!"}, {"dia": "Sábado", "ref": "Rm 8.37", "tema": "Somos mais que vencedores"}], "perguntas": [{"q": "Por quantos anos os midianitas oprimiram Israel antes do levantamento de Gideão, segundo Juízes 6.1?", "a": "Sete anos", "correta": 0, "op": ["Sete anos", "Dezoito anos", "Oito anos", "Quarenta anos"]}, {"q": "Segundo a lição, o que os midianitas faziam sempre que Israel semeava a terra, conforme Juízes 6.3-5?", "a": "Subiam com os amalequitas e os do Oriente, destruindo a novidade da terra e não deixando mantimento", "correta": 2, "op": ["Ofereciam trocas comerciais justas com Israel", "Pediam permissão aos anciãos para colher parte da colheita", "Subiam com os amalequitas e os do Oriente, destruindo a novidade da terra e não deixando mantimento", "Enviavam apenas espiões, sem causar destruição"]}, {"q": "O que Gideão estava fazendo quando o Anjo do Senhor lhe apareceu, segundo Juízes 6.11?", "a": "Estava malhando trigo no lagar, para o salvar dos midianitas", "correta": 1, "op": ["Estava orando no monte Tabor", "Estava malhando trigo no lagar, para o salvar dos midianitas", "Estava reunindo um exército em Ofra", "Estava destruindo o altar de Baal de seu pai"]}, {"q": "Qual foi a primeira reação de Gideão à saudação do Anjo do Senhor, segundo Juízes 6.13?", "a": "Questionou onde estavam as maravilhas de Deus, já que o Senhor parecia ter desamparado o povo", "correta": 3, "op": ["Aceitou imediatamente a missão sem hesitar", "Pediu para que sua família fosse poupada da guerra", "Perguntou pelo nome do anjo que lhe falava", "Questionou onde estavam as maravilhas de Deus, já que o Senhor parecia ter desamparado o povo"]}, {"q": "Como Gideão descreveu sua própria condição ao ser chamado por Deus, segundo Juízes 6.15?", "a": "Disse que sua família era a mais pobre em Manassés, e ele o menor na casa de seu pai", "correta": 0, "op": ["Disse que sua família era a mais pobre em Manassés, e ele o menor na casa de seu pai", "Disse que já havia liderado outras batalhas antes", "Disse que preferia que Deus escolhesse outro homem mais velho", "Disse que só aceitaria se recebesse recompensa em prata"]}, {"q": "O que o Senhor respondeu a Gideão diante de sua insegurança, segundo Juízes 6.16?", "a": "Que estaria com ele, e ele feriria os midianitas como se fossem um só homem", "correta": 1, "op": ["Que enviaria outro anjo mais forte para ajudá-lo", "Que estaria com ele, e ele feriria os midianitas como se fossem um só homem", "Que Gideão precisaria primeiro construir um exército de cem mil homens", "Que a vitória viria somente após a morte de Gideão"]}, {"q": "Segundo a lição, o que caracteriza o 'verdadeiro profeta de Deus' ao confrontar o pecado do povo antes de enviar um libertador?", "a": "Não suaviza a mensagem divina com discursos de autoajuda, mas transmite com fidelidade a Palavra do Senhor", "correta": 2, "op": ["Sempre evita mencionar o pecado para não desanimar o povo", "Prioriza mensagens de prosperidade material", "Não suaviza a mensagem divina com discursos de autoajuda, mas transmite com fidelidade a Palavra do Senhor", "Utiliza apenas parábolas para não confrontar diretamente"]}, {"q": "Segundo o Ponto Importante da lição, qual é o primeiro passo para receber o poder que vem do alto?", "a": "Reconhecer a nossa fraqueza", "correta": 3, "op": ["Conquistar reconhecimento público", "Acumular recursos financeiros", "Buscar aprovação da família", "Reconhecer a nossa fraqueza"]}, {"q": "De acordo com a lição, qual é o paralelo traçado entre a experiência de Gideão e a vida cristã hoje sobre lidar com dúvidas?", "a": "Que Deus aprecia um coração sincero e ampara o crente quando ele derrama suas inquietações diante dEle", "correta": 1, "op": ["Que dúvidas nunca devem ser expressas em oração", "Que Deus aprecia um coração sincero e ampara o crente quando ele derrama suas inquietações diante dEle", "Que apenas os que nunca duvidam podem ser usados por Deus", "Que a dúvida é sempre sinal de incredulidade irreversível"]}, {"q": "Onde os israelitas se refugiavam por causa da opressão midianita, segundo Juízes 6.2?", "a": "Nas covas dos montes, nas cavernas e nas fortificações", "correta": 0, "op": ["Nas covas dos montes, nas cavernas e nas fortificações", "Nas cidades fortificadas de Gaza e Ecrom", "No território da tribo de Benjamim", "Além do rio Jordão, na região de Gileade"]}]}, {"num": 7, "data": "16/08", "titulo": "O Fim da Liderança de Gideão e o Governo de Abimeleque", "texto": "Jz 8.22-24; 9.1-6", "textoAureo": "Então, se ajuntaram todos os cidadãos de Siquém e toda Bete-Milo; e foram e levantaram a Abimeleque como rei, junto ao carvalho alto que está perto de Siquém. (Jz 9.6)", "verdade": "A liderança cristã deve ser exercida em constante vigilância, para que os líderes não sejam seduzidos pelo orgulho e pelo poder.", "resumo": "A liderança cristã deve ser exercida em constante vigilância, para que os líderes não sejam seduzidos pelo orgulho e pelo poder.", "leituraBiblica": "Juízes 8.22-24; 9.1-6", "memorizando": "Então, se ajuntaram todos os cidadãos de Siquém e toda Bete-Milo; e foram e levantaram a Abimeleque como rei, junto ao carvalho alto que está perto de Siquém. (Jz 9.6)", "leituraDiaria": [{"dia": "Segunda", "ref": "Sl 139.23", "tema": "Sonda-me, ó Deus"}, {"dia": "Terça", "ref": "1 Co 16.13", "tema": "Sejam vigilantes"}, {"dia": "Quarta", "ref": "1 Co 10.12", "tema": "Cuide para que não caia"}, {"dia": "Quinta", "ref": "Pv 16.18", "tema": "A soberba precede a ruína"}, {"dia": "Sexta", "ref": "1 Pe 5.2,3", "tema": "Não cuide do rebanho com má vontade"}, {"dia": "Sábado", "ref": "Jo 10.12,13", "tema": "O perigo dos mercenários"}], "perguntas": [{"q": "O que os homens de Israel pediram a Gideão após a vitória sobre os midianitas, segundo Juízes 8.22?", "a": "Que ele dominasse sobre eles, junto com seu filho e o filho de seu filho", "correta": 1, "op": ["Que ele se tornasse sacerdote no Tabernáculo", "Que ele dominasse sobre eles, junto com seu filho e o filho de seu filho", "Que ele dividisse a terra entre as doze tribos", "Que ele fosse reconhecido apenas como conselheiro, sem poder"]}, {"q": "Como Gideão respondeu ao pedido do povo para governá-los, segundo Juízes 8.23?", "a": "Recusou, afirmando que o Senhor dominaria sobre eles", "correta": 2, "op": ["Aceitou de imediato e assumiu o trono", "Pediu um tempo para consultar os anciãos", "Recusou, afirmando que o Senhor dominaria sobre eles", "Delegou a decisão à tribo de Efraim"]}, {"q": "O que Gideão pediu ao povo como recompensa pela vitória, e para que usou esse material, segundo a lição?", "a": "Pediu os pendentes de ouro do despojo e mandou confeccionar um éfode, que se tornou objeto de idolatria", "correta": 0, "op": ["Pediu os pendentes de ouro do despojo e mandou confeccionar um éfode, que se tornou objeto de idolatria", "Pediu apenas alimento para seus setenta filhos", "Pediu terras adicionais para sua própria tribo", "Pediu que construíssem um templo em Jerusalém"]}, {"q": "O que o nome Abimeleque significa, segundo a lição, e o que isso sugere?", "a": "'Meu pai é rei', sugerindo que Gideão talvez nutrisse uma inclinação monárquica, apesar de tê-la recusado publicamente", "correta": 3, "op": ["'Filho do trovão', sugerindo força militar herdada do pai", "'Servo de Baal', sugerindo idolatria desde o nascimento", "'Guerreiro valente', sugerindo talento militar precoce", "'Meu pai é rei', sugerindo que Gideão talvez nutrisse uma inclinação monárquica, apesar de tê-la recusado publicamente"]}, {"q": "Qual foi a primeira estratégia de Abimeleque para conquistar o poder, segundo Juízes 9.1-3?", "a": "Convencer os familiares de sua mãe em Siquém de que era melhor ter uma liderança centralizada nele", "correta": 1, "op": ["Derrotar publicamente as outras tribos em batalha", "Convencer os familiares de sua mãe em Siquém de que era melhor ter uma liderança centralizada nele", "Comprar o apoio direto dos anciãos de Israel", "Pedir a bênção do sumo sacerdote em Siló"]}, {"q": "De onde vieram as setenta peças de prata usadas por Abimeleque para financiar sua campanha, segundo Juízes 9.4?", "a": "Da casa de Baal-Berite, um templo pagão", "correta": 2, "op": ["Do tesouro pessoal de Gideão", "Dos despojos de guerra contra os midianitas", "Da casa de Baal-Berite, um templo pagão", "Da contribuição voluntária dos anciãos de Siquém"]}, {"q": "Qual foi o primeiro ato de Abimeleque para eliminar seus concorrentes ao trono, segundo Juízes 9.5?", "a": "Assassinar seus setenta meios-irmãos sobre uma pedra, com exceção de Jotão", "correta": 0, "op": ["Assassinar seus setenta meios-irmãos sobre uma pedra, com exceção de Jotão", "Exilar seus irmãos para fora de Israel", "Subornar seus irmãos para que renunciassem ao direito de sucessão", "Aprisionar seus irmãos na torre de Siquém"]}, {"q": "Na parábola contada por Jotão, qual árvore aceitou reinar sobre as demais, segundo Juízes 9.7-15?", "a": "O espinheiro", "correta": 3, "op": ["A oliveira", "A figueira", "A videira", "O espinheiro"]}, {"q": "Segundo a lição, o que o espinheiro representa na parábola de Jotão?", "a": "Abimeleque: inútil, sem frutos, mas perigoso, pois pode causar destruição", "correta": 1, "op": ["A tribo de Efraim, que se sentiu preterida na guerra", "Abimeleque: inútil, sem frutos, mas perigoso, pois pode causar destruição", "O povo de Siquém, que rejeitou toda forma de liderança", "Jotão, o único sobrevivente do massacre"]}, {"q": "Segundo a lição, quais são os perigos apontados na liderança de Gideão em seus últimos anos?", "a": "O orgulho, a centralização de poder e a negligência espiritual", "correta": 2, "op": ["Apenas a fraqueza física decorrente da idade avançada", "A falta de exército e de recursos financeiros", "O orgulho, a centralização de poder e a negligência espiritual", "A ausência total de fé, desde o início do seu ministério"]}]}, {"num": 8, "data": "23/08", "titulo": "Jefté: De Rejeitado a Libertador", "texto": "Jz 10.15-18; 11.1-6", "textoAureo": "E disseram a Jefté: Vem e sê-nos por cabeça, para que combatamos contra os filhos de Amom. (Jz 11.6)", "verdade": "Em tudo o que fazemos é preciso ter fé e coragem, mas também atitudes sábias e prudentes.", "resumo": "Em tudo o que fazemos é preciso ter fé e coragem, mas também atitudes sábias e prudentes.", "leituraBiblica": "Juízes 10.15-18; 11.1-6", "memorizando": "E disseram a Jefté: Vem e sê-nos por cabeça, para que combatamos contra os filhos de Amom. (Jz 11.6)", "leituraDiaria": [{"dia": "Segunda", "ref": "Pv 28.13", "tema": "Aquele que confessa e deixa"}, {"dia": "Terça", "ref": "Tg 2.26", "tema": "Fé sem obras é morta"}, {"dia": "Quarta", "ref": "Ec 5.4,5", "tema": "Cuidado ao fazer um voto"}, {"dia": "Quinta", "ref": "Ec 3.1", "tema": "Tudo tem o seu tempo"}, {"dia": "Sexta", "ref": "Cl 1.9", "tema": "Inteligência espiritual"}, {"dia": "Sábado", "ref": "Sl 133", "tema": "A beleza da unidade"}], "perguntas": [{"q": "O que os israelitas fizeram, além de confessar o pecado, para demonstrar arrependimento genuíno, segundo Juízes 10.15,16?", "a": "Tiraram os deuses alheios do meio deles e voltaram a servir ao Senhor", "correta": 0, "op": ["Tiraram os deuses alheios do meio deles e voltaram a servir ao Senhor", "Enviaram presentes aos filhos de Amom para evitar a guerra", "Pediram que Moisés intercedesse por eles", "Construíram um novo altar em Gileade sem consultar o Senhor"]}, {"q": "Por que Jefté foi expulso de casa por seus irmãos, segundo Juízes 11.1,2?", "a": "Porque era filho de uma prostituta e os irmãos não queriam dividir a herança com ele", "correta": 2, "op": ["Porque havia desobedecido a uma ordem direta do pai", "Porque adorava outros deuses secretamente", "Porque era filho de uma prostituta e os irmãos não queriam dividir a herança com ele", "Porque havia se recusado a lutar contra os amonitas"]}, {"q": "Para onde Jefté fugiu após ser expulso de casa, e quem se ajuntou a ele lá, segundo Juízes 11.3?", "a": "Para a terra de Tobe, onde homens levianos se ajuntaram com ele", "correta": 1, "op": ["Para o Egito, onde se tornou mercenário", "Para a terra de Tobe, onde homens levianos se ajuntaram com ele", "Para Moabe, onde se casou novamente", "Para Siquém, onde se tornou sacerdote"]}, {"q": "O que os anciãos de Gileade pediram a Jefté, segundo Juízes 11.6?", "a": "Que fosse a cabeça deles para combater os filhos de Amom", "correta": 3, "op": ["Que devolvesse a herança que havia reivindicado", "Que se tornasse sacerdote do povo", "Que intercedesse apenas em oração pela vitória", "Que fosse a cabeça deles para combater os filhos de Amom"]}, {"q": "Segundo a lição, o que caracteriza a 'prova do arrependimento', citando Provérbios 28.13?", "a": "Não basta confessar o pecado; é preciso deixá-lo, pois quem confessa e deixa alcança misericórdia", "correta": 1, "op": ["Basta apenas sentir remorso interno pelo pecado cometido", "Não basta confessar o pecado; é preciso deixá-lo, pois quem confessa e deixa alcança misericórdia", "É suficiente pedir perdão publicamente uma única vez", "Depende exclusivamente de rituais de purificação"]}, {"q": "Segundo a lição, por que Jefté inicialmente hesitou em aceitar o convite dos anciãos de Gileade?", "a": "Porque recordou que havia sido rejeitado e expulso por eles anteriormente", "correta": 0, "op": ["Porque recordou que havia sido rejeitado e expulso por eles anteriormente", "Porque não acreditava que pudesse vencer os amonitas", "Porque preferia continuar vivendo na terra de Tobe", "Porque exigiu primeiro o pagamento em prata"]}, {"q": "Segundo a lição, que 'importante lição' se destaca do episódio em que os anciãos e Jefté selam um compromisso diante de Deus (Jz 11.9,11)?", "a": "Que muitas vezes deixamos de realizar grandes coisas simplesmente porque não conseguimos abrir mão do nosso orgulho", "correta": 2, "op": ["Que acordos verbais não têm valor sem testemunhas escritas", "Que apenas anciãos têm autoridade para nomear líderes", "Que muitas vezes deixamos de realizar grandes coisas simplesmente porque não conseguimos abrir mão do nosso orgulho", "Que Jefté jamais deveria ter aceitado a liderança de Gileade"]}, {"q": "Antes da batalha, o que Jefté procurou fazer com o rei dos amonitas, segundo a lição?", "a": "Resolver o conflito pacificamente, enviando mensageiros para negociar", "correta": 3, "op": ["Atacar de surpresa, sem qualquer aviso prévio", "Pedir ajuda militar aos efraimitas antes de tudo", "Consultar um profeta para saber o resultado da guerra", "Resolver o conflito pacificamente, enviando mensageiros para negociar"]}, {"q": "Segundo a lição, o que caracteriza o 'verdadeiro profeta' ou o exercício da prudência de Jefté ao negociar com o rei amonita, com base em sua argumentação histórica?", "a": "Demonstrou profundo conhecimento histórico e da ação de Deus ao defender a legitimidade da posse da terra por Israel", "correta": 1, "op": ["Recusou-se a argumentar, preferindo apenas a força militar", "Demonstrou profundo conhecimento histórico e da ação de Deus ao defender a legitimidade da posse da terra por Israel", "Baseou-se unicamente em ameaças para intimidar o rei", "Cedeu parte do território a Amom para evitar a guerra"]}, {"q": "Segundo o Ponto Importante da lição, o que pode acontecer em momentos de grande euforia ou de profunda angústia?", "a": "Nossas emoções podem nos levar a agir sem pensar", "correta": 0, "op": ["Nossas emoções podem nos levar a agir sem pensar", "Nunca corremos risco de tomar decisões precipitadas", "Apenas os líderes espirituais sofrem esse risco", "A euforia sempre garante bons resultados"]}]}, {"num": 9, "data": "30/08", "titulo": "Sansão: A Força e a Fraqueza de um Jovem", "texto": "Jz 13.1-7,24,25; 14.1-3", "textoAureo": "Depois, teve esta mulher um filho e chamou o seu nome Sansão; e o menino cresceu, e o Senhor o abençoou. (Jz 13.24)", "verdade": "Por mais que Deus use alguém de forma extraordinária, a natureza humana ainda carrega fragilidades.", "resumo": "Por mais que Deus use alguém de forma extraordinária, a natureza humana ainda carrega fragilidades.", "leituraBiblica": "Juízes 13.1-7,24,25; 14.1-3", "memorizando": "Depois, teve esta mulher um filho e chamou o seu nome Sansão; e o menino cresceu, e o Senhor o abençoou. (Jz 13.24)", "leituraDiaria": [{"dia": "Segunda", "ref": "Rm 12.2", "tema": "Não vos conformeis com este mundo"}, {"dia": "Terça", "ref": "Rm 6.16", "tema": "Não seja escravo"}, {"dia": "Quarta", "ref": "1 Pe 1.15,16", "tema": "Seja santo"}, {"dia": "Quinta", "ref": "Rm 5.8", "tema": "Cristo, o libertador"}, {"dia": "Sexta", "ref": "1 Jo 2.14", "tema": "A força dos jovens"}, {"dia": "Sábado", "ref": "Tg 4.7", "tema": "Resistindo ao Diabo"}], "perguntas": [{"q": "Por quantos anos os filisteus dominaram Israel antes do nascimento de Sansão, segundo Juízes 13.1?", "a": "Quarenta anos", "correta": 3, "op": ["Oito anos", "Dezoito anos", "Vinte anos", "Quarenta anos"]}, {"q": "O que o Anjo do Senhor ordenou à esposa de Manoá que evitasse durante a gravidez, segundo Juízes 13.4?", "a": "Beber vinho ou bebida forte, e comer coisa imunda", "correta": 1, "op": ["Sair de casa após o anoitecer", "Beber vinho ou bebida forte, e comer coisa imunda", "Consultar qualquer outro profeta além do Anjo", "Ter contato com qualquer estrangeiro"]}, {"q": "O que significa a palavra 'nazireu', segundo a lição?", "a": "Separado, consagrado a Deus por toda a vida ou por um período específico", "correta": 2, "op": ["Guerreiro forte e valente escolhido por Deus", "Descendente direto da tribo de Levi", "Separado, consagrado a Deus por toda a vida ou por um período específico", "Profeta que recebe visões em sonhos"]}, {"q": "Segundo a lição, por que Manoá quis saber mais sobre a missão do filho que nasceria, ao pedir que o Anjo retornasse?", "a": "Demonstrou seu desejo sincero de educar o filho conforme a orientação divina", "correta": 0, "op": ["Demonstrou seu desejo sincero de educar o filho conforme a orientação divina", "Queria negociar uma recompensa maior pela missão do filho", "Desconfiava que o Anjo fosse um impostor", "Pretendia impedir que o filho cumprisse a missão"]}, {"q": "O que caracteriza Sansão, segundo a lição, apesar de ter crescido em um lar piedoso e receber um dom extraordinário?", "a": "Foi o mais vacilante dos juízes de Israel: possuía imensa força física, mas um caráter frágil", "correta": 1, "op": ["Foi o juiz mais fiel e obediente de toda a história de Israel", "Foi o mais vacilante dos juízes de Israel: possuía imensa força física, mas um caráter frágil", "Nunca cometeu nenhum erro registrado nas Escrituras", "Recusou-se completamente a exercer o papel de juiz"]}, {"q": "Por qual critério Sansão escolheu a mulher filisteia de Timna para se casar, segundo Juízes 14.3?", "a": "Porque ela era agradável aos seus olhos", "correta": 2, "op": ["Porque ela pertencia a uma família rica e influente", "Porque seus pais haviam arranjado o casamento previamente", "Porque ela era agradável aos seus olhos", "Porque ela havia se convertido à fé de Israel"]}, {"q": "Qual foi a reação dos pais de Sansão ao saberem de seu desejo de se casar com uma mulher filisteia, segundo Juízes 14.3?", "a": "Fizeram objeções, perguntando se não havia mulher adequada entre o próprio povo", "correta": 3, "op": ["Concordaram de imediato, sem qualquer objeção", "Recusaram-se a participar da cerimônia de casamento", "Pediram que Sansão consultasse um sacerdote antes", "Fizeram objeções, perguntando se não havia mulher adequada entre o próprio povo"]}, {"q": "Segundo a lição, o casamento de Sansão com uma mulher filisteia contrariava qual princípio, ainda válido no Novo Testamento?", "a": "Que o crente não deve se prender a um jugo desigual com o incrédulo (2 Co 6.14)", "correta": 0, "op": ["Que o crente não deve se prender a um jugo desigual com o incrédulo (2 Co 6.14)", "Que casamentos entre tribos diferentes eram sempre proibidos", "Que apenas sacerdotes podiam autorizar casamentos em Israel", "Que mulheres estrangeiras não podiam se converter à fé de Israel"]}, {"q": "Segundo a lição, o que revela o episódio em que Sansão come o mel do cadáver do leão sem contar a origem aos pais?", "a": "Sua atitude descuidada e irreverente diante da consagração que tinha perante Deus como nazireu", "correta": 1, "op": ["Sua generosidade em compartilhar tudo com a família", "Sua atitude descuidada e irreverente diante da consagração que tinha perante Deus como nazireu", "Sua obediência rigorosa ao voto nazireu", "Sua total ignorância sobre as leis de pureza"]}, {"q": "Segundo a lição, qual é o principal alerta da história de Sansão para os jovens de hoje?", "a": "Que decisões baseadas apenas na atração física e visual podem comprometer a vida espiritual", "correta": 2, "op": ["Que a força física é sempre sinal de aprovação divina", "Que os pais nunca devem opinar sobre relacionamentos dos filhos", "Que decisões baseadas apenas na atração física e visual podem comprometer a vida espiritual", "Que o voto de nazireu era uma prática apenas simbólica, sem consequências"]}]}, {"num": 10, "data": "06/09", "titulo": "Sansão: Entre Vitórias e Derrotas", "texto": "Jz 15.1-4; 16.1-4,28-30", "textoAureo": "Então, Sansão clamou ao Senhor e disse: Senhor Jeová, peço-te que te lembres de mim e esforça-me agora, só esta vez, ó Deus, para que de uma vez me vingue dos filisteus, pelos meus dois olhos. (Jz 16.28)", "verdade": "Entre vitórias e derrotas, o cristão aprende que a obediência fortalece, mas o pecado enfraquece.", "resumo": "Entre vitórias e derrotas, o cristão aprende que a obediência fortalece, mas o pecado enfraquece.", "leituraBiblica": "Juízes 15.1-4; 16.1-4,28-30", "memorizando": "Então, Sansão clamou ao Senhor e disse: Senhor Jeová, peço-te que te lembres de mim e esforça-me agora, só esta vez, ó Deus, para que de uma vez me vingue dos filisteus, pelos meus dois olhos. (Jz 16.28)", "leituraDiaria": [{"dia": "Segunda", "ref": "Gl 6.1,2", "tema": "Cuidando do irmão"}, {"dia": "Terça", "ref": "Jo 7.37,38", "tema": "Jesus, água da vida"}, {"dia": "Quarta", "ref": "1 Co 6.18,19", "tema": "Fuja da prostituição"}, {"dia": "Quinta", "ref": "Pv 4.23", "tema": "Cuidado com as confidências"}, {"dia": "Sexta", "ref": "Pv 16.18", "tema": "A soberba precede a ruína"}, {"dia": "Sábado", "ref": "Rm 8.37-39", "tema": "Mais que vencedores"}], "perguntas": [{"q": "O que Sansão usou para incendiar as searas dos filisteus, segundo Juízes 15.4?", "a": "Trezentas raposas, amarradas cauda a cauda com um tição no meio", "correta": 1, "op": ["Um exército emprestado da tribo de Judá", "Trezentas raposas, amarradas cauda a cauda com um tição no meio", "Archotes distribuídos entre os moradores de Timna", "Uma queixada de jumento incendiada"]}, {"q": "Com que arma Sansão matou mil homens do exército filisteu, segundo Juízes 15.15-17?", "a": "Uma queixada de jumento", "correta": 0, "op": ["Uma queixada de jumento", "Uma espada de dois fios", "Uma aguilhada de bois", "Uma funda e pedras"]}, {"q": "Segundo a lição, o que Sansão fez na cidade de Gaza que colocava sua vida em risco, conforme Juízes 16.1?", "a": "Relacionou-se com uma prostituta", "correta": 2, "op": ["Provocou os anciãos da cidade publicamente", "Roubou os portões da cidade sem necessidade", "Relacionou-se com uma prostituta", "Recusou-se a pagar tributo aos filisteus"]}, {"q": "O que Sansão fez ao escapar de Gaza durante a noite, segundo Juízes 16.3?", "a": "Arrancou as portas da cidade, com ambas as umbreiras e a tranca, levando-as ao cume do monte defronte de Hebrom", "correta": 3, "op": ["Matou todos os guardas da cidade", "Incendiou o templo de Dagom antecipadamente", "Libertou todos os prisioneiros israelitas da cidade", "Arrancou as portas da cidade, com ambas as umbreiras e a tranca, levando-as ao cume do monte defronte de Hebrom"]}, {"q": "Quem era Dalila, segundo a lição, e de onde ela vinha?", "a": "Uma mulher do vale de Soreque, cujo nome de origem semita significa 'débil, sujeita a desejos ou abatida'", "correta": 1, "op": ["Uma sacerdotisa do templo de Dagom em Gaza", "Uma mulher do vale de Soreque, cujo nome de origem semita significa 'débil, sujeita a desejos ou abatida'", "Uma princesa filisteia, filha do rei de Ecrom", "Uma escrava israelita que servia na casa de Sansão"]}, {"q": "Qual era, de fato, o verdadeiro segredo da força de Sansão, segundo a lição?", "a": "O cumprimento do seu voto de nazireu, e não seus cabelos em si mesmos, mas o poder de Deus", "correta": 0, "op": ["O cumprimento do seu voto de nazireu, e não seus cabelos em si mesmos, mas o poder de Deus", "Um amuleto que ele sempre carregava consigo", "Sua descendência direta da tribo de Levi", "Uma bênção secreta transmitida apenas por Manoá"]}, {"q": "O que aconteceu com Sansão imediatamente depois que seu cabelo foi cortado, segundo Juízes 16.20,21?", "a": "Ele não percebeu que o Senhor já o havia deixado, foi capturado, teve os olhos furados e foi feito escravo em Gaza", "correta": 2, "op": ["Ele recuperou a força imediatamente ao acordar", "Ele fugiu antes que os filisteus pudessem prendê-lo", "Ele não percebeu que o Senhor já o havia deixado, foi capturado, teve os olhos furados e foi feito escravo em Gaza", "Ele se converteu à religião dos filisteus para escapar"]}, {"q": "O que Sansão pediu ao Senhor em sua última oração, estando cego e preso no templo de Dagom, segundo Juízes 16.28?", "a": "Que Deus se lembrasse dele e o esforçasse mais uma vez, para se vingar dos filisteus por seus dois olhos", "correta": 3, "op": ["Que Deus o libertasse da prisão antes da festa", "Que Deus poupasse a vida de todos os presentes no templo", "Que Deus lhe desse uma nova esposa israelita", "Que Deus se lembrasse dele e o esforçasse mais uma vez, para se vingar dos filisteus por seus dois olhos"]}, {"q": "Segundo Juízes 16.30, o que se pode afirmar sobre o resultado da última ação de Sansão, ao empurrar as colunas do templo?", "a": "Matou mais pessoas em sua morte do que havia matado durante toda a sua vida", "correta": 1, "op": ["Não conseguiu causar dano significativo aos filisteus", "Matou mais pessoas em sua morte do que havia matado durante toda a sua vida", "Foi o único a morrer no desabamento do templo", "Conseguiu escapar ileso após derrubar as colunas"]}, {"q": "Apesar de suas muitas falhas, onde Sansão é mencionado no Novo Testamento, segundo a lição?", "a": "Na galeria dos heróis da fé, em Hebreus 11, entre aqueles que da fraqueza tiraram força", "correta": 1, "op": ["Nos Evangelhos, como antecessor direto de Jesus", "Na galeria dos heróis da fé, em Hebreus 11, entre aqueles que da fraqueza tiraram força", "Na carta de Tiago, como exemplo de paciência", "No livro de Apocalipse, como um dos vinte e quatro anciãos"]}]}, {"num": 11, "data": "13/09", "titulo": "Crise Espiritual e Falsa Religiosidade", "texto": "Jz 17.1-13", "textoAureo": "E tinha este homem, Mica, uma casa de deuses, e fez um éfode e terafins, e consagrou a um de seus filhos, para que lhe fosse por sacerdote. (Jz 17.5)", "verdade": "O abandono do verdadeiro culto a Deus leva à crise espiritual e produz uma falsa religiosidade.", "resumo": "O abandono do verdadeiro culto a Deus leva à crise espiritual e produz uma falsa religiosidade.", "leituraBiblica": "Juízes 17.1-13", "memorizando": "E tinha este homem, Mica, uma casa de deuses, e fez um éfode e terafins, e consagrou a um de seus filhos, para que lhe fosse por sacerdote. (Jz 17.5)", "leituraDiaria": [{"dia": "Segunda", "ref": "Cl 2.22,23", "tema": "Preceitos de homens"}, {"dia": "Terça", "ref": "2 Pe 2.1-3", "tema": "O perigo das heresias"}, {"dia": "Quarta", "ref": "2 Tm 3.5", "tema": "Aparência de piedade"}, {"dia": "Quinta", "ref": "At 8.18-20", "tema": "O pecado da simonia"}, {"dia": "Sexta", "ref": "Tg 1.27", "tema": "A verdadeira religião"}, {"dia": "Sábado", "ref": "Jo 4.23,24", "tema": "Verdadeiros adoradores"}], "perguntas": [{"q": "O que Mica havia feito antes do relato de Juízes 17, e qual foi o motivo real de sua restituição, segundo a lição?", "a": "Furtara mil e cem moedas de prata de sua mãe, e restituiu por medo da maldição que ela havia lançado, não por arrependimento genuíno", "correta": 0, "op": ["Furtara mil e cem moedas de prata de sua mãe, e restituiu por medo da maldição que ela havia lançado, não por arrependimento genuíno", "Vendera terras da família sem autorização, e devolveu por ordem do sacerdote local", "Roubara um éfode do Tabernáculo de Siló e o devolveu por temor a Deus", "Emprestara dinheiro aos vizinhos e cobrou juros abusivos, sendo obrigado a devolver"]}, {"q": "O que a mãe de Mica mandou fazer com as duzentas moedas de prata separadas do total, segundo Juízes 17.4?", "a": "Mandou o ourives fazer delas uma imagem de escultura e de fundição", "correta": 1, "op": ["Mandou construir um novo altar em Betel", "Mandou o ourives fazer delas uma imagem de escultura e de fundição", "Mandou distribuir entre os pobres da região", "Mandou entregar como oferta ao Tabernáculo de Siló"]}, {"q": "O que compunha a 'casa de deuses' de Mica, segundo Juízes 17.5?", "a": "Um éfode e terafins, além da imagem de escultura e de fundição", "correta": 2, "op": ["Apenas um altar de pedras sem nenhuma imagem", "Um exemplar da Lei de Moisés e um candelabro", "Um éfode e terafins, além da imagem de escultura e de fundição", "Uma réplica da Arca da Aliança"]}, {"q": "Quem Mica consagrou como sacerdote de sua casa antes da chegada do levita, segundo Juízes 17.5?", "a": "Um de seus próprios filhos", "correta": 3, "op": ["Um sacerdote contratado de Siló", "Um profeta itinerante da tribo de Efraim", "Sua própria esposa", "Um de seus próprios filhos"]}, {"q": "De onde vinha o jovem levita que chegou à casa de Mica, segundo Juízes 17.7?", "a": "De Belém de Judá", "correta": 0, "op": ["De Belém de Judá", "De Siló, no território de Efraim", "De Hebrom, na tribo de Judá", "De Dã, no extremo norte de Israel"]}, {"q": "O que Mica ofereceu ao levita para que este se tornasse seu sacerdote particular, segundo Juízes 17.10?", "a": "Dez moedas de prata por ano, vestuário e sustento", "correta": 1, "op": ["Uma casa própria e terras para cultivo", "Dez moedas de prata por ano, vestuário e sustento", "Metade de todos os seus bens", "Um cargo de liderança sobre toda a tribo de Efraim"]}, {"q": "Segundo a lição, o que caracteriza a atitude do jovem levita ao aceitar rapidamente a proposta de Mica?", "a": "Ele esqueceu-se da sua vocação e transformou o ministério de sacerdote em conveniência financeira", "correta": 2, "op": ["Ele demonstrou fidelidade exemplar ao chamado sacerdotal", "Ele recusou inicialmente, mas foi convencido pelos anciãos", "Ele esqueceu-se da sua vocação e transformou o ministério de sacerdote em conveniência financeira", "Ele exigiu primeiro autorização do sumo sacerdote de Siló"]}, {"q": "Por que a expressão 'não havia rei em Israel; cada qual fazia o que parecia direito aos seus olhos' (Jz 17.6) é relevante para este episódio, segundo a lição?", "a": "Explica a anarquia religiosa que permitia práticas de sincretismo e cultos particulares fora da ordem estabelecida por Deus", "correta": 1, "op": ["Indica que Israel já tinha um rei, mas ele era ausente", "Explica a anarquia religiosa que permitia práticas de sincretismo e cultos particulares fora da ordem estabelecida por Deus", "Mostra que apenas a tribo de Dã vivia sem liderança", "Refere-se exclusivamente à ausência de exército organizado"]}, {"q": "O que Mica concluiu, de forma equivocada, ao conseguir um levita como sacerdote particular, segundo Juízes 17.13?", "a": "Que agora o Senhor lhe faria bem, porquanto tinha um levita por sacerdote", "correta": 3, "op": ["Que não precisaria mais oferecer sacrifícios", "Que sua família estaria livre de qualquer julgamento divino", "Que poderia parar de pagar o salário combinado", "Que agora o Senhor lhe faria bem, porquanto tinha um levita por sacerdote"]}, {"q": "Segundo a lição, como o Novo Testamento chama o pecado de comprar ou vender benefícios espirituais, exemplificado na relação entre Mica e o levita?", "a": "Simonia", "correta": 0, "op": ["Simonia", "Idolatria ritual", "Apostasia formal", "Blasfêmia contra o Espírito"]}]}, {"num": 12, "data": "20/09", "titulo": "Tempos de Decadência Moral e Maldade", "texto": "Jz 19.1-3,14,15,20-23", "textoAureo": "E sucedeu que cada um que tal via dizia: Nunca tal se fez, nem se viu desde o dia em que os filhos de Israel subiram da terra do Egito, até ao dia de hoje; ponderai isto no coração, considerai e falai. (Jz 19.30)", "verdade": "Quando o povo se afasta de Deus e de seus princípios, a sociedade entra em decadência.", "resumo": "Quando o povo se afasta de Deus e de seus princípios, a sociedade entra em decadência.", "leituraBiblica": "Juízes 19.1-3,14,15,20-23", "memorizando": "E sucedeu que cada um que tal via dizia: Nunca tal se fez, nem se viu desde o dia em que os filhos de Israel subiram da terra do Egito, até ao dia de hoje; ponderai isto no coração, considerai e falai. (Jz 19.30)", "leituraDiaria": [{"dia": "Segunda", "ref": "Gn 2.24", "tema": "O plano de Deus"}, {"dia": "Terça", "ref": "Mt 24.12", "tema": "A multiplicação da iniquidade"}, {"dia": "Quarta", "ref": "Sl 11.3", "tema": "Fundamentos transtornados"}, {"dia": "Quinta", "ref": "1 Pe 5.8", "tema": "Vigiando sempre"}, {"dia": "Sexta", "ref": "Rm 1.26,27", "tema": "Confrontando a depravação"}, {"dia": "Sábado", "ref": "Mq 6.8; 1 Tm 5.8", "tema": "Protegendo os vulneráveis"}], "perguntas": [{"q": "Quem é o personagem central do episódio narrado em Juízes 19, e o que ele tomou para si, segundo o versículo 1?", "a": "Um levita, que peregrinava aos lados da montanha de Efraim e tomou para si uma mulher concubina, de Belém de Judá", "correta": 2, "op": ["Um sacerdote de Siló, que tomou uma esposa filisteia", "Mica, que já havia consagrado um levita como sacerdote", "Um levita, que peregrinava aos lados da montanha de Efraim e tomou para si uma mulher concubina, de Belém de Judá", "Um ancião de Gibeá, que hospedou viajantes estrangeiros"]}, {"q": "Qual foi o propósito da viagem do levita à casa do sogro, segundo Juízes 19.3?", "a": "Reconciliar-se com sua concubina e tentar trazê-la de volta", "correta": 0, "op": ["Reconciliar-se com sua concubina e tentar trazê-la de volta", "Vender terras herdadas do pai da concubina", "Buscar um novo cargo sacerdotal em Belém", "Levar um sacrifício ao Tabernáculo de Siló"]}, {"q": "Por que o levita decidiu não pernoitar entre os jebuseus, seguindo até Gibeá, segundo o contexto da lição?", "a": "Porque acreditava que teria mais segurança em uma cidade pertencente à tribo de Benjamim", "correta": 1, "op": ["Porque os jebuseus o expulsaram da cidade", "Porque acreditava que teria mais segurança em uma cidade pertencente à tribo de Benjamim", "Porque não havia água disponível entre os jebuseus", "Porque fora avisado por um profeta a evitar aquele povo"]}, {"q": "Quem acolheu o levita e sua concubina em Gibeá, já que inicialmente ninguém os recebera na praça, segundo Juízes 19.20?", "a": "Um homem idoso, natural de Efraim, conhecido apenas como 'o velho'", "correta": 3, "op": ["Um sacerdote levita que morava na cidade", "O próprio governante local de Gibeá", "Um mercador rico que viajava para Jerusalém", "Um homem idoso, natural de Efraim, conhecido apenas como 'o velho'"]}, {"q": "O que os homens de Gibeá, descritos como 'filhos de Belial', exigiram do anfitrião, segundo Juízes 19.22?", "a": "Que o levita hóspede lhes fosse entregue para que abusassem sexualmente dele", "correta": 1, "op": ["Que lhes fosse entregue todo o ouro da casa", "Que o levita hóspede lhes fosse entregue para que abusassem sexualmente dele", "Que o velho lhes desse suas próprias filhas em casamento", "Que o levita fosse expulso imediatamente da cidade"]}, {"q": "A que episódio do livro de Gênesis a lição compara a depravação de Gibeá, mostrando similaridade com a maldade da época?", "a": "Ao episódio de Sodoma e Ló, em Gênesis 19", "correta": 2, "op": ["Ao dilúvio nos dias de Noé", "À torre de Babel", "Ao episódio de Sodoma e Ló, em Gênesis 19", "À expulsão de Adão e Eva do Éden"]}, {"q": "Segundo a lição, o que a alternativa proposta pelo homem idoso, de entregar sua filha virgem e a concubina do levita, revela sobre a decadência da cultura daquele tempo?", "a": "Que pais que desvalorizam suas filhas e homens que falham em proteger as mulheres tornam-se cúmplices da perversidade", "correta": 0, "op": ["Que pais que desvalorizam suas filhas e homens que falham em proteger as mulheres tornam-se cúmplices da perversidade", "Que era uma prática normal e aceitável para a época, sem implicações morais", "Que apenas os homens de Gibeá eram culpados, sem nenhuma outra responsabilidade", "Que a hospitalidade sempre prevalecia sobre qualquer outro valor moral"]}, {"q": "O que o levita fez com o corpo de sua concubina após a tragédia, segundo o relato de Juízes 19.29?", "a": "Cortou o corpo em doze partes e as enviou aos territórios de Israel", "correta": 3, "op": ["Sepultou-a imediatamente em Gibeá", "Levou-a de volta para a casa do sogro em Belém", "Entregou o corpo às autoridades de Gibeá para julgamento", "Cortou o corpo em doze partes e as enviou aos territórios de Israel"]}, {"q": "Segundo a lição, qual princípio da 'masculinidade bíblica' é apresentado como resposta à desumanização vista em Gibeá?", "a": "Que se expressa em liderança responsável, amorosa e protetora, e não em omissão ou covardia diante do mal", "correta": 1, "op": ["Que o homem deve sempre exercer autoridade absoluta sobre a mulher", "Que se expressa em liderança responsável, amorosa e protetora, e não em omissão ou covardia diante do mal", "Que a masculinidade bíblica dispensa qualquer forma de proteção às mulheres", "Que apenas os sacerdotes tinham responsabilidade de proteger os vulneráveis"]}, {"q": "Segundo a lição, o que os profetas, séculos depois, ainda apontavam sobre Gibeá?", "a": "Que ela permanecia como símbolo de corrupção e degradação moral", "correta": 2, "op": ["Que ela havia se tornado um exemplo de arrependimento nacional", "Que ela fora completamente esquecida na história de Israel", "Que ela permanecia como símbolo de corrupção e degradação moral", "Que ela se tornara a capital espiritual de Israel"]}]}, {"num": 13, "data": "27/09", "titulo": "Esperança em Meio ao Caos: Aguardando a Vinda do Rei", "texto": "Jz 21.1-3,6-10,25", "textoAureo": "Naqueles dias, não havia rei em Israel, porém cada um fazia o que parecia reto aos seus olhos. (Jz 21.25)", "verdade": "Mesmo em meio ao caos, há esperança, pois Deus conduz a história e sustenta aqueles que confiam nEle.", "resumo": "Mesmo em meio ao caos, há esperança, pois Deus conduz a história e sustenta aqueles que confiam nEle.", "leituraBiblica": "Juízes 21.1-3,6-10,25", "memorizando": "Naqueles dias, não havia rei em Israel, porém cada um fazia o que parecia reto aos seus olhos. (Jz 21.25)", "leituraDiaria": [{"dia": "Segunda", "ref": "Pv 17.15; Rm 1.32", "tema": "O erro da cumplicidade com o pecado"}, {"dia": "Terça", "ref": "Mt 23.23", "tema": "A hipocrisia religiosa"}, {"dia": "Quarta", "ref": "2 Tm 3.1-5", "tema": "Dias trabalhosos"}, {"dia": "Quinta", "ref": "2 Sm 7.12-16", "tema": "Aliança davídica"}, {"dia": "Sexta", "ref": "Jr 29.11", "tema": "Vivendo em esperança"}, {"dia": "Sábado", "ref": "Ap 19.16", "tema": "Jesus, Rei dos reis"}], "perguntas": [{"q": "Qual juramento os homens de Israel haviam feito em Mispa, segundo Juízes 21.1?", "a": "Que nenhum deles daria sua filha por mulher aos benjamitas", "correta": 1, "op": ["Que jamais lutariam contra outra tribo de Israel", "Que nenhum deles daria sua filha por mulher aos benjamitas", "Que exterminariam completamente a tribo de Benjamim", "Que nunca mais se reuniriam em assembleia nacional"]}, {"q": "O que o povo lamentou ao perceber a quase extinção da tribo de Benjamim, segundo Juízes 21.3?", "a": "Que faltasse uma tribo em Israel", "correta": 2, "op": ["A perda de território conquistado", "A morte do sumo sacerdote naquele período", "Que faltasse uma tribo em Israel", "O fim da aliança com os gibeonitas"]}, {"q": "O que o povo descobriu sobre os moradores de Jabes-Gileade ao fazer a contagem da congregação, segundo Juízes 21.8,9?", "a": "Que nenhum deles havia subido ao arraial, em Mispa, para a assembleia", "correta": 0, "op": ["Que nenhum deles havia subido ao arraial, em Mispa, para a assembleia", "Que eles haviam se aliado aos benjamitas contra Israel", "Que sua cidade já havia sido destruída anos antes", "Que eles se recusavam a pagar tributo às demais tribos"]}, {"q": "O que o ajuntamento de Israel ordenou aos doze mil homens valentes enviados contra Jabes-Gileade, segundo Juízes 21.10?", "a": "Que ferissem a fio de espada os moradores da cidade, incluindo mulheres e meninos", "correta": 3, "op": ["Que apenas prendessem os líderes da cidade", "Que negociassem um acordo de paz duradouro", "Que exigissem apenas o pagamento de tributos", "Que ferissem a fio de espada os moradores da cidade, incluindo mulheres e meninos"]}, {"q": "Qual versículo final resume a condição espiritual e moral de Israel ao término do livro de Juízes?", "a": "Juízes 21.25, que afirma não haver rei em Israel e cada um fazer o que parecia reto aos seus próprios olhos", "correta": 1, "op": ["Juízes 20.48, sobre a destruição total de Benjamim", "Juízes 21.25, que afirma não haver rei em Israel e cada um fazer o que parecia reto aos seus próprios olhos", "Juízes 19.30, sobre o clamor do povo diante da tragédia em Gibeá", "Juízes 17.6, sobre a idolatria da casa de Mica"]}, {"q": "Segundo a lição, qual foi uma das mensagens centrais de Juízes quanto à necessidade de um rei para a nação?", "a": "Que um rei pudesse unificar a nação, trazer estabilidade, segurança e conduzir o povo ao temor do Senhor", "correta": 2, "op": ["Que um rei fosse necessário apenas para arrecadar impostos", "Que um rei substituísse totalmente a necessidade de fé em Deus", "Que um rei pudesse unificar a nação, trazer estabilidade, segurança e conduzir o povo ao temor do Senhor", "Que um rei viesse exclusivamente da tribo de Benjamim"]}, {"q": "Quem surgiu no cenário bíblico após o período dos juízes, exercendo também a função de juiz e conduzindo o povo à vitória sobre os filisteus, segundo a lição?", "a": "Samuel", "correta": 0, "op": ["Samuel", "Davi", "Saul", "Salomão"]}, {"q": "Apesar de ter sido permitido por Deus, como terminou o reinado do primeiro rei de Israel, segundo a lição?", "a": "Saul foi rejeitado pelo Senhor por sua desobediência", "correta": 1, "op": ["Saul reinou com êxito até sua morte natural", "Saul foi rejeitado pelo Senhor por sua desobediência", "Saul entregou o trono voluntariamente a Davi", "Saul foi o único rei aprovado integralmente por Deus"]}, {"q": "Segundo a aliança davídica (2 Sm 7.12-16), o que Deus prometeu a respeito do trono de Davi?", "a": "Que dele viria um reino eterno, como sombra e figura do reinado de Cristo", "correta": 3, "op": ["Que o trono de Davi duraria apenas até seu neto", "Que nenhum de seus descendentes reinaria após ele", "Que o trono seria transferido para a tribo de Benjamim", "Que dele viria um reino eterno, como sombra e figura do reinado de Cristo"]}, {"q": "Segundo a conclusão da lição, qual esperança o povo de Deus deve manter diante de uma sociedade marcada pela decadência espiritual, moral e social, semelhante à época dos juízes?", "a": "A esperança no retorno glorioso de Cristo, que reinará para sempre em plenitude", "correta": 2, "op": ["A esperança em reformas políticas humanas duradouras", "A esperança de que a história se repetirá exatamente da mesma forma", "A esperança no retorno glorioso de Cristo, que reinará para sempre em plenitude", "A esperança exclusivamente na restauração da monarquia davídica terrena"]}]}]
+      } },
     { id: '4t2026', label: '4º Trimestre 2026', periodo: 'Outubro a Dezembro 2026', atual: false,
       dados: { tema: 'Jovens', subtema: 'Conteúdo em breve', comentarista: '', periodo: '4º Trimestre 2026 — Outubro a Dezembro', licoes: [] } },
   ],
@@ -8960,17 +8988,25 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
     carregarDesafios(),
     carregarDesafioPontos()
   ]);
+  // Intervalo de datas do trimestre ATUAL — usado para não misturar frequência,
+  // bônus e ajustes de outros trimestres (ex: 2º Trimestre) no progresso do aluno.
+  const _trimRangeProg = RANK_TRIMESTRES[_trimestreIdAtual()] || { inicio: cfgTrimestreInicio, fim: cfgTrimestrefim };
   let aulasAluno = [];
   let bonusAluno = [];
   try {
     const [aulasRes, bonusRes] = await Promise.all([
-      sbClient.from('aulas').select('*').eq('turma', turmaAluno).order('data', { ascending: false }),
-      sbClient.from('bonus_pontos').select('*').eq('turma', turmaAluno).order('created_at', { ascending: false })
+      sbClient.from('aulas').select('*').eq('turma', turmaAluno)
+        .gte('data', _trimRangeProg.inicio).lte('data', _trimRangeProg.fim)
+        .order('data', { ascending: false }),
+      sbClient.from('bonus_pontos').select('*').eq('turma', turmaAluno)
+        .gte('data_referencia', _trimRangeProg.inicio).lte('data_referencia', _trimRangeProg.fim)
+        .order('created_at', { ascending: false })
     ]);
     console.log('DEBUG AULAS:', { turmaAluno, idAluno, totalAulas: (aulasRes.data||[]).length, erroAulas: aulasRes.error });
     aulasAluno = aulasRes.data || [];
     // Filtrar bônus: para todos OU para esse aluno
-    const ajustesRes = await sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaAluno);
+    const ajustesRes = await sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaAluno)
+      .gte('data_referencia', _trimRangeProg.inicio).lte('data_referencia', _trimRangeProg.fim);
     const ajustesAluno = (ajustesRes.data || []).filter(a =>
       !a.aluno_ids || a.aluno_ids.includes(idAluno)
     );
@@ -8979,9 +9015,13 @@ async function _carregarDadosAlunoProgresso(idAluno, turmaAluno) {
       ...ajustesAluno
     ];
   } catch(e) { console.error('ERRO ao carregar aulas/bonus:', e.message, e); }
+  // PROVAS: restringir ao trimestre atual (a tabela global PROVAS carrega todos os
+  // trimestres; aqui filtramos a cópia usada no progresso do aluno).
+  const _trimIdProg = _trimestreIdAtual();
+  const provasDoTrimestre = (PROVAS||[]).filter(p => !p.trimestre || p.trimestre === _trimIdProg);
   return { idAluno, turmaAluno, aulasAluno, bonusAluno,
     quizScoresSnap: {...quizScores},
-    provasSnap: [...(PROVAS||[])],
+    provasSnap: [...provasDoTrimestre],
     desafioSnap: [..._desafioPontos] };
 }
 
@@ -9000,10 +9040,10 @@ async function _renderAlunoProgressoComDados(dados) {
 
   const presencasReais = aulasAluno.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
   const quizzesFeitos  = Object.keys(quizScores).filter(k => k.startsWith(turmaAluno)).length;
-  const provasFeitas   = (PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).length;
+  const provasFeitas   = (provasSnap||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).length;
   const desafiosFeitos = _desafioPontos.filter(d=>d.aluno_id===idAluno).length;
   const seq = calcularSemanasSeguidas(idAluno, turmaAluno, aulasAluno);
-  const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS||[], _desafioPontos);
+  const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasAluno, quizScores, provasSnap||[], _desafioPontos, _trimestreIdAtual());
   const bonusTotal = (dados.bonusAluno||[]).reduce((s,b)=>s+(parseFloat(b.pontos)||0),0);
   const pts = { ...ptsBase, total:(ptsBase.total||0)+bonusTotal, bonus:bonusTotal };
   const totalAulas = aulasAluno.length;
@@ -9012,7 +9052,7 @@ async function _renderAlunoProgressoComDados(dados) {
     ? Math.round(Object.keys(quizScores).filter(k=>k.startsWith(turmaAluno)).reduce((s,k)=>s+(quizScores[k].pct||0),0)/quizzesFeitos)
     : 0;
   const mediaProva = provasFeitas>0
-    ? Math.round((PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).reduce((s,p)=>{
+    ? Math.round((provasSnap||[]).filter(p=>p.turma===turmaAluno&&p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]).reduce((s,p)=>{
         const r=p.resultados[idAluno]; return s+(r.pct||0);
       },0)/provasFeitas)
     : 0;
@@ -9077,7 +9117,7 @@ async function _renderAlunoProgressoComDados(dados) {
   }
 
   // Medalhas
-  verificarEAtribuirMedalhas(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS||[], _desafioPontos)
+  verificarEAtribuirMedalhas(idAluno, turmaAluno, aulasAluno, quizScores, PROVAS||[], _desafioPontos, _trimestreIdAtual())
     .then(async novas => {
       if (novas.length) novas.forEach(m => toast(`${m.icone} Nova medalha: ${m.titulo}!`, 'ok'));
       const todasMedalhas = await carregarMedalhasAluno(idAluno);
@@ -9141,7 +9181,8 @@ function _renderAlunoHistoricoCompleto(idAluno, turmaAluno, seq, presencasReais,
   // Aba Provas
   const provasEl = document.getElementById('aluno-hist-provas');
   if (provasEl) {
-    const provasAluno = (PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.resultados&&p.resultados[idAluno]);
+    const _trimIdHistProvas = _trimestreIdAtual();
+    const provasAluno = (PROVAS||[]).filter(p=>p.turma===turmaAluno&&p.resultados&&p.resultados[idAluno]&&(!p.trimestre||p.trimestre===_trimIdHistProvas));
     provasEl.innerHTML = provasAluno.length
       ? provasAluno.map(p=>{
           const r=p.resultados[idAluno];
@@ -9223,6 +9264,108 @@ function alunoToggle(contentId, arrowId) {
   el.style.display=open?'block':'none';
   if(arr) arr.classList.toggle('open',open);
 }
+
+// ── PROGRESSO DO ALUNO EM TRIMESTRES ANTERIORES ──
+// Mostra um resumo (frequência, quizzes, provas, pontos) de um trimestre passado,
+// sem misturar esses números com o trimestre atual. Carregado sob demanda (lazy),
+// só quando o aluno abre a seção, para não pesar o carregamento normal da tela.
+let _trimAnterioresCarregado = false;
+function alunoToggleTrimAnteriores() {
+  alunoToggle('aluno-trim-ant-content','alunoTrimAntArr');
+  if (!_trimAnterioresCarregado) {
+    _trimAnterioresCarregado = true;
+    _renderTrimAnterioresTabs();
+  }
+}
+
+function _trimAlunoContext() {
+  let turmaAluno, idAluno;
+  if (USER.perfil === 'aluno') { turmaAluno = USER.turma || 'adultos'; idAluno = USER.id; }
+  else {
+    turmaAluno = USER.turma_aluno || USER.turma || 'adultos';
+    idAluno = USER._aluno_id || USER.id;
+  }
+  return { turmaAluno, idAluno };
+}
+
+function _renderTrimAnterioresTabs() {
+  const tabsEl = document.getElementById('aluno-trim-ant-tabs');
+  const bodyEl = document.getElementById('aluno-trim-ant-body');
+  if (!tabsEl) return;
+  const atualId = _trimestreIdAtual();
+  const ids = ['1t2026','2t2026','3t2026','4t2026'];
+  const hoje = _hojeStr();
+  const anteriores = ids.filter(id => id !== atualId && RANK_TRIMESTRES[id] && RANK_TRIMESTRES[id].fim < hoje);
+  if (!anteriores.length) {
+    tabsEl.innerHTML = '';
+    if (bodyEl) bodyEl.innerHTML = '<div style="font-size:12px;color:var(--ink-soft);padding:8px 0">Ainda não há trimestres anteriores concluídos para exibir.</div>';
+    return;
+  }
+  tabsEl.innerHTML = anteriores.map((id,i) => `<button type="button" class="pv-trim-btn${i===0?' on':''}" data-trim="${id}" onclick="selTrimAnteriorAluno('${id}',this)" style="padding:6px 12px;border-radius:20px;border:1.5px solid ${i===0?'var(--gold)':'var(--cb)'};background:${i===0?'var(--ink)':'var(--cream)'};font-size:11px;font-weight:700;color:${i===0?'var(--gold-l)':'var(--ink-soft)'};cursor:pointer">${RANK_TRIMESTRES[id].label}</button>`).join('');
+  selTrimAnteriorAluno(anteriores[0], tabsEl.querySelector('button'));
+}
+
+async function selTrimAnteriorAluno(trimId, btn) {
+  document.querySelectorAll('#aluno-trim-ant-tabs button').forEach(b => {
+    const isThis = b === btn;
+    b.classList.toggle('on', isThis);
+    b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+    b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+    b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+  });
+  const body = document.getElementById('aluno-trim-ant-body');
+  if (!body) return;
+  body.innerHTML = '<div style="text-align:center;padding:16px;color:var(--ink-soft);font-size:13px">⏳ Carregando...</div>';
+
+  const { turmaAluno, idAluno } = _trimAlunoContext();
+  const trim = RANK_TRIMESTRES[trimId];
+  if (!trim) { body.innerHTML = '<div style="font-size:12px;color:var(--ink-soft)">Trimestre não encontrado.</div>'; return; }
+
+  try {
+    const [aulasRes, quizRes, provasRes, bonusRes, ajustesRes] = await Promise.all([
+      sbClient.from('aulas').select('*').eq('turma', turmaAluno).gte('data', trim.inicio).lte('data', trim.fim),
+      sbClient.from('quiz_resultados').select('*').eq('aluno_id', idAluno).eq('turma', turmaAluno).eq('trimestre', trimId),
+      sbClient.from('provas').select('*').eq('turma', turmaAluno).eq('trimestre', trimId),
+      sbClient.from('bonus_pontos').select('*').eq('turma', turmaAluno).gte('data_referencia', trim.inicio).lte('data_referencia', trim.fim),
+      sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaAluno).gte('data_referencia', trim.inicio).lte('data_referencia', trim.fim),
+    ]);
+    const aulasT = aulasRes.data || [];
+    const quizList = quizRes.data || [];
+    const provasT = provasRes.data || [];
+    const bonusT = (bonusRes.data||[]).filter(b => !b.aluno_ids || b.aluno_ids.includes(idAluno));
+    const ajustesT = (ajustesRes.data||[]).filter(a => !a.aluno_ids || a.aluno_ids.includes(idAluno));
+
+    const presencas = aulasT.filter(a => (a.presencas||{})[idAluno] === 'presente').length;
+    const totalAulas = aulasT.length;
+    const pctFreq = totalAulas ? Math.round((presencas/totalAulas)*100) : 0;
+
+    const quizScoresLocal = {};
+    quizList.forEach(r => { quizScoresLocal[`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
+    const quizzesFeitos = Object.keys(quizScoresLocal).length;
+    const mediaQuiz = quizzesFeitos ? Math.round(Object.values(quizScoresLocal).reduce((s,q)=>s+(q.pct||0),0)/quizzesFeitos) : 0;
+
+    const provasDoAluno = provasT.filter(p=>p.tipo==='prova'&&p.resultados&&p.resultados[idAluno]);
+    const provasFeitas = provasDoAluno.length;
+    const mediaProva = provasFeitas ? Math.round(provasDoAluno.reduce((s,p)=>s+((p.resultados[idAluno].pct)||0),0)/provasFeitas) : 0;
+
+    const bonusTotal = [...bonusT, ...ajustesT].reduce((s,b)=>s+(parseFloat(b.pontos)||0),0);
+    const ptsBase = calcularPontosAluno(idAluno, turmaAluno, aulasT, quizScoresLocal, provasT, [], trimId);
+    const ptsTotal = Math.round((ptsBase.total||0) + bonusTotal);
+
+    body.innerHTML = `
+      <div style="background:var(--cream);border-radius:14px;padding:14px;border:1px solid var(--cb)">
+        <div style="font-size:11px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">${trim.label}</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+          <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink)">${pctFreq}%</div><div style="font-size:10px;color:var(--ink-soft)">Frequência (${presencas}/${totalAulas})</div></div>
+          <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink)">${mediaQuiz}%</div><div style="font-size:10px;color:var(--ink-soft)">Média Quizzes (${quizzesFeitos})</div></div>
+          <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--ink)">${mediaProva}%</div><div style="font-size:10px;color:var(--ink-soft)">Média Provas (${provasFeitas})</div></div>
+          <div style="text-align:center"><div style="font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:700;color:var(--gold-deep)">${ptsTotal}</div><div style="font-size:10px;color:var(--ink-soft)">Pontos totais</div></div>
+        </div>
+      </div>`;
+  } catch(e) {
+    body.innerHTML = `<div style="color:var(--red);font-size:12px;padding:8px">Erro ao carregar: ${e.message}</div>`;
+  }
+}
 function setAlunoHistTab(tab, btn) {
   ['quiz','provas','desafios','bonus'].forEach(t=>{
     const el=document.getElementById('aluno-hist-'+t);
@@ -9281,7 +9424,7 @@ async function renderProvasProf() {
   const grupos = {};
   minhas.forEach(p => { const t = p.trimestre||'sem'; if(!grupos[t]) grupos[t]=[]; grupos[t].push(p); });
   const ordemTrims = ['4t2026','3t2026','2t2026','1t2026','sem'];
-  const trimAtual = '2t2026';
+  const trimAtual = _trimestreIdAtual();
 
   box.innerHTML = ordemTrims.filter(t => grupos[t]?.length).map(t => {
     const label = TRIM_LABELS_PROF[t] || t;
@@ -9568,6 +9711,24 @@ async function abrirModalProva(id, tipoPresel) {
     document.getElementById('pv-tempo').value = 0;
     document.getElementById('pv-data-limite').value = '';
     document.getElementById('pv-data-inicio').value = '';
+    // Nova avaliação: selecionar automaticamente o TRIMESTRE ATUAL (não deixar preso no
+    // "2º Tri 2026" que vem marcado como padrão no HTML) — bug que fazia novas provas/quizzes
+    // ficarem invisíveis para os alunos do trimestre corrente.
+    const trimNovo = _trimestreIdAtual();
+    document.getElementById('pv-trimestre').value = trimNovo;
+    document.querySelectorAll('.pv-trim-btn').forEach(b => {
+      const isThis = b.dataset.trim === trimNovo;
+      b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+      b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+      b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+      const label = b.textContent.replace(' ✦','');
+      b.textContent = isThis ? label + ' ✦' : label;
+    });
+    const datasNovo = TRIM_DATAS[trimNovo];
+    if (datasNovo) {
+      document.getElementById('pv-data-inicio').value = datasNovo.inicio;
+      document.getElementById('pv-data-limite').value = datasNovo.fim;
+    }
   }
   atualizarLicoesModal(id);
   onTipoProvaChange();
@@ -9702,7 +9863,7 @@ async function coletarQuestoes(turma, licoesSel) {
   let questoes = [];
 
   // 1. Questões das lições hardcoded
-  const dadosLicoes = LICOES[turma];
+  const dadosLicoes = _dadosTrimestreAtual(turma);
   if (dadosLicoes) {
     licoesSel.forEach(numLicao => {
       const lic = dadosLicoes.licoes.find(l => l.num === numLicao);
@@ -9778,7 +9939,7 @@ async function salvarProva() {
   const tempo = parseInt(document.getElementById('pv-tempo').value) || 0;
   const dataLimite = document.getElementById('pv-data-limite').value || null;
   const dataInicio = document.getElementById('pv-data-inicio').value || null;
-  const trimestre = document.getElementById('pv-trimestre')?.value || '2t2026';
+  const trimestre = document.getElementById('pv-trimestre')?.value || _trimestreIdAtual();
   const licoesSel = Array.from(document.querySelectorAll('#pv-licoes-check input:checked')).map(c => parseInt(c.value));
   const questoes = await coletarQuestoes(turma, licoesSel);
   const editId = document.getElementById('pv-id').value;
@@ -11422,7 +11583,7 @@ function sincronizarLicaoEmMemoria(l) {
   // Só sincronizar lições — ignorar quizzes, simulados e avulsas
   if (l.tipo && l.tipo !== 'licao') return;
   // Atualizar LICOES[turma].licoes para que provas criadas usem dados atualizados
-  const turmaData = LICOES[l.turma];
+  const turmaData = _dadosTrimestreAtual(l.turma);
   if (!turmaData) return;
   const idx = turmaData.licoes.findIndex(x => x.num === l.num);
   if (idx >= 0) {
@@ -12006,7 +12167,7 @@ const DEFINICOES_MEDALHAS = [
   { tipo:'pontos_200',           icone:'🥇', titulo:'200 Pontos',              descricao:'Acumulou 200 pontos no trimestre' },
 ];
 
-async function verificarEAtribuirMedalhas(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos) {
+async function verificarEAtribuirMedalhas(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos, trimestreId) {
   if (!alunoId) return [];
   try {
     // Buscar medalhas já conquistadas
@@ -12018,7 +12179,7 @@ async function verificarEAtribuirMedalhas(alunoId, turma, aulas, quizScoresAluno
     const quizzesFeitos = Object.keys(quizScoresAluno || {}).filter(k => k.startsWith(turma)).length;
     const quizPerfeitoFeito = Object.values(quizScoresAluno || {}).some(q => q.pct === 100);
     const desafiosCumpridos = desafioPontos.filter(d => d.aluno_id === alunoId).length;
-    const totalPts = calcularPontosAluno(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos);
+    const totalPts = calcularPontosAluno(alunoId, turma, aulas, quizScoresAluno, provas, desafioPontos, trimestreId);
     const seq = calcularSemanasSeguidas(alunoId, turma, aulas);
 
     const checar = [
@@ -12074,7 +12235,7 @@ function renderMedalhasAluno(medalhas) {
 
 // ══════════════════════════════════════════════
 // Pontos: presença=10, quiz(acerto)=2pts por acerto, prova=pct*0.5
-function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioPontos) {
+function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioPontos, trimestreId) {
   let pts = 0;
   let ptsPres = 0, ptsQ = 0, ptsProv = 0, ptsDesafio = 0;
 
@@ -12082,8 +12243,12 @@ function calcularPontosAluno(alunoId, turma, aulas, quizScores, provas, desafioP
   const fatorProva = RANKING_CONFIG.pts_prova_fator ?? 10;
   const ptsRecuperacao = RANKING_CONFIG.pts_recuperacao_presenca ?? 10;
 
-  // Datas do trimestre atual para filtrar
-  const trim = RANK_TRIMESTRES[curRankTrimestre];
+  // Datas do trimestre para filtrar. Prioridade: trimestreId explícito (passado pelo
+  // chamador) > curRankTrimestre (tela de Ranking) > trimestre atual real. Isso evita que
+  // esta função "herde" por engano o trimestre que está selecionado na tela de Ranking
+  // quando é chamada de outros lugares (progresso do aluno, medalhas, perfil visto pelo professor).
+  const _trimIdCalc = trimestreId || curRankTrimestre || _trimestreIdAtual();
+  const trim = RANK_TRIMESTRES[_trimIdCalc];
   const trimInicio = trim ? trim.inicio : null;
   const trimFim = trim ? trim.fim : null;
 
@@ -12244,7 +12409,7 @@ async function setRankTipo(tipo, el) {
 // ══════════════════════════════════════════════
 function gerarCertificado() {
   if (!USER || USER.perfil !== 'aluno') return;
-  const dados = LICOES[USER.turma];
+  const dados = _dadosTrimestreAtual(USER.turma);
   if (!dados) return;
   const totalLicoes = dados.licoes.length;
   const feitasKeys = Object.keys(quizScores).filter(k => k.startsWith(USER.turma));
@@ -13028,8 +13193,15 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
       return true;
     });
 
+    // Intervalo de datas do trimestre ATUAL — este widget mostra a posição do aluno
+    // no ranking do trimestre corrente, então não pode misturar aulas/bônus de outros
+    // trimestres (ex: 2º Trimestre) aqui.
+    const _trimIdRankAluno = _trimestreIdAtual();
+    const _trimRangeRankAluno = RANK_TRIMESTRES[_trimIdRankAluno] || { inicio: cfgTrimestreInicio, fim: cfgTrimestrefim };
+
     const { data: aulasData } = await sbClient.from('aulas')
-      .select('*').eq('turma', turmaUsar);
+      .select('*').eq('turma', turmaUsar)
+      .gte('data', _trimRangeRankAluno.inicio).lte('data', _trimRangeRankAluno.fim);
     const aulas = aulasData || [];
 
     // Carregar quizzes, provas, desafios e bônus
@@ -13040,8 +13212,10 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     let ajustesTurmaAluno = [];
     try {
       const [bRes, aRes] = await Promise.all([
-        sbClient.from('bonus_pontos').select('*').eq('turma', turmaUsar),
+        sbClient.from('bonus_pontos').select('*').eq('turma', turmaUsar)
+          .gte('data_referencia', _trimRangeRankAluno.inicio).lte('data_referencia', _trimRangeRankAluno.fim),
         sbClient.from('ajustes_pontuacao').select('*').eq('turma', turmaUsar)
+          .gte('data_referencia', _trimRangeRankAluno.inicio).lte('data_referencia', _trimRangeRankAluno.fim)
       ]);
       bonusTurmaRank = bRes.data || [];
       ajustesTurmaAluno = aRes.data || [];
@@ -13061,7 +13235,7 @@ async function renderRankingAluno(aulasJaBuscadas, idAlunoParam, turmaAlunoParam
     // Ranking PONTOS
     const rankingGeral = alunos.map(a => {
       const sc = _quizScoresParaAluno(a.id);
-      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS||[], _desafioPontos);
+      const ptsBase = calcularPontosAluno(a.id, turmaUsar, aulas, sc, PROVAS||[], _desafioPontos, _trimIdRankAluno);
       const totalPts = (ptsBase.total||0) + _bonusAluno(a.id);
       const pres = aulas.filter(au => (au.presencas||{})[a.id] === 'presente').length;
       const pct = aulas.length ? Math.round((pres/aulas.length)*100) : 0;
@@ -14124,7 +14298,7 @@ async function selProvasProfTab(tab, el) {
 // ══════════════════════════════════════════════════════
 // RELATÓRIO DE QUIZZES DE LIÇÃO
 // ══════════════════════════════════════════════════════
-let _qlTurmaAtual = 'juniores';
+let _qlTurmaAtual = 'maternal';
 
 function toggleQLicao(uid) {
   const body = document.getElementById(uid);
@@ -14153,13 +14327,13 @@ async function renderQuemNaoFezQuiz() {
   try {
     // Buscar todos os resultados da turma
     const { data: resultados } = await sbClient.from('quiz_resultados')
-      .select('aluno_id,licao_num').eq('turma', _qlTurmaAtual);
+      .select('aluno_id,licao_num').eq('turma', _qlTurmaAtual).eq('trimestre', _trimestreIdAtual());
 
     // Buscar alunos ativos da turma
     const alunos = (await sbGet('alunos', { turma: _qlTurmaAtual })).filter(a => a.ativo !== false);
 
     // Buscar lições da turma
-    const dados = LICOES[_qlTurmaAtual];
+    const dados = _dadosTrimestreAtual(_qlTurmaAtual);
     const licoes = dados ? dados.licoes : [];
     const hoje = _hojeFortaleza();
 
@@ -14230,13 +14404,13 @@ async function renderQuizzesLicao() {
   try {
     // Buscar todos os resultados de quiz da turma
     const { data: resultados } = await sbClient.from('quiz_resultados')
-      .select('*').eq('turma', _qlTurmaAtual).order('licao_num', { ascending: true });
+      .select('*').eq('turma', _qlTurmaAtual).eq('trimestre', _trimestreIdAtual()).order('licao_num', { ascending: true });
 
     // Buscar alunos da turma
     const alunos = await sbGet('alunos', { turma: _qlTurmaAtual });
 
     // Buscar lições da turma
-    const dados = LICOES[_qlTurmaAtual];
+    const dados = _dadosTrimestreAtual(_qlTurmaAtual);
     const licoes = dados ? dados.licoes : [];
 
     if (!resultados || !resultados.length) {
@@ -14319,7 +14493,7 @@ async function renderQuizzesLicao() {
 
 async function verRespostasQuizLicao(alunoId, turma, licaoNum, nomeAluno) {
   // Buscar lição do banco ou memória
-  const dados = LICOES[turma];
+  const dados = _dadosTrimestreAtual(turma);
   const lic = dados ? dados.licoes.find(l => l.num === licaoNum) : null;
   if (!lic) { toast('Lição não encontrada', 'er'); return; }
 
@@ -14482,14 +14656,17 @@ async function renderProgressoProf() {
   if (!turma) return;
   document.getElementById('prof-aluno-turma-txt').textContent = `Turma de ${TN[turma]} — como aluno`;
 
-  // Buscar aulas da turma
-  const aulas = await sbGet('aulas', { turma }, 'data', false);
+  // Buscar aulas da turma, restritas ao trimestre atual (não misturar com trimestres anteriores)
+  const _trimIdProf = _trimestreIdAtual();
+  const _trimRangeProf = RANK_TRIMESTRES[_trimIdProf] || { inicio: cfgTrimestreInicio, fim: cfgTrimestrefim };
+  const aulasTodas = await sbGet('aulas', { turma }, 'data', false);
+  const aulas = aulasTodas.filter(a => a.data >= _trimRangeProf.inicio && a.data <= _trimRangeProf.fim);
   const total = aulas.length;
   const presentes = aulas.filter(a => (a.presencas||{})[USER.id] === 'presente').length;
   const seq = calcularSemanasSeguidas(USER.id, turma, aulas);
 
   // Pontos
-  const pts = calcularPontosAluno(USER.id, turma, aulas, quizScores, PROVAS||[], _desafioPontos);
+  const pts = calcularPontosAluno(USER.id, turma, aulas, quizScores, PROVAS||[], _desafioPontos, _trimIdProf);
   const hero = document.getElementById('prof-pts-hero');
   if (hero) {
     hero.style.display = 'block';
@@ -14835,7 +15012,7 @@ function popularFiltroLicao() {
   if (!sel) return;
   sel.innerHTML = '<option value="">Todas as lições</option>';
   if (!turma) return;
-  const dados = LICOES[turma];
+  const dados = _dadosTrimestreAtual(turma);
   if (!dados) return;
   dados.licoes.forEach(l => {
     const opt = document.createElement('option');
@@ -15194,7 +15371,7 @@ async function atualizarLicoesModal(editId) {
   } catch(e) {}
 
   // Mesclar com LICOES hardcoded — DB tem prioridade se existir
-  var dadosHard = LICOES[turma];
+  var dadosHard = _dadosTrimestreAtual(turma);
   var licoesHard = (dadosHard && dadosHard.licoes) ? dadosHard.licoes : [];
 
   // Unir: começar com hardcoded, sobrescrever/adicionar com as do banco
@@ -15260,7 +15437,7 @@ function atualizarResumoProva() {
   var turmaEl = document.getElementById('pv-turma');
   if (!turmaEl) return;
   var turma = turmaEl.value;
-  var dados = LICOES[turma];
+  var dados = _dadosTrimestreAtual(turma);
   var resumo = document.getElementById('pv-resumo');
   if (!resumo) return;
   var checks = document.querySelectorAll('#pv-licoes-check input:checked');
@@ -15282,7 +15459,7 @@ var _gestorTurma = null, _gestorLicao = null;
 var _gestorPergs = [], _gestorAlterado = false;
 
 function verQuestoesLicao(turma, numLicao) {
-  var dados = LICOES[turma];
+  var dados = _dadosTrimestreAtual(turma);
   if (!dados) return;
   var lic = dados.licoes.find(function(l){ return l.num===numLicao; });
   if (!lic) return;
@@ -15544,7 +15721,7 @@ async function gestorSalvarAlteracoes() {
   if (formAberto) { toast('Salve ou cancele a edição em andamento','er'); formAberto.scrollIntoView({behavior:'smooth',block:'center'}); return; }
 
   // Atualizar memória local
-  var dados = LICOES[_gestorTurma];
+  var dados = _dadosTrimestreAtual(_gestorTurma);
   if (dados) {
     var licIdx = dados.licoes.findIndex(function(l){ return l.num===_gestorLicao; });
     if (licIdx >= 0) dados.licoes[licIdx].perguntas = JSON.parse(JSON.stringify(_gestorPergs));
@@ -16181,7 +16358,7 @@ async function carregarHistoricoCompleto() {
       ${quizData.map(r => {
         const cor = r.pct>=70?'var(--tc)':r.pct>=50?'var(--warn)':'var(--red)';
         const dt = r.data_resposta ? new Date(r.data_resposta).toLocaleDateString('pt-BR',{timeZone:'America/Fortaleza',day:'2-digit',month:'2-digit'}) : '';
-        const dados = LICOES[turmaAluno];
+        const dados = _dadosTrimestreAtual(turmaAluno, r.trimestre);
         const lic = dados ? dados.licoes.find(l => l.num === r.licao_num) : null;
         return `<div style="display:flex;align-items:center;gap:10px;padding:6px 0;border-bottom:1px solid var(--cb)">
           <div style="background:var(--ink);color:var(--gold-l);width:28px;height:28px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex-shrink:0">${r.licao_num}</div>
@@ -17122,7 +17299,7 @@ function promoverProf(profId, nomeProf) {
 // ══════════════════════════════════════════════
 // SISTEMA DE AJUSTES DE PONTUAÇÃO
 // ══════════════════════════════════════════════
-let _ajustesTurma = 'adultos';
+let _ajustesTurma = 'maternal';
 let _motivoSelecionado = null;
 let _alunosAjusteSelecionados = [];
 
