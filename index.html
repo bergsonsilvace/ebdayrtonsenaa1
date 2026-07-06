@@ -2136,6 +2136,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
         </div>
         <div class="fg" style="margin-bottom:8px">
           <label class="fl">Lição do dia</label>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="f-trim-tabs"></div>
           <select class="fc" id="f-licao-sel" onchange="selecionarLicaoDropdown()" style="margin-bottom:8px">
             <option value="">— Selecionar da grade do trimestre —</option>
           </select>
@@ -2461,6 +2462,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             </div>
             <div>
               <label class="fl">Lição</label>
+              <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px" id="esc-trim-tabs"></div>
               <select class="fc" id="esc-licao-sel">
                 <option value="">— Selecionar —</option>
               </select>
@@ -4342,6 +4344,7 @@ async function iniciarApp() {
   }
 
   renderDash(); renderAlunos(); renderHist(); carregarAulaExistente(); renderFreq();
+  _renderFreqTrimTabs();
   popularDropdownLicao(curTurmaFreq);
   registrarAcesso();
   setTimeout(mostrarAvisosPopup, 1500);
@@ -4515,7 +4518,7 @@ async function _navTo(id) {
     renderAlunos();
   }
   else if (id === 'professores') { await renderProfessores(); }
-  else if (id === 'freq') { renderFreq(); popularDropdownLicao(curTurmaFreq); }
+  else if (id === 'freq') { renderFreq(); _renderFreqTrimTabs(); popularDropdownLicao(curTurmaFreq); }
   else if (id === 'contestacoes') renderContestacoes('pendente');
   else if (id === 'historico') { cacheAulas = await sbGet('aulas',{},'data',false); renderHist(); }
   else if (id === 'mensal') { cacheAulas = await sbGet('aulas',{},'data',false); renderMensal(); }
@@ -6092,10 +6095,36 @@ async function sincronizarProfComoAluno(profData, editId) {
 }
 
 // ── FREQUÊNCIA ──
+// Trimestre selecionado no dropdown de "Lição do dia" (lançar frequência). Por padrão
+// é o trimestre atual, mas o professor/superintendente pode escolher outro — útil para
+// lançar uma frequência atrasada de um trimestre anterior, por exemplo.
+let _freqTrimestreAtual = _trimestreIdAtual();
+
+function _renderFreqTrimTabs() {
+  const box = document.getElementById('f-trim-tabs');
+  if (!box) return;
+  box.innerHTML = Object.entries(RANK_TRIMESTRES).map(([id, tr]) => {
+    const on = id === _freqTrimestreAtual;
+    return `<button type="button" class="pv-trim-btn${on?' on':''}" data-trim="${id}" onclick="selFreqTrimestre('${id}',this)" style="padding:5px 11px;border-radius:20px;border:1.5px solid ${on?'var(--gold)':'var(--cb)'};background:${on?'var(--ink)':'var(--cream)'};font-size:10px;font-weight:700;color:${on?'var(--gold-l)':'var(--ink-soft)'};cursor:pointer">${tr.label}${id===_trimestreIdAtual()?' ✦':''}</button>`;
+  }).join('');
+}
+
+function selFreqTrimestre(id, btn) {
+  _freqTrimestreAtual = id;
+  document.querySelectorAll('#f-trim-tabs button').forEach(b => {
+    const isThis = b === btn;
+    b.classList.toggle('on', isThis);
+    b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+    b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+    b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+  });
+  popularDropdownLicao(curTurmaFreq);
+}
+
 function popularDropdownLicao(turma) {
   const sel = document.getElementById('f-licao-sel');
   if (!sel) return;
-  const dados = _dadosTrimestreAtual(turma);
+  const dados = _dadosTrimestreAtual(turma, _freqTrimestreAtual);
   if (!dados) {
     sel.innerHTML = '<option value="">— Selecionar da grade do trimestre —</option>';
     return;
@@ -14767,6 +14796,10 @@ async function renderProgressoProf() {
   const presentes = aulas.filter(a => (a.presencas||{})[USER.id] === 'presente').length;
   const seq = calcularSemanasSeguidas(USER.id, turma, aulas);
 
+  // Recarregar os pontos de quiz deste aluno/trimestre especificamente — não reaproveitar
+  // o que estiver na variável compartilhada 'quizScores' de uma tela anterior.
+  await carregarQuizScoresDoAluno(USER.id, turma);
+
   // Pontos
   const pts = calcularPontosAluno(USER.id, turma, aulas, quizScores, PROVAS||[], _desafioPontos, _trimIdProf);
   const hero = document.getElementById('prof-pts-hero');
@@ -17202,15 +17235,39 @@ function selecionarTurmaEscala(turma) {
   popularLicoesEscala(turma);
 }
 
+// Trimestre selecionado no dropdown de lição da tela de Escalas — mesmo princípio do
+// seletor de "Lição do dia" na frequência: por padrão é o atual, mas dá pra escolher outro.
+let _escTrimestreAtual = _trimestreIdAtual();
+
+function _renderEscTrimTabs() {
+  const box = document.getElementById('esc-trim-tabs');
+  if (!box) return;
+  box.innerHTML = Object.entries(RANK_TRIMESTRES).map(([id, tr]) => {
+    const on = id === _escTrimestreAtual;
+    return `<button type="button" class="pv-trim-btn${on?' on':''}" data-trim="${id}" onclick="selEscTrimestre('${id}',this)" style="padding:5px 11px;border-radius:20px;border:1.5px solid ${on?'var(--gold)':'var(--cb)'};background:${on?'var(--ink)':'var(--cream)'};font-size:10px;font-weight:700;color:${on?'var(--gold-l)':'var(--ink-soft)'};cursor:pointer">${tr.label}${id===_trimestreIdAtual()?' ✦':''}</button>`;
+  }).join('');
+}
+
+function selEscTrimestre(id, btn) {
+  _escTrimestreAtual = id;
+  document.querySelectorAll('#esc-trim-tabs button').forEach(b => {
+    const isThis = b === btn;
+    b.classList.toggle('on', isThis);
+    b.style.background = isThis ? 'var(--ink)' : 'var(--cream)';
+    b.style.borderColor = isThis ? 'var(--gold)' : 'var(--cb)';
+    b.style.color = isThis ? 'var(--gold-l)' : 'var(--ink-soft)';
+  });
+  popularLicoesEscala(document.getElementById('esc-turma-sel').value);
+}
+
 function popularLicoesEscala(turma) {
   var sel = document.getElementById('esc-licao-sel');
   if (!sel) return;
-  // Buscar as lições do trimestre marcado como ATUAL (não sempre o 2º trimestre fixo)
-  var trimList = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turma] : null;
-  var trimObj = trimList ? (trimList.find(function(t){ return t.atual; }) || trimList[trimList.length - 1]) : null;
-  var licoes = (trimObj && trimObj.dados && trimObj.dados.licoes && trimObj.dados.licoes.length)
-    ? trimObj.dados.licoes
-    : (LICOES[turma] ? LICOES[turma].licoes : []);
+  _renderEscTrimTabs();
+  // Buscar as lições do trimestre selecionado (por padrão, o atual — mas o usuário
+  // pode escolher outro pelas abas acima).
+  var dados = _dadosTrimestreAtual(turma, _escTrimestreAtual);
+  var licoes = dados ? dados.licoes : [];
   if (!licoes || !licoes.length) { sel.innerHTML = '<option value="">— Nenhuma lição cadastrada neste trimestre —</option>'; return; }
   sel.innerHTML = '<option value="">— Selecionar lição —</option>'
     + licoes.map(function(l){
