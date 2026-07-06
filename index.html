@@ -4868,6 +4868,12 @@ async function _renderDashRanking(alunos, aulas) {
 
     // Calcular pontos de TODOS os alunos ativos e matriculados no trimestre atual (exceto excluídos do ranking)
     const trimAtualId = _trimestreIdAtual();
+    const trimAtual = RANK_TRIMESTRES[trimAtualId];
+    // Garante que calcularPontosAluno (que lê o trimestre via variável global) também
+    // filtre quizzes/provas/desafios pelo trimestre atual, independente da aba que o
+    // usuário deixou selecionada na tela de Ranking.
+    const _curRankTrimestreAnterior = curRankTrimestre;
+    curRankTrimestre = trimAtualId;
     const ativos = alunos.filter(a => {
       if ((a.status||'ativo') !== 'ativo') return false;
       if (!_matriculadoEm(a, trimAtualId)) return false;
@@ -4875,7 +4881,9 @@ async function _renderDashRanking(alunos, aulas) {
       return !excl.includes(a.id);
     });
     const ranked = ativos.map(a=>{
-      const aulasT = todasAulas.filter(au=>au.turma===a.turma);
+      const aulasT = trimAtual
+        ? todasAulas.filter(au=>au.turma===a.turma && au.data >= trimAtual.inicio && au.data <= trimAtual.fim)
+        : todasAulas.filter(au=>au.turma===a.turma);
       const sc = _quizScoresParaAluno(a.id);
       const base = calcularPontosAluno(a.id, a.turma, aulasT, sc, PROVAS||[], _desafioPontos);
       const pres = aulasT.filter(au=>(au.presencas||{})[a.id]==='presente').length;
@@ -4887,6 +4895,7 @@ async function _renderDashRanking(alunos, aulas) {
       if (y.pres!==x.pres) return y.pres-x.pres;
       return y.pct-x.pct;
     });
+    curRankTrimestre = _curRankTrimestreAnterior;
 
     _dashRankData = ranked;
     _dashRankTab = 'geral';
@@ -6368,7 +6377,8 @@ let _quizScoresTodos = {}; // { 'alunoId': { 'turma-num': { acertos, total, pct 
 
 async function carregarQuizScoresTodos() {
   try {
-    const { data } = await sbClient.from('quiz_resultados').select('*');
+    // Só carrega o trimestre atual — cada trimestre tem sua própria Lição 1, 2, 3...
+    const { data } = await sbClient.from('quiz_resultados').select('*').eq('trimestre', _trimestreIdAtual());
     _quizScoresTodos = {};
     if (data) {
       data.forEach(r => {
@@ -6898,7 +6908,7 @@ async function renderRanking() {
       sbClient.from('aulas').select('*').eq('turma', curTurmaRank),
       sbClient.from('bonus_pontos').select('*').eq('turma', curTurmaRank),
       sbClient.from('ajustes_pontuacao').select('*').eq('turma', curTurmaRank),
-      sbClient.from('quiz_resultados').select('*').eq('turma', curTurmaRank),
+      sbClient.from('quiz_resultados').select('*').eq('turma', curTurmaRank).eq('trimestre', curRankTrimestre),
       sbClient.from('provas').select('*').eq('turma', curTurmaRank),
       sbClient.from('desafio_pontos').select('*').eq('turma', curTurmaRank),
     ]);
@@ -6915,8 +6925,7 @@ async function renderRanking() {
     cacheAlunos = [...cacheAlunos.filter(a => a.turma !== curTurmaRank), ...alunosTurma];
     if (qRes.data) {
       alunos.forEach(a => { if (_quizScoresTodos[a.id]) Object.keys(_quizScoresTodos[a.id]).filter(k => k.startsWith(curTurmaRank)).forEach(k => delete _quizScoresTodos[a.id][k]); });
-      qRes.data.filter(r => !trim || !r.created_at || (r.created_at.substring(0,10) >= trim.inicio && r.created_at.substring(0,10) <= trim.fim))
-        .forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.created_at ? r.created_at.substring(0,10) : null }; });
+      qRes.data.forEach(r => { if (!_quizScoresTodos[r.aluno_id]) _quizScoresTodos[r.aluno_id] = {}; _quizScoresTodos[r.aluno_id][`${r.turma}-${r.licao_num}`] = { acertos: r.acertos, total: r.total, pct: r.pct, pontos: r.pontos, data: r.data_resposta ? r.data_resposta.substring(0,10) : null }; });
     }
     if (pRes.data) PROVAS = trim ? pRes.data.filter(p => { const d = p.data_inicio || (p.created_at ? p.created_at.substring(0,10) : null); return !d || (d >= trim.inicio && d <= trim.fim); }) : pRes.data;
     if (dRes.data) _desafioPontos = trim ? dRes.data.filter(d => !d.data || (d.data >= trim.inicio && d.data <= trim.fim)) : dRes.data;
@@ -8057,8 +8066,11 @@ function toggleLeituraBiblica(num) {
   if (_lbAberta[num]) return;
   _lbAberta[num] = true;
 
-  // Pegar referência da lição atual
-  var dados = LICOES[quizAtual ? quizAtual.turma : curTurmaLicoes];
+  // Pegar referência da lição atual (sempre do trimestre marcado como atual)
+  var turmaRef = quizAtual ? quizAtual.turma : curTurmaLicoes;
+  var trimListRef = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turmaRef] : null;
+  var trimObjRef = trimListRef ? (trimListRef.find(function(t){ return t.id === _trimestreIdAtual(); }) || trimListRef.find(function(t){ return t.atual; })) : null;
+  var dados = trimObjRef ? trimObjRef.dados : LICOES[turmaRef];
   if (!dados) return;
   var lic = dados.licoes.find(function(l){ return l.num === num; });
   if (!lic || !lic.leituraBiblica) return;
@@ -8420,12 +8432,16 @@ async function mostrarResultado() {
   if (deveSalvar && alunoId) {
     try {
       // Bug 1: verificar no banco se já fez ANTES de salvar (não no cache local)
+      // Cada trimestre tem sua própria Lição 1, 2, 3... então a verificação e o
+      // salvamento precisam ser sempre restritos ao trimestre atual (coluna "trimestre").
+      const trimAtualQuiz = _trimestreIdAtual();
       const chaveQuiz = `${q.turma}-${q.licaoNum}`;
       const { data: jaFez } = await sbClient.from('quiz_resultados')
         .select('id')
         .eq('aluno_id', alunoId)
         .eq('turma', q.turma)
         .eq('licao_num', q.licaoNum)
+        .eq('trimestre', trimAtualQuiz)
         .maybeSingle();
 
       if (jaFez) {
@@ -8451,13 +8467,14 @@ async function mostrarResultado() {
         aluno_id: alunoId,
         turma: q.turma,
         licao_num: q.licaoNum,
+        trimestre: trimAtualQuiz,
         acertos,
         total,
         pct,
         pontos: pontosGanhos,
         data_resposta: _agoraISO(),
         respostas: respostasDetalhadas
-      }, { onConflict: 'aluno_id,turma,licao_num' });
+      }, { onConflict: 'aluno_id,turma,licao_num,trimestre' });
 
       if (error) {
         toast('⚠️ Erro ao salvar: ' + error.message, 'er');
@@ -8518,7 +8535,7 @@ async function mostrarResultado() {
       try {
         const { data: qr } = await sbClient.from('quiz_resultados')
           .select('pode_refazer').eq('aluno_id', alunoId)
-          .eq('turma', q.turma).eq('licao_num', q.licaoNum).single();
+          .eq('turma', q.turma).eq('licao_num', q.licaoNum).eq('trimestre', _trimestreIdAtual()).single();
         podeRefazer = qr?.pode_refazer === true;
       } catch(e) {}
     }
@@ -8656,7 +8673,7 @@ async function confirmarRespostaContestacao(contId, alunoId, turma, licaoNum, ac
     if (acao === 'aprovar') {
       await sbClient.from('quiz_resultados').update({
         pode_refazer: true
-      }).eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum);
+      }).eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum).eq('trimestre', _trimestreIdAtual());
     }
 
     document.getElementById('mo-resposta-cont')?.remove();
@@ -8676,9 +8693,10 @@ function irParaProgresso() {
 
 function refazerQuiz() {
   if (!quizAtual) return;
-  const lic = LICOES[quizAtual.turma]?.licoes?.find(l => l.num === quizAtual.licaoNum);
-  if (lic) {
-    quizAtual.embaralhadas = lic.perguntas.map(p => ({ ...p, opEmbaralhadas: [...(p.op||[p.a])] }));
+  // Usar as perguntas já carregadas em quizAtual (corretas para o trimestre atual),
+  // em vez de buscar de novo em LICOES[turma], que é sempre o 2º trimestre fixo.
+  if (quizAtual.perguntas && quizAtual.perguntas.length) {
+    quizAtual.embaralhadas = quizAtual.perguntas.map(p => ({ ...p, opEmbaralhadas: [...(p.op||[p.a])] }));
   }
   // Limpar liberação após refazer
   const key = `${quizAtual.turma}-${quizAtual.licaoNum}`;
@@ -8785,8 +8803,9 @@ async function carregarQuizScoresDoAluno(alunoId, turma) {
   try {
     // Limpar quizScores da turma antes de carregar — evita contaminação entre alunos
     Object.keys(quizScores).forEach(k => { if (k.startsWith(turma)) delete quizScores[k]; });
+    // Carregar apenas o trimestre atual — cada trimestre tem sua própria Lição 1, 2, 3...
     const { data } = await sbClient.from('quiz_resultados')
-      .select('*').eq('aluno_id', alunoId);
+      .select('*').eq('aluno_id', alunoId).eq('trimestre', _trimestreIdAtual());
     if (data && data.length) {
       data.forEach(r => {
         quizScores[`${r.turma}-${r.licao_num}`] = {
@@ -9065,8 +9084,10 @@ async function _renderAlunoProgressoComDados(dados) {
       renderMedalhasAluno(todasMedalhas);
     }).catch(()=>{});
 
-  // Certificado
-  const totalLicoes = (LICOES[turmaAluno]?.licoes||[]).length;
+  // Certificado (usa a quantidade de lições do trimestre atual, não do 2T fixo)
+  const _trimListCert = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turmaAluno] : null;
+  const _trimObjCert = _trimListCert ? (_trimListCert.find(t => t.atual) || _trimListCert[_trimListCert.length - 1]) : null;
+  const totalLicoes = (_trimObjCert ? _trimObjCert.dados.licoes : (LICOES[turmaAluno]?.licoes||[])).length;
   if (quizzesFeitos>=totalLicoes && totalLicoes>0 && !document.getElementById('btn-certificado')) {
     const certBtn = document.createElement('button');
     certBtn.id='btn-certificado'; certBtn.className='btn btn-gold btn-full';
@@ -9099,7 +9120,9 @@ function _renderAlunoHistoricoCompleto(idAluno, turmaAluno, seq, presencasReais,
             const cor=pct>=80?'rgba(26,107,74,.15)':pct>=60?'rgba(184,122,0,.15)':'rgba(184,74,74,.12)';
             const corTxt=pct>=80?'#1a6b4a':pct>=60?'#b87a00':'#c46060';
             const numLic=k.split('-').pop();
-            const licData = (LICOES[turmaAluno]?.licoes||[]).find(l=>String(l.num)===String(numLic));
+            const _trimListHist = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turmaAluno] : null;
+            const _trimObjHist = _trimListHist ? (_trimListHist.find(t => t.atual) || _trimListHist[_trimListHist.length - 1]) : null;
+            const licData = ((_trimObjHist ? _trimObjHist.dados.licoes : (LICOES[turmaAluno]?.licoes)) || []).find(l=>String(l.num)===String(numLic));
             const titulo=licData?licData.titulo.toUpperCase():`LIÇÃO ${numLic}`;
             const dt=s.data?new Date(s.data).toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—';
             return `<div class="aluno-hist-item">
@@ -10149,7 +10172,7 @@ async function confirmarCorrecaoPontos(alunoId, turma, provaId) {
       if (!licao) { toast('Informe o número da lição', 'er'); return; }
       const { error } = await sbClient.from('quiz_resultados')
         .update({ pontos: novos })
-        .eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licao);
+        .eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licao).eq('trimestre', _trimestreIdAtual());
       if (error) throw error;
       toast(`Pontos da Lição ${licao} corrigidos para ${novos} pts! ❖`, 'ok');
     } else if (tipo === 'desafio') {
@@ -12322,11 +12345,15 @@ async function renderCalendario() {
     return parseInt(ano) === calAnoAtual && parseInt(mes) === calMesAtual + 1;
   });
 
-  // Montar lições do trimestre indexadas por data
+  // Montar lições do trimestre ATUAL indexadas por data (antes usava a variável
+  // LICOES antiga, fixa no 2º trimestre — agora busca sempre o trimestre marcado
+  // como "atual" em LICOES_TRIMESTRES, para cada turma).
   const licoesMap = {};
   ['maternal','juniores','jovens','adultos'].forEach(turma => {
-    const dados = LICOES[turma] || (turma === 'juniores' ? LICOES['criancas'] : null);
-    if (!dados) return;
+    const trimestresTurma = LICOES_TRIMESTRES[turma] || [];
+    const trimAtualObj = trimestresTurma.find(t => t.atual) || trimestresTurma[trimestresTurma.length - 1];
+    const dados = trimAtualObj ? trimAtualObj.dados : null;
+    if (!dados || !dados.licoes || !dados.licoes.length) return;
     dados.licoes.forEach(l => {
       const [d, m] = l.data.split('/');
       const key = `2026-${m.padStart(2,'0')}-${d.padStart(2,'0')}`;
@@ -14294,7 +14321,7 @@ async function verRespostasQuizLicao(alunoId, turma, licaoNum, nomeAluno) {
 
   // Buscar resultado do quiz
   const { data: res } = await sbClient.from('quiz_resultados')
-    .select('*').eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum).single();
+    .select('*').eq('aluno_id', alunoId).eq('turma', turma).eq('licao_num', licaoNum).eq('trimestre', _trimestreIdAtual()).maybeSingle();
   if (!res) { toast('Resultado não encontrado', 'er'); return; }
 
   const prev = document.getElementById('modal-respostas-quiz-lic');
@@ -17756,6 +17783,9 @@ if ('serviceWorker' in navigator) {
     navigator.serviceWorker.register('/sw.js').then(reg => {
       // Forçar verificação de atualização imediata
       reg.update();
+      // Verificar de novo periodicamente — cobre o caso do aluno deixar
+      // o app aberto na tela por um bom tempo sem recarregar
+      setInterval(() => { reg.update(); }, 5 * 60 * 1000);
       // Quando novo SW estiver pronto, recarregar automaticamente
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
@@ -17773,6 +17803,13 @@ if ('serviceWorker' in navigator) {
     // Detectar quando SW toma controle (primeira instalação)
     navigator.serviceWorker.addEventListener('controllerchange', () => {
       window.location.reload();
+    });
+
+    // Também verificar ao voltar pro app (ex: troca de aba, celular bloqueado e desbloqueado)
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') {
+        navigator.serviceWorker.getRegistration().then(reg => { if (reg) reg.update(); });
+      }
     });
   });
 }
