@@ -3635,7 +3635,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </div>
 
 <script>
-console.log('%c EBD App — build 2026-07-17-v4 (fix dashboard: bonus/ajustes vazando do 2T) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
+console.log('%c EBD App — build 2026-07-20-v1 (fix quiz zerado + liberação por trimestre) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
 const SUPABASE_URL = 'https://bhcubiannrivpndxphps.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoY3ViaWFubnJpdnBuZHhwaHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA2OTUsImV4cCI6MjA5MDY1NjY5NX0.9oCHIXJkWq4d4dgrRXyFwNSMPhAUW6so-GhWkaAbaOI';
 
@@ -8439,8 +8439,10 @@ async function mostrarResultado() {
   const liberacaoAtiva = getLiberacaoAtiva(q.turma, q.licaoNum, q.trimestre);
   if (!liberacaoAtiva) {
     try {
-      const { data: aulas } = await sbClient.from('aulas')
-        .select('data').eq('turma', q.turma).order('data', { ascending: true });
+      const _trimAtualQuizCalc = RANK_TRIMESTRES[_trimestreIdAtual()];
+      let qAulas = sbClient.from('aulas').select('data').eq('turma', q.turma).order('data', { ascending: true });
+      if (_trimAtualQuizCalc) qAulas = qAulas.gte('data', _trimAtualQuizCalc.inicio).lte('data', _trimAtualQuizCalc.fim);
+      const { data: aulas } = await qAulas;
       if (aulas && aulas.length >= q.licaoNum) {
         const dataAula = aulas[q.licaoNum - 1]?.data;
         if (dataAula) diasApos = Math.max(0, Math.floor((_hojeFortaleza() - new Date(dataAula)) / 86400000));
