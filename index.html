@@ -3635,7 +3635,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </div>
 
 <script>
-console.log('%c EBD App — build 2026-07-20-v1 (fix quiz zerado + liberação por trimestre) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
+console.log('%c EBD App — build 2026-07-20-v2 (fix DEFINITIVO quiz zerado: usa data da lição, não mais tabela de aulas) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
 const SUPABASE_URL = 'https://bhcubiannrivpndxphps.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoY3ViaWFubnJpdnBuZHhwaHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA2OTUsImV4cCI6MjA5MDY1NjY5NX0.9oCHIXJkWq4d4dgrRXyFwNSMPhAUW6so-GhWkaAbaOI';
 
@@ -7966,7 +7966,7 @@ async function abrirLicao(turma, num, trimId) {
   if (!lic) return;
 
   // Prepara quiz state
-  quizAtual = { turma, licaoNum: num, trimestre: trimLabelAlvo, perguntas: [...lic.perguntas], atual: 0, respostas: [],
+  quizAtual = { turma, licaoNum: num, trimestre: trimLabelAlvo, dataLicao: lic.data, perguntas: [...lic.perguntas], atual: 0, respostas: [],
     embaralhadas: lic.perguntas.map(p => ({ ...p, opEmbaralhadas: [...(p.op||[p.a])] }))
   };
 
@@ -8438,16 +8438,13 @@ async function mostrarResultado() {
   let diasApos = 0;
   const liberacaoAtiva = getLiberacaoAtiva(q.turma, q.licaoNum, q.trimestre);
   if (!liberacaoAtiva) {
-    try {
-      const _trimAtualQuizCalc = RANK_TRIMESTRES[_trimestreIdAtual()];
-      let qAulas = sbClient.from('aulas').select('data').eq('turma', q.turma).order('data', { ascending: true });
-      if (_trimAtualQuizCalc) qAulas = qAulas.gte('data', _trimAtualQuizCalc.inicio).lte('data', _trimAtualQuizCalc.fim);
-      const { data: aulas } = await qAulas;
-      if (aulas && aulas.length >= q.licaoNum) {
-        const dataAula = aulas[q.licaoNum - 1]?.data;
-        if (dataAula) diasApos = Math.max(0, Math.floor((_hojeFortaleza() - new Date(dataAula)) / 86400000));
-      }
-    } catch(e) {}
+    // Usa a data da própria lição (ex: "20/07") em vez de contar posição na lista de
+    // aulas registradas — mais confiável, não depende do professor já ter marcado presença.
+    if (q.dataLicao) {
+      const [dLic, mLic] = q.dataLicao.split('/');
+      const dataLicObj = new Date(2026, parseInt(mLic)-1, parseInt(dLic), 0, 0, 0, 0);
+      diasApos = Math.max(0, Math.floor((_hojeFortaleza() - dataLicObj) / 86400000));
+    }
   }
   const pontosGanhos = liberacaoAtiva
     ? liberacaoAtiva.pts_fixo
@@ -12137,21 +12134,26 @@ async function recalcularRanking() {
         const { data: resultados } = await sbClient.from('quiz_resultados').select('*');
         if (!resultados || !resultados.length) { toast('Nenhum resultado para recalcular', ''); return; }
 
-        const { data: aulas } = await sbClient.from('aulas').select('data,turma');
-        const aulasPorTurma = {};
-        (aulas || []).forEach(a => {
-          if (!aulasPorTurma[a.turma]) aulasPorTurma[a.turma] = [];
-          aulasPorTurma[a.turma].push(a.data);
-        });
-
         let atualizados = 0;
         for (const r of resultados) {
-          const aulasTurma = (aulasPorTurma[r.turma] || []).sort();
-          // Encontrar data da aula correspondente à lição
-          const dataAula = aulasTurma[r.licao_num - 1] || aulasTurma[aulasTurma.length - 1];
-          const diasApos = dataAula
-            ? Math.max(0, Math.floor((new Date(r.data_resposta) - new Date(dataAula)) / 86400000))
-            : 0;
+          // Usa a data da própria lição (via LICOES_TRIMESTRES) em vez de contar posição
+          // na lista de aulas registradas — evita pegar a data errada quando falta
+          // alguma aula registrada ou quando há lições de vários trimestres.
+          let dataLicao = null;
+          const trimList = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[r.turma] : null;
+          if (trimList) {
+            const trimObj = trimList.find(t => t.id === r.trimestre);
+            if (trimObj) {
+              const lic = (trimObj.dados.licoes || []).find(l => l.num === r.licao_num);
+              if (lic) dataLicao = lic.data;
+            }
+          }
+          let diasApos = 0;
+          if (dataLicao) {
+            const [dLic, mLic] = dataLicao.split('/');
+            const dataLicObj = new Date(2026, parseInt(mLic)-1, parseInt(dLic), 0, 0, 0, 0);
+            diasApos = Math.max(0, Math.floor((new Date(r.data_resposta) - dataLicObj) / 86400000));
+          }
           const novosPontos = calcularPtQuiz(diasApos, r.acertos, r.total);
           await sbClient.from('quiz_resultados').update({ pontos: novosPontos }).eq('id', r.id);
           atualizados++;
