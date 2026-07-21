@@ -3635,7 +3635,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </div>
 
 <script>
-console.log('%c EBD App — build 2026-07-20-v2 (fix DEFINITIVO quiz zerado: usa data da lição, não mais tabela de aulas) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
+console.log('%c EBD App — build 2026-07-20-v3 (fix contador segunda-feira + bônus vazando pra todos) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
 const SUPABASE_URL = 'https://bhcubiannrivpndxphps.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoY3ViaWFubnJpdnBuZHhwaHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA2OTUsImV4cCI6MjA5MDY1NjY5NX0.9oCHIXJkWq4d4dgrRXyFwNSMPhAUW6so-GhWkaAbaOI';
 
@@ -5167,7 +5167,7 @@ function iniciarCountdown() {
   const ev=document.getElementById('dash-cd-ev');
   if (!d) return;
   if (_dashCdInterval) clearInterval(_dashCdInterval);
-  const diaSemana = 0;
+  const diaSemana = 1; // Segunda-feira — dia real da nossa EBD
   const horaEBD = 9;
   function tick() {
     const now=new Date();
@@ -16784,10 +16784,19 @@ async function salvarBonusManual() {
   if (!pts || pts <= 0) { toast('Informe uma pontuação válida', 'er'); return; }
   if (paraEspec && !_alunosBonusSelecionados.length) { toast('Selecione ao menos um aluno', 'er'); return; }
 
+  // Segurança: se algum aluno foi selecionado, o bônus é só pra eles — mesmo que a
+  // caixinha "específicos" tenha ficado desmarcada por engano. Só vai pra "todos" se
+  // realmente nenhum aluno estiver selecionado.
+  const aplicarParaEspecificos = paraEspec || _alunosBonusSelecionados.length > 0;
+  if (!aplicarParaEspecificos) {
+    const TN2 = { maternal:'Maternal', juniores:'Juniores', jovens:'Jovens', adultos:'Adultos' };
+    if (!confirm(`Este bônus de ${pts} pts será aplicado a TODOS os alunos ativos de ${TN2[turma]||turma}. Confirma?`)) return;
+  }
+
   const dado = {
     motivo, descricao: desc || null, pontos: pts, turma,
     data_referencia: data,
-    aluno_ids: paraEspec ? _alunosBonusSelecionados.map(a => a.id) : null,
+    aluno_ids: aplicarParaEspecificos ? _alunosBonusSelecionados.map(a => a.id) : null,
     criado_por: USER.nome
   };
 
