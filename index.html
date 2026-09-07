@@ -3635,7 +3635,7 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
 </div>
 
 <script>
-console.log('%c EBD App — build 2026-07-20-v4 (fix datas de Jovens 3T + sincronização de lições novas) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
+console.log('%c EBD App — build 2026-09-07-v1 (checagem extra de atualização ao abrir lição/quiz) ', 'background:#c8900a;color:#000;font-weight:bold;padding:4px 8px;border-radius:4px');
 const SUPABASE_URL = 'https://bhcubiannrivpndxphps.supabase.co';
 const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImJoY3ViaWFubnJpdnBuZHhwaHBzIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUwODA2OTUsImV4cCI6MjA5MDY1NjY5NX0.9oCHIXJkWq4d4dgrRXyFwNSMPhAUW6so-GhWkaAbaOI';
 
@@ -7907,6 +7907,11 @@ function _renderLicoesLista(dados, turmaRender, trimId) {
 }
 
 async function abrirLicao(turma, num, trimId) {
+  // Checagem extra de atualização bem no momento crítico (abrir uma lição/quiz) —
+  // reduz a chance de alguém responder o quiz com uma versão antiga do app em cache.
+  if ('serviceWorker' in navigator) {
+    try { const reg = await navigator.serviceWorker.getRegistration(); if (reg) reg.update(); } catch(e) {}
+  }
   // Pega os dados do TRIMESTRE que foi clicado (não sempre o "atual" — o usuário pode estar
   // navegando/abrindo uma lição de qualquer trimestre no accordion de Lições).
   const trimList = (typeof LICOES_TRIMESTRES !== 'undefined') ? LICOES_TRIMESTRES[turma] : null;
