@@ -8453,8 +8453,9 @@ async function mostrarResultado() {
       diasApos = Math.max(0, Math.floor((_hojeFortaleza() - dataLicObj) / 86400000));
     }
   }
+  // Liberação especial: vale o total de pontos fixos só para quem acerta tudo; cada erro desconta.
   const pontosGanhos = liberacaoAtiva
-    ? liberacaoAtiva.pts_fixo
+    ? (total > 0 ? Math.round((acertos / total) * (parseFloat(liberacaoAtiva.pts_fixo) || 0) * 10) / 10 : 0)
     : calcularPtQuiz(diasApos, acertos, total);
 
   // Determinar id real do aluno
