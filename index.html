@@ -7009,8 +7009,9 @@ function _renderRankingBox(box, alunos, aulasT, bonusTurma, ajustesTurmaRank) {
   const TOP_CLASS = ['rank-top1', 'rank-top2', 'rank-top3'];
   const FILL_CLASS = ['rank-fill rank-fill-top1', 'rank-fill rank-fill-top2', 'rank-fill rank-fill-top3', 'rank-fill'];
 
-  // Trimestre sem aulas — mesmo layout mas zerado e opaco
-  if (!aulasT.length) {
+  // Trimestre sem aulas — mesmo layout mas zerado e opaco (só na aba de presença;
+  // na aba de pontos o quiz, provas e bônus já contam mesmo sem aula registrada)
+  if (!aulasT.length && rankTipo !== 'pts') {
     box.innerHTML = '<div style="opacity:.45;pointer-events:none">' +
       alunos.map((a, i) => {
         const isTop = i < 3;
