@@ -2728,8 +2728,9 @@ body.tema-escuro .cal-day.hoje { background: rgba(184,151,42,.12) !important; }
             <div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--gold-deep);margin:14px 0 8px">🔓 Liberações de Quiz</div>
             <div class="frow">
               <div class="fg"><label class="fl">Turma</label><select class="fc" id="lib-turma"><option value="maternal">Maternal</option><option value="juniores">Juniores</option><option value="jovens">Jovens</option><option value="adultos">Adultos</option></select></div>
-              <div class="fg" style="margin:0"><label class="fl">Lição nº</label><input class="fc" type="number" id="lib-licao" min="1" max="13" placeholder="Ex: 1"></div>
+              <div class="fg" style="margin:0"></div>
             </div>
+            <div class="fg"><label class="fl">Lições (toque para marcar uma ou mais)</label><div id="lib-grade" style="display:grid;grid-template-columns:repeat(7,1fr);gap:6px"><button type="button" class="lib-chip" data-n="1" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">1</button><button type="button" class="lib-chip" data-n="2" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">2</button><button type="button" class="lib-chip" data-n="3" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">3</button><button type="button" class="lib-chip" data-n="4" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">4</button><button type="button" class="lib-chip" data-n="5" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">5</button><button type="button" class="lib-chip" data-n="6" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">6</button><button type="button" class="lib-chip" data-n="7" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">7</button><button type="button" class="lib-chip" data-n="8" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">8</button><button type="button" class="lib-chip" data-n="9" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">9</button><button type="button" class="lib-chip" data-n="10" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">10</button><button type="button" class="lib-chip" data-n="11" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">11</button><button type="button" class="lib-chip" data-n="12" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">12</button><button type="button" class="lib-chip" data-n="13" onclick="libToggleLicao(this)" style="padding:9px 0;border:1.5px solid var(--cb);border-radius:8px;background:#fff;color:var(--ink);font-size:13px;font-weight:700;cursor:pointer">13</button></div><div style="margin-top:6px"><button type="button" onclick="libMarcarTodas()" style="padding:4px 10px;background:none;border:1px solid var(--cb);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink-soft)">Marcar todas</button> <button type="button" onclick="libLimparSel()" style="padding:4px 10px;background:none;border:1px solid var(--cb);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;color:var(--ink-soft)">Limpar</button></div></div>
             <div class="fg"><label class="fl">🗓️ Trimestre</label><select class="fc" id="lib-trimestre"><option value="1t2026">1º Trimestre 2026</option><option value="2t2026">2º Trimestre 2026</option><option value="3t2026">3º Trimestre 2026</option><option value="4t2026">4º Trimestre 2026</option></select></div>
             <div class="frow">
               <div class="fg"><label class="fl">Liberar por (dias)</label><input class="fc" type="number" id="lib-dias" min="1" max="30" value="2"></div>
@@ -11996,24 +11997,44 @@ function renderLiberacoes() {
   }).join('');
 }
 
+function libToggleLicao(btn) {
+  const on = btn.getAttribute('data-sel') !== '1';
+  btn.setAttribute('data-sel', on ? '1' : '0');
+  btn.style.background = on ? 'var(--tc)' : '#fff';
+  btn.style.color = on ? '#fff' : 'var(--ink)';
+  btn.style.borderColor = on ? 'var(--tc)' : 'var(--cb)';
+}
+function libLicoesSelecionadas() {
+  return Array.from(document.querySelectorAll('#lib-grade .lib-chip[data-sel="1"]')).map(b => parseInt(b.getAttribute('data-n')));
+}
+function libMarcarTodas() {
+  document.querySelectorAll('#lib-grade .lib-chip').forEach(b => { if (b.getAttribute('data-sel') !== '1') libToggleLicao(b); });
+}
+function libLimparSel() {
+  document.querySelectorAll('#lib-grade .lib-chip').forEach(b => { if (b.getAttribute('data-sel') === '1') libToggleLicao(b); });
+}
+
 async function salvarLiberacao() {
   const turma = document.getElementById('lib-turma').value;
-  const licao = parseInt(document.getElementById('lib-licao').value);
+  const licoesSel = libLicoesSelecionadas();
   const trimestre = document.getElementById('lib-trimestre').value;
   const trimLabel = (RANK_TRIMESTRES[trimestre] && RANK_TRIMESTRES[trimestre].label) || trimestre;
   const dias  = parseInt(document.getElementById('lib-dias').value) || 2;
   const pts   = parseFloat(document.getElementById('lib-pts').value) || 10;
-  if (!licao || licao < 1 || licao > 13) { toast('Digite o número da lição (1-13)', 'er'); return; }
+  if (!licoesSel.length) { toast('Marque pelo menos uma lição', 'er'); return; }
   const expiraEm = new Date();
   expiraEm.setDate(expiraEm.getDate() + dias);
   expiraEm.setHours(23, 59, 59, 0);
   try {
-    await sbClient.from('quiz_liberacoes').upsert({
-      turma, licao_num: licao, pts_fixo: pts, trimestre: trimLabel,
+    const linhas = licoesSel.map(n => ({
+      turma, licao_num: n, pts_fixo: pts, trimestre: trimLabel,
       expira_em: expiraEm.toISOString(),
       created_at: _agoraISO()
-    }, { onConflict: 'turma,licao_num,trimestre' });
-    toast(`Lição ${licao} (${trimLabel}) liberada por ${dias} dia(s) com ${pts} pts ✦`, 'ok');
+    }));
+    const { error: errLib } = await sbClient.from('quiz_liberacoes').upsert(linhas, { onConflict: 'turma,licao_num,trimestre' });
+    if (errLib) throw errLib;
+    libLimparSel();
+    toast(`Lição${licoesSel.length>1?'ões':''} ${licoesSel.join(', ')} (${trimLabel}) liberada${licoesSel.length>1?'s':''} por ${dias} dia(s) com ${pts} pts ✦`, 'ok');
     await carregarLiberacoes();
   } catch(e) { toast('Erro: ' + (e?.message||e?.details||String(e)), 'er'); }
 }
